@@ -1,72 +1,129 @@
 import 'package:flutter/foundation.dart';
 import '../../data/models/relief_item_model.dart';
 import '../../data/models/evacuee_model.dart';
-import '../../data/models/relief_request_model.dart';
 
 class ReliefTrackingController extends ChangeNotifier {
-  // Camp Info State
-  String campName = "Rathnapura Central Shelter";
-  int evacueeCount = 185;
-  int maxCapacity = 250;
-  int medicalStaffCount = 6;
+  // Dr. Rohan Silva - Camp Info State
+  String leaderName = "Dr. Rohan Silva";
+  String leaderTitle = "RELIEF TRIAGE LEAD #04";
+  String campName = "Camp Nēraya";
+  int evacueeCount = 275;
+  int maxCapacity = 300;
+  bool isShelterClosed = false;
 
-  // Inventory State
+  // Rapid Headcount Actions (+1, +5, +10, -1)
+  void updateHeadcount(int delta) {
+    evacueeCount = (evacueeCount + delta).clamp(0, maxCapacity + 50);
+    notifyListeners();
+  }
+
+  void toggleShelterStatus() {
+    isShelterClosed = !isShelterClosed;
+    notifyListeners();
+  }
+
+  // Inventory Items State (Matching Image 2 frame2)
   List<ReliefItemModel> inventoryItems = [
     const ReliefItemModel(
       id: 'inv_1',
-      name: 'Clean Drinking Water',
-      category: SupplyCategory.water,
-      quantity: 45,
-      unit: 'Liters',
-      minThreshold: 200,
-      lastUpdated: '10 mins ago',
-    ),
-    const ReliefItemModel(
-      id: 'inv_2',
-      name: 'First Aid Medical Kits',
-      category: SupplyCategory.medical,
-      quantity: 12,
-      unit: 'Units',
-      minThreshold: 10,
-      lastUpdated: '25 mins ago',
-    ),
-    const ReliefItemModel(
-      id: 'inv_3',
-      name: 'Baby Infant Formula',
+      name: 'Infant Formula Milk Powder',
       category: SupplyCategory.food,
-      quantity: 5,
+      quantity: 0,
       unit: 'Cans',
       minThreshold: 30,
       lastUpdated: 'Just now',
     ),
     const ReliefItemModel(
-      id: 'inv_4',
-      name: 'Dry Rations / Rice Bags',
-      category: SupplyCategory.food,
-      quantity: 120,
-      unit: 'Kg',
+      id: 'inv_2',
+      name: 'Drinking Water Jerry Cans (20L)',
+      category: SupplyCategory.water,
+      quantity: 15,
+      unit: 'Cans',
       minThreshold: 50,
-      lastUpdated: '1 hour ago',
+      lastUpdated: '10 mins ago',
     ),
     const ReliefItemModel(
-      id: 'inv_5',
-      name: 'Thermal Blankets',
+      id: 'inv_3',
+      name: 'Trauma & Suture Packs',
+      category: SupplyCategory.medical,
+      quantity: 45,
+      unit: 'Packs',
+      minThreshold: 15,
+      lastUpdated: '25 mins ago',
+    ),
+    const ReliefItemModel(
+      id: 'inv_4',
+      name: 'Thermal Sleeping Blankets',
       category: SupplyCategory.shelter,
       quantity: 90,
       unit: 'Pieces',
       minThreshold: 40,
       lastUpdated: '3 hours ago',
     ),
-    const ReliefItemModel(
-      id: 'inv_6',
-      name: 'Sanitary & Hygiene Packs',
-      category: SupplyCategory.hygiene,
-      quantity: 18,
-      unit: 'Packs',
-      minThreshold: 50,
-      lastUpdated: '30 mins ago',
-    ),
   ];
+
+  // Incoming Shipment Log (Matching Image 2 frame2)
+  Map<String, dynamic> incomingShipment = {
+    'title': 'Relief Supply Truck',
+    'subtitle': 'Convoy B',
+    'eta': 'ETA: 18 MINS',
+    'progress': 0.65,
+    'driverPhone': '+94 77 123 4567',
+    'isRestocked': false,
+  };
+
+  void confirmRestock() {
+    incomingShipment['isRestocked'] = true;
+    // Boost stock values
+    updateStockQuantity('inv_1', 40);
+    updateStockQuantity('inv_2', 50);
+    notifyListeners();
+  }
+
+  // Alerts List (Matching Image 3 alert d.)
+  List<Map<String, dynamic>> alertList = [
+    {
+      'id': 'alt_1',
+      'title': 'Infant Formula Milk Powder — Depleted',
+      'subtitle': 'Camp Nēraya stock reached zero. Immediate resupply required.',
+      'time': '2m ago',
+      'type': 'critical',
+      'actionText': 'DISPATCH SUPPLY',
+      'isDismissed': false,
+    },
+    {
+      'id': 'alt_2',
+      'title': 'Shelter Capacity — Critical',
+      'subtitle': 'Camp Dawn Ridge at 96% occupancy (288/300 beds).',
+      'time': '18m ago',
+      'type': 'critical',
+      'actionText': 'VIEW SHELTER',
+      'isDismissed': false,
+    },
+    {
+      'id': 'alt_3',
+      'title': 'Drinking Water Jerry Cans — Low Stock',
+      'subtitle': 'Below 20L threshold at Camp Nēraya. Restock recommended.',
+      'time': '41m ago',
+      'type': 'low',
+      'actionText': 'REQUEST SUPPLY',
+      'isDismissed': false,
+    },
+    {
+      'id': 'alt_4',
+      'title': 'Resupply Dispatched — EMER-042',
+      'subtitle': 'Transferred to DMC, medical crew notified. ETA 15 min.',
+      'time': '1h ago',
+      'type': 'logs',
+      'actionText': 'VIEW LOG',
+      'isDismissed': false,
+    },
+  ];
+
+  void dismissAlert(String id) {
+    alertList.removeWhere((a) => a['id'] == id);
+    notifyListeners();
+  }
 
   // Evacuee State
   List<EvacueeModel> evacuees = [
@@ -100,83 +157,38 @@ class ReliefTrackingController extends ChangeNotifier {
       checkInTime: '10:00 AM Today',
       assignedZone: 'Zone C - Main Hall',
     ),
-    const EvacueeModel(
-      id: 'evac_4',
-      fullName: 'Dilani Silva',
-      age: 74,
-      gender: 'Female',
-      triage: TriagePriority.red,
-      specialNeeds: 'Wheelchair assistance required',
-      checkInTime: '11:20 AM Today',
-      assignedZone: 'Zone A - Medical Tent 1',
-    ),
-    const EvacueeModel(
-      id: 'evac_5',
-      fullName: 'Kasun Wickramasinghe',
-      age: 14,
-      gender: 'Male',
-      triage: TriagePriority.green,
-      specialNeeds: 'None',
-      checkInTime: '12:05 PM Today',
-      assignedZone: 'Zone C - Main Hall',
-    ),
-  ];
-
-  // Supply Requests State
-  List<ReliefRequestModel> reliefRequests = [
-    const ReliefRequestModel(
-      id: 'req_101',
-      itemTitle: 'Emergency Water Container Truck',
-      quantityRequested: '1,000 Liters',
-      urgency: RequestUrgency.immediate,
-      status: RequestStatus.dispatched,
-      requestedBy: 'Camp Logistics Officer',
-      timestamp: '09:00 AM',
-      eta: '20 Mins',
-    ),
-    const ReliefRequestModel(
-      id: 'req_102',
-      itemTitle: 'Infant Formula & Diapers Batch',
-      quantityRequested: '50 Boxes',
-      urgency: RequestUrgency.high,
-      status: RequestStatus.pending,
-      requestedBy: 'Medical Volunteer',
-      timestamp: '11:15 AM',
-      eta: 'Pending Dispatch',
-    ),
-    const ReliefRequestModel(
-      id: 'req_103',
-      itemTitle: 'First Aid Refill Bundles',
-      quantityRequested: '20 Bundles',
-      urgency: RequestUrgency.routine,
-      status: RequestStatus.delivered,
-      requestedBy: 'Dr. Bandara',
-      timestamp: 'Yesterday',
-      eta: 'Delivered',
-    ),
   ];
 
   // Filtering State
-  SupplyCategory? selectedInventoryCategory;
-  TriagePriority? selectedTriageFilter;
+  String selectedSupplyFilter = 'All'; // 'All' | 'Depleted' | 'Low' | 'Adequate'
+  String selectedAlertFilter = 'All'; // 'All' | 'Critical' | 'Low Stock' | 'Logs'
   String inventorySearchQuery = '';
-  String evacueeSearchQuery = '';
 
-  // Getters for filtered items
   List<ReliefItemModel> get filteredInventory {
     return inventoryItems.where((item) {
-      final matchesCategory = selectedInventoryCategory == null || item.category == selectedInventoryCategory;
+      bool matchesFilter = true;
+      if (selectedSupplyFilter == 'Depleted') {
+        matchesFilter = item.status == StockStatus.critical;
+      } else if (selectedSupplyFilter == 'Low') {
+        matchesFilter = item.status == StockStatus.low;
+      } else if (selectedSupplyFilter == 'Adequate') {
+        matchesFilter = item.status == StockStatus.adequate;
+      }
       final matchesSearch = item.name.toLowerCase().contains(inventorySearchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      return matchesFilter && matchesSearch;
     }).toList();
   }
 
-  List<EvacueeModel> get filteredEvacuees {
-    return evacuees.where((e) {
-      final matchesTriage = selectedTriageFilter == null || e.triage == selectedTriageFilter;
-      final matchesSearch = e.fullName.toLowerCase().contains(evacueeSearchQuery.toLowerCase()) ||
-          e.assignedZone.toLowerCase().contains(evacueeSearchQuery.toLowerCase());
-      return matchesTriage && matchesSearch;
+  List<Map<String, dynamic>> get filteredAlerts {
+    return alertList.where((alert) {
+      if (selectedAlertFilter == 'Critical') {
+        return alert['type'] == 'critical';
+      } else if (selectedAlertFilter == 'Low Stock') {
+        return alert['type'] == 'low';
+      } else if (selectedAlertFilter == 'Logs') {
+        return alert['type'] == 'logs';
+      }
+      return true;
     }).toList();
   }
 
@@ -214,30 +226,18 @@ class ReliefTrackingController extends ChangeNotifier {
     }
   }
 
-  // Request Actions
-  void addReliefRequest(ReliefRequestModel request) {
-    reliefRequests.insert(0, request);
+  void setSupplyFilter(String filter) {
+    selectedSupplyFilter = filter;
     notifyListeners();
   }
 
-  // Filter setters
-  void setInventoryCategory(SupplyCategory? category) {
-    selectedInventoryCategory = category;
-    notifyListeners();
-  }
-
-  void setTriageFilter(TriagePriority? priority) {
-    selectedTriageFilter = priority;
+  void setAlertFilter(String filter) {
+    selectedAlertFilter = filter;
     notifyListeners();
   }
 
   void setInventorySearchQuery(String query) {
     inventorySearchQuery = query;
-    notifyListeners();
-  }
-
-  void setEvacueeSearchQuery(String query) {
-    evacueeSearchQuery = query;
     notifyListeners();
   }
 }

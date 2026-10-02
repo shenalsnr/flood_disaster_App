@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../controllers/relief_tracking_controller.dart';
-import '../../data/models/relief_item_model.dart';
-import '../../data/models/evacuee_model.dart';
 
 class CampCapacityCard extends StatelessWidget {
   final ReliefTrackingController controller;
@@ -14,94 +12,173 @@ class CampCapacityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double capacityRatio = (controller.evacueeCount / controller.maxCapacity).clamp(0.0, 1.0);
-    final int criticalItemsCount = controller.inventoryItems.where((i) => i.status == StockStatus.critical).length;
-    final int redTriageCount = controller.evacuees.where((e) => e.triage == TriagePriority.red).length;
+    final int occupancyPercentage = (capacityRatio * 100).toInt();
 
     Color progressColor;
-    if (capacityRatio > 0.9) {
-      progressColor = const Color(0xFFFF5252);
-    } else if (capacityRatio > 0.75) {
-      progressColor = const Color(0xFFFFAB40);
+    if (capacityRatio > 0.85) {
+      progressColor = const Color(0xFFFF453A); // Red accent
+    } else if (capacityRatio > 0.70) {
+      progressColor = const Color(0xFFFF9F0A); // Orange accent
     } else {
-      progressColor = const Color(0xFF69F0AE);
+      progressColor = const Color(0xFF30D158); // Green accent
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black45,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header: Camp Name & Badge
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Top Header Row: User Avatar, Name & WS Sync Pill (Matching Image 1 Iframe)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: const Color(0xFF1F2C46),
+                  child: const Text(
+                    'RS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
-                    child: const Icon(Icons.night_shelter_outlined, color: Colors.blueAccent, size: 24),
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.campName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.leaderName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const Text(
-                        'Relief Camp ID: #RC-042',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      controller.leaderTitle,
+                      style: const TextStyle(
+                        color: Color(0xFF8E9BAE),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF063327),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF30D158).withValues(alpha: 0.4)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.circle, color: Color(0xFF30D158), size: 8),
+                  SizedBox(width: 6),
+                  Text(
+                    'WS SYNC: OK',
+                    style: TextStyle(
+                      color: Color(0xFF30D158),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+
+        // Shelter Capacity Overview Card (Matching Image 1 Iframe)
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: const Color(0xFF131A2A),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF1E283D)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'SHELTER CAPACITY OVERVIEW',
+                style: TextStyle(
+                  color: Color(0xFF7E8B9B),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '${controller.evacueeCount}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '/${controller.maxCapacity}',
+                    style: const TextStyle(
+                      color: Color(0xFF63738A),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Beds Occupied - $occupancyPercentage%',
+                    style: const TextStyle(
+                      color: Color(0xFF8E9BAE),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: capacityRatio,
+                  minHeight: 10,
+                  backgroundColor: const Color(0xFF261D23),
+                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Alert Badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: progressColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: progressColor.withValues(alpha: 0.5)),
+                  color: const Color(0xFFFF3B30),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: progressColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+                    const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 14),
                     const SizedBox(width: 6),
                     Text(
-                      '${(capacityRatio * 100).toInt()}% Capacity',
-                      style: TextStyle(
-                        color: progressColor,
-                        fontWeight: FontWeight.bold,
+                      capacityRatio > 0.85 ? 'CRITICAL CAPACITY' : 'STABLE CAPACITY',
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -109,113 +186,146 @@ class CampCapacityCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 20),
 
-          // Capacity Bar & Numbers
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Shelter Headcount',
-                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${controller.evacueeCount}',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: ' / ${controller.maxCapacity} Max',
-                      style: const TextStyle(color: Colors.white54, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        // Rapid Headcount Section (Matching Image 1 Iframe)
+        const Text(
+          'RAPID HEADCOUNT',
+          style: TextStyle(
+            color: Color(0xFF7E8B9B),
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: capacityRatio,
-              minHeight: 8,
-              backgroundColor: Colors.white12,
-              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _buildHeadcountBtn(context, '+1', () => controller.updateHeadcount(1)),
+            const SizedBox(width: 8),
+            _buildHeadcountBtn(context, '+5', () => controller.updateHeadcount(5)),
+            const SizedBox(width: 8),
+            _buildHeadcountBtn(context, '+10', () => controller.updateHeadcount(10)),
+            const SizedBox(width: 8),
+            _buildHeadcountBtn(context, '-1', () => controller.updateHeadcount(-1)),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // Close Shelter Button
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: const Color(0xFF23161A),
+              side: const BorderSide(color: Color(0xFFFF3B30), width: 1.5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => controller.toggleShelterStatus(),
+            icon: Icon(
+              Icons.warning_amber_rounded,
+              color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF3B30),
+              size: 18,
+            ),
+            label: Text(
+              controller.isShelterClosed ? 'RE-OPEN SHELTER' : 'CLOSE SHELTER',
+              style: TextStyle(
+                color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF3B30),
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 0.8,
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 22),
 
-          // Metrics Grid
-          Row(
+        // Shortage Alerts Section (Matching Image 1 Iframe)
+        const Text(
+          'SHORTAGE ALERTS',
+          style: TextStyle(
+            color: Color(0xFF7E8B9B),
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFF131A2A),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFF1E283D)),
+          ),
+          child: Column(
             children: [
-              Expanded(
-                child: _buildMetricTile(
-                  icon: Icons.personal_injury_outlined,
-                  iconColor: Colors.redAccent,
-                  title: 'Critical Triage',
-                  value: '$redTriageCount Evacuees',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildMetricTile(
-                  icon: Icons.warning_amber_rounded,
-                  iconColor: Colors.orangeAccent,
-                  title: 'Low Supplies',
-                  value: '$criticalItemsCount Depleted',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildMetricTile(
-                  icon: Icons.medical_services_outlined,
-                  iconColor: Colors.greenAccent,
-                  title: 'Medical Staff',
-                  value: '${controller.medicalStaffCount} On Duty',
-                ),
-              ),
+              _buildShortageTile('Infant Formula', 'EMPTY', const Color(0xFF3B1E22), const Color(0xFFFF3B30)),
+              const Divider(color: Color(0xFF1E283D), height: 1),
+              _buildShortageTile('Drinking Water', 'LOW STOCK', const Color(0xFF382C1B), const Color(0xFFFF9F0A)),
             ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeadcountBtn(BuildContext context, String label, VoidCallback onPressed) {
+    return Expanded(
+      child: SizedBox(
+        height: 50,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF1A2438),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          onPressed: onPressed,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildMetricTile({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildShortageTile(String title, String badgeText, Color badgeBg, Color badgeTextColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: iconColor, size: 14),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(color: Colors.white54, fontSize: 10),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
           Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: badgeBg,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              badgeText,
+              style: TextStyle(
+                color: badgeTextColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+              ),
+            ),
           ),
         ],
       ),
