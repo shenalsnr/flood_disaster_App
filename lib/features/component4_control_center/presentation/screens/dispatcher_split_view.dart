@@ -18,7 +18,9 @@ class DispatcherSplitView extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             icon: const Icon(Icons.cell_tower, size: 18),
             label: const Text('BROADCAST ZONE ALERT'),
@@ -82,7 +84,11 @@ class DispatcherSplitView extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.dashboard_customize_outlined, size: 64, color: Colors.white24),
+                    Icon(
+                      Icons.dashboard_customize_outlined,
+                      size: 64,
+                      color: Colors.white24,
+                    ),
                     SizedBox(height: 12),
                     Text(
                       'Live Multi-Agency Coordinate Feed',
@@ -117,14 +123,21 @@ class DispatcherSplitView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: severityColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     severity,
-                    style: TextStyle(color: severityColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: severityColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (isVerified)
@@ -134,7 +147,10 @@ class DispatcherSplitView extends StatelessWidget {
                       SizedBox(width: 4),
                       Text(
                         'Verified by GN',
-                        style: TextStyle(color: Colors.blueAccent, fontSize: 11),
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -143,7 +159,11 @@ class DispatcherSplitView extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
             Text(
               location,
@@ -160,7 +180,10 @@ class DispatcherSplitView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text('Broadcast Targeted Evacuation Alert', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Broadcast Targeted Evacuation Alert',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'Select zone radius to dispatch early warning sirens and push notifications to all citizen devices.',
           style: TextStyle(color: Colors.white70),
@@ -168,12 +191,18 @@ class DispatcherSplitView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white54),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('BROADCAST NOW', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'BROADCAST NOW',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

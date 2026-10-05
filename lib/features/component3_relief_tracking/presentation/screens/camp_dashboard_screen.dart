@@ -67,7 +67,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   value: capacityRatio,
                   backgroundColor: Colors.white12,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    capacityRatio > 0.8 ? Colors.redAccent : Colors.orangeAccent,
+                    capacityRatio > 0.8
+                        ? Colors.redAccent
+                        : Colors.orangeAccent,
                   ),
                   minHeight: 10,
                 ),
@@ -88,23 +90,57 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           const SizedBox(height: 12),
 
           // Glanceable stock status tiles
-          _buildSupplyItem('Clean Drinking Water', '45 Liters Left', Colors.redAccent, false),
-          _buildSupplyItem('First Aid Kits', '12 Units Available', Colors.green, true),
-          _buildSupplyItem('Baby Formula', 'CRITICAL DEPLETION', Colors.redAccent, false),
-          _buildSupplyItem('Dry Rations / Rice', 'Plenty in Stock', Colors.green, true),
+          _buildSupplyItem(
+            'Clean Drinking Water',
+            '45 Liters Left',
+            Colors.redAccent,
+            false,
+          ),
+          _buildSupplyItem(
+            'First Aid Kits',
+            '12 Units Available',
+            Colors.green,
+            true,
+          ),
+          _buildSupplyItem(
+            'Baby Formula',
+            'CRITICAL DEPLETION',
+            Colors.redAccent,
+            false,
+          ),
+          _buildSupplyItem(
+            'Dry Rations / Rice',
+            'Plenty in Stock',
+            Colors.green,
+            true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSupplyItem(String title, String status, Color statusColor, bool inStock) {
+  Widget _buildSupplyItem(
+    String title,
+    String status,
+    Color statusColor,
+    bool inStock,
+  ) {
     return Card(
       color: const Color(0xFF1E1E1E),
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
-        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        subtitle: Text(status, style: TextStyle(color: statusColor, fontSize: 12)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          status,
+          style: TextStyle(color: statusColor, fontSize: 12),
+        ),
         trailing: Switch(
           value: inStock,
           activeColor: Colors.greenAccent,

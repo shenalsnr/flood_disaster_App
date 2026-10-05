@@ -52,12 +52,20 @@ class EvacuationMapScreen extends StatelessWidget {
                 color: const Color(0xFFB71C1C),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: const [
-                  BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 4)),
+                  BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
                 ],
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.white, size: 36),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.white,
+                    size: 36,
+                  ),
                   SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -105,7 +113,11 @@ class EvacuationMapScreen extends StatelessWidget {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.directions_walk, color: Colors.greenAccent, size: 28),
+                          Icon(
+                            Icons.directions_walk,
+                            color: Colors.greenAccent,
+                            size: 28,
+                          ),
                           SizedBox(width: 8),
                           Text(
                             'Fastest Safe Walking Path',
@@ -118,7 +130,10 @@ class EvacuationMapScreen extends StatelessWidget {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.greenAccent.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
@@ -146,7 +161,9 @@ class EvacuationMapScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.greenAccent,
                         foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       onPressed: () {},
                       icon: const Icon(Icons.navigation),

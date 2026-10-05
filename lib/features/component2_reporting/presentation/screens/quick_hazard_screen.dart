@@ -22,7 +22,10 @@ class QuickHazardScreen extends StatelessWidget {
             children: [
               // Auto-GPS & Offline Status Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2A2A2A),
                   borderRadius: BorderRadius.circular(8),
@@ -37,7 +40,11 @@ class QuickHazardScreen extends StatelessWidget {
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ),
-                    Icon(Icons.cloud_queue, color: Colors.orangeAccent, size: 20),
+                    Icon(
+                      Icons.cloud_queue,
+                      color: Colors.orangeAccent,
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -98,7 +105,9 @@ class QuickHazardScreen extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Colors.white30),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.camera_alt, color: Colors.white70),
                   label: const Text('Attach Quick Photo (Optional)'),
