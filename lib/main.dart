@@ -1,32 +1,71 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 
-import 'features/component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
+
 import 'firebase_options.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Force dark status bar icons to match the dark theme
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
 
-    await FirebaseFirestore.instance.collection('connection_test').add({
+  await FirebaseFirestore.instance.collection('connection_test').add({
     'message': 'Hello from LifeLine',
     'time': FieldValue.serverTimestamp(),
   });
   
-  runApp(const LifeLineApp());
+  runApp(const WeSafeApp());
 }
 
-class LifeLineApp extends StatelessWidget {
-  const LifeLineApp({super.key});
+class WeSafeApp extends StatelessWidget {
+  const WeSafeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'LifeLine - Relief Tracking',
-      home: CampDashboardScreen(),
+      title: 'WeSafe — Flood Early Warning',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
+        colorScheme: ColorScheme.dark(
+          primary: const Color(0xFF00E676),
+          secondary: const Color(0xFF40C4FF),
+          surface: const Color(0xFF1A1A1A),
+          error: const Color(0xFFFF5252),
+        ),
+        fontFamily: 'Roboto',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF121212),
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00E676),
+            foregroundColor: Colors.black,
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10))),
+          ),
+        ),
+      ),
+      home: const CitizenDashboardScreen(),
     );
   }
 }
