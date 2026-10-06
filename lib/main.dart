@@ -9,7 +9,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialize Firebase in the background so it doesn't freeze the splash screen!
+  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+      .then((_) => debugPrint('Firebase initialized successfully'))
+      .catchError((e) => debugPrint('Firebase init error: $e'));
   
   // Force dark status bar icons to match the dark theme
   SystemChrome.setSystemUIOverlayStyle(
@@ -19,10 +22,7 @@ Future<void> main() async {
     ),
   );
 
-  await FirebaseFirestore.instance.collection('connection_test').add({
-    'message': 'Hello from LifeLine',
-    'time': FieldValue.serverTimestamp(),
-  });
+  // Removed the blocking connection_test query so the app can boot up immediately!
   
   runApp(const WeSafeApp());
 }

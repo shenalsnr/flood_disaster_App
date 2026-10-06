@@ -61,13 +61,20 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
 
   void _startNavigation() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => BatterySavingNavScreen(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => BatterySavingNavScreen(
           safeZoneName: _safeZoneName,
           // Pass live coords here when geolocator is integrated
           userLocation: _userLocation,
           destination: _safeZoneLocation,
         ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
       ),
     );
   }
@@ -194,6 +201,39 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
             top: 105,
             left: 16,
             child: _MapLegend(),
+          ),
+
+          // ── Battery Saver Action Button ───────────────────────────────────
+          Positioned(
+            top: 105,
+            right: 16,
+            child: GestureDetector(
+              onTap: _startNavigation,
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withValues(alpha: 0.6),
+                  border: Border.all(
+                    color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.battery_saver_rounded,
+                  color: Color(0xFF00E676),
+                  size: 28,
+                ),
+              ),
+            ),
           ),
 
           // ── Bottom action card ────────────────────────────────────────────
