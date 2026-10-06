@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 // Replace state mutation with a Firestore document write when backend is ready.
 // ---------------------------------------------------------------------------
 
+import '../../services/citizen_firestore_service.dart';
+
 enum _CheckInStatus { idle, loading, confirmed }
 
 class SafeArrivalCheckInScreen extends StatefulWidget {
@@ -23,6 +25,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
   // --- Local state (replace with Firestore write later) ---
   _CheckInStatus _status = _CheckInStatus.idle;
   String? _checkInTime;
+  final CitizenFirestoreService _firestoreService = CitizenFirestoreService();
 
   // Animations
   late AnimationController _rippleController;
@@ -57,14 +60,22 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
     super.dispose();
   }
 
-  // --- Check-In Action (replace with Firestore write later) ---
+  // --- Check-In Action (Firestore write) ---
   Future<void> _markAsSafe() async {
     if (_status != _CheckInStatus.idle) return;
 
     setState(() => _status = _CheckInStatus.loading);
 
-    // Simulate a network call — remove this delay when wiring to Firebase
-    await Future.delayed(const Duration(milliseconds: 1400));
+    try {
+      // Ensure profile exists (simulating registration)
+      await _firestoreService.createCitizenProfile("Citizen User");
+      // Mark as safe
+      await _firestoreService.markAsSafe();
+    } catch (e) {
+      // Handle error gracefully in real app
+      setState(() => _status = _CheckInStatus.idle);
+      return;
+    }
 
     final now = TimeOfDay.now();
     final formattedTime =

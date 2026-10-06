@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 
-import 'features/component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
+
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -32,7 +32,7 @@ class WeSafeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'WeSafe — Flood Early Warning',
       theme: ThemeData(

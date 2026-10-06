@@ -9,7 +9,10 @@ import 'package:flutter/services.dart';
 // Replace _contacts list operations with Firestore CRUD calls when ready.
 // ---------------------------------------------------------------------------
 
-// Model — swap for a Firestore-backed model when backend is ready
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/citizen_firestore_service.dart';
+
+// Model — mapped from Firestore DocumentSnapshot
 class EmergencyContact {
   final String id;
   String name;
@@ -22,6 +25,16 @@ class EmergencyContact {
     required this.phone,
     required this.relationship,
   });
+
+  factory EmergencyContact.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return EmergencyContact(
+      id: doc.id,
+      name: data['name'] ?? '',
+      phone: data['phoneNumber'] ?? '',
+      relationship: data['relationship'] ?? '',
+    );
+  }
 }
 
 class EmergencyContactsScreen extends StatefulWidget {
@@ -33,46 +46,39 @@ class EmergencyContactsScreen extends StatefulWidget {
 }
 
 class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
-  // --- Mock data (replace with Firestore collection stream later) ---
-  final List<EmergencyContact> _contacts = [
-    EmergencyContact(
-        id: '1', name: 'Kamal Perera', phone: '071-234-5678', relationship: 'Father'),
-    EmergencyContact(
-        id: '2', name: 'Nimali Silva', phone: '077-890-1234', relationship: 'Mother'),
-    EmergencyContact(
-        id: '3', name: 'Tharindu Rajapaksa', phone: '076-456-7890', relationship: 'Brother'),
-    EmergencyContact(
-        id: '4', name: 'Dr. Sudesh Jayasinghe', phone: '011-234-5678', relationship: 'Family Doctor'),
-  ];
+  final CitizenFirestoreService _firestoreService = CitizenFirestoreService();
 
-  int _uniqueIdCounter = 100;
+  // ── CRUD Operations (Firestore) ──────────────────────────────────────────
 
-  // ── CRUD Operations ──────────────────────────────────────────────────────
-
-  void _addContact(String name, String phone, String relationship) {
-    setState(() {
-      _contacts.add(EmergencyContact(
-        id: (_uniqueIdCounter++).toString(),
-        name: name.trim(),
-        phone: phone.trim(),
-        relationship: relationship.trim(),
-      ));
+  void _addContact(String name, String phone, String relationship) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_firestoreService.currentUserId)
+        .collection('contacts')
+        .add({
+      'name': name.trim(),
+      'phoneNumber': phone.trim(),
+      'relationship': relationship.trim(),
+      'addedAt': FieldValue.serverTimestamp(),
     });
   }
 
   void _editContact(
-      EmergencyContact contact, String name, String phone, String relationship) {
-    setState(() {
-      contact.name = name.trim();
-      contact.phone = phone.trim();
-      contact.relationship = relationship.trim();
+      EmergencyContact contact, String name, String phone, String relationship) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_firestoreService.currentUserId)
+        .collection('contacts')
+        .doc(contact.id)
+        .update({
+      'name': name.trim(),
+      'phoneNumber': phone.trim(),
+      'relationship': relationship.trim(),
     });
   }
 
   void _deleteContact(String id) {
-    setState(() {
-      _contacts.removeWhere((c) => c.id == id);
-    });
+    _firestoreService.deleteEmergencyContact(id);
   }
 
   // ── Dialog helpers ───────────────────────────────────────────────────────
@@ -254,9 +260,15 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
-              child: Text(
-                '${_contacts.length} contacts',
-                style: const TextStyle(color: Colors.white38, fontSize: 13),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestoreService.getEmergencyContacts(),
+                builder: (context, snapshot) {
+                  final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                  return Text(
+                    '$count contacts',
+                    style: const TextStyle(color: Colors.white38, fontSize: 13),
+                  );
+                }
               ),
             ),
           ),
@@ -286,21 +298,39 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
 
           // ── Contact List ─────────────────────────────────────────────────
           Expanded(
-            child: _contacts.isEmpty
-                ? const _EmptyContactState()
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    itemCount: _contacts.length,
-                    itemBuilder: (context, index) {
-                      final contact = _contacts[index];
-                      return _ContactTile(
-                        key: ValueKey(contact.id),
-                        contact: contact,
-                        onEdit: () => _showContactDialog(contact: contact),
-                        onDelete: () => _confirmDelete(contact),
-                      );
-                    },
-                  ),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestoreService.getEmergencyContacts(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading contacts', style: TextStyle(color: Colors.red)));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final contacts = snapshot.data!.docs
+                    .map((doc) => EmergencyContact.fromFirestore(doc))
+                    .toList();
+
+                if (contacts.isEmpty) {
+                  return const _EmptyContactState();
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  itemCount: contacts.length,
+                  itemBuilder: (context, index) {
+                    final contact = contacts[index];
+                    return _ContactTile(
+                      key: ValueKey(contact.id),
+                      contact: contact,
+                      onEdit: () => _showContactDialog(contact: contact),
+                      onDelete: () => _confirmDelete(contact),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

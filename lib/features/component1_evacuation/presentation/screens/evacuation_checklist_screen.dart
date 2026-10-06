@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 // Replace _items list with a Firebase stream / Firestore collection later.
 // ---------------------------------------------------------------------------
 
-// Model — swap for a Firestore-backed model when backend is ready
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/citizen_firestore_service.dart';
+
+// Model — mapped from Firestore DocumentSnapshot
 class ChecklistItem {
   final String id;
   String name;
@@ -18,6 +21,15 @@ class ChecklistItem {
     required this.name,
     this.isPacked = false,
   });
+
+  factory ChecklistItem.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return ChecklistItem(
+      id: doc.id,
+      name: data['itemName'] ?? '',
+      isPacked: data['isPacked'] ?? false,
+    );
+  }
 }
 
 class EvacuationChecklistScreen extends StatefulWidget {
@@ -30,21 +42,8 @@ class EvacuationChecklistScreen extends StatefulWidget {
 
 class _EvacuationChecklistScreenState
     extends State<EvacuationChecklistScreen> {
-  // --- Mock data (replace with Firestore stream later) ---
-  final List<ChecklistItem> _items = [
-    ChecklistItem(id: '1', name: 'Water (3-day supply)'),
-    ChecklistItem(id: '2', name: 'First Aid Kit'),
-    ChecklistItem(id: '3', name: 'Flashlight & Batteries'),
-    ChecklistItem(id: '4', name: 'Emergency Cash'),
-    ChecklistItem(id: '5', name: 'Medications (7-day supply)'),
-    ChecklistItem(id: '6', name: 'Important Documents (NIC, Passport)'),
-    ChecklistItem(id: '7', name: 'Whistle / Signal Device'),
-    ChecklistItem(id: '8', name: 'Warm Blanket', isPacked: true),
-    ChecklistItem(id: '9', name: 'Phone Charger & Power Bank', isPacked: true),
-  ];
-
+  final CitizenFirestoreService _firestoreService = CitizenFirestoreService();
   final TextEditingController _addController = TextEditingController();
-  int _uniqueIdCounter = 100;
 
   @override
   void dispose() {
@@ -52,38 +51,22 @@ class _EvacuationChecklistScreenState
     super.dispose();
   }
 
-  // ── CRUD Operations (will call Firestore later) ──────────────────────────
+  // ── CRUD Operations (Firestore) ──────────────────────────────────────────
 
-  void _addItem() {
+  void _addItem() async {
     final text = _addController.text.trim();
     if (text.isEmpty) return;
-    setState(() {
-      _items.add(
-        ChecklistItem(
-          id: (_uniqueIdCounter++).toString(),
-          name: text,
-        ),
-      );
-      _addController.clear();
-    });
+    await _firestoreService.addChecklistItem(text);
+    _addController.clear();
   }
 
   void _togglePacked(ChecklistItem item) {
-    setState(() {
-      item.isPacked = !item.isPacked;
-    });
+    _firestoreService.toggleChecklistItem(item.id, item.isPacked);
   }
 
   void _deleteItem(String id) {
-    setState(() {
-      _items.removeWhere((item) => item.id == id);
-    });
+    _firestoreService.deleteChecklistItem(id);
   }
-
-  // ── Computed stats ───────────────────────────────────────────────────────
-  int get _packedCount => _items.where((i) => i.isPacked).length;
-  double get _progress =>
-      _items.isEmpty ? 0 : _packedCount / _items.length;
 
   @override
   Widget build(BuildContext context) {
@@ -101,55 +84,59 @@ class _EvacuationChecklistScreenState
           style: TextStyle(
               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: Text(
-                '$_packedCount / ${_items.length}',
-                style: const TextStyle(
-                  color: Color(0xFF00E676),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          // ── Progress Header ──────────────────────────────────────────────
-          _ProgressHeader(progress: _progress, packedCount: _packedCount, total: _items.length),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestoreService.getChecklistItems(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading checklist', style: TextStyle(color: Colors.red)));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          // ── Add Item Input ───────────────────────────────────────────────
-          _AddItemField(
-            controller: _addController,
-            onAdd: _addItem,
-          ),
+          final List<ChecklistItem> items = snapshot.data!.docs
+              .map((doc) => ChecklistItem.fromFirestore(doc))
+              .toList();
 
-          // ── Checklist ────────────────────────────────────────────────────
-          Expanded(
-            child: _items.isEmpty
-                ? _EmptyState(
-                    icon: Icons.checklist_rounded,
-                    message: 'Your checklist is empty.\nAdd items above.',
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    itemCount: _items.length,
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      return _ChecklistItemTile(
-                        key: ValueKey(item.id),
-                        item: item,
-                        onToggle: () => _togglePacked(item),
-                        onDelete: () => _deleteItem(item.id),
-                      );
-                    },
-                  ),
-          ),
-        ],
+          final int packedCount = items.where((i) => i.isPacked).length;
+          final double progress = items.isEmpty ? 0 : packedCount / items.length;
+
+          return Column(
+            children: [
+              // ── Progress Header ──────────────────────────────────────────────
+              _ProgressHeader(progress: progress, packedCount: packedCount, total: items.length),
+
+              // ── Add Item Input ───────────────────────────────────────────────
+              _AddItemField(
+                controller: _addController,
+                onAdd: _addItem,
+              ),
+
+              // ── Checklist ────────────────────────────────────────────────────
+              Expanded(
+                child: items.isEmpty
+                    ? const _EmptyState(
+                        icon: Icons.checklist_rounded,
+                        message: 'Your checklist is empty.\nAdd items above.',
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return _ChecklistItemTile(
+                            key: ValueKey(item.id),
+                            item: item,
+                            onToggle: () => _togglePacked(item),
+                            onDelete: () => _deleteItem(item.id),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
