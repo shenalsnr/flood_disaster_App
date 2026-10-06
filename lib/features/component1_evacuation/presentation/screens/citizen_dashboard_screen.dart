@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
-
 
 // ---------------------------------------------------------------------------
 // Citizen Dashboard Screen — Component 1: Early Warning & Evacuation
@@ -51,58 +51,65 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
 
   // --- Navigation grid items (strictly Component 1 only) ---
   List<_DashboardTile> get _tiles => [
-        _DashboardTile(
-          id: 'tile_checklist',
-          icon: Icons.checklist_rounded,
-          label: 'Go-Bag\nChecklist',
-          color: const Color(0xFF00E676),
-          onTap: () => _push(const EvacuationChecklistScreen()),
-        ),
-        _DashboardTile(
-          id: 'tile_contacts',
-          icon: Icons.contact_phone_rounded,
-          label: 'Emergency\nContacts',
-          color: const Color(0xFF40C4FF),
-          onTap: () => _push(const EmergencyContactsScreen()),
-        ),
-        _DashboardTile(
-          id: 'tile_safe_route',
-          icon: Icons.alt_route_rounded,
-          label: 'Safe\nRoute',
-          color: const Color(0xFFFFD740),
-          onTap: () => _push(const SafeRoutingMapScreen()),
-        ),
-        _DashboardTile(
-          id: 'tile_checkin',
-          icon: Icons.verified_user_rounded,
-          label: 'Safe Arrival\nCheck-In',
-          color: const Color(0xFFFF6D00),
-          onTap: () => _push(const SafeArrivalCheckInScreen()),
-        ),
-      ];
+    _DashboardTile(
+      id: 'tile_checklist',
+      icon: Icons.checklist_rounded,
+      label: 'Go-Bag\nChecklist',
+      color: const Color(0xFF00E676),
+      onTap: () => _push(const EvacuationChecklistScreen()),
+    ),
+    _DashboardTile(
+      id: 'tile_contacts',
+      icon: Icons.contact_phone_rounded,
+      label: 'Emergency\nContacts',
+      color: const Color(0xFF40C4FF),
+      onTap: () => _push(const EmergencyContactsScreen()),
+    ),
+    _DashboardTile(
+      id: 'tile_safe_route',
+      icon: Icons.alt_route_rounded,
+      label: 'Safe\nRoute',
+      color: const Color(0xFFFFD740),
+      onTap: () => _push(const SafeRoutingMapScreen()),
+    ),
+    _DashboardTile(
+      id: 'tile_checkin',
+      icon: Icons.verified_user_rounded,
+      label: 'Safe Arrival\nCheck-In',
+      color: const Color(0xFFFF6D00),
+      onTap: () => _push(const SafeArrivalCheckInScreen()),
+    ),
+  ];
 
   void _push(Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: const Color(0xFF0A192F), // Dark Navy Blue
       appBar: AppBar(
-        backgroundColor: const Color(0xFF121212),
+        backgroundColor: const Color(
+          0xFF060F1E,
+        ), // Slightly darker navy for AppBar
         elevation: 0,
         title: Row(
           children: [
-            const Icon(Icons.shield_rounded, color: Color(0xFF00E676), size: 22),
+            const Icon(
+              Icons.shield_rounded,
+              color: Color(0xFF00E676),
+              size: 22,
+            ),
             const SizedBox(width: 8),
             RichText(
               text: const TextSpan(
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                 children: [
-                  TextSpan(text: 'We', style: TextStyle(color: Colors.white)),
+                  TextSpan(
+                    text: 'We',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   TextSpan(
                     text: 'Safe',
                     style: TextStyle(color: Color(0xFF00E676)),
@@ -217,8 +224,11 @@ class _CriticalAlertCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.warning_amber_rounded,
-                  color: Colors.white, size: 28),
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.white,
+                size: 28,
+              ),
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
@@ -406,7 +416,7 @@ class _DashboardGridTileState extends State<_DashboardGridTile>
           child: Container(
             key: ValueKey(tile.id),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
+              color: const Color(0xFF112240), // Sleek lighter navy for cards
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: tile.color.withValues(alpha: 0.35),
@@ -457,17 +467,17 @@ class _StatusFooter extends StatelessWidget {
     {
       'icon': Icons.cell_tower,
       'label': 'Network: Online',
-      'color': Color(0xFF00E676)
+      'color': Color(0xFF00E676),
     },
     {
       'icon': Icons.offline_pin,
       'label': 'Map cached (10km)',
-      'color': Color(0xFF40C4FF)
+      'color': Color(0xFF40C4FF),
     },
     {
       'icon': Icons.battery_4_bar,
       'label': 'Battery-save ON',
-      'color': Color(0xFFFFD740)
+      'color': Color(0xFFFFD740),
     },
   ];
 
@@ -478,7 +488,7 @@ class _StatusFooter extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF141414),
+        color: const Color(0xFF0F1E36), // Navy matching footer
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white12),
       ),
@@ -500,8 +510,11 @@ class _StatusFooter extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 children: [
-                  Icon(item['icon'] as IconData,
-                      color: item['color'] as Color, size: 16),
+                  Icon(
+                    item['icon'] as IconData,
+                    color: item['color'] as Color,
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     item['label'] as String,

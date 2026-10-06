@@ -250,6 +250,20 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
+          // ── Map Toggle Button ──────────────────────────────────────────
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A1A),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white24),
+              ),
+              child: const Icon(Icons.map_outlined, color: Colors.white70, size: 20),
+            ),
+          ),
           // Live indicator
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
