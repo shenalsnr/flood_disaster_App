@@ -3,7 +3,7 @@ import 'package:flood_disaster/main.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const WeSafeApp());
+    await tester.pumpWidget(const LifeLineApp());
     expect(find.text('Dr. Rohan Silva'), findsOneWidget);
   });
 }
