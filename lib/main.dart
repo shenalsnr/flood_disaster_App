@@ -4,16 +4,12 @@ import 'package:flutter/material.dart';
 import 'features/component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
 import 'firebase_options.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    await FirebaseFirestore.instance.collection('connection_test').add({
-    'message': 'Hello from LifeLine',
-    'time': FieldValue.serverTimestamp(),
-  });
+   
   
   runApp(const LifeLineApp());
 }
