@@ -23,20 +23,11 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -48,6 +39,34 @@ class DefaultFirebaseOptions {
         );
     }
   }
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCYSI0vHBB4ai4qYyAwAZVkS8FwSEvPSes',
+    appId: '1:819733545728:ios:1a6c98fc7e1c95ebde69e5',
+    messagingSenderId: '819733545728',
+    projectId: 'flood-disaster-app-project',
+    storageBucket: 'flood-disaster-app-project.firebasestorage.app',
+    iosBundleId: 'com.example.floodDisaster',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCYSI0vHBB4ai4qYyAwAZVkS8FwSEvPSes',
+    appId: '1:819733545728:ios:1a6c98fc7e1c95ebde69e5',
+    messagingSenderId: '819733545728',
+    projectId: 'flood-disaster-app-project',
+    storageBucket: 'flood-disaster-app-project.firebasestorage.app',
+    iosBundleId: 'com.example.floodDisaster',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDfw68TWRcG05KD55WQgKpbNHIvgg79yIg',
+    appId: '1:819733545728:web:b7e803c3132d2427de69e5',
+    messagingSenderId: '819733545728',
+    projectId: 'flood-disaster-app-project',
+    authDomain: 'flood-disaster-app-project.firebaseapp.com',
+    storageBucket: 'flood-disaster-app-project.firebasestorage.app',
+    measurementId: 'G-1NSPHX7Q6Y',
+  );
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDfw68TWRcG05KD55WQgKpbNHIvgg79yIg',
