@@ -1,20 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-
-
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+// ⚠️ මේ path දෙක ඔබේ folder structure එකට අනුව වෙනස් කරන්න
+import 'features/component4_control_center/presentation/screens/sign_in_screen.dart';
+import 'features/component4_control_center/presentation/screens/alert_dashboard_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize Firebase in the background so it doesn't freeze the splash screen!
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-      .then((_) => debugPrint('Firebase initialized successfully'))
-      .catchError((e) => debugPrint('Firebase init error: $e'));
-  
-  // Force dark status bar icons to match the dark theme
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase init error: $e');
+  }
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -22,8 +26,6 @@ Future<void> main() async {
     ),
   );
 
-  // Removed the blocking connection_test query so the app can boot up immediately!
-  
   runApp(const WeSafeApp());
 }
 
@@ -38,11 +40,11 @@ class WeSafeApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-        colorScheme: ColorScheme.dark(
-          primary: const Color(0xFF00E676),
-          secondary: const Color(0xFF40C4FF),
-          surface: const Color(0xFF1A1A1A),
-          error: const Color(0xFFFF5252),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00E676),
+          secondary: Color(0xFF40C4FF),
+          surface: Color(0xFF1A1A1A),
+          error: Color(0xFFFF5252),
         ),
         fontFamily: 'Roboto',
         appBarTheme: const AppBarTheme(
@@ -60,12 +62,13 @@ class WeSafeApp extends StatelessWidget {
             backgroundColor: const Color(0xFF00E676),
             foregroundColor: Colors.black,
             textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10))),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
           ),
         ),
       ),
-      home: const CitizenDashboardScreen(),
+      home: const AlertDashboardScreen(),
     );
   }
 }

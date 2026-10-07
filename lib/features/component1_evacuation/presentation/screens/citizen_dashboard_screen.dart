@@ -4,6 +4,7 @@ import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
+import '../../../component4_control_center/presentation/screens/sign_in_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Citizen Dashboard Screen — Component 1: Early Warning & Evacuation
@@ -90,6 +91,15 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF0A192F), // Dark Navy Blue
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white70),
+          tooltip: 'Switch Role',
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => SignInScreen()),
+            );
+          },
+        ),
         backgroundColor: const Color(
           0xFF060F1E,
         ), // Slightly darker navy for AppBar
