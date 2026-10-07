@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "819733545728",
+    "project_id": "flood-disaster-app-project",
+    "storage_bucket": "flood-disaster-app-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819733545728:android:552ca13299ccec27de69e5",
+        "android_client_info": {
+          "package_name": "com.example.flood_disaster"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj4Tmyd_ytzo7VrvpheEn8M4l4MXdZ7bc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
