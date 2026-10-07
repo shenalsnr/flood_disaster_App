@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' hide Path;
+
 import 'battery_saving_nav_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -24,14 +25,18 @@ class SafeRoutingMapScreen extends StatefulWidget {
   State<SafeRoutingMapScreen> createState() => _SafeRoutingMapScreenState();
 }
 
-class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
+class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
+    with TickerProviderStateMixin {
   // ── Mock GPS data ──────────────────────────────────────────────────────────
   // GEOLOCATOR HOOK: replace _userLocation with Geolocator.getPositionStream()
   final LatLng _userLocation = const LatLng(6.6828, 80.3992); // Ratnapura town
 
   // FIREBASE HOOK: load nearest shelter from Firestore (Component 3 provides
   // shelter data; query by proximity to _userLocation)
-  final LatLng _safeZoneLocation = const LatLng(6.6950, 80.4050); // Mock shelter
+  final LatLng _safeZoneLocation = const LatLng(
+    6.6950,
+    80.4050,
+  ); // Mock shelter
 
   final String _safeZoneName = 'Rathnapura Central College';
 
@@ -39,6 +44,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
   late final List<LatLng> _routePoints;
 
   final MapController _mapController = MapController();
+  bool _isNavigating = false;
 
   @override
   void initState() {
@@ -59,20 +65,69 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
     super.dispose();
   }
 
-  void _startNavigation() {
+  void _animatedMapMove(
+    LatLng destLocation,
+    double destZoom, {
+    double destRotation = 0.0,
+  }) {
+    final latTween = Tween<double>(
+      begin: _mapController.camera.center.latitude,
+      end: destLocation.latitude,
+    );
+    final lngTween = Tween<double>(
+      begin: _mapController.camera.center.longitude,
+      end: destLocation.longitude,
+    );
+    final zoomTween = Tween<double>(
+      begin: _mapController.camera.zoom,
+      end: destZoom,
+    );
+    final rotationTween = Tween<double>(
+      begin: _mapController.camera.rotation,
+      end: destRotation,
+    );
+
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    final Animation<double> animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
+
+    controller.addListener(() {
+      _mapController.move(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+      );
+      if (rotationTween.begin != rotationTween.end) {
+        _mapController.rotate(rotationTween.evaluate(animation));
+      }
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        controller.dispose();
+      }
+    });
+
+    controller.forward();
+  }
+
+  void _navigateToBatterySaver() {
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => BatterySavingNavScreen(
-          safeZoneName: _safeZoneName,
-          // Pass live coords here when geolocator is integrated
-          userLocation: _userLocation,
-          destination: _safeZoneLocation,
-        ),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            BatterySavingNavScreen(
+              safeZoneName: _safeZoneName,
+              // Pass live coords here when geolocator is integrated
+              userLocation: _userLocation,
+              destination: _safeZoneLocation,
+            ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
         transitionDuration: const Duration(milliseconds: 400),
       ),
@@ -88,7 +143,10 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
         backgroundColor: Colors.black.withValues(alpha: 0.7),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Column(
@@ -97,7 +155,10 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
             Text(
               'Safe Evacuation Route',
               style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+              ),
             ),
             Text(
               'OpenStreetMap — Offline Ready',
@@ -105,18 +166,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
             ),
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              key: const Key('map_recenter_btn'),
-              icon: const Icon(Icons.my_location_rounded,
-                  color: Color(0xFF00E676)),
-              tooltip: 'Re-center on my location',
-              onPressed: () => _mapController.move(_userLocation, 15),
-            ),
-          ),
-        ],
+        // Re-center action removed from AppBar, replaced by floating FAB below
       ),
       body: Stack(
         children: [
@@ -136,7 +186,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
               // OSM tile layer — swap provider for offline cache later
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.flood_disaster',
+                userAgentPackageName: 'dev.lasha.flood_disaster',
                 // OFFLINE HOOK: tileProvider: CachedTileProvider(),
               ),
 
@@ -159,8 +209,8 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
                   // User's current location
                   Marker(
                     point: _userLocation,
-                    width: 56,
-                    height: 56,
+                    width: 80,
+                    height: 80,
                     child: _UserLocationMarker(),
                   ),
 
@@ -197,18 +247,14 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
           ),
 
           // ── Legend pill ───────────────────────────────────────────────────
-          Positioned(
-            top: 105,
-            left: 16,
-            child: _MapLegend(),
-          ),
+          Positioned(top: 105, left: 16, child: _MapLegend()),
 
           // ── Battery Saver Action Button ───────────────────────────────────
           Positioned(
             top: 105,
             right: 16,
             child: GestureDetector(
-              onTap: _startNavigation,
+              onTap: _navigateToBatterySaver,
               child: Container(
                 width: 56,
                 height: 56,
@@ -236,6 +282,31 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
             ),
           ),
 
+          // ── My Location FAB (Google Maps Style) ───────────────────────────
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            bottom: _isNavigating ? 180 : 280,
+            right: 16,
+            child: FloatingActionButton(
+              heroTag: 'my_location_fab',
+              backgroundColor: Colors.white,
+              elevation: 4,
+              mini: true,
+              onPressed: () {
+                _animatedMapMove(
+                  _userLocation,
+                  _isNavigating ? 18.0 : 15.0,
+                  destRotation: _isNavigating ? 45.0 : 0.0,
+                );
+              },
+              child: const Icon(
+                Icons.my_location_rounded,
+                color: Colors.blueAccent,
+              ),
+            ),
+          ),
+
           // ── Bottom action card ────────────────────────────────────────────
           Positioned(
             bottom: 0,
@@ -243,7 +314,14 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen> {
             right: 0,
             child: _BottomActionCard(
               safeZoneName: _safeZoneName,
-              onStartNavigation: _startNavigation,
+              isNavigating: _isNavigating,
+              onStartNavigation: () {
+                setState(() {
+                  _isNavigating = true;
+                });
+                // Fluid animation zoom & rotate for tracking mode
+                _animatedMapMove(_userLocation, 18.0, destRotation: 45.0);
+              },
             ),
           ),
         ],
@@ -273,9 +351,10 @@ class _UserLocationMarkerState extends State<_UserLocationMarker>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-    _anim = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _anim = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -286,21 +365,91 @@ class _UserLocationMarkerState extends State<_UserLocationMarker>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _anim,
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFF40C4FF).withValues(alpha: 0.25),
-          border: Border.all(color: const Color(0xFF40C4FF), width: 2.5),
-        ),
-        child: const Center(
-          child: Icon(Icons.navigation_rounded,
-              color: Color(0xFF40C4FF), size: 26),
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            // Directional cone (subtle gradient) pointing "up"
+            Transform.translate(
+              offset: const Offset(0, -20),
+              child: ClipPath(
+                clipper: _ConeClipper(),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.blueAccent.withValues(alpha: 0.4),
+                        Colors.blueAccent.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Pulsing blue radius
+            Container(
+              width: 24 + (_anim.value * 24),
+              height: 24 + (_anim.value * 24),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blueAccent.withValues(
+                  alpha: 0.2 - (_anim.value * 0.2),
+                ),
+              ),
+            ),
+            // Solid blue dot with white border
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blueAccent,
+                border: Border.all(color: Colors.white, width: 3.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
+}
+
+class _ConeClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(
+      size.width / 2,
+      size.height,
+    ); // bottom center (origin of the dot)
+    path.lineTo(0, 0); // top left
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height * 0.2,
+      size.width,
+      0,
+    ); // curve across top
+    path.lineTo(size.width / 2, size.height); // back to origin
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class _SafeZoneMarker extends StatelessWidget {
@@ -352,8 +501,10 @@ class _MapLegend extends StatelessWidget {
           SizedBox(width: 12),
           Icon(Icons.location_pin, color: Color(0xFF00E676), size: 14),
           SizedBox(width: 4),
-          Text('Safe Zone',
-              style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(
+            'Safe Zone',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
           SizedBox(width: 12),
           Icon(Icons.remove, color: Color(0xFF00E676), size: 14),
           SizedBox(width: 4),
@@ -366,10 +517,12 @@ class _MapLegend extends StatelessWidget {
 
 class _BottomActionCard extends StatelessWidget {
   final String safeZoneName;
+  final bool isNavigating;
   final VoidCallback onStartNavigation;
 
   const _BottomActionCard({
     required this.safeZoneName,
+    required this.isNavigating,
     required this.onStartNavigation,
   });
 
@@ -382,7 +535,11 @@ class _BottomActionCard extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(color: Colors.white12),
         boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 24, offset: Offset(0, -4)),
+          BoxShadow(
+            color: Colors.black54,
+            blurRadius: 24,
+            offset: Offset(0, -4),
+          ),
         ],
       ),
       child: Column(
@@ -408,8 +565,11 @@ class _BottomActionCard extends StatelessWidget {
                   color: const Color(0xFF00E676).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.shield_rounded,
-                    color: Color(0xFF00E676), size: 24),
+                child: const Icon(
+                  Icons.shield_rounded,
+                  color: Color(0xFF00E676),
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -432,8 +592,10 @@ class _BottomActionCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1A1A),
                   borderRadius: BorderRadius.circular(8),
@@ -441,14 +603,18 @@ class _BottomActionCard extends StatelessWidget {
                 ),
                 child: const Column(
                   children: [
-                    Text('~18 min',
-                        style: TextStyle(
-                            color: Color(0xFFFFD740),
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold)),
-                    Text('walk',
-                        style:
-                            TextStyle(color: Colors.white38, fontSize: 10)),
+                    Text(
+                      '~18 min',
+                      style: TextStyle(
+                        color: Color(0xFFFFD740),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'walk',
+                      style: TextStyle(color: Colors.white38, fontSize: 10),
+                    ),
                   ],
                 ),
               ),
@@ -460,46 +626,56 @@ class _BottomActionCard extends StatelessWidget {
           // Route stats row
           const Row(
             children: [
-              _RouteStat(icon: Icons.straighten, label: '1.4 km', sub: 'distance'),
+              _RouteStat(
+                icon: Icons.straighten,
+                label: '1.4 km',
+                sub: 'distance',
+              ),
               SizedBox(width: 12),
               _RouteStat(
-                  icon: Icons.water_drop_outlined,
-                  label: 'Flood-free',
-                  sub: 'path status'),
+                icon: Icons.water_drop_outlined,
+                label: 'Flood-free',
+                sub: 'path status',
+              ),
               SizedBox(width: 12),
               _RouteStat(
-                  icon: Icons.people_alt_outlined,
-                  label: '65% full',
-                  sub: 'shelter cap.'),
+                icon: Icons.people_alt_outlined,
+                label: '65% full',
+                sub: 'shelter cap.',
+              ),
             ],
           ),
 
-          const SizedBox(height: 20),
+          if (!isNavigating) ...[
+            const SizedBox(height: 20),
 
-          // START NAVIGATING button
-          SizedBox(
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton.icon(
-              key: const Key('start_navigating_btn'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00E676),
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                elevation: 0,
-              ),
-              onPressed: onStartNavigation,
-              icon: const Icon(Icons.directions_walk_rounded, size: 28),
-              label: const Text(
-                'START NAVIGATING',
-                style: TextStyle(
+            // START NAVIGATING button
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton.icon(
+                key: const Key('start_navigating_btn'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00E676),
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+                onPressed: onStartNavigation,
+                icon: const Icon(Icons.directions_walk_rounded, size: 28),
+                label: const Text(
+                  'START NAVIGATING',
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1),
+                    letterSpacing: 1,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -511,8 +687,11 @@ class _RouteStat extends StatelessWidget {
   final String label;
   final String sub;
 
-  const _RouteStat(
-      {required this.icon, required this.label, required this.sub});
+  const _RouteStat({
+    required this.icon,
+    required this.label,
+    required this.sub,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -528,14 +707,18 @@ class _RouteStat extends StatelessWidget {
           children: [
             Icon(icon, color: Colors.white54, size: 16),
             const SizedBox(height: 4),
-            Text(label,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold)),
-            Text(sub,
-                style:
-                    const TextStyle(color: Colors.white38, fontSize: 10)),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              sub,
+              style: const TextStyle(color: Colors.white38, fontSize: 10),
+            ),
           ],
         ),
       ),

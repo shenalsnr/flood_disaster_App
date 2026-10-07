@@ -1,11 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 
-
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +12,7 @@ Future<void> main() async {
   Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => debugPrint('Firebase initialized successfully'))
       .catchError((e) => debugPrint('Firebase init error: $e'));
-  
+
   // Force dark status bar icons to match the dark theme
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -23,7 +22,7 @@ Future<void> main() async {
   );
 
   // Removed the blocking connection_test query so the app can boot up immediately!
-  
+
   runApp(const WeSafeApp());
 }
 
@@ -61,7 +60,8 @@ class WeSafeApp extends StatelessWidget {
             foregroundColor: Colors.black,
             textStyle: const TextStyle(fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10))),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
           ),
         ),
       ),
