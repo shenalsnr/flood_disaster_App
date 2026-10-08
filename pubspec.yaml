@@ -38,6 +38,7 @@ dependencies:
   latlong2: ^0.10.1
   firebase_core: ^4.15.0
   cloud_firestore: ^6.10.0
+  image_picker: ^1.2.4
   firebase_auth: ^6.7.0
 
 dev_dependencies:

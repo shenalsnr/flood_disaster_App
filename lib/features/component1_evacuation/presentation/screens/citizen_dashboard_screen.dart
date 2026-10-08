@@ -4,6 +4,8 @@ import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
+import 'package:flood_disaster/features/component4_control_center/presentation/screens/responder_login_screen.dart';
+import 'package:flood_disaster/features/component4_control_center/presentation/controllers/responder_controller.dart';
 import 'citizen_drawer.dart';
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,18 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
       drawer: const CitizenDrawer(),
       extendBodyBehindAppBar: true, // Let background bleed into app bar
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white70),
+          tooltip: 'Switch Role',
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
+            );
+          },
+        ),
+        backgroundColor: const Color(
+          0xFF060F1E,
+        ), // Slightly darker navy for AppBar
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -95,6 +109,92 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
           ),
         ],
       ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Logged in Citizen Profile Banner ────────────────────────────
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF1E293B)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: Color(0xFF00E676),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ResponderController().currentUser?.fullName ??
+                              'Chamara Dissanayake',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Sector: ${ResponderController().currentUser?.floodZone ?? 'Colombo Low-Lying Area'}',
+                          style: const TextStyle(
+                            color: Color(0xFF38BDF8),
+                            fontSize: 11,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'ACTIVE',
+                      style: TextStyle(
+                        color: Color(0xFF00E676),
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Critical Alert Card ──────────────────────────────────────────
+            ScaleTransition(
+              scale: _pulseAnimation,
+              child: _CriticalAlertCard(
+                title: _alertTitle,
+                body: _alertBody,
+                time: _alertTime,
+              ),
+            ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
