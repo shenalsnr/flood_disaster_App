@@ -1,14 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-// Component 1: Evacuation & Early Warning (Import preserved for component integration)
-// ignore: unused_import
 import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-// Component 3: Relief Equipment & Camp Tracking (Your Component)
-import 'features/component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
+
 
 import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,9 +64,7 @@ class WeSafeApp extends StatelessWidget {
           ),
         ),
       ),
-      // Set to your feature (Component 3: Relief Tracking).
-      // Component 1 (CitizenDashboardScreen) is also imported above if needed.
-      home: const CampDashboardScreen(),
+      home: const CitizenDashboardScreen(),
     );
   }
 }
