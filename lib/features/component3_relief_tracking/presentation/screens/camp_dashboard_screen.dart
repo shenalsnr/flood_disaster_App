@@ -9,6 +9,7 @@ import '../widgets/leaders_chat_panel.dart';
 import '../widgets/request_supply_dialog.dart';
 import '../widgets/supply_requests_list.dart';
 import 'relief_truck_tracking_screen.dart';
+import 'supply_admin_dashboard_screen.dart';
 import 'equipment_tracking_screen.dart';
 
 class CampDashboardScreen extends StatefulWidget {
@@ -208,26 +209,63 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
   Widget _buildSuppliesTab() {
     final items = _controller.filteredInventory;
     final shipment = _controller.incomingShipment;
-    final pending = _controller.pendingRequest;
-    final isPending = pending != null;
+    final req = _controller.activeRequest;
+    final status = (req?['status'] ?? '').toString(); // '' | pending | dispatched | arrived
+    final hasRequest = req != null;
+    final onTheWay = status == 'dispatched';
+    final arrived = status == 'arrived';
+    final isPending = status == 'pending';
 
-    // While a supply request is waiting for the DMC, the truck card shows
-    // the request instead of the (demo) incoming convoy.
-    String pendingText() {
-      final q = pending?['quantityRequested'];
+    // While a supply request is open, the truck card follows it:
+    // PENDING (waiting for the DMC) -> ON THE WAY (driver assigned) -> ARRIVED.
+    String reqText() {
+      final q = req?['quantityRequested'];
       final qText = q is num
           ? (q == q.roundToDouble() ? q.round().toString() : q.toString())
           : '';
-      return '${pending?['itemName'] ?? 'Supply'} - $qText ${pending?['unit'] ?? ''}'.trim();
+      return '${req?['itemName'] ?? 'Supply'} - $qText ${req?['unit'] ?? ''}'.trim();
     }
 
-    final cardTitle = isPending ? 'Supply Request' : shipment['title'] as String;
-    final cardSubtitle = isPending
-        ? 'Waiting for DMC to assign a truck - ${pendingText()}'
-        : shipment['subtitle'] as String;
-    final cardBadge = isPending ? 'PENDING' : shipment['eta'] as String;
-    final accent = isPending ? const Color(0xFFFF9F0A) : const Color(0xFF30D158);
-    final accentBg = isPending ? const Color(0xFF382C1B) : const Color(0xFF063327);
+    final driverName = (req?['driverName'] ?? '').toString();
+    final driverPhone = hasRequest
+        ? (req?['driverPhone'] ?? '').toString()
+        : shipment['driverPhone'] as String;
+
+    String cardTitle = shipment['title'] as String;
+    String cardSubtitle = shipment['subtitle'] as String;
+    String cardBadge = shipment['eta'] as String;
+    double? cardProgress = shipment['progress'] as double;
+    Color accent = const Color(0xFF30D158);
+    Color accentBg = const Color(0xFF063327);
+    IconData cardIcon = Icons.local_shipping_outlined;
+
+    if (isPending) {
+      cardTitle = 'Supply Request';
+      cardSubtitle = 'Waiting for DMC to assign a truck - ${reqText()}';
+      cardBadge = 'PENDING';
+      cardProgress = null;
+      accent = const Color(0xFFFF9F0A);
+      accentBg = const Color(0xFF382C1B);
+      cardIcon = Icons.hourglass_top;
+    } else if (onTheWay) {
+      cardTitle = 'Truck on the way';
+      cardSubtitle = 'Driver: $driverName - ${reqText()}';
+      cardBadge = 'ON THE WAY';
+      cardProgress = 0.65;
+      accent = const Color(0xFF448AFF);
+      accentBg = const Color(0xFF1B2A4A);
+    } else if (arrived) {
+      cardTitle = 'Truck arrived';
+      cardSubtitle = 'Driver: $driverName - ${reqText()}. Confirm when unloaded.';
+      cardBadge = 'ARRIVED';
+      cardProgress = 1.0;
+      cardIcon = Icons.check_circle_outline;
+    }
+
+    // Call is possible when there is a driver number to call.
+    final canCall = driverPhone.isNotEmpty && !isPending;
+    // Restock can be confirmed after arrival (or for the demo convoy).
+    final canRestock = hasRequest ? arrived : !(shipment['isRestocked'] as bool);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -371,8 +409,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 
         const SizedBox(height: 20),
 
-        // Incoming Shipment Tracking Tile (Matching Image 2 frame2)
-        Container(
+        // Incoming Shipment Tracking Tile (Matching Image 2 frame2).
+        // Hidden after the restock is confirmed; a new request brings it back.
+        if (_controller.showTruckCard) Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: const Color(0xFF131A2A),
@@ -393,7 +432,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                           color: accentBg,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(isPending ? Icons.hourglass_top : Icons.local_shipping_outlined, color: accent, size: 20),
+                        child: Icon(cardIcon, color: accent, size: 20),
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -433,7 +472,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: isPending ? null : shipment['progress'] as double,
+                  value: cardProgress,
                   minHeight: 6,
                   backgroundColor: const Color(0xFF1E283D),
                   valueColor: AlwaysStoppedAnimation<Color>(accent),
@@ -452,7 +491,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      onPressed: isPending ? null : () => _callDriver(shipment['driverPhone'] as String),
+                      onPressed: canCall ? () => _callDriver(driverPhone) : null,
                       icon: const Icon(Icons.phone_outlined, color: Colors.white, size: 16),
                       label: const Text('Call Driver', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
@@ -461,14 +500,25 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: shipment['isRestocked'] ? Colors.grey : Colors.white,
+                        backgroundColor: canRestock ? Colors.white : Colors.grey,
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      onPressed: (isPending || shipment['isRestocked']) ? null : () => _controller.confirmRestock(),
+                      onPressed: canRestock
+                          ? () {
+                              _controller.confirmRestock();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Restock confirmed. Stock updated.'),
+                                  backgroundColor: Color(0xFF30D158),
+                                  showCloseIcon: true,
+                                ),
+                              );
+                            }
+                          : null,
                       child: Text(
-                        shipment['isRestocked'] ? 'Restocked' : 'Confirm Restock',
+                        (!hasRequest && (shipment['isRestocked'] as bool)) ? 'Restocked' : 'Confirm Restock',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ),
@@ -881,6 +931,13 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ReliefTruckTrackingScreen()));
                 },
                 child: _buildAccountRow(Icons.local_shipping_outlined, 'Fleet Tracking', 'Live tracking of relief trucks'),
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SupplyAdminDashboardScreen()));
+                },
+                child: _buildAccountRow(Icons.admin_panel_settings_outlined, 'Supply Admin Dashboard', 'Assign trucks to supply requests'),
               ),
               const Divider(color: Color(0xFF1E283D), height: 16),
               GestureDetector(

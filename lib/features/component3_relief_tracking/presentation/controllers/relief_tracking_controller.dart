@@ -48,9 +48,20 @@ class ReliefTrackingController extends ChangeNotifier {
   StreamSubscription<dynamic>? _itemsSub;
   StreamSubscription<dynamic>? _requestsSub;
 
-  /// The camp's latest supply request that the DMC has not completed yet
-  /// (null when there is none). Drives the pending state of the truck card.
-  Map<String, dynamic>? pendingRequest;
+  /// The camp's newest supply request that is not finished yet (null when
+  /// there is none). Its `status` moves pending -> dispatched (truck assigned,
+  /// driver details set) -> arrived (truck reached the camp) -> resolved
+  /// (restock confirmed). It also carries the request's `docId`.
+  /// Drives the truck card on the Supplies page.
+  Map<String, dynamic>? activeRequest;
+
+  /// Whether the truck card is shown on the Supplies page. It disappears
+  /// once the leader confirms the restock, and comes back as PENDING when
+  /// a new supply request is made.
+  bool showTruckCard = true;
+
+  /// Requests whose restock was already confirmed (never shown again).
+  final Set<String> _finishedRequestIds = {};
   bool _itemsSeeded = false;
   final Map<String, int> _orderKeys = {};
 
@@ -100,14 +111,21 @@ class ReliefTrackingController extends ChangeNotifier {
         Map<String, dynamic>? found;
         for (final d in snap.docs) {
           final m = d.data();
+          final status = m['status'];
+          // A leader's own request counts from the start; an automatic
+          // shortage alert only once the admin has put a truck on it.
+          final counts = (status == 'pending' && m['trigger'] == 'request') ||
+              status == 'dispatched' ||
+              status == 'arrived';
           if (m['campId'] == campId &&
-              m['trigger'] == 'request' &&
-              m['status'] == 'pending') {
-            found = m; // newest first
+              counts &&
+              !_finishedRequestIds.contains(d.id)) {
+            found = {...m, 'docId': d.id}; // newest first
             break;
           }
         }
-        pendingRequest = found;
+        activeRequest = found;
+        if (found != null) showTruckCard = true;
         notifyListeners();
       }, onError: (Object e) {
         debugPrint('Supply requests sync error: $e');
@@ -252,10 +270,47 @@ class ReliefTrackingController extends ChangeNotifier {
   };
 
   void confirmRestock() {
+    final req = activeRequest;
+    if (req != null) {
+      _restockFromRequest(req);
+      return;
+    }
+    showTruckCard = false; // demo convoy delivered: hide the card
     incomingShipment['isRestocked'] = true;
     // Boost stock values
     updateStockQuantity('inv_1', 40);
     updateStockQuantity('inv_2', 50);
+    notifyListeners();
+  }
+
+  /// The leader confirms the truck's delivery: the delivered amount is added
+  /// to the matching inventory item and the request is closed.
+  void _restockFromRequest(Map<String, dynamic> req) {
+    final name = (req['itemName'] ?? '').toString().trim().toLowerCase();
+    final itemId = req['itemId']?.toString();
+    final index = inventoryItems.indexWhere(
+      (i) => (itemId != null && i.id == itemId) || i.name.trim().toLowerCase() == name,
+    );
+    if (index != -1) {
+      final item = inventoryItems[index];
+      final delivered = (req['quantityRequested'] as num?)?.toDouble() ??
+          (item.minThreshold * 2);
+      updateStockQuantity(item.id, delivered);
+    }
+    final docId = req['docId']?.toString();
+    if (docId != null) {
+      _finishedRequestIds.add(docId);
+      try {
+        FirestoreService.instance
+            .resolveDmcDispatchRequest(docId)
+            .catchError((Object e) => debugPrint('Restock confirm failed: $e'));
+      } catch (e) {
+        debugPrint('Restock confirm failed: $e');
+      }
+    }
+    // Hide the truck card straight away (the stream confirms it later).
+    activeRequest = null;
+    showTruckCard = false;
     notifyListeners();
   }
 
@@ -512,6 +567,8 @@ class ReliefTrackingController extends ChangeNotifier {
     required String urgency,
     String note = '',
   }) {
+    showTruckCard = true; // a new request starts the process again
+    notifyListeners();
     final docId = '${campId}_req_${DateTime.now().millisecondsSinceEpoch}';
     return FirestoreService.instance.saveDmcDispatchRequest(docId, {
       'campId': campId,

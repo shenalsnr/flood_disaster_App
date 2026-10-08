@@ -61,6 +61,137 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
     }
   }
 
+  /// Bottom sheet shown when a leader taps one of their own messages.
+  Future<void> _showMessageActions(String messageId, String currentText) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFF131A2A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined, color: Colors.white),
+              title: const Text('Edit message', style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(ctx, 'edit'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Color(0xFFFF3B30)),
+              title: const Text('Delete for everyone',
+                  style: TextStyle(color: Color(0xFFFF3B30))),
+              subtitle: const Text('Removed from every leader\'s chat',
+                  style: TextStyle(color: Color(0xFF8E9BAE), fontSize: 11)),
+              onTap: () => Navigator.pop(ctx, 'delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || action == null) return;
+    if (action == 'edit') {
+      await _editMessage(messageId, currentText);
+    } else {
+      await _deleteMessage(messageId);
+    }
+  }
+
+  Future<void> _editMessage(String messageId, String currentText) async {
+    final ctrl = TextEditingController(text: currentText);
+    final newText = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131A2A),
+        title: const Text(
+          'Edit message',
+          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          maxLines: 4,
+          minLines: 1,
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFF0B101D),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFF1E283D)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF8E9BAE))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF5252),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || newText == null || newText.isEmpty || newText == currentText) return;
+    try {
+      await FirestoreService.instance.editLeaderChatMessage(messageId, newText);
+    } catch (e) {
+      _showError('Message not edited: $e');
+    }
+  }
+
+  Future<void> _deleteMessage(String messageId) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131A2A),
+        title: const Text(
+          'Delete for everyone?',
+          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'This message will be removed for all camp leaders.',
+          style: TextStyle(color: Color(0xFF8E9BAE), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF8E9BAE))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF3B30),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await FirestoreService.instance.deleteLeaderChatMessage(messageId);
+    } catch (e) {
+      _showError('Message not deleted: $e');
+    }
+  }
+
+  void _showError(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), backgroundColor: const Color(0xFFFF3B30)),
+    );
+  }
+
   Future<void> _editIdentity() async {
     final c = widget.controller;
     final nameCtrl = TextEditingController(text: c.chatName);
@@ -200,6 +331,14 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
         // Messages
         Expanded(child: _buildMessages()),
 
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            'Tap your own message to edit or delete it',
+            style: TextStyle(color: Color(0xFF5E6D82), fontSize: 10),
+          ),
+        ),
+
         // Input bar
         Container(
           padding: const EdgeInsets.all(12),
@@ -261,6 +400,9 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final d = docs[index].data();
+            final messageId = docs[index].id;
+            final deleted = d['deleted'] == true;
+            final edited = d['edited'] == true;
             final isSelf = d['senderId'] == widget.controller.chatClientId;
             final senderName = (d['senderName'] ?? 'Leader').toString();
             final campName = (d['campName'] ?? '').toString();
@@ -274,6 +416,11 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
                 text: (d['text'] ?? '').toString(),
                 time: _formatTime(d['createdAt']),
                 isSelf: isSelf,
+                deleted: deleted,
+                edited: edited,
+                onTap: (isSelf && !deleted)
+                    ? () => _showMessageActions(messageId, (d['text'] ?? '').toString())
+                    : null,
               ),
             );
           },
@@ -300,10 +447,16 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
     required String text,
     required String time,
     required bool isSelf,
+    bool deleted = false,
+    bool edited = false,
+    VoidCallback? onTap,
   }) {
     return Align(
       alignment: isSelf ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
+      child: GestureDetector(
+        onTap: onTap,
+        onLongPress: onTap,
+        child: Container(
         constraints: const BoxConstraints(maxWidth: 280),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -323,14 +476,28 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
+            if (deleted)
+              const Text(
+                'This message was deleted',
+                style: TextStyle(
+                  color: Color(0xFF7E8B9B),
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              )
+            else
+              Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
             const SizedBox(height: 4),
             Align(
               alignment: Alignment.bottomRight,
-              child: Text(time, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 9)),
+              child: Text(
+                (edited && !deleted) ? 'edited • $time' : time,
+                style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 9),
+              ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -304,6 +304,24 @@ class FirestoreService {
         .snapshots();
   }
 
+  /// Edit the text of a chat message (marks it as edited).
+  Future<void> editLeaderChatMessage(String messageId, String text) async {
+    await _leaderChat.doc(messageId).update({
+      'text': text,
+      'edited': true,
+      'editedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// "Delete for everyone": the text is removed for all leaders and the
+  /// message shows as deleted.
+  Future<void> deleteLeaderChatMessage(String messageId) async {
+    await _leaderChat.doc(messageId).update({
+      'text': '',
+      'deleted': true,
+    });
+  }
+
   /// Mark an existing DMC request as resolved (no-op if it does not exist).
   Future<void> resolveDmcDispatchRequest(String docId) async {
     await _dmcDispatchRequests.doc(docId).update({
