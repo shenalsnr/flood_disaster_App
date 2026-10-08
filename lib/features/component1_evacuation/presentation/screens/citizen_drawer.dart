@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'citizen_profile_screen.dart';
 import 'citizen_settings_screen.dart';
-import '../../../component4_control_center/presentation/screens/sign_in_screen.dart';
+import 'c1_admin_metrics_screen.dart';
+import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 
 class CitizenDrawer extends StatelessWidget {
   const CitizenDrawer({super.key});
@@ -13,7 +14,7 @@ class CitizenDrawer extends StatelessWidget {
       await FirebaseAuth.instance.signOut();
       if (context.mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const SignInScreen()),
+          MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
           (route) => false,
         );
       }
@@ -185,6 +186,21 @@ class CitizenDrawer extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const CitizenSettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              // ── Admin Tools Shortcut (For Presentation) ─────────────────────
+              _DrawerItem(
+                icon: Icons.admin_panel_settings_rounded,
+                title: 'Admin Dashboard',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const C1AdminMetricsScreen(),
                     ),
                   );
                 },

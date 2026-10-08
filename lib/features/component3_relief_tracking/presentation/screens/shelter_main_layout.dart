@@ -50,7 +50,7 @@ class _ShelterMainLayoutState extends State<ShelterMainLayout> {
           BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
           BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: 'Supplies'),
           BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: 'Alerts'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
           BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: 'Team'),
         ],
       ),

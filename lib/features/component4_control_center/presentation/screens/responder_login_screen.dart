@@ -1,5 +1,7 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
@@ -267,8 +269,11 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.email_outlined,
-                        color: Color(0xFFFF6D00), size: 18),
+                    const Icon(
+                      Icons.email_outlined,
+                      color: Color(0xFFFF6D00),
+                      size: 18,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -313,10 +318,15 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     color: Color(0xFF475569),
                     letterSpacing: 6,
                   ),
-                  prefixIcon: const Icon(Icons.pin,
-                      color: Color(0xFFFF6D00), size: 20),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIcon: const Icon(
+                    Icons.pin,
+                    color: Color(0xFFFF6D00),
+                    size: 20,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(color: Color(0xFF1E293B)),
@@ -327,8 +337,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFF6D00),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -351,10 +363,15 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   filled: true,
                   fillColor: const Color(0xFF0F172A),
                   hintText: 'Enter new secure PIN or password',
-                  hintStyle:
-                      const TextStyle(color: Color(0xFF475569), fontSize: 13),
-                  prefixIcon: const Icon(Icons.lock_outline,
-                      color: Color(0xFFFF6D00), size: 20),
+                  hintStyle: const TextStyle(
+                    color: Color(0xFF475569),
+                    fontSize: 13,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: Color(0xFFFF6D00),
+                    size: 20,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscureNewPin
@@ -369,8 +386,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       });
                     },
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(color: Color(0xFF1E293B)),
@@ -381,8 +400,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFF6D00),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -532,10 +553,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFF1E293B),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFF1E293B), width: 1),
                 ),
                 child: Row(
                   children: [
@@ -719,8 +737,11 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                               ),
                             ),
                             SizedBox(width: 8),
-                            Icon(Icons.login_rounded,
-                                size: 18, color: Colors.white),
+                            Icon(
+                              Icons.login_rounded,
+                              size: 18,
+                              color: Colors.white,
+                            ),
                           ],
                         ),
                 ),
