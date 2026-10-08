@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "com.example.flood_disaster"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "30.0.16248370"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

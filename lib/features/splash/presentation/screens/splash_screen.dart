@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../component1_evacuation/presentation/screens/evacuation_map_screen.dart';
+import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 
 /// Animated launch screen for WeSafe.
 ///
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, _, _) => const EvacuationMapScreen(),
+        pageBuilder: (_, _, _) => const OnboardingScreen(),
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
