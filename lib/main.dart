@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
+import 'features/splash/presentation/screens/splash_screen.dart';
+
 void main() {
   runApp(const WeSafeApp());
 }
@@ -12,47 +15,8 @@ class WeSafeApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'WeSafe',
+      theme: AppTheme.dark,
       home: const SplashScreen(),
-    );
-  }
-}
-
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.shield,
-              size: 100,
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              'WeSafe',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            const Text(
-              'Your Community, Your Safety.',
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
