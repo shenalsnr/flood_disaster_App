@@ -1,30 +1,27 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'firebase_options.dart';
 
-// ⚠️ මේ path දෙක ඔබේ folder structure එකට අනුව වෙනස් කරන්න
-import 'features/component4_control_center/presentation/screens/sign_in_screen.dart';
-import 'features/component4_control_center/presentation/screens/alert_dashboard_screen.dart';
+import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
+
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize Firebase in the background so it doesn't freeze the splash screen!
+  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+      .then((_) => debugPrint('Firebase initialized successfully'))
+      .catchError((e) => debugPrint('Firebase init error: $e'));
 
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    debugPrint('Firebase initialized successfully');
-  } catch (e) {
-    debugPrint('Firebase init error: $e');
-  }
-
+  // Force dark status bar icons to match the dark theme
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
+
+  // Removed the blocking connection_test query so the app can boot up immediately!
 
   runApp(const WeSafeApp());
 }
@@ -62,7 +59,7 @@ class WeSafeApp extends StatelessWidget {
             backgroundColor: const Color(0xFF00E676),
             foregroundColor: Colors.black,
             textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape: const RoundedRectangleBorder(
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
           ),

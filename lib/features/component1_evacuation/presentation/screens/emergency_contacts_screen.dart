@@ -47,6 +47,13 @@ class EmergencyContactsScreen extends StatefulWidget {
 
 class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   final CitizenFirestoreService _firestoreService = CitizenFirestoreService();
+  late Stream<QuerySnapshot> _contactsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _contactsStream = _firestoreService.getEmergencyContacts();
+  }
 
   // ── CRUD Operations (Firestore) ──────────────────────────────────────────
 
@@ -84,129 +91,19 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   // ── Dialog helpers ───────────────────────────────────────────────────────
 
   Future<void> _showContactDialog({EmergencyContact? contact}) async {
-    final nameCtrl =
-        TextEditingController(text: contact?.name ?? '');
-    final phoneCtrl =
-        TextEditingController(text: contact?.phone ?? '');
-    final relationCtrl =
-        TextEditingController(text: contact?.relationship ?? '');
-    final formKey = GlobalKey<FormState>();
-
     await showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Dialog header
-                Row(
-                  children: [
-                    const Icon(Icons.contact_phone_rounded,
-                        color: Color(0xFF40C4FF), size: 22),
-                    const SizedBox(width: 10),
-                    Text(
-                      contact == null ? 'Add Contact' : 'Edit Contact',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                _DialogField(
-                  key: const Key('contact_name_field'),
-                  controller: nameCtrl,
-                  label: 'Full Name',
-                  hint: 'e.g. Kamal Perera',
-                  icon: Icons.person_outline_rounded,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Name is required' : null,
-                ),
-                const SizedBox(height: 14),
-
-                _DialogField(
-                  key: const Key('contact_phone_field'),
-                  controller: phoneCtrl,
-                  label: 'Phone Number',
-                  hint: 'e.g. 071-234-5678',
-                  icon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d\-\+\s\(\)]')),
-                  ],
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Phone is required' : null,
-                ),
-                const SizedBox(height: 14),
-
-                _DialogField(
-                  key: const Key('contact_relation_field'),
-                  controller: relationCtrl,
-                  label: 'Relationship',
-                  hint: 'e.g. Father, Mother, Doctor',
-                  icon: Icons.group_outlined,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Relationship is required' : null,
-                ),
-                const SizedBox(height: 24),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Cancel',
-                          style: TextStyle(color: Colors.white38)),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      key: Key(contact == null
-                          ? 'contact_save_btn'
-                          : 'contact_update_btn'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF40C4FF),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          if (contact == null) {
-                            _addContact(
-                                nameCtrl.text, phoneCtrl.text, relationCtrl.text);
-                          } else {
-                            _editContact(contact, nameCtrl.text, phoneCtrl.text,
-                                relationCtrl.text);
-                          }
-                          Navigator.of(ctx).pop();
-                        }
-                      },
-                      child: Text(contact == null ? 'Save' : 'Update'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+      builder: (ctx) => _ContactDialog(
+        contact: contact,
+        onSave: (name, phone, relation) {
+          if (contact == null) {
+            _addContact(name, phone, relation);
+          } else {
+            _editContact(contact, name, phone, relation);
+          }
+        },
       ),
     );
-
-    nameCtrl.dispose();
-    phoneCtrl.dispose();
-    relationCtrl.dispose();
   }
 
   Future<void> _confirmDelete(EmergencyContact contact) async {
@@ -261,7 +158,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: Center(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestoreService.getEmergencyContacts(),
+                stream: _contactsStream,
                 builder: (context, snapshot) {
                   final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
                   return Text(
@@ -299,7 +196,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           // ── Contact List ─────────────────────────────────────────────────
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestoreService.getEmergencyContacts(),
+              stream: _contactsStream,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Center(child: Text('Error loading contacts', style: TextStyle(color: Colors.red)));
@@ -354,6 +251,145 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
 // ---------------------------------------------------------------------------
 // Sub-widgets
 // ---------------------------------------------------------------------------
+
+class _ContactDialog extends StatefulWidget {
+  final EmergencyContact? contact;
+  final void Function(String name, String phone, String relation) onSave;
+
+  const _ContactDialog({this.contact, required this.onSave});
+
+  @override
+  State<_ContactDialog> createState() => _ContactDialogState();
+}
+
+class _ContactDialogState extends State<_ContactDialog> {
+  late TextEditingController nameCtrl;
+  late TextEditingController phoneCtrl;
+  late TextEditingController relationCtrl;
+  final formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    nameCtrl = TextEditingController(text: widget.contact?.name ?? '');
+    phoneCtrl = TextEditingController(text: widget.contact?.phone ?? '');
+    relationCtrl = TextEditingController(text: widget.contact?.relationship ?? '');
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    phoneCtrl.dispose();
+    relationCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Dialog header
+              Row(
+                children: [
+                  const Icon(Icons.contact_phone_rounded,
+                      color: Color(0xFF40C4FF), size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.contact == null ? 'Add Contact' : 'Edit Contact',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              _DialogField(
+                key: const Key('contact_name_field'),
+                controller: nameCtrl,
+                label: 'Full Name',
+                hint: 'e.g. Kamal Perera',
+                icon: Icons.person_outline_rounded,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+              ),
+              const SizedBox(height: 14),
+
+              _DialogField(
+                key: const Key('contact_phone_field'),
+                controller: phoneCtrl,
+                label: 'Phone Number',
+                hint: 'e.g. 071-234-5678',
+                icon: Icons.phone_outlined,
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d\-\+\s\(\)]')),
+                ],
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Phone is required' : null,
+              ),
+              const SizedBox(height: 14),
+
+              _DialogField(
+                key: const Key('contact_relation_field'),
+                controller: relationCtrl,
+                label: 'Relationship',
+                hint: 'e.g. Father, Mother, Doctor',
+                icon: Icons.group_outlined,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Relationship is required' : null,
+              ),
+              const SizedBox(height: 24),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.white38)),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    key: Key(widget.contact == null
+                        ? 'contact_save_btn'
+                        : 'contact_update_btn'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF40C4FF),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        widget.onSave(nameCtrl.text, phoneCtrl.text, relationCtrl.text);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: Text(widget.contact == null ? 'Save' : 'Update'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _ContactTile extends StatelessWidget {
   final EmergencyContact contact;
