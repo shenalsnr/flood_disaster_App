@@ -9,8 +9,6 @@ import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
-import 'package:flood_disaster/features/component4_control_center/presentation/screens/responder_login_screen.dart';
-import 'package:flood_disaster/features/component4_control_center/presentation/controllers/responder_controller.dart';
 import 'citizen_drawer.dart';
 
 // ---------------------------------------------------------------------------
@@ -63,13 +61,15 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
           .doc(FirebaseAuth.instance.currentUser?.uid ?? 'unknown')
           .snapshots(),
       builder: (context, userSnap) {
-        final userData = userSnap.hasData && userSnap.data != null && userSnap.data!.exists
+        final userData =
+            userSnap.hasData && userSnap.data != null && userSnap.data!.exists
             ? (userSnap.data!.data() as Map<String, dynamic>)
             : <String, dynamic>{};
-            
+
         final district = userData['district'] as String? ?? 'Colombo';
         final citizenName = userData['fullName'] as String? ?? 'Citizen User';
-        final citizenZone = userData['alertZone'] as String? ?? 'Colombo Low-Lying Area';
+        final citizenZone =
+            userData['alertZone'] as String? ?? 'Colombo Low-Lying Area';
 
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -103,14 +103,12 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
               drawer: const CitizenDrawer(),
               extendBodyBehindAppBar: true,
               appBar: AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white70),
-                  tooltip: 'Switch Role',
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
-                    );
-                  },
+                leading: Builder(
+                  builder: (ctx) => IconButton(
+                    icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                    tooltip: 'Open Menu',
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
+                  ),
                 ),
                 iconTheme: const IconThemeData(color: Colors.white),
                 backgroundColor: Colors.transparent,
@@ -173,7 +171,10 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                         // ── Logged in Citizen Profile Banner ────────────────────────────
                         Container(
                           margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF0F172A),
                             borderRadius: BorderRadius.circular(12),
@@ -185,10 +186,12 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                  color: const Color(0xFF00E676)
+                                      .withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                                    color: const Color(0xFF00E676)
+                                        .withValues(alpha: 0.4),
                                   ),
                                 ),
                                 child: const Icon(
@@ -223,9 +226,13 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                  color: const Color(0xFF00E676)
+                                      .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text(
