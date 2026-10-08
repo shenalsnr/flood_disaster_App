@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import 'sign_in_screen.dart';
 import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';

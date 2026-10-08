@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CitizenFirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Assuming we have a mock user ID for now since Firebase Auth is not fully wired in the request UI
-  // In a real app, you would use FirebaseAuth.instance.currentUser!.uid
-  final String currentUserId = 'mock_user_123'; 
+  // Uses actual logged-in user ID, falls back to 'mock_user_123' if testing without login
+  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? 'mock_user_123';
 
   // ===========================================================================
   // 3. Citizen Profile & Safe Arrival Status
