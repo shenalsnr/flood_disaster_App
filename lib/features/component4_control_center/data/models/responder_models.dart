@@ -136,3 +136,90 @@ class IncidentReport {
     }
   }
 }
+
+class UserProfile {
+  final String uid;
+  final String fullName;
+  final String email;
+  final String phoneNumber;
+  final String nic;
+  final String floodZone;
+  final String role; // responder, citizen, volunteer, campLeader
+  final String? photoUrl;
+
+  const UserProfile({
+    required this.uid,
+    required this.fullName,
+    required this.email,
+    required this.phoneNumber,
+    required this.nic,
+    required this.floodZone,
+    required this.role,
+    this.photoUrl,
+  });
+
+  Map<String, dynamic> toMap([String? password]) {
+    return {
+      'uid': uid,
+      'fullName': fullName,
+      'email': email.toLowerCase().trim(),
+      'phoneNumber': phoneNumber,
+      'nic': nic,
+      'floodZone': floodZone,
+      'role': role,
+      'password': ?password,
+      'photoUrl': ?photoUrl,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+  }
+
+  factory UserProfile.fromMap(Map<String, dynamic> map, String id) {
+    return UserProfile(
+      uid: id,
+      fullName: map['fullName'] as String? ?? 'User',
+      email: map['email'] as String? ?? id,
+      phoneNumber: map['phoneNumber'] as String? ?? '',
+      nic: map['nic'] as String? ?? '',
+      floodZone: map['floodZone'] as String? ?? '',
+      role: map['role'] as String? ?? 'responder',
+      photoUrl: map['photoUrl'] as String?,
+    );
+  }
+
+  UserProfile copyWith({
+    String? uid,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? nic,
+    String? floodZone,
+    String? role,
+    String? photoUrl,
+  }) {
+    return UserProfile(
+      uid: uid ?? this.uid,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      nic: nic ?? this.nic,
+      floodZone: floodZone ?? this.floodZone,
+      role: role ?? this.role,
+      photoUrl: photoUrl ?? this.photoUrl,
+    );
+  }
+
+  String get roleTitle {
+    switch (role) {
+      case 'citizen':
+        return 'CIVILIAN CITIZEN • EARLY WARNING';
+      case 'volunteer':
+        return 'COMMUNITY VOLUNTEER • GROUND SCOUT';
+      case 'campLeader':
+        return 'RELIEF CAMP LEADER • LOGISTICS';
+      case 'responder':
+      default:
+        return 'DISPATCHER #04 • DMC CONTROL';
+    }
+  }
+}
+

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 
 import 'firebase_options.dart';
+import 'features/component4_control_center/presentation/screens/responder_register_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,7 +66,7 @@ class WeSafeApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const AlertDashboardScreen(),
+      home: const ResponderRegisterScreen(),
     );
   }
 }

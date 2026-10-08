@@ -49,6 +49,12 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
               foregroundColor: Colors.white,
             ),
             onPressed: () {
+              _controller.broadcastZoneAlert(
+                zone: widget.incident.location,
+                title: 'IMMEDIATE EVACUATION: ${widget.incident.title}',
+                message:
+                    'High priority alert issued for all residents within 2 km of ${widget.incident.location}.',
+              );
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
