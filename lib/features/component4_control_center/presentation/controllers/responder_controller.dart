@@ -10,6 +10,31 @@ class ResponderController extends ChangeNotifier {
     _initMockData();
   }
 
+  // Active Logged-in User
+  UserProfile? _currentUser = const UserProfile(
+    uid: 'n.perera@dispatched.gov.lk',
+    fullName: 'Nadeeka Perera',
+    email: 'n.perera@dispatched.gov.lk',
+    phoneNumber: '+94 77 482 1029',
+    nic: '982341092V',
+    floodZone: 'Colombo Sector 4 (Low-Lying Area)',
+    role: 'responder',
+  );
+
+  UserProfile? get currentUser => _currentUser;
+
+  void setCurrentUser(UserProfile user) {
+    _currentUser = user;
+    notifyListeners();
+  }
+
+  void updateCurrentUserPhoto(String photoUrl) {
+    if (_currentUser != null) {
+      _currentUser = _currentUser!.copyWith(photoUrl: photoUrl);
+      notifyListeners();
+    }
+  }
+
   // Active filter for triage list
   String _selectedSeverityFilter = 'ALL';
   String get selectedSeverityFilter => _selectedSeverityFilter;
