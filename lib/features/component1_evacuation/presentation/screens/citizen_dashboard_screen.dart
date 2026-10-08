@@ -9,6 +9,8 @@ import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
+import 'package:flood_disaster/features/component4_control_center/presentation/screens/responder_login_screen.dart';
+import 'package:flood_disaster/features/component4_control_center/presentation/controllers/responder_controller.dart';
 import 'citizen_drawer.dart';
 
 // ---------------------------------------------------------------------------
@@ -61,12 +63,13 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
           .doc(FirebaseAuth.instance.currentUser?.uid ?? 'unknown')
           .snapshots(),
       builder: (context, userSnap) {
-        final district =
-            userSnap.hasData && userSnap.data != null && userSnap.data!.exists
-            ? (userSnap.data!.data() as Map<String, dynamic>)['district']
-                      as String? ??
-                  'Colombo'
-            : 'Colombo';
+        final userData = userSnap.hasData && userSnap.data != null && userSnap.data!.exists
+            ? (userSnap.data!.data() as Map<String, dynamic>)
+            : <String, dynamic>{};
+            
+        final district = userData['district'] as String? ?? 'Colombo';
+        final citizenName = userData['fullName'] as String? ?? 'Citizen User';
+        final citizenZone = userData['alertZone'] as String? ?? 'Colombo Low-Lying Area';
 
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -100,6 +103,15 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
               drawer: const CitizenDrawer(),
               extendBodyBehindAppBar: true,
               appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white70),
+                  tooltip: 'Switch Role',
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
+                    );
+                  },
+                ),
                 iconTheme: const IconThemeData(color: Colors.white),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -158,6 +170,77 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // ── Logged in Citizen Profile Banner ────────────────────────────
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFF1E293B)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.person_rounded,
+                                  color: Color(0xFF00E676),
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      citizenName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Sector: $citizenZone',
+                                      style: const TextStyle(
+                                        color: Color(0xFF38BDF8),
+                                        fontSize: 11,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'ACTIVE',
+                                  style: TextStyle(
+                                    color: Color(0xFF00E676),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
                         if (topAlert != null)
                           ScaleTransition(
                             scale: isPulse
