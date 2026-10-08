@@ -102,7 +102,9 @@ class EvacuationMapScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.greenAccent.withOpacity(0.5)),
+                border: Border.all(
+                  color: Colors.greenAccent.withValues(alpha: 0.5),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -135,7 +137,7 @@ class EvacuationMapScreen extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.greenAccent.withOpacity(0.2),
+                          color: Colors.greenAccent.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(

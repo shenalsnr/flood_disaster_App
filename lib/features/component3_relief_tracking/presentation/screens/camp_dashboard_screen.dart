@@ -143,7 +143,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
         ),
         trailing: Switch(
           value: inStock,
-          activeColor: Colors.greenAccent,
+          activeThumbColor: Colors.greenAccent,
           onChanged: (val) {
             setState(() {
               // Toggles supply state directly
