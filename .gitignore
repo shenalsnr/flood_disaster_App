@@ -45,7 +45,4 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
-# Kotlin / Gradle caches
-.kotlin/
-.kotlin_workspace/
-.gradle/
+#
