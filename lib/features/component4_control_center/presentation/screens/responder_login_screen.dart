@@ -26,7 +26,6 @@ class ResponderLoginScreen extends StatefulWidget {
 }
 
 class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
-  late UserRole _currentRole;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -36,33 +35,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
   @override
   void initState() {
     super.initState();
-    _currentRole = widget.initialRole;
+    // Only fill email if it was passed from the registration screen
     if (widget.initialEmail != null && widget.initialEmail!.isNotEmpty) {
       _emailController.text = widget.initialEmail!;
-      _passwordController.text = 'Secure@1234';
-    } else {
-      _populateRoleCredentials();
-    }
-  }
-
-  void _populateRoleCredentials() {
-    switch (_currentRole) {
-      case UserRole.responder:
-        _emailController.text = 'n.perera@dispatched.gov.lk';
-        _passwordController.text = 'Disaster@2026';
-        break;
-      case UserRole.citizen:
-        _emailController.text = 'chamara.d@gmail.com';
-        _passwordController.text = 'Secure@1234';
-        break;
-      case UserRole.volunteer:
-        _emailController.text = 'volunteer.kapila@dmc.org';
-        _passwordController.text = 'Report@2026';
-        break;
-      case UserRole.campLeader:
-        _emailController.text = 'leader.rohan@relief.gov.lk';
-        _passwordController.text = 'Camp@2026';
-        break;
     }
   }
 
@@ -178,8 +153,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Please enter your email address first to receive the OTP code.',
-          ),
+              'Please enter your email address first to receive the OTP code.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -451,8 +425,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'Invalid OTP code. Please enter the code sent to your email.',
-                        ),
+                            'Invalid OTP code. Please enter the code sent to your email.'),
                         backgroundColor: Colors.redAccent,
                       ),
                     );
@@ -463,8 +436,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'Please enter a valid PIN or password (min 4 characters).',
-                        ),
+                            'Please enter a valid PIN or password (min 4 characters).'),
                         backgroundColor: Colors.redAccent,
                       ),
                     );
@@ -527,7 +499,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Bar with Circular Back Button (Matching Image 1)
+              // Top Bar with Circular Back Button
               Row(
                 children: [
                   GestureDetector(
@@ -575,7 +547,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 22),
 
-              // Top Brand Card (Matching Image 1)
+              // Top Brand Card
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -634,14 +606,14 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 20),
 
-              // Field 1: OFFICIAL WORK EMAIL
+              // Field 1: EMAIL
               _buildFieldLabel('OFFICIAL WORK EMAIL'),
               TextField(
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 keyboardType: TextInputType.emailAddress,
                 decoration: _buildInputDecoration(
-                  hint: 'n.perera@dispatched.gov.lk',
+                  hint: 'Enter your email',
                   icon: Icons.email,
                 ),
               ),
@@ -655,7 +627,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 obscureText: _obscurePassword,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: _buildInputDecoration(
-                  hint: '••••••••••••',
+                  hint: 'Enter your password',
                   icon: Icons.lock,
                   suffix: IconButton(
                     icon: Icon(
@@ -674,7 +646,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 14),
 
-              // Remember credentials & Reset PIN? Row (Matching Image 1)
+              // Remember credentials & Reset PIN? Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -721,7 +693,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 36),
 
-              // Primary Button: AUTHENTICATE & LOGIN ➔ (Matching Image 1)
+              // Primary Button: AUTHENTICATE & LOGIN
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -777,7 +749,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 22),
 
-              // Bottom Link: New officer? Registration (Matching Image 1)
+              // Bottom Link: New officer? Registration
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
