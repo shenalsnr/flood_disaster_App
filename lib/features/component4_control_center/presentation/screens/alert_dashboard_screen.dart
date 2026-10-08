@@ -555,8 +555,8 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
             label: 'Teams',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),

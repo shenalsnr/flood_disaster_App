@@ -3,6 +3,8 @@ import '../controllers/relief_tracking_controller.dart';
 import '../widgets/camp_capacity_card.dart';
 import '../widgets/supply_item_tile.dart';
 import '../widgets/add_stock_dialog.dart';
+import 'relief_truck_tracking_screen.dart';
+import 'equipment_tracking_screen.dart';
 
 class CampDashboardScreen extends StatefulWidget {
   const CampDashboardScreen({super.key});
@@ -111,8 +113,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               label: 'Alerts',
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline_rounded),
-              label: 'Profile',
+              icon: const Icon(Icons.settings),
+              label: 'Settings',
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.people_outline_rounded),
@@ -637,6 +639,20 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 'Role & Permissions',
                 'Relief Team Lead',
                 badgeText: 'VERIFIED',
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ReliefTruckTrackingScreen()));
+                },
+                child: _buildAccountRow(Icons.local_shipping_outlined, 'Fleet Tracking', 'Live tracking of relief trucks'),
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EquipmentTrackingScreen()));
+                },
+                child: _buildAccountRow(Icons.handyman_outlined, 'Equipment Tracking', 'Manage pumps, generators, etc.'),
               ),
             ],
           ),

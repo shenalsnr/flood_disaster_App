@@ -1,11 +1,62 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/shelter_theme.dart';
+import '../../domain/services/shelter_relief_service.dart';
+import '../../data/models/chat_message_model.dart';
 
-class TeamChatScreen extends StatelessWidget {
+class TeamChatScreen extends StatefulWidget {
   const TeamChatScreen({super.key});
 
   @override
+  State<TeamChatScreen> createState() => _TeamChatScreenState();
+}
+
+class _TeamChatScreenState extends State<TeamChatScreen> {
+  final ShelterReliefService _service = ShelterReliefService.instance;
+  final TextEditingController _msgCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _service.addListener(_onUpdate);
+  }
+  
+  @override
+  void dispose() {
+    _service.removeListener(_onUpdate);
+    _msgCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onUpdate() {
+    if (mounted) setState(() {});
+  }
+
+  void _sendMessage() {
+    final text = _msgCtrl.text.trim();
+    if (text.isEmpty) return;
+
+    final now = DateTime.now();
+    final timeStr = '${now.hour}:${now.minute.toString().padLeft(2, '0')}';
+
+    _service.addChatMessage(
+      ChatMessageModel(
+        id: now.millisecondsSinceEpoch.toString(),
+        senderName: 'You',
+        senderCampId: _service.selectedShelterId ?? 'myCamp',
+        text: text,
+        timestamp: timeStr,
+        isSelf: true,
+        status: MessageStatus.sent,
+      ),
+    );
+    
+    _msgCtrl.clear();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final messages = _service.chatMessages;
+
     return Scaffold(
       backgroundColor: ShelterTheme.backgroundDeepNavy,
       appBar: AppBar(
@@ -22,7 +73,7 @@ class TeamChatScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text('Community Chat', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-            Text('12 online - Kolonnawa Zone 04', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
+            Text('12 online - Inter-Camp Comms', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
           ],
         ),
         actions: [
@@ -44,7 +95,7 @@ class TeamChatScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text('PINNED', style: TextStyle(color: ShelterTheme.primaryActionOrange, fontSize: 10, fontWeight: FontWeight.bold)),
-                      Text('Water distribution at 3 PM — Gate B', style: TextStyle(color: Colors.white, fontSize: 12)),
+                      Text('Coordination channel for Camp Leaders only.', style: TextStyle(color: Colors.white, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -53,23 +104,22 @@ class TeamChatScreen extends StatelessWidget {
           ),
           
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              children: [
-                const Center(child: Text('TODAY', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold))),
-                const SizedBox(height: 16),
-                _buildChatBubble('Nadeesha1', 'Water levels rising near Gate B. We need sandbags urgently.', '12:41', false, 'N'),
-                const SizedBox(height: 16),
-                _buildChatBubble('Priyala', 'Convoy 3 is 10 mins out with water + formula. Hang tight.', '12:42', false, 'P'),
-                const SizedBox(height: 16),
-                _buildSystemMessage('Dr. Rohan Silva joined the message'),
-                const SizedBox(height: 16),
-                _buildChatBubble('You', 'Copy. Redirecting volunteers to Gate B now. Keep me posted on the ETA.', '12:44', true, null),
-                const SizedBox(height: 16),
-                _buildChatBubble('Nadeesha1', 'Can DMC expedite this one?', '12:47', false, 'N'),
-                const SizedBox(height: 16),
-                _buildChatBubble('You', 'Escalating to DMC now. Dispatch PMIL0-042 is in.', '12:50', true, null),
-              ],
+              itemCount: messages.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Center(child: Text('TODAY', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold))),
+                  );
+                }
+                final msg = messages[index - 1];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildChatBubble(msg.senderName, msg.text, msg.timestamp, msg.isSelf, msg.avatarInitials),
+                );
+              },
             ),
           ),
           
@@ -94,13 +144,15 @@ class TeamChatScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(color: ShelterTheme.surfaceLightNavy),
                     ),
-                    child: const TextField(
-                      style: TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
+                    child: TextField(
+                      controller: _msgCtrl,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
                         hintText: 'Message the team...',
                         hintStyle: TextStyle(color: ShelterTheme.textMuted),
                         border: InputBorder.none,
                       ),
+                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                 ),
@@ -109,26 +161,13 @@ class TeamChatScreen extends StatelessWidget {
                   backgroundColor: ShelterTheme.primaryActionOrange,
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white, size: 18),
-                    onPressed: () {},
+                    onPressed: _sendMessage,
                   ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSystemMessage(String text) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: ShelterTheme.surfaceDarkNavy,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(text, style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 10)),
       ),
     );
   }
@@ -142,7 +181,7 @@ class TeamChatScreen extends StatelessWidget {
           CircleAvatar(
             radius: 16,
             backgroundColor: ShelterTheme.surfaceLightNavy,
-            child: Text(avatar ?? '', style: const TextStyle(color: Colors.white, fontSize: 12)),
+            child: Text(avatar ?? sender[0].toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 12)),
           ),
           const SizedBox(width: 8),
         ],
@@ -187,7 +226,7 @@ class TeamChatScreen extends StatelessWidget {
             ],
           ),
         ),
-        if (isMe) const SizedBox(width: 24), // Spacer for self messages so they don't touch the edge
+        if (isMe) const SizedBox(width: 24),
       ],
     );
   }
