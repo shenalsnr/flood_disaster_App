@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../data/services/auth_firebase_service.dart';
+
 import '../controllers/responder_controller.dart';
 import 'sign_in_screen.dart';
 import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
@@ -48,7 +49,10 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
         backgroundColor: const Color(0xFF0B132B),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
@@ -108,7 +112,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                                   : Colors.grey,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: const Color(0xFF070B14), width: 2),
+                                color: const Color(0xFF070B14),
+                                width: 2,
+                              ),
                             ),
                           ),
                         ),
@@ -204,6 +210,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                         color: Color(0xFF94A3B8),
                         fontSize: 11,
                       ),
+                    const Text(
+                      'Sri Lanka Disaster Management Centre (DMC)',
+                      style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
                     ),
                   ],
                 ),
@@ -294,8 +303,10 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
 
               // Duty Status Card
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(12),
@@ -311,9 +322,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: isOnDuty
-                            ? const Color(0xFF00E676)
-                            : Colors.grey,
+                        color: isOnDuty ? const Color(0xFF00E676) : Colors.grey,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -338,7 +347,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                           const Text(
                             'Receiving active emergency incident stream',
                             style: TextStyle(
-                                color: Color(0xFF64748B), fontSize: 11),
+                              color: Color(0xFF64748B),
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
@@ -441,7 +452,8 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                              builder: (_) => const CitizenDashboardScreen()),
+                            builder: (_) => const CitizenDashboardScreen(),
+                          ),
                         );
                       },
                     ),
@@ -454,7 +466,8 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                              builder: (_) => const QuickHazardScreen()),
+                            builder: (_) => const QuickHazardScreen(),
+                          ),
                         );
                       },
                     ),
@@ -467,7 +480,8 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                              builder: (_) => const CampDashboardScreen()),
+                            builder: (_) => const CampDashboardScreen(),
+                          ),
                         );
                       },
                     ),
@@ -498,15 +512,21 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   children: [
                     SwitchListTile(
                       dense: true,
-                      title: const Text('Audible Emergency Siren',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600)),
+                      title: const Text(
+                        'Audible Emergency Siren',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       subtitle: const Text(
-                          'Play critical frequency tone on Level 4 floods',
-                          style: TextStyle(
-                              color: Color(0xFF64748B), fontSize: 11)),
+                        'Play critical frequency tone on Level 4 floods',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 11,
+                        ),
+                      ),
                       value: _audioSirenAlerts,
                       activeThumbColor: const Color(0xFFFF6D00),
                       onChanged: (v) => setState(() => _audioSirenAlerts = v),
@@ -514,15 +534,21 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                     const Divider(color: Color(0xFF1E293B), height: 1),
                     SwitchListTile(
                       dense: true,
-                      title: const Text('Offline GIS Tile Caching (10km)',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600)),
+                      title: const Text(
+                        'Offline GIS Tile Caching (10km)',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       subtitle: const Text(
-                          'Pre-cached offline maps for cellular blackouts',
-                          style: TextStyle(
-                              color: Color(0xFF64748B), fontSize: 11)),
+                        'Pre-cached offline maps for cellular blackouts',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 11,
+                        ),
+                      ),
                       value: _offlineCaching,
                       activeThumbColor: const Color(0xFF00E676),
                       onChanged: (v) => setState(() => _offlineCaching = v),
@@ -632,14 +658,20 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       title: Text(
         title,
         style: const TextStyle(
-            color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       subtitle: Text(
         subtitle,
         style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
       ),
-      trailing:
-          const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white38),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 14,
+        color: Colors.white38,
+      ),
       onTap: onTap,
     );
   }

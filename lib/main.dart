@@ -9,8 +9,9 @@ import 'features/component4_control_center/presentation/screens/responder_regist
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize Firebase in the background so it doesn't freeze the splash screen!
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => debugPrint('Firebase initialized successfully'))
       .catchError((e) => debugPrint('Firebase init error: $e'));
 
@@ -34,7 +35,7 @@ class WeSafeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'WeSafe — Flood Early Warning',
+      title: 'WeSafe — Flood Relief & Early Warning',
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0A0A0A),
@@ -66,7 +67,7 @@ class WeSafeApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const ResponderRegisterScreen(),
+      home: const CitizenDashboardScreen(),
     );
   }
 }
