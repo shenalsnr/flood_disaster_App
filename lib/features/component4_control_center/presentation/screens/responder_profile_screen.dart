@@ -210,10 +210,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                         color: Color(0xFF94A3B8),
                         fontSize: 11,
                       ),
-                    const Text(
-                      'Sri Lanka Disaster Management Centre (DMC)',
-                      style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
-                    ),
+                    )
                   ],
                 ),
               ),

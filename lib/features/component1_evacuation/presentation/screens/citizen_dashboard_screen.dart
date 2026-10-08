@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+
+import '../../models/warning_alert.dart';
 
 import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
-import 'package:flood_disaster/features/component4_control_center/presentation/screens/responder_login_screen.dart';
-import 'package:flood_disaster/features/component4_control_center/presentation/controllers/responder_controller.dart';
 import 'citizen_drawer.dart';
 
 // ---------------------------------------------------------------------------
@@ -23,12 +26,7 @@ class CitizenDashboardScreen extends StatefulWidget {
 
 class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
     with SingleTickerProviderStateMixin {
-  // --- Mock alert data ---
-  final String _alertLevel = 'CRITICAL';
-  final String _alertTitle = 'Critical Flood Warning — Sector 4';
-  final String _alertBody =
-      'River Kalu Ganga has exceeded danger level. Immediate evacuation required for low-lying areas.';
-  final String _alertTime = 'Issued: 22:01 LKT';
+  static const _severityRank = {'Watch': 0, 'Warning': 1, 'Critical': 2};
 
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -57,260 +55,344 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF070B14), // Deep rich black/navy
-      drawer: const CitizenDrawer(),
-      extendBodyBehindAppBar: true, // Let background bleed into app bar
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white70),
-          tooltip: 'Switch Role',
-          onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
-            );
-          },
-        ),
-        backgroundColor: const Color(
-          0xFF060F1E,
-        ), // Slightly darker navy for AppBar
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Row(
-          children: [
-            const Icon(
-              Icons.shield_rounded,
-              color: Color(0xFF00E676),
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            RichText(
-              text: const TextSpan(
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5),
-                children: [
-                  TextSpan(
-                    text: 'We',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  TextSpan(
-                    text: 'Safe',
-                    style: TextStyle(color: Color(0xFF00E676)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Center(child: _AlertLevelBadge(level: _alertLevel)),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Logged in Citizen Profile Banner ────────────────────────────
-            Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1E293B)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF00E676).withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.person_rounded,
-                      color: Color(0xFF00E676),
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ResponderController().currentUser?.fullName ??
-                              'Chamara Dissanayake',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Sector: ${ResponderController().currentUser?.floodZone ?? 'Colombo Low-Lying Area'}',
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 11,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'ACTIVE',
-                      style: TextStyle(
-                        color: Color(0xFF00E676),
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid ?? 'unknown')
+          .snapshots(),
+      builder: (context, userSnap) {
+        final userData =
+            userSnap.hasData && userSnap.data != null && userSnap.data!.exists
+            ? (userSnap.data!.data() as Map<String, dynamic>)
+            : <String, dynamic>{};
 
-            // ── Critical Alert Card ──────────────────────────────────────────
-            ScaleTransition(
-              scale: _pulseAnimation,
-              child: _CriticalAlertCard(
-                title: _alertTitle,
-                body: _alertBody,
-                time: _alertTime,
-              ),
-            ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(-0.8, -0.6),
-            radius: 1.5,
-            colors: [
-              Color(0xFF112240), // Subtle highlight glow
-              Color(0xFF070B14), // Deep background
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Critical Alert Card ──────────────────────────────────────────
-                ScaleTransition(
-                  scale: _pulseAnimation,
-                  child: _PremiumCriticalAlertCard(
-                    title: _alertTitle,
-                    body: _alertBody,
-                    time: _alertTime,
+        final district = userData['district'] as String? ?? 'Colombo';
+        final citizenName = userData['fullName'] as String? ?? 'Citizen User';
+        final citizenZone =
+            userData['alertZone'] as String? ?? 'Colombo Low-Lying Area';
+
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('warnings')
+              .where('district', isEqualTo: district)
+              .snapshots(),
+          builder: (context, warningsSnap) {
+            WarningAlert? topAlert;
+            List<WarningAlert> allAlerts = [];
+
+            if (warningsSnap.hasData && warningsSnap.data!.docs.isNotEmpty) {
+              allAlerts = warningsSnap.data!.docs
+                  .map((d) => WarningAlert.fromDoc(d))
+                  .toList();
+
+              // Only run reduce if list is not empty, which we know it isn't
+              topAlert = allAlerts.reduce(
+                (a, b) =>
+                    (_severityRank[b.severity] ?? 0) >
+                        (_severityRank[a.severity] ?? 0)
+                    ? b
+                    : a,
+              );
+            }
+
+            final alertLevel = topAlert?.severity.toUpperCase() ?? 'SAFE';
+            final isPulse = topAlert != null;
+
+            return Scaffold(
+              backgroundColor: const Color(0xFF070B14),
+              drawer: const CitizenDrawer(),
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                leading: Builder(
+                  builder: (ctx) => IconButton(
+                    icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                    tooltip: 'Open Menu',
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
                   ),
                 ),
-
-                const SizedBox(height: 36),
-
-                // ── Section Header ───────────────────────────────────────────────
-                Row(
+                iconTheme: const IconThemeData(color: Colors.white),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                title: Row(
                   children: [
-                    Container(
-                      width: 4,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00E676),
-                        borderRadius: BorderRadius.circular(2),
-                        boxShadow: const [
-                          BoxShadow(color: Color(0x6600E676), blurRadius: 8),
+                    const Icon(
+                      Icons.shield_rounded,
+                      color: Color(0xFF00E676),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'We',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          TextSpan(
+                            text: 'Safe',
+                            style: TextStyle(color: Color(0xFF00E676)),
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Emergency Actions',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 20),
-
-                // ── Primary Action: Safe Route ──────────────────────────────────
-                _PremiumActionCard(
-                  onTap: () => _push(const SafeRoutingMapScreen()),
-                  icon: Icons.alt_route_rounded,
-                  title: 'Safe Route',
-                  subtitle: 'Fastest path to high ground',
-                  color: const Color(0xFFFFD740),
-                  isPrimary: true,
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Center(child: _AlertLevelBadge(level: alertLevel)),
+                  ),
+                ],
+              ),
+              body: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(-0.8, -0.6),
+                    radius: 1.5,
+                    colors: [Color(0xFF112240), Color(0xFF070B14)],
+                  ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // ── Secondary Actions (Row 1) ───────────────────────────────────
-                Row(
-                  children: [
-                    Expanded(
-                      child: _PremiumGridCard(
-                        onTap: () => _push(const EvacuationChecklistScreen()),
-                        icon: Icons.checklist_rounded,
-                        label: 'Go-Bag\nChecklist',
-                        color: const Color(0xFF00E676),
-                      ),
+                child: SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _PremiumGridCard(
-                        onTap: () => _push(const EmergencyContactsScreen()),
-                        icon: Icons.contact_phone_rounded,
-                        label: 'Emergency\nContacts',
-                        color: const Color(0xFF40C4FF),
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Logged in Citizen Profile Banner ────────────────────────────
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFF1E293B)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00E676)
+                                      .withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFF00E676)
+                                        .withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.person_rounded,
+                                  color: Color(0xFF00E676),
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      citizenName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Sector: $citizenZone',
+                                      style: const TextStyle(
+                                        color: Color(0xFF38BDF8),
+                                        fontSize: 11,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00E676)
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'ACTIVE',
+                                  style: TextStyle(
+                                    color: Color(0xFF00E676),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        if (topAlert != null)
+                          ScaleTransition(
+                            scale: isPulse
+                                ? _pulseAnimation
+                                : const AlwaysStoppedAnimation(1.0),
+                            child: _PremiumCriticalAlertCard(
+                              title:
+                                  '${topAlert.severity} ${topAlert.hazardType} — ${topAlert.locationZone}',
+                              body: topAlert.description,
+                              time:
+                                  'Issued: ${DateFormat('dd MMM, HH:mm').format(topAlert.issuedTimestamp)}',
+                              waterLevel: topAlert.waterLevelMeters,
+                              rainfall: topAlert.rainfallMm,
+                              severity: topAlert.severity,
+                            ),
+                          )
+                        else
+                          _AllClearCard(district: district),
+
+                        // ── Multiple active warnings list ────────────────────
+                        if (allAlerts.length > 1) ...[
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFF6D00),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                '${allAlerts.length} Active Warnings',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          ...allAlerts
+                              .skip(1)
+                              .map((a) => _MiniAlertTile(alert: a)),
+                        ],
+
+                        const SizedBox(height: 36),
+
+                        // ── Section Header ───────────────────────────────────────────────
+                        Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF00E676),
+                                borderRadius: BorderRadius.circular(2),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x6600E676),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Emergency Actions',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        // ── Primary Action: Safe Route ──────────────────────────────────
+                        _PremiumActionCard(
+                          onTap: () => _push(const SafeRoutingMapScreen()),
+                          icon: Icons.alt_route_rounded,
+                          title: 'Safe Route',
+                          subtitle: 'Fastest path to high ground',
+                          color: const Color(0xFFFFD740),
+                          isPrimary: true,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ── Secondary Actions (Row 1) ───────────────────────────────────
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _PremiumGridCard(
+                                onTap: () =>
+                                    _push(const EvacuationChecklistScreen()),
+                                icon: Icons.checklist_rounded,
+                                label: 'Go-Bag\nChecklist',
+                                color: const Color(0xFF00E676),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _PremiumGridCard(
+                                onTap: () =>
+                                    _push(const EmergencyContactsScreen()),
+                                icon: Icons.contact_phone_rounded,
+                                label: 'Emergency\nContacts',
+                                color: const Color(0xFF40C4FF),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ── Secondary Action (Full Width) ───────────────────────────────
+                        _PremiumActionCard(
+                          onTap: () => _push(const SafeArrivalCheckInScreen()),
+                          icon: Icons.verified_user_rounded,
+                          title: 'Safe Arrival Check-In',
+                          subtitle: 'Mark yourself and family as safe',
+                          color: const Color(0xFFFF6D00),
+                          isPrimary: false,
+                        ),
+
+                        const SizedBox(height: 36),
+
+                        // ── Status Footer ────────────────────────────────────────────────
+                        const _PremiumStatusFooter(),
+                        const SizedBox(height: 20),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // ── Secondary Action (Full Width) ───────────────────────────────
-                _PremiumActionCard(
-                  onTap: () => _push(const SafeArrivalCheckInScreen()),
-                  icon: Icons.verified_user_rounded,
-                  title: 'Safe Arrival Check-In',
-                  subtitle: 'Mark yourself and family as safe',
-                  color: const Color(0xFFFF6D00),
-                  isPrimary: false,
-                ),
-
-                const SizedBox(height: 36),
-
-                // ── Status Footer ────────────────────────────────────────────────
-                const _PremiumStatusFooter(),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -406,7 +488,9 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
                 decoration: BoxDecoration(
                   color: widget.color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: widget.color.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: widget.color.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Icon(widget.icon, color: widget.color, size: 28),
               ),
@@ -434,7 +518,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -530,7 +614,9 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
                 decoration: BoxDecoration(
                   color: widget.color.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
-                  border: Border.all(color: widget.color.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: widget.color.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Icon(widget.icon, color: widget.color, size: 24),
               ),
@@ -558,24 +644,36 @@ class _PremiumCriticalAlertCard extends StatelessWidget {
   final String title;
   final String body;
   final String time;
+  final double waterLevel;
+  final double rainfall;
+  final String severity;
 
   const _PremiumCriticalAlertCard({
     required this.title,
     required this.body,
     required this.time,
+    required this.waterLevel,
+    required this.rainfall,
+    required this.severity,
   });
+
+  static const _gradients = {
+    'Watch': [Color(0xFF7B5800), Color(0xFF4A3500)],
+    'Warning': [Color(0xFFBF3600), Color(0xFF7A2000)],
+    'Critical': [Color(0xFFD32F2F), Color(0xFF9B0000)],
+  };
 
   @override
   Widget build(BuildContext context) {
+    final gradColors =
+        _gradients[severity] ??
+        [const Color(0xFFD32F2F), const Color(0xFF9B0000)];
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFFD32F2F),
-            const Color(0xFF9B0000).withValues(alpha: 0.8),
-          ],
+          colors: [gradColors[0], gradColors[1].withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -638,16 +736,37 @@ class _PremiumCriticalAlertCard extends StatelessWidget {
           Text(
             body,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white.withValues(alpha: 0.85),
               fontSize: 14,
               height: 1.5,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          // Live metrics row
           Row(
             children: [
-              Icon(Icons.access_time_rounded, color: Colors.white.withValues(alpha: 0.6), size: 16),
+              _MetricPill(
+                icon: Icons.water_rounded,
+                label: '${waterLevel.toStringAsFixed(2)} m',
+                hint: 'Water Level',
+              ),
+              const SizedBox(width: 10),
+              _MetricPill(
+                icon: Icons.grain_rounded,
+                label: '${rainfall.toStringAsFixed(1)} mm',
+                hint: 'Rainfall',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(
+                Icons.access_time_rounded,
+                color: Colors.white.withValues(alpha: 0.6),
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Text(
                 time,
@@ -658,6 +777,203 @@ class _PremiumCriticalAlertCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String hint;
+  const _MetricPill({
+    required this.icon,
+    required this.label,
+    required this.hint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white70, size: 14),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                hint,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AllClearCard extends StatelessWidget {
+  final String district;
+  const _AllClearCard({required this.district});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF003822), Color(0xFF001F13)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF00E676).withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00E676).withValues(alpha: 0.08),
+            blurRadius: 20,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.shield_rounded,
+              color: Color(0xFF00E676),
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'All Clear',
+                  style: TextStyle(
+                    color: Color(0xFF00E676),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'No active warnings in $district.',
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniAlertTile extends StatelessWidget {
+  final WarningAlert alert;
+  const _MiniAlertTile({required this.alert});
+
+  static const _colors = {
+    'Watch': Color(0xFFFFC107),
+    'Warning': Color(0xFFFF6D00),
+    'Critical': Color(0xFFFF1744),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _colors[alert.severity] ?? const Color(0xFFFFC107);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D1B2A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.warning_amber_rounded, color: color, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${alert.hazardType} — ${alert.locationZone}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  '${alert.waterLevelMeters.toStringAsFixed(2)} m  •  ${alert.rainfallMm.toStringAsFixed(1)} mm',
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              alert.severity,
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
       ),
@@ -699,9 +1015,7 @@ class _BlinkingDotState extends State<_BlinkingDot>
         decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(color: Colors.white, blurRadius: 6),
-          ],
+          boxShadow: [BoxShadow(color: Colors.white, blurRadius: 6)],
         ),
       ),
     );
@@ -715,20 +1029,29 @@ class _AlertLevelBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSafe = level == 'SAFE';
+    final bgColor = isSafe
+        ? const Color(0xFF00E676).withValues(alpha: 0.15)
+        : const Color(0xFFB71C1C).withValues(alpha: 0.8);
+    final borderColor = isSafe
+        ? const Color(0xFF00E676).withValues(alpha: 0.4)
+        : Colors.redAccent.shade100.withValues(alpha: 0.5);
+    final shadowColor = isSafe
+        ? const Color(0x3300E676)
+        : const Color(0x4DB71C1C);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFB71C1C).withValues(alpha: 0.8),
+        color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.redAccent.shade100.withValues(alpha: 0.5), width: 1.5),
-        boxShadow: const [
-          BoxShadow(color: Color(0x4DB71C1C), blurRadius: 8),
-        ],
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 8)],
       ),
       child: Text(
         level,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: isSafe ? const Color(0xFF00E676) : Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w900,
           letterSpacing: 1.5,
@@ -755,7 +1078,11 @@ class _PremiumStatusFooter extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.display_settings_rounded, color: Colors.white38, size: 18),
+              const Icon(
+                Icons.display_settings_rounded,
+                color: Colors.white38,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               const Text(
                 'SYSTEM STATUS',
@@ -769,11 +1096,23 @@ class _PremiumStatusFooter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildStatusRow(Icons.cell_tower, 'Network: Online', const Color(0xFF00E676)),
+          _buildStatusRow(
+            Icons.cell_tower,
+            'Network: Online',
+            const Color(0xFF00E676),
+          ),
           const SizedBox(height: 14),
-          _buildStatusRow(Icons.offline_pin_rounded, 'Map cached (10km)', const Color(0xFF40C4FF)),
+          _buildStatusRow(
+            Icons.offline_pin_rounded,
+            'Map cached (10km)',
+            const Color(0xFF40C4FF),
+          ),
           const SizedBox(height: 14),
-          _buildStatusRow(Icons.battery_4_bar_rounded, 'Battery-save ON', const Color(0xFFFFD740)),
+          _buildStatusRow(
+            Icons.battery_4_bar_rounded,
+            'Battery-save ON',
+            const Color(0xFFFFD740),
+          ),
         ],
       ),
     );
