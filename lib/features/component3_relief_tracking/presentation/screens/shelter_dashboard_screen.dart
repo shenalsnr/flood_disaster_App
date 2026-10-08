@@ -3,11 +3,11 @@ import '../../../../core/theme/shelter_theme.dart';
 import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/ration_item_model.dart';
 import '../../data/models/shelter_model.dart';
-import 'manage_shelters_screen.dart';
 
 /// Shelter Dashboard Screen - Primary interface for Camp Relief Leads
 class ShelterDashboardScreen extends StatefulWidget {
-  const ShelterDashboardScreen({super.key});
+  final bool isEmbedded;
+  const ShelterDashboardScreen({super.key, this.isEmbedded = false});
 
   @override
   State<ShelterDashboardScreen> createState() => _ShelterDashboardScreenState();
@@ -19,15 +19,14 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-populate a dummy shelter if none exists (for demonstration)
     if (_service.shelters.isEmpty) {
       _service.addShelter(
         const ShelterModel(
           id: 's1',
           name: 'Main District Relief Camp',
           location: 'Colombo 07',
-          totalBeds: 500,
-          occupiedBeds: 350,
+          totalBeds: 300,
+          occupiedBeds: 275,
           isClosed: false,
         ),
       );
@@ -42,13 +41,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
   }
 
   void _onServiceUpdate() {
-    setState(() {}); // Rebuild UI on state changes
-  }
-
-  Color _getOccupancyColor(double ratio) {
-    if (ratio >= 0.90) return ShelterTheme.statusCriticalRed;
-    if (ratio >= 0.75) return ShelterTheme.statusWarningYellow;
-    return ShelterTheme.statusSafeGreen;
+    setState(() {});
   }
 
   @override
@@ -59,194 +52,193 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
         : null;
 
     final items = activeShelter != null ? _service.getItemsByShelter(activeShelter.id) : <RationItemModel>[];
-    
-    // Filter shortages (low or depleted)
     final shortages = items.where((i) => i.status != SupplyStatus.adequate).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Column(
-          children: [
-            Text('Dr. Rohan Silva', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text('Camp Relief Lead', style: TextStyle(fontSize: 12, color: ShelterTheme.textMuted)),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Manage Shelters',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManageSheltersScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: activeShelter == null
-          ? const Center(child: Text("No shelters available. Please add one.", style: TextStyle(color: ShelterTheme.textHighContrastWhite)))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ACTIVE SHELTER CARD
-                  _buildShelterCapacityCard(activeShelter),
-                  const SizedBox(height: 24),
-                  
-                  // RAPID HEADCOUNT
-                  const Text('Rapid Headcount', style: TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  _buildRapidHeadcount(activeShelter.isClosed),
-                  const SizedBox(height: 24),
-                  
-                  // SHORTAGE SUMMARY
-                  const Text('Supply Shortages', style: TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  _buildShortageSummary(shortages),
-                ],
+      backgroundColor: ShelterTheme.backgroundDeepNavy,
+      body: SafeArea(
+        child: activeShelter == null
+            ? const Center(child: Text("No shelters available.", style: TextStyle(color: Colors.white)))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // TOP PROFILE ROW
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          backgroundColor: ShelterTheme.surfaceLightNavy,
+                          child: Text('RS', style: TextStyle(color: Colors.white)),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Dr. Rohan Silva', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                              Text('RELIEF TEAM LEAD | RM', style: TextStyle(fontSize: 10, color: ShelterTheme.textMuted)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            border: Border.all(color: ShelterTheme.statusSafeGreen),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text('+ YES (SYNC OK)', style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+
+                    // SHELTER CAPACITY OVERVIEW
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: ShelterTheme.surfaceDarkNavy,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('SHELTER CAPACITY OVERVIEW', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: '${activeShelter.occupiedBeds}/${activeShelter.totalBeds}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+                                TextSpan(text: ' Beds Occupied - ${activeShelter.occupancyPercentage}%', style: const TextStyle(fontSize: 14, color: ShelterTheme.textMuted)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          LinearProgressIndicator(
+                            value: activeShelter.occupancyRatio,
+                            backgroundColor: ShelterTheme.surfaceLightNavy,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              activeShelter.occupancyRatio >= 0.9 ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
+                            ),
+                            minHeight: 8,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          const SizedBox(height: 16),
+                          if (activeShelter.occupancyRatio >= 0.9)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: ShelterTheme.statusCriticalRed,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text('! CRITICAL CAPACITY', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // RAPID HEADCOUNT
+                    const Text('RAPID HEADCOUNT', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: _buildHeadcountBtn('+1', 1)),
+                        const SizedBox(width: 8),
+                        Expanded(child: _buildHeadcountBtn('+5', 5)),
+                        const SizedBox(width: 8),
+                        Expanded(child: _buildHeadcountBtn('+10', 10)),
+                        const SizedBox(width: 8),
+                        Expanded(child: _buildHeadcountBtn('-1', -1)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () => _service.toggleShelterStatus(activeShelter.id),
+                      icon: Icon(activeShelter.isClosed ? Icons.lock_open : Icons.warning_amber, color: ShelterTheme.statusCriticalRed),
+                      label: Text(activeShelter.isClosed ? 'OPEN SHELTER' : 'CLOSE SHELTER', style: const TextStyle(color: ShelterTheme.statusCriticalRed, fontWeight: FontWeight.bold)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: ShelterTheme.statusCriticalRed),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // SHORTAGE ALERTS
+                    const Text('SHORTAGE ALERTS', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    ...shortages.map((item) {
+                      final isDepleted = item.status == SupplyStatus.depleted;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: ShelterTheme.surfaceDarkNavy,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                isDepleted ? 'EMPTY' : 'LOW STOCK',
+                                style: TextStyle(
+                                  color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
               ),
-            ),
-      bottomNavigationBar: BottomNavigationBar(
+      ),
+      bottomNavigationBar: widget.isEmbedded ? null : BottomNavigationBar(
+        backgroundColor: ShelterTheme.surfaceDarkNavy,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: ShelterTheme.primaryActionOrange,
+        unselectedItemColor: ShelterTheme.textMuted,
+        showUnselectedLabels: true,
+        selectedFontSize: 10,
+        unselectedFontSize: 10,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'SUPPLIES'),
-          BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'URGENT DISPATCH'),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: 'Supplies'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: 'Alerts'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: 'Team'),
         ],
+        currentIndex: 0,
         onTap: (index) {
-          // Navigation logic for other features
+          // Navigation stub
         },
       ),
     );
   }
 
-  Widget _buildShelterCapacityCard(ShelterModel shelter) {
-    final ratio = shelter.occupancyRatio;
-    final color = _getOccupancyColor(ratio);
-    
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    shelter.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ShelterTheme.textHighContrastWhite),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: shelter.isClosed ? ShelterTheme.statusCriticalRed : ShelterTheme.statusSafeGreen,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    shelter.isClosed ? 'CLOSED' : 'OPEN',
-                    style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(shelter.location, style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 14)),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${shelter.occupiedBeds} / ${shelter.totalBeds} Beds', style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 16)),
-                Text('${shelter.occupancyPercentage}%', style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: ratio,
-              backgroundColor: ShelterTheme.surfaceLightNavy,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              minHeight: 14,
-              borderRadius: BorderRadius.circular(7),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _service.toggleShelterStatus(shelter.id),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ShelterTheme.surfaceLightNavy,
-                ),
-                child: Text(shelter.isClosed ? 'OPEN TO NEW EVACUEES' : 'CLOSE SHELTER', style: const TextStyle(color: ShelterTheme.textHighContrastWhite)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRapidHeadcount(bool isClosed) {
-    return Row(
-      children: [
-        Expanded(child: _buildHeadcountBtn('+1', 1, ShelterTheme.primaryActionOrange, isClosed)),
-        const SizedBox(width: 8),
-        Expanded(child: _buildHeadcountBtn('+5', 5, ShelterTheme.primaryActionOrange, isClosed)),
-        const SizedBox(width: 8),
-        Expanded(child: _buildHeadcountBtn('+10', 10, ShelterTheme.primaryActionOrange, isClosed)),
-        const SizedBox(width: 8),
-        Expanded(child: _buildHeadcountBtn('-1', -1, ShelterTheme.surfaceLightNavy, false)), // Allow leaving even if closed
-      ],
-    );
-  }
-
-  Widget _buildHeadcountBtn(String label, int delta, Color color, bool isClosed) {
+  Widget _buildHeadcountBtn(String label, int delta) {
     return ElevatedButton(
-      onPressed: (isClosed && delta > 0) ? null : () => _service.updateHeadcount(delta),
+      onPressed: () => _service.updateHeadcount(delta),
       style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(vertical: 0),
+        backgroundColor: ShelterTheme.surfaceLightNavy,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        minimumSize: const Size(0, 56), // Wet-touch compliant
+        elevation: 0,
       ),
-      child: Text(label, style: const TextStyle(fontSize: 18)),
-    );
-  }
-
-  Widget _buildShortageSummary(List<RationItemModel> shortages) {
-    if (shortages.isEmpty) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('All supplies are adequately stocked.', style: TextStyle(color: ShelterTheme.statusSafeGreen)),
-        ),
-      );
-    }
-    
-    return Column(
-      children: shortages.map((item) {
-        final isDepleted = item.status == SupplyStatus.depleted;
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: Icon(
-              isDepleted ? Icons.warning : Icons.info_outline,
-              color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
-            ),
-            title: Text(item.name, style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontWeight: FontWeight.bold)),
-            subtitle: Text('${item.quantity} ${item.unit} remaining', style: const TextStyle(color: ShelterTheme.textMuted)),
-            trailing: Text(
-              isDepleted ? 'EMPTY' : 'LOW',
-              style: TextStyle(
-                color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+      child: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 }
