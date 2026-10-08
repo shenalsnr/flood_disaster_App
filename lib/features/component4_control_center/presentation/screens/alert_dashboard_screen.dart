@@ -230,20 +230,21 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
               child: const Icon(Icons.shield, color: Color(0xFFFF6D00), size: 20),
             ),
             const SizedBox(width: 10),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Nadeeka Perera',
-                  style: TextStyle(
+                  _controller.currentUser?.fullName ?? 'Nadeeka Perera',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
                 Text(
-                  'DISPATCHER #04 • DMC CONTROL',
-                  style: TextStyle(
+                  _controller.currentUser?.roleTitle ??
+                      'DISPATCHER #04 • DMC CONTROL',
+                  style: const TextStyle(
                     color: Color(0xFF38BDF8),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,

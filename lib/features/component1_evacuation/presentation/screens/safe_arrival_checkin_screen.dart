@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 // ---------------------------------------------------------------------------
 
 import '../../services/citizen_firestore_service.dart';
+import 'citizen_dashboard_screen.dart';
 
 enum _CheckInStatus { idle, loading, confirmed }
 
@@ -107,14 +108,19 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
         backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white54),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white54,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'Safe Arrival Check-In',
           style: TextStyle(
-              color: Colors.white54, fontWeight: FontWeight.w500, fontSize: 16),
+            color: Colors.white54,
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
         ),
       ),
       body: SafeArea(
@@ -146,8 +152,11 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.battery_saver_outlined,
-                        color: Colors.white24, size: 14),
+                    Icon(
+                      Icons.battery_saver_outlined,
+                      color: Colors.white24,
+                      size: 14,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Battery-save mode active',
@@ -366,10 +375,7 @@ class _SuccessState extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: const Color(0xFF00E676).withValues(alpha: 0.15),
-                border: Border.all(
-                  color: const Color(0xFF00E676),
-                  width: 2,
-                ),
+                border: Border.all(color: const Color(0xFF00E676), width: 2),
               ),
               child: const Icon(
                 Icons.check_circle_rounded,
@@ -416,8 +422,11 @@ class _SuccessState extends StatelessWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.location_on_rounded,
-                      color: Color(0xFF00E676), size: 18),
+                  Icon(
+                    Icons.location_on_rounded,
+                    color: Color(0xFF00E676),
+                    size: 18,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'Safe Zone: Rathnapura Central College',
@@ -437,11 +446,43 @@ class _SuccessState extends StatelessWidget {
             TextButton.icon(
               key: const Key('checkin_reset_btn'),
               onPressed: onReset,
-              icon: const Icon(Icons.refresh_rounded,
-                  color: Colors.white38, size: 18),
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: Colors.white38,
+                size: 18,
+              ),
               label: const Text(
                 'Update check-in status',
                 style: TextStyle(color: Colors.white38, fontSize: 13),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
+                (route) => false,
+              ),
+              icon: const Icon(
+                Icons.dashboard_rounded,
+                color: Colors.black,
+                size: 18,
+              ),
+              label: const Text(
+                'Return to Dashboard',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00E676),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
             ),
           ],
