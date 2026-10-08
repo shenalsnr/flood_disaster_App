@@ -271,6 +271,39 @@ class FirestoreService {
     }, SetOptions(merge: true));
   }
 
+  // ========================================================
+  // 8. Leaders Chat (Community Chat between camp leaders)
+  // ========================================================
+
+  CollectionReference<Map<String, dynamic>> get _leaderChat =>
+      _db.collection('leaderChat');
+
+  /// Post one message to the chat shared by all camp leaders.
+  Future<void> sendLeaderChatMessage({
+    required String senderId,
+    required String senderName,
+    required String campName,
+    required String text,
+  }) async {
+    await _leaderChat.add({
+      'senderId': senderId,
+      'senderName': senderName,
+      'campName': campName,
+      'text': text,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Real-time stream of the latest [limit] chat messages, newest first.
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamLeaderChat({
+    int limit = 100,
+  }) {
+    return _leaderChat
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .snapshots();
+  }
+
   /// Mark an existing DMC request as resolved (no-op if it does not exist).
   Future<void> resolveDmcDispatchRequest(String docId) async {
     await _dmcDispatchRequests.doc(docId).update({

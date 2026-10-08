@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import '../../data/models/relief_item_model.dart';
@@ -19,6 +20,22 @@ class ReliefTrackingController extends ChangeNotifier {
   bool isShelterClosed = false;
 
   // --------------------------------------------------------
+  // Leaders chat identity. The demo login has no real accounts, so each
+  // app launch gets a random id (to tell "my" messages from other
+  // leaders') and a display name the leader can change in the chat.
+  // --------------------------------------------------------
+  final String chatClientId =
+      'leader_${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 31)}';
+  late String chatName = leaderName;
+  late String chatCamp = campName;
+
+  void setChatIdentity(String name, String camp) {
+    chatName = name;
+    chatCamp = camp;
+    notifyListeners();
+  }
+
+  // --------------------------------------------------------
   // Real-time sync (FR9): headcount, open/closed and inventory
   // are mirrored to Firestore so every device sees the same data.
   // --------------------------------------------------------
@@ -29,6 +46,11 @@ class ReliefTrackingController extends ChangeNotifier {
 
   StreamSubscription<dynamic>? _statusSub;
   StreamSubscription<dynamic>? _itemsSub;
+  StreamSubscription<dynamic>? _requestsSub;
+
+  /// The camp's latest supply request that the DMC has not completed yet
+  /// (null when there is none). Drives the pending state of the truck card.
+  Map<String, dynamic>? pendingRequest;
   bool _itemsSeeded = false;
   final Map<String, int> _orderKeys = {};
 
@@ -72,6 +94,23 @@ class ReliefTrackingController extends ChangeNotifier {
         notifyListeners();
       }, onError: (Object e) {
         debugPrint('Supply items sync error: $e');
+      });
+
+      _requestsSub = fs.streamDmcDispatchRequests().listen((snap) {
+        Map<String, dynamic>? found;
+        for (final d in snap.docs) {
+          final m = d.data();
+          if (m['campId'] == campId &&
+              m['trigger'] == 'request' &&
+              m['status'] == 'pending') {
+            found = m; // newest first
+            break;
+          }
+        }
+        pendingRequest = found;
+        notifyListeners();
+      }, onError: (Object e) {
+        debugPrint('Supply requests sync error: $e');
       });
     } catch (e) {
       // Firebase unavailable (e.g. not initialised): keep working locally.
@@ -145,6 +184,7 @@ class ReliefTrackingController extends ChangeNotifier {
   void dispose() {
     _statusSub?.cancel();
     _itemsSub?.cancel();
+    _requestsSub?.cancel();
     super.dispose();
   }
 
@@ -459,6 +499,32 @@ class ReliefTrackingController extends ChangeNotifier {
       (i) => fs.saveDmcDispatchRequest(_dmcDocId(i), _dmcPayload(i, 'manual')),
     ));
     return urgent.length;
+  }
+
+  /// Camp Leader asks the DMC for a supply that is not (only) tracked in
+  /// the inventory, e.g. "50 packs of rice, urgent". Saved next to the
+  /// dispatch requests so the control centre sees one list per camp.
+  /// [urgency] is 'normal', 'urgent' or 'critical'.
+  Future<void> sendSupplyRequest({
+    required String itemName,
+    required double quantity,
+    required String unit,
+    required String urgency,
+    String note = '',
+  }) {
+    final docId = '${campId}_req_${DateTime.now().millisecondsSinceEpoch}';
+    return FirestoreService.instance.saveDmcDispatchRequest(docId, {
+      'campId': campId,
+      'campName': campName,
+      'itemName': itemName,
+      'quantityRequested': quantity,
+      'unit': unit,
+      'urgency': urgency,
+      'note': note,
+      'status': 'pending',
+      'trigger': 'request',
+      'requestedBy': leaderName,
+    });
   }
 
   // Evacuee Actions

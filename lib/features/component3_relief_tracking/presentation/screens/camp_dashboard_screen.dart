@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
 import '../widgets/camp_capacity_card.dart';
 import '../widgets/supply_item_tile.dart';
 import '../widgets/add_stock_dialog.dart';
+import '../widgets/leaders_chat_panel.dart';
+import '../widgets/request_supply_dialog.dart';
+import '../widgets/supply_requests_list.dart';
 import 'relief_truck_tracking_screen.dart';
 import 'equipment_tracking_screen.dart';
 
@@ -46,6 +50,66 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Opens the Request Supply form. When [item] is given the form is
+  /// pre-filled for it. After sending, a confirmation popup is shown.
+  Future<void> _showRequestSupplyDialog({ReliefItemModel? item}) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) =>
+          RequestSupplyDialog(controller: _controller, prefillItem: item),
+    );
+    if (!mounted || result == null) return;
+    await _showRequestSentPopup(result);
+  }
+
+  Future<void> _showRequestSentPopup(Map<String, dynamic> r) {
+    final queued = r['status'] == 'queued';
+    final qty = r['quantity'] as double;
+    final qtyText = qty == qty.roundToDouble() ? qty.round().toString() : qty.toString();
+    final color = queued ? const Color(0xFFFF9F0A) : const Color(0xFF30D158);
+
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131A2A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF1E283D)),
+        ),
+        title: Row(
+          children: [
+            Icon(queued ? Icons.cloud_off : Icons.check_circle, color: color),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                queued ? 'Request saved' : 'Request sent',
+                style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          queued
+              ? '${r['item']} ($qtyText ${r['unit']}) is saved on this phone. '
+                  'It will be sent to the DMC automatically when you are back online.'
+              : 'Your request for ${r['item']} ($qtyText ${r['unit']}) was sent to the DMC. '
+                  'It is now PENDING - the truck card on the Supplies page shows its status.',
+          style: const TextStyle(color: Color(0xFF8E9BAE), fontSize: 13),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF5252),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }
@@ -132,7 +196,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        CampCapacityCard(controller: _controller),
+        CampCapacityCard(
+          controller: _controller,
+          onRequestSupply: (item) => _showRequestSupplyDialog(item: item),
+        ),
       ],
     );
   }
@@ -141,31 +208,72 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
   Widget _buildSuppliesTab() {
     final items = _controller.filteredInventory;
     final shipment = _controller.incomingShipment;
+    final pending = _controller.pendingRequest;
+    final isPending = pending != null;
+
+    // While a supply request is waiting for the DMC, the truck card shows
+    // the request instead of the (demo) incoming convoy.
+    String pendingText() {
+      final q = pending?['quantityRequested'];
+      final qText = q is num
+          ? (q == q.roundToDouble() ? q.round().toString() : q.toString())
+          : '';
+      return '${pending?['itemName'] ?? 'Supply'} - $qText ${pending?['unit'] ?? ''}'.trim();
+    }
+
+    final cardTitle = isPending ? 'Supply Request' : shipment['title'] as String;
+    final cardSubtitle = isPending
+        ? 'Waiting for DMC to assign a truck - ${pendingText()}'
+        : shipment['subtitle'] as String;
+    final cardBadge = isPending ? 'PENDING' : shipment['eta'] as String;
+    final accent = isPending ? const Color(0xFFFF9F0A) : const Color(0xFF30D158);
+    final accentBg = isPending ? const Color(0xFF382C1B) : const Color(0xFF063327);
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Header: Title & Add Item Link
+        // Header: Title + clear action buttons
+        const Text(
+          'RATION & MEDICAL LOG',
+          style: TextStyle(
+            color: Color(0xFF7E8B9B),
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'RATION & MEDICAL LOG',
-              style: TextStyle(
-                color: Color(0xFF7E8B9B),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
+            Expanded(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFFF5252)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: _showAddStockDialog,
+                icon: const Icon(Icons.add, color: Color(0xFFFF5252), size: 18),
+                label: const Text(
+                  'ADD ITEM',
+                  style: TextStyle(color: Color(0xFFFF5252), fontWeight: FontWeight.bold, fontSize: 12),
+                ),
               ),
             ),
-            GestureDetector(
-              onTap: _showAddStockDialog,
-              child: const Text(
-                '+ Add Item',
-                style: TextStyle(
-                  color: Color(0xFFFF5252),
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF5252),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: () => _showRequestSupplyDialog(),
+                icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                label: const Text(
+                  'REQUEST SUPPLY',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),
             ),
@@ -241,6 +349,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                           ? '${item.name} marked EMPTY'
                           : '${item.name} marked LOW',
                     ),
+                    duration: const Duration(seconds: 30), // auto-hide after 30 s
+                    persist: false, // keep the timer even though there is an action
+                    showCloseIcon: true, // X button to close it at once
+                    closeIconColor: Colors.white,
                     action: SnackBarAction(
                       label: 'UNDO',
                       onPressed: () =>
@@ -278,22 +390,27 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF063327),
+                          color: accentBg,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.local_shipping_outlined, color: Color(0xFF30D158), size: 20),
+                        child: Icon(isPending ? Icons.hourglass_top : Icons.local_shipping_outlined, color: accent, size: 20),
                       ),
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            shipment['title'],
+                            cardTitle,
                             style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                           ),
-                          Text(
-                            shipment['subtitle'],
-                            style: const TextStyle(color: Color(0xFF7E8B9B), fontSize: 11),
+                          SizedBox(
+                            width: 170,
+                            child: Text(
+                              cardSubtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Color(0xFF7E8B9B), fontSize: 11),
+                            ),
                           ),
                         ],
                       ),
@@ -302,12 +419,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF063327),
+                      color: accentBg,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      shipment['eta'],
-                      style: const TextStyle(color: Color(0xFF30D158), fontSize: 10, fontWeight: FontWeight.bold),
+                      cardBadge,
+                      style: TextStyle(color: accent, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -316,10 +433,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: shipment['progress'],
+                  value: isPending ? null : shipment['progress'] as double,
                   minHeight: 6,
                   backgroundColor: const Color(0xFF1E283D),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF30D158)),
+                  valueColor: AlwaysStoppedAnimation<Color>(accent),
                 ),
               ),
               const SizedBox(height: 14),
@@ -335,7 +452,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      onPressed: () => _callDriver(shipment['driverPhone'] as String),
+                      onPressed: isPending ? null : () => _callDriver(shipment['driverPhone'] as String),
                       icon: const Icon(Icons.phone_outlined, color: Colors.white, size: 16),
                       label: const Text('Call Driver', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
@@ -349,7 +466,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      onPressed: shipment['isRestocked'] ? null : () => _controller.confirmRestock(),
+                      onPressed: (isPending || shipment['isRestocked']) ? null : () => _controller.confirmRestock(),
                       child: Text(
                         shipment['isRestocked'] ? 'Restocked' : 'Confirm Restock',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -361,6 +478,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             ],
           ),
         ),
+
+        const SizedBox(height: 20),
+        SupplyRequestsList(campId: ReliefTrackingController.campId),
       ],
     );
   }
@@ -870,104 +990,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     );
   }
 
-  // --- TAB 4: TEAM / COMMUNITY CHAT (Image 3 frame5) ---
+  // --- TAB 4: TEAM / COMMUNITY CHAT (live chat between all camp leaders) ---
   Widget _buildTeamTab() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          color: const Color(0xFF131A2A),
-          child: const Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Color(0xFF1F2C46),
-                child: Icon(Icons.people, color: Colors.white, size: 16),
-              ),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Community Chat', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                  Text('● 12 online • Kolonnawa Zone 04', style: TextStyle(color: Color(0xFF30D158), fontSize: 10)),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildChatMessage('Nadeesha F.', 'Water levels rising near Gate B. We need sandbags urgently.', '10:42'),
-              const SizedBox(height: 10),
-              _buildChatMessage('Priya M.', 'Convoy B is 18 mins out with water + formula. Hang tight.', '10:44'),
-              const SizedBox(height: 10),
-              _buildChatMessage('Dr. Rohan Silva', 'Copy. Redirecting volunteers to Gate B now. Keep me posted on the ETA.', '10:45', isSelf: true),
-              const SizedBox(height: 10),
-              _buildChatMessage('Nadeesha F.', 'Can DMC expedite this one?', '10:47'),
-              const SizedBox(height: 10),
-              _buildChatMessage('Dr. Rohan Silva', 'Escalating to DMC now. Dispatch #MED-042 is in.', '10:48', isSelf: true),
-            ],
-          ),
-        ),
-
-        // Chat Input Bar
-        Container(
-          padding: const EdgeInsets.all(12),
-          color: const Color(0xFF131A2A),
-          child: Row(
-            children: [
-              const Icon(Icons.attach_file, color: Color(0xFF7E8B9B)),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: TextField(
-                  style: TextStyle(color: Colors.white, fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: 'Message the team...',
-                    hintStyle: TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: const Color(0xFFFF5252),
-                child: const Icon(Icons.send, color: Colors.white, size: 18),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChatMessage(String sender, String text, String time, {bool isSelf = false}) {
-    return Align(
-      alignment: isSelf ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 280),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelf ? const Color(0xFF1E2C48) : const Color(0xFF131A2A),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF1E283D)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(sender, style: TextStyle(color: isSelf ? const Color(0xFF448AFF) : const Color(0xFF30D158), fontWeight: FontWeight.bold, fontSize: 11)),
-            const SizedBox(height: 4),
-            Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
-            const SizedBox(height: 4),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(time, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 9)),
-            ),
-          ],
-        ),
-      ),
-    );
+    return LeadersChatPanel(controller: _controller);
   }
 }

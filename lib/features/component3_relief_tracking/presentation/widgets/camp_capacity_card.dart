@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
 
 class CampCapacityCard extends StatelessWidget {
   final ReliefTrackingController controller;
 
+  /// Called when a Camp Leader taps an empty item in the shortage list.
+  final void Function(ReliefItemModel item)? onRequestSupply;
+
   const CampCapacityCard({
     super.key,
     required this.controller,
+    this.onRequestSupply,
   });
 
   @override
@@ -22,6 +27,10 @@ class CampCapacityCard extends StatelessWidget {
     } else {
       progressColor = const Color(0xFF30D158); // Green accent
     }
+
+    final emptyItems = controller.inventoryItems
+        .where((i) => i.status == StockStatus.critical)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +256,7 @@ class CampCapacityCard extends StatelessWidget {
         ),
         const SizedBox(height: 22),
 
-        // Shortage Alerts Section (Matching Image 1 Iframe)
+        // Shortage Alerts Section: only items that have run out
         const Text(
           'SHORTAGE ALERTS',
           style: TextStyle(
@@ -256,6 +265,11 @@ class CampCapacityCard extends StatelessWidget {
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
           ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Tap an empty item to request supply',
+          style: TextStyle(color: Color(0xFF5E6D82), fontSize: 11),
         ),
         const SizedBox(height: 10),
 
@@ -266,13 +280,22 @@ class CampCapacityCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: const Color(0xFF1E283D)),
           ),
-          child: Column(
-            children: [
-              _buildShortageTile('Infant Formula', 'EMPTY', const Color(0xFF3B1E22), const Color(0xFFFF3B30)),
-              const Divider(color: Color(0xFF1E283D), height: 1),
-              _buildShortageTile('Drinking Water', 'LOW STOCK', const Color(0xFF382C1B), const Color(0xFFFF9F0A)),
-            ],
-          ),
+          child: emptyItems.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'No empty items. All supplies are available.',
+                    style: TextStyle(color: Color(0xFF30D158), fontSize: 13),
+                  ),
+                )
+              : Column(
+                  children: [
+                    for (var i = 0; i < emptyItems.length; i++) ...[
+                      if (i > 0) const Divider(color: Color(0xFF1E283D), height: 1),
+                      _buildShortageTile(emptyItems[i]),
+                    ],
+                  ],
+                ),
         ),
       ],
     );
@@ -302,37 +325,44 @@ class CampCapacityCard extends StatelessWidget {
     );
   }
 
-  Widget _buildShortageTile(String title, String badgeText, Color badgeBg, Color badgeTextColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: badgeBg,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              badgeText,
-              style: TextStyle(
-                color: badgeTextColor,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
+  Widget _buildShortageTile(ReliefItemModel item) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onRequestSupply == null ? null : () => onRequestSupply!(item),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                item.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-        ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B1E22),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                item.quantity <= 0 ? 'EMPTY' : 'DEPLETED',
+                style: const TextStyle(
+                  color: Color(0xFFFF3B30),
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: Color(0xFF5E6D82), size: 18),
+          ],
+        ),
       ),
     );
   }
