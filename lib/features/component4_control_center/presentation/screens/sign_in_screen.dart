@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../data/models/responder_models.dart';
 import 'responder_login_screen.dart';
 import 'responder_register_screen.dart';
@@ -58,8 +59,10 @@ class _SignInScreenState extends State<SignInScreen> {
               // Top Agency Badge
               Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(20),
@@ -182,8 +185,7 @@ class _SignInScreenState extends State<SignInScreen> {
               _buildRoleCard(
                 role: UserRole.responder,
                 title: 'Emergency Dispatcher / Responder',
-                subtitle:
-                    'Component 4 • Triage incident queue, dispatch units & live tracking',
+                subtitle: 'Component 4 • Triage incident queue, dispatch units & live tracking',
                 icon: Icons.cell_tower,
                 color: const Color(0xFFFF6D00),
                 isHighlight: true,
@@ -194,8 +196,7 @@ class _SignInScreenState extends State<SignInScreen> {
               _buildRoleCard(
                 role: UserRole.citizen,
                 title: 'Affected Citizen',
-                subtitle:
-                    'Component 1 • Evacuation route, weather alerts & battery save mode',
+                subtitle: 'Component 1 • Evacuation route, weather alerts & battery save mode',
                 icon: Icons.person_pin_circle_outlined,
                 color: const Color(0xFF00E676),
               ),
@@ -205,8 +206,7 @@ class _SignInScreenState extends State<SignInScreen> {
               _buildRoleCard(
                 role: UserRole.volunteer,
                 title: 'Community Volunteer Reporter',
-                subtitle:
-                    'Component 2 • Icon-driven hazard reporting with auto-tagged GPS',
+                subtitle: 'Component 2 • Icon-driven hazard reporting with auto-tagged GPS',
                 icon: Icons.add_location_alt_outlined,
                 color: const Color(0xFF38BDF8),
               ),
@@ -216,8 +216,7 @@ class _SignInScreenState extends State<SignInScreen> {
               _buildRoleCard(
                 role: UserRole.campLeader,
                 title: 'Relief Camp Triage Leader',
-                subtitle:
-                    'Component 3 • Manage shelter beds, supplies & food logistics',
+                subtitle: 'Component 3 • Manage shelter beds, supplies & food logistics',
                 icon: Icons.night_shelter_outlined,
                 color: const Color(0xFFA855F7),
               ),
@@ -234,8 +233,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 6,
-                  shadowColor:
-                      const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                  shadowColor: const Color(0xFFFF6D00).withValues(alpha: 0.4),
                 ),
                 onPressed: _proceedToLogin,
                 child: Row(
@@ -290,8 +288,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
               // Emergency Hotline Footer
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(10),
@@ -300,7 +300,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.phone_in_talk, color: Colors.redAccent, size: 16),
+                    Icon(
+                      Icons.phone_in_talk,
+                      color: Colors.redAccent,
+                      size: 16,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Emergency Hotlines: 117 (DMC) • 119 (Police) • 110 (Fire)',
@@ -341,9 +345,7 @@ class _SignInScreenState extends State<SignInScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF1E293B)
-              : const Color(0xFF0F172A),
+          color: isSelected ? const Color(0xFF1E293B) : const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? color : const Color(0xFF1E293B),
@@ -392,7 +394,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFF6D00)
                                 .withValues(alpha: 0.2),
