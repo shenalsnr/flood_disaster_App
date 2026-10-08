@@ -14,13 +14,13 @@ class ResponderRegisterScreen extends StatefulWidget {
 
 class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'Chamara Dissanayake');
-  final _emailController = TextEditingController(text: 'chamara.d@gmail.com');
-  final _phoneController = TextEditingController(text: '+94 71 234 5678');
-  final _nicController = TextEditingController(text: '982341092V');
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _nicController = TextEditingController();
   final _customSectorController = TextEditingController();
-  final _passwordController = TextEditingController(text: 'Secure@1234');
-  final _confirmPasswordController = TextEditingController(text: 'Secure@1234');
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   String _selectedSector = 'Colombo Low-Lying Area (Kelani Bank Zone)';
   final String _selectedRole = 'responder';

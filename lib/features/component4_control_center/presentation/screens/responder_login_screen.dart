@@ -48,20 +48,20 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
   void _populateRoleCredentials() {
     switch (_currentRole) {
       case UserRole.responder:
-        _emailController.text = 'n.perera@dispatched.gov.lk';
-        _passwordController.text = 'Disaster@2026';
+        _emailController.text;
+        _passwordController.text;
         break;
       case UserRole.citizen:
-        _emailController.text = 'chamara.d@gmail.com';
-        _passwordController.text = 'Secure@1234';
+        _emailController.text;
+        _passwordController.text;
         break;
       case UserRole.volunteer:
-        _emailController.text = 'volunteer.kapila@dmc.org';
-        _passwordController.text = 'Report@2026';
+        _emailController.text;
+        _passwordController.text;
         break;
       case UserRole.campLeader:
-        _emailController.text = 'leader.rohan@relief.gov.lk';
-        _passwordController.text = 'Camp@2026';
+        _emailController.text;
+        _passwordController.text;
         break;
     }
   }
