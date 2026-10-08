@@ -5,32 +5,56 @@ import 'package:flutter/foundation.dart';
 import '../../data/models/relief_item_model.dart';
 import '../../data/models/evacuee_model.dart';
 import '../../data/services/firestore_service.dart';
+import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 
 class ReliefTrackingController extends ChangeNotifier {
   ReliefTrackingController() {
+    _auth.addListener(_onAuthChanged);
     _startSync();
   }
 
+  /// The logged-in user (set by the login screen). The leader's name, role
+  /// and photo shown in this component come from here.
+  final ResponderController _auth = ResponderController();
+
+  void _onAuthChanged() => notifyListeners();
+
   // Dr. Rohan Silva - Camp Info State
-  String leaderName = "Dr. Rohan Silva";
-  String leaderTitle = "RELIEF TRIAGE LEAD #04";
+  String get leaderName {
+    final name = _auth.currentUser?.fullName.trim() ?? '';
+    return name.isEmpty ? 'Camp Leader' : name;
+  }
+
+  String get leaderTitle =>
+      _auth.currentUser?.roleTitle ?? 'RELIEF CAMP LEADER • LOGISTICS';
+
+  String? get leaderPhotoUrl => _auth.currentUser?.photoUrl;
+
   String campName = "Camp Nēraya";
   int evacueeCount = 275;
   int maxCapacity = 300;
   bool isShelterClosed = false;
 
   // --------------------------------------------------------
-  // Leaders chat identity. The demo login has no real accounts, so each
-  // app launch gets a random id (to tell "my" messages from other
-  // leaders') and a display name the leader can change in the chat.
+  // Leaders chat identity: the logged-in account tells "my" messages apart
+  // from other leaders'; the display name can be changed in the chat.
   // --------------------------------------------------------
-  final String chatClientId =
+  final String _sessionChatId =
       'leader_${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 31)}';
-  late String chatName = leaderName;
+
+  /// Messages are matched to their sender by the logged-in account, so a
+  /// leader keeps ownership of their messages (and can still edit or delete
+  /// them) after restarting the app. Falls back to a per-launch id.
+  String get chatClientId {
+    final uid = _auth.currentUser?.uid ?? '';
+    return uid.isEmpty ? _sessionChatId : uid;
+  }
+  String? _chatNameOverride;
+  String get chatName => _chatNameOverride ?? leaderName;
   late String chatCamp = campName;
 
   void setChatIdentity(String name, String camp) {
-    chatName = name;
+    _chatNameOverride = name;
     chatCamp = camp;
     notifyListeners();
   }
@@ -62,6 +86,29 @@ class ReliefTrackingController extends ChangeNotifier {
 
   /// Requests whose restock was already confirmed (never shown again).
   final Set<String> _finishedRequestIds = {};
+
+  // Items that already have an open request from this camp (pending, truck
+  // on the way, or arrived and not yet confirmed). Such an item cannot be
+  // requested again and does not appear in the shortage alerts.
+  final Set<String> _openRequestItemIds = {};
+  final Set<String> _openRequestItemNames = {};
+
+  String _nameKey(String name) => name.trim().toLowerCase();
+
+  bool hasOpenRequest(ReliefItemModel item) =>
+      _openRequestItemIds.contains(item.id) ||
+      _openRequestItemNames.contains(_nameKey(item.name));
+
+  /// Items a leader may request: marked LOW or EMPTY, with no open request.
+  List<ReliefItemModel> get requestableItems => inventoryItems
+      .where((i) => i.status != StockStatus.adequate && !hasOpenRequest(i))
+      .toList();
+
+  /// Empty (depleted) items for the dashboard's shortage alerts; an item
+  /// leaves the list as soon as it has been requested.
+  List<ReliefItemModel> get shortageAlertItems => inventoryItems
+      .where((i) => i.status == StockStatus.critical && !hasOpenRequest(i))
+      .toList();
   bool _itemsSeeded = false;
   final Map<String, int> _orderKeys = {};
 
@@ -109,9 +156,24 @@ class ReliefTrackingController extends ChangeNotifier {
 
       _requestsSub = fs.streamDmcDispatchRequests().listen((snap) {
         Map<String, dynamic>? found;
+        _openRequestItemIds.clear();
+        _openRequestItemNames.clear();
         for (final d in snap.docs) {
           final m = d.data();
           final status = m['status'];
+          final isOpen =
+              status == 'pending' || status == 'dispatched' || status == 'arrived';
+          // Only a leader's own request blocks a new one (an automatic
+          // shortage alert is not a request).
+          if (m['campId'] == campId &&
+              isOpen &&
+              m['trigger'] == 'request' &&
+              !_finishedRequestIds.contains(d.id)) {
+            final id = m['itemId']?.toString();
+            if (id != null && id.isNotEmpty) _openRequestItemIds.add(id);
+            final name = (m['itemName'] ?? '').toString();
+            if (name.isNotEmpty) _openRequestItemNames.add(_nameKey(name));
+          }
           // A leader's own request counts from the start; an automatic
           // shortage alert only once the admin has put a truck on it.
           final counts = (status == 'pending' && m['trigger'] == 'request') ||
@@ -200,6 +262,7 @@ class ReliefTrackingController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _auth.removeListener(_onAuthChanged);
     _statusSub?.cancel();
     _itemsSub?.cancel();
     _requestsSub?.cancel();
@@ -522,6 +585,8 @@ class ReliefTrackingController extends ChangeNotifier {
       };
 
   void _notifyDmc(ReliefItemModel item, {required String trigger}) {
+    // A leader's request for this item is already open: do not overwrite it.
+    if (hasOpenRequest(item)) return;
     try {
       FirestoreService.instance
           .saveDmcDispatchRequest(_dmcDocId(item), _dmcPayload(item, trigger))
@@ -546,7 +611,7 @@ class ReliefTrackingController extends ChangeNotifier {
   /// Throws if the request could not be saved, so the UI can tell the user.
   Future<int> sendUrgentDispatch() async {
     final urgent = inventoryItems
-        .where((i) => i.status == StockStatus.critical)
+        .where((i) => i.status == StockStatus.critical && !hasOpenRequest(i))
         .toList();
     if (urgent.isEmpty) return 0;
     final fs = FirestoreService.instance;
@@ -556,31 +621,52 @@ class ReliefTrackingController extends ChangeNotifier {
     return urgent.length;
   }
 
-  /// Camp Leader asks the DMC for a supply that is not (only) tracked in
-  /// the inventory, e.g. "50 packs of rice, urgent". Saved next to the
-  /// dispatch requests so the control centre sees one list per camp.
-  /// [urgency] is 'normal', 'urgent' or 'critical'.
+  /// Camp Leader asks the DMC for a supply. Only an item that is marked LOW
+  /// or EMPTY, and has no open request yet, can be requested. There is one
+  /// request document per camp and item, so a second leader of the same camp
+  /// cannot create a duplicate. [urgency] is 'normal', 'urgent' or 'critical'.
+  /// Throws a [StateError] with a readable message if the item may not be
+  /// requested.
   Future<void> sendSupplyRequest({
-    required String itemName,
+    required ReliefItemModel item,
     required double quantity,
-    required String unit,
     required String urgency,
     String note = '',
   }) {
-    showTruckCard = true; // a new request starts the process again
+    if (item.status == StockStatus.adequate) {
+      throw StateError('${item.name} is available. Only LOW or EMPTY items can be requested.');
+    }
+    if (hasOpenRequest(item)) {
+      throw StateError('${item.name} has already been requested.');
+    }
+    final docId = _dmcDocId(item);
+    _finishedRequestIds.remove(docId); // a new request starts the process again
+    showTruckCard = true;
+    // Show the item as requested straight away (the server confirms later).
+    _openRequestItemIds.add(item.id);
+    _openRequestItemNames.add(_nameKey(item.name));
     notifyListeners();
-    final docId = '${campId}_req_${DateTime.now().millisecondsSinceEpoch}';
     return FirestoreService.instance.saveDmcDispatchRequest(docId, {
       'campId': campId,
       'campName': campName,
-      'itemName': itemName,
+      'itemId': item.id,
+      'itemName': item.name,
+      'quantity': item.quantity,
+      'minThreshold': item.minThreshold,
       'quantityRequested': quantity,
-      'unit': unit,
+      'unit': item.unit,
       'urgency': urgency,
       'note': note,
       'status': 'pending',
       'trigger': 'request',
       'requestedBy': leaderName,
+      // clear details left over from an earlier delivery of the same item
+      'driverName': null,
+      'driverPhone': null,
+      'vehicleNumber': null,
+      'dispatchedAt': null,
+      'arrivedAt': null,
+      'hiddenByCamp': false,
     });
   }
 

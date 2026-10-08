@@ -8,9 +8,9 @@ import '../widgets/add_stock_dialog.dart';
 import '../widgets/leaders_chat_panel.dart';
 import '../widgets/request_supply_dialog.dart';
 import '../widgets/supply_requests_list.dart';
-import 'relief_truck_tracking_screen.dart';
 import 'supply_admin_dashboard_screen.dart';
-import 'equipment_tracking_screen.dart';
+import 'personal_information_screen.dart';
+import '../widgets/leader_avatar.dart';
 
 class CampDashboardScreen extends StatefulWidget {
   const CampDashboardScreen({super.key});
@@ -839,19 +839,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ),
           child: Column(
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F2C46),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    'RS',
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
+              LeaderAvatar(
+                name: _controller.leaderName,
+                photoUrl: _controller.leaderPhotoUrl,
+                size: 72,
               ),
               const SizedBox(height: 12),
               Text(
@@ -915,7 +906,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 style: TextStyle(color: Color(0xFF7E8B9B), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
               ),
               const SizedBox(height: 12),
-              _buildAccountRow(Icons.person_outline, 'Personal Information', 'Name, ID, contact details'),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const PersonalInformationScreen()));
+                },
+                child: _buildAccountRow(Icons.person_outline, 'Personal Information', 'Name, photo, contact details'),
+              ),
               const Divider(color: Color(0xFF1E283D), height: 16),
               _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', 'Camp Nēraya, Camp Dawn Ridge'),
               const Divider(color: Color(0xFF1E283D), height: 16),
@@ -928,23 +924,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               const Divider(color: Color(0xFF1E283D), height: 16),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ReliefTruckTrackingScreen()));
-                },
-                child: _buildAccountRow(Icons.local_shipping_outlined, 'Fleet Tracking', 'Live tracking of relief trucks'),
-              ),
-              const Divider(color: Color(0xFF1E283D), height: 16),
-              GestureDetector(
-                onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const SupplyAdminDashboardScreen()));
                 },
                 child: _buildAccountRow(Icons.admin_panel_settings_outlined, 'Supply Admin Dashboard', 'Assign trucks to supply requests'),
-              ),
-              const Divider(color: Color(0xFF1E283D), height: 16),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EquipmentTrackingScreen()));
-                },
-                child: _buildAccountRow(Icons.handyman_outlined, 'Equipment Tracking', 'Manage pumps, generators, etc.'),
               ),
             ],
           ),
