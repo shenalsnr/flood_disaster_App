@@ -144,16 +144,18 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
           // Soft orange glow behind the emblem.
-          FadeTransition(
-            opacity: _logoFade,
-            child: Container(
+          AnimatedBuilder(
+            animation: _logoFade,
+            builder: (_, _) => Container(
               width: _logoSize * 0.9,
               height: _logoSize * 0.9,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.28),
+                    color: AppColors.primary.withValues(
+                      alpha: 0.28 * _logoFade.value,
+                    ),
                     blurRadius: 80,
                     spreadRadius: 14,
                   ),
@@ -288,15 +290,23 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
               const SizedBox(height: 14),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: Text(
-                  _statusFor(p),
-                  key: ValueKey(_statusFor(p)),
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    letterSpacing: 0.4,
-                    color: AppColors.textMuted,
+              SizedBox(
+                height: 20,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                  child: Text(
+                    _statusFor(p),
+                    key: ValueKey(_statusFor(p)),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      letterSpacing: 0.4,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               ),
