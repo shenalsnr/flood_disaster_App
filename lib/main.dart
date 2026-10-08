@@ -37,11 +37,11 @@ class WeSafeApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-        colorScheme: ColorScheme.dark(
-          primary: const Color(0xFF00E676),
-          secondary: const Color(0xFF40C4FF),
-          surface: const Color(0xFF1A1A1A),
-          error: const Color(0xFFFF5252),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00E676),
+          secondary: Color(0xFF40C4FF),
+          surface: Color(0xFF1A1A1A),
+          error: Color(0xFFFF5252),
         ),
         fontFamily: 'Roboto',
         appBarTheme: const AppBarTheme(
@@ -65,7 +65,7 @@ class WeSafeApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const CitizenDashboardScreen(),
+      home: const AlertDashboardScreen(),
     );
   }
 }
