@@ -65,7 +65,7 @@ class WeSafeApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const AlertDashboardScreen(),
+      home: const CitizenDashboardScreen(),
     );
   }
 }
