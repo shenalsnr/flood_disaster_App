@@ -14,13 +14,15 @@ class ResponderRegisterScreen extends StatefulWidget {
 
 class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'Chamara Dissanayake');
-  final _emailController = TextEditingController(text: 'chamara.d@gmail.com');
-  final _phoneController = TextEditingController(text: '+94 71 234 5678');
-  final _nicController = TextEditingController(text: '982341092V');
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _nicController = TextEditingController();
+  final _districtController = TextEditingController();
+  final _cityController = TextEditingController();
   final _customSectorController = TextEditingController();
-  final _passwordController = TextEditingController(text: 'Secure@1234');
-  final _confirmPasswordController = TextEditingController(text: 'Secure@1234');
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   String _selectedSector = 'Colombo Low-Lying Area (Kelani Bank Zone)';
   final String _selectedRole = 'responder';
@@ -44,6 +46,8 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _nicController.dispose();
+    _districtController.dispose();
+    _cityController.dispose();
     _customSectorController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -78,6 +82,8 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
         email: _emailController.text.trim(),
         phoneNumber: _phoneController.text.trim(),
         nic: _nicController.text.trim(),
+        district: _districtController.text.trim(),
+        city: _cityController.text.trim(),
         floodZone: finalSector,
         password: _passwordController.text,
         role: _selectedRole,
@@ -359,6 +365,56 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                             ),
                             validator: (v) => v == null || v.isEmpty
                                 ? 'Enter NIC'
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Field: DISTRICT & CITY (2 Column Row)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFieldLabel('DISTRICT'),
+                          TextFormField(
+                            controller: _districtController,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            decoration: _buildInputDecoration(
+                              hint: 'Enter district',
+                              icon: Icons.map_outlined,
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Enter district'
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFieldLabel('CITY'),
+                          TextFormField(
+                            controller: _cityController,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            decoration: _buildInputDecoration(
+                              hint: 'Enter city',
+                              icon: Icons.location_city_outlined,
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Enter city'
                                 : null,
                           ),
                         ],
