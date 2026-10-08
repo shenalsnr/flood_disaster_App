@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'citizen_profile_screen.dart';
 import 'citizen_settings_screen.dart';
 import '../../../component4_control_center/presentation/screens/sign_in_screen.dart';
@@ -27,58 +28,281 @@ class CitizenDrawer extends StatelessWidget {
     final String displayName = user?.displayName ?? 'Citizen User';
     final String email = user?.email ?? 'citizen@example.com';
 
+    // Extract initials for the premium avatar
+    String initials = 'CU';
+    if (displayName.isNotEmpty) {
+      final parts = displayName.trim().split(' ');
+      if (parts.length > 1 && parts[1].isNotEmpty) {
+        initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+      } else {
+        initials = parts[0][0].toUpperCase();
+      }
+    }
+
     return Drawer(
-      backgroundColor: const Color(0xFF0A192F),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xFF060F1E),
-            ),
-            accountName: Text(
-              displayName,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            accountEmail: Text(
-              email,
-              style: const TextStyle(color: Colors.white70),
-            ),
-            currentAccountPicture: const CircleAvatar(
-              backgroundColor: Color(0xFF00E676),
-              child: Icon(Icons.person, color: Color(0xFF060F1E), size: 36),
-            ),
+      backgroundColor: Colors.transparent, // Rely on Container for styling
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF070B14),
+          border: Border(right: BorderSide(color: Colors.white10, width: 1)),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Custom Premium Header ─────────────────────────────────────────
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF112240).withValues(alpha: 0.8),
+                      const Color(0xFF070B14),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: const Border(
+                    bottom: BorderSide(color: Colors.white10, width: 1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00E676)
+                                .withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            color: Color(0xFF070B14),
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF00E676)
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFF00E676)
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: const Text(
+                              'CITIZEN',
+                              style: TextStyle(
+                                color: Color(0xFF00E676),
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            displayName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            email,
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // ── Navigation Items ────────────────────────────────────────────
+              _DrawerItem(
+                icon: Icons.person_outline_rounded,
+                title: 'My Profile',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CitizenProfileScreen(),
+                    ),
+                  );
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.settings_outlined,
+                title: 'Settings',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CitizenSettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Divider(color: Colors.white10),
+              ),
+
+              _DrawerItem(
+                icon: Icons.help_outline_rounded,
+                title: 'Help & Support',
+                onTap: () {
+                  Navigator.pop(context); // Add actual routing when built
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.info_outline_rounded,
+                title: 'About WeSafe',
+                onTap: () {
+                  Navigator.pop(context); // Add actual routing when built
+                },
+              ),
+
+              const Spacer(),
+
+              // ── Log Out Button & Footer ─────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFFF5252),
+                          side: const BorderSide(
+                            color: Color(0xFFFF5252),
+                            width: 1.5,
+                          ),
+                          backgroundColor: const Color(0xFFFF5252)
+                              .withValues(alpha: 0.1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () => _signOut(context),
+                        icon: const Icon(Icons.logout_rounded, size: 20),
+                        label: const Text(
+                          'Log Out',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'WeSafe v1.0.0',
+                      style: TextStyle(
+                        color: Colors.white24,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.person_outline, color: Colors.white),
-            title: const Text('My Profile', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context); // Close drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CitizenProfileScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings_outlined, color: Colors.white),
-            title: const Text('Settings', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context); // Close drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CitizenSettingsScreen()),
-              );
-            },
-          ),
-          const Divider(color: Colors.white24),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.redAccent),
-            title: const Text('Log Out', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-            onTap: () => _signOut(context),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Icon(icon, color: Colors.white70, size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: Colors.white.withValues(alpha: 0.2),
+        size: 20,
+      ),
+      onTap: onTap,
     );
   }
 }
