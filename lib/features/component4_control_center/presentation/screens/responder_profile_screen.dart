@@ -56,7 +56,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'Dispatcher Profile',
+          'Dispatcher Settings',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import '../../data/models/relief_item_model.dart';
@@ -20,22 +19,6 @@ class ReliefTrackingController extends ChangeNotifier {
   bool isShelterClosed = false;
 
   // --------------------------------------------------------
-  // Leaders chat identity. The demo login has no real accounts, so each
-  // app launch gets a random id (to tell "my" messages from other
-  // leaders') and a display name the leader can change in the chat.
-  // --------------------------------------------------------
-  final String chatClientId =
-      'leader_${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 31)}';
-  late String chatName = leaderName;
-  late String chatCamp = campName;
-
-  void setChatIdentity(String name, String camp) {
-    chatName = name;
-    chatCamp = camp;
-    notifyListeners();
-  }
-
-  // --------------------------------------------------------
   // Real-time sync (FR9): headcount, open/closed and inventory
   // are mirrored to Firestore so every device sees the same data.
   // --------------------------------------------------------
@@ -46,22 +29,6 @@ class ReliefTrackingController extends ChangeNotifier {
 
   StreamSubscription<dynamic>? _statusSub;
   StreamSubscription<dynamic>? _itemsSub;
-  StreamSubscription<dynamic>? _requestsSub;
-
-  /// The camp's newest supply request that is not finished yet (null when
-  /// there is none). Its `status` moves pending -> dispatched (truck assigned,
-  /// driver details set) -> arrived (truck reached the camp) -> resolved
-  /// (restock confirmed). It also carries the request's `docId`.
-  /// Drives the truck card on the Supplies page.
-  Map<String, dynamic>? activeRequest;
-
-  /// Whether the truck card is shown on the Supplies page. It disappears
-  /// once the leader confirms the restock, and comes back as PENDING when
-  /// a new supply request is made.
-  bool showTruckCard = true;
-
-  /// Requests whose restock was already confirmed (never shown again).
-  final Set<String> _finishedRequestIds = {};
   bool _itemsSeeded = false;
   final Map<String, int> _orderKeys = {};
 
@@ -105,30 +72,6 @@ class ReliefTrackingController extends ChangeNotifier {
         notifyListeners();
       }, onError: (Object e) {
         debugPrint('Supply items sync error: $e');
-      });
-
-      _requestsSub = fs.streamDmcDispatchRequests().listen((snap) {
-        Map<String, dynamic>? found;
-        for (final d in snap.docs) {
-          final m = d.data();
-          final status = m['status'];
-          // A leader's own request counts from the start; an automatic
-          // shortage alert only once the admin has put a truck on it.
-          final counts = (status == 'pending' && m['trigger'] == 'request') ||
-              status == 'dispatched' ||
-              status == 'arrived';
-          if (m['campId'] == campId &&
-              counts &&
-              !_finishedRequestIds.contains(d.id)) {
-            found = {...m, 'docId': d.id}; // newest first
-            break;
-          }
-        }
-        activeRequest = found;
-        if (found != null) showTruckCard = true;
-        notifyListeners();
-      }, onError: (Object e) {
-        debugPrint('Supply requests sync error: $e');
       });
     } catch (e) {
       // Firebase unavailable (e.g. not initialised): keep working locally.
@@ -202,7 +145,6 @@ class ReliefTrackingController extends ChangeNotifier {
   void dispose() {
     _statusSub?.cancel();
     _itemsSub?.cancel();
-    _requestsSub?.cancel();
     super.dispose();
   }
 
@@ -270,47 +212,10 @@ class ReliefTrackingController extends ChangeNotifier {
   };
 
   void confirmRestock() {
-    final req = activeRequest;
-    if (req != null) {
-      _restockFromRequest(req);
-      return;
-    }
-    showTruckCard = false; // demo convoy delivered: hide the card
     incomingShipment['isRestocked'] = true;
     // Boost stock values
     updateStockQuantity('inv_1', 40);
     updateStockQuantity('inv_2', 50);
-    notifyListeners();
-  }
-
-  /// The leader confirms the truck's delivery: the delivered amount is added
-  /// to the matching inventory item and the request is closed.
-  void _restockFromRequest(Map<String, dynamic> req) {
-    final name = (req['itemName'] ?? '').toString().trim().toLowerCase();
-    final itemId = req['itemId']?.toString();
-    final index = inventoryItems.indexWhere(
-      (i) => (itemId != null && i.id == itemId) || i.name.trim().toLowerCase() == name,
-    );
-    if (index != -1) {
-      final item = inventoryItems[index];
-      final delivered = (req['quantityRequested'] as num?)?.toDouble() ??
-          (item.minThreshold * 2);
-      updateStockQuantity(item.id, delivered);
-    }
-    final docId = req['docId']?.toString();
-    if (docId != null) {
-      _finishedRequestIds.add(docId);
-      try {
-        FirestoreService.instance
-            .resolveDmcDispatchRequest(docId)
-            .catchError((Object e) => debugPrint('Restock confirm failed: $e'));
-      } catch (e) {
-        debugPrint('Restock confirm failed: $e');
-      }
-    }
-    // Hide the truck card straight away (the stream confirms it later).
-    activeRequest = null;
-    showTruckCard = false;
     notifyListeners();
   }
 
@@ -554,34 +459,6 @@ class ReliefTrackingController extends ChangeNotifier {
       (i) => fs.saveDmcDispatchRequest(_dmcDocId(i), _dmcPayload(i, 'manual')),
     ));
     return urgent.length;
-  }
-
-  /// Camp Leader asks the DMC for a supply that is not (only) tracked in
-  /// the inventory, e.g. "50 packs of rice, urgent". Saved next to the
-  /// dispatch requests so the control centre sees one list per camp.
-  /// [urgency] is 'normal', 'urgent' or 'critical'.
-  Future<void> sendSupplyRequest({
-    required String itemName,
-    required double quantity,
-    required String unit,
-    required String urgency,
-    String note = '',
-  }) {
-    showTruckCard = true; // a new request starts the process again
-    notifyListeners();
-    final docId = '${campId}_req_${DateTime.now().millisecondsSinceEpoch}';
-    return FirestoreService.instance.saveDmcDispatchRequest(docId, {
-      'campId': campId,
-      'campName': campName,
-      'itemName': itemName,
-      'quantityRequested': quantity,
-      'unit': unit,
-      'urgency': urgency,
-      'note': note,
-      'status': 'pending',
-      'trigger': 'request',
-      'requestedBy': leaderName,
-    });
   }
 
   // Evacuee Actions

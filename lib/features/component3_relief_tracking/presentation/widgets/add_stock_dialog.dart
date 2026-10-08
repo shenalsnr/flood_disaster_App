@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../data/models/relief_item_model.dart';
 
+/// Form to add a new item to the camp's supply log.
+///
+/// Every field has a plain-language label, a hint and, where it helps, a
+/// short explanation, so a Camp Leader can fill it in without guessing.
 class AddStockDialog extends StatefulWidget {
   final Function(ReliefItemModel item) onItemAdded;
 
@@ -14,11 +18,25 @@ class AddStockDialog extends StatefulWidget {
 }
 
 class _AddStockDialogState extends State<AddStockDialog> {
+  static const Color _card = Color(0xFF131A2A);
+  static const Color _field = Color(0xFF0B101D);
+  static const Color _border = Color(0xFF1E283D);
+  static const Color _muted = Color(0xFF8E9BAE);
+  static const Color _accent = Color(0xFFFF5252);
+
+  static const List<String> _quickUnits = [
+    'Packs',
+    'Kg',
+    'Litres',
+    'Pieces',
+    'Cans',
+    'Boxes',
+  ];
+
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _qtyController = TextEditingController();
-  final _unitController = TextEditingController(text: 'Units');
-  final _minThresholdController = TextEditingController(text: '20');
+  final _unitController = TextEditingController();
 
   SupplyCategory _selectedCategory = SupplyCategory.water;
 
@@ -27,101 +45,178 @@ class _AddStockDialogState extends State<AddStockDialog> {
     _nameController.dispose();
     _qtyController.dispose();
     _unitController.dispose();
-    _minThresholdController.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      final newItem = ReliefItemModel(
-        id: 'inv_${DateTime.now().millisecondsSinceEpoch}',
-        name: _nameController.text.trim(),
-        category: _selectedCategory,
-        quantity: double.tryParse(_qtyController.text.trim()) ?? 0,
-        unit: _unitController.text.trim(),
-        minThreshold: double.tryParse(_minThresholdController.text.trim()) ?? 10,
-        lastUpdated: 'Just Now',
-      );
-
-      widget.onItemAdded(newItem);
-      Navigator.pop(context);
+  String _categoryLabel(SupplyCategory c) {
+    switch (c) {
+      case SupplyCategory.water:
+        return 'Water';
+      case SupplyCategory.food:
+        return 'Food';
+      case SupplyCategory.medical:
+        return 'Medical';
+      case SupplyCategory.shelter:
+        return 'Shelter';
+      case SupplyCategory.hygiene:
+        return 'Hygiene';
+      case SupplyCategory.other:
+        return 'Other';
     }
+  }
+
+  IconData _categoryIcon(SupplyCategory c) {
+    switch (c) {
+      case SupplyCategory.water:
+        return Icons.water_drop_outlined;
+      case SupplyCategory.food:
+        return Icons.restaurant_outlined;
+      case SupplyCategory.medical:
+        return Icons.medical_services_outlined;
+      case SupplyCategory.shelter:
+        return Icons.night_shelter_outlined;
+      case SupplyCategory.hygiene:
+        return Icons.clean_hands_outlined;
+      case SupplyCategory.other:
+        return Icons.inventory_2_outlined;
+    }
+  }
+
+  double? _parse(TextEditingController c) => double.tryParse(c.text.trim());
+
+  /// The low-stock level is worked out automatically: 20% of the starting
+  /// amount (or 10 when the item starts at 0). Swiping an item LOW / EMPTY
+  /// on the Supplies list sets its status by hand, so no extra field is needed.
+  double get _autoThreshold {
+    final qty = _parse(_qtyController) ?? 0;
+    return qty > 0 ? (qty * 0.2 < 1 ? 1 : qty * 0.2) : 10;
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final newItem = ReliefItemModel(
+      id: 'inv_${DateTime.now().millisecondsSinceEpoch}',
+      name: _nameController.text.trim(),
+      category: _selectedCategory,
+      quantity: _parse(_qtyController) ?? 0,
+      unit: _unitController.text.trim(),
+      minThreshold: _autoThreshold,
+      lastUpdated: 'Just Now',
+    );
+
+    widget.onItemAdded(newItem);
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF1E1E1E),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      backgroundColor: _card,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: _border),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.blueAccent.withValues(alpha: 0.15),
+                        color: _accent.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.add_box_outlined, color: Colors.blueAccent),
+                      child: const Icon(Icons.add_box_outlined, color: _accent),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Add Inventory Item',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Expanded(
+                      child: Text(
+                        'Add Item to Supplies',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 6),
+                const Text(
+                  'Add something your camp has in stock so you can track it. '
+                  'The app will warn you when it runs low.',
+                  style: TextStyle(color: _muted, fontSize: 12),
+                ),
+                const SizedBox(height: 18),
 
-                // Item Name
+                // 1. Name
+                _label('1. Item name', help: 'What is it?'),
                 TextFormField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: _inputDecoration('Item Name', Icons.inventory_2_outlined),
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter item name' : null,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: _decoration('e.g. Drinking water, Rice, Paracetamol'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Type the name of the item' : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
-                // Category Dropdown
-                DropdownButtonFormField<SupplyCategory>(
-                  initialValue: _selectedCategory,
-                  dropdownColor: const Color(0xFF2C2C2C),
-                  style: const TextStyle(color: Colors.white),
-                  decoration: _inputDecoration('Category', Icons.category_outlined),
-                  items: SupplyCategory.values.map((cat) {
-                    return DropdownMenuItem(
-                      value: cat,
-                      child: Text(cat.name.toUpperCase()),
+                // 2. Category
+                _label('2. Type of item', help: 'Tap one'),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: SupplyCategory.values.map((c) {
+                    final selected = c == _selectedCategory;
+                    return ChoiceChip(
+                      showCheckmark: false,
+                      selected: selected,
+                      backgroundColor: _field,
+                      selectedColor: _accent.withValues(alpha: 0.2),
+                      side: BorderSide(color: selected ? _accent : _border, width: 1.5),
+                      avatar: Icon(
+                        _categoryIcon(c),
+                        size: 16,
+                        color: selected ? _accent : _muted,
+                      ),
+                      label: Text(
+                        _categoryLabel(c),
+                        style: TextStyle(
+                          color: selected ? _accent : Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      onSelected: (_) => setState(() => _selectedCategory = c),
                     );
                   }).toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedCategory = val);
-                  },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
-                // Initial Quantity & Unit
+                // 3. Quantity + unit
+                _label('3. How much do you have now?', help: 'Enter the amount and what it is counted in'),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: TextFormField(
                         controller: _qtyController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('Initial Stock Qty', Icons.numbers),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        decoration: _decoration('Amount, e.g. 120'),
+                        validator: (v) {
+                          final n = double.tryParse((v ?? '').trim());
+                          if (n == null) return 'Enter a number';
+                          if (n < 0) return 'Cannot be negative';
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -129,42 +224,52 @@ class _AddStockDialogState extends State<AddStockDialog> {
                       child: TextFormField(
                         controller: _unitController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('Unit (e.g. Kg, L)', Icons.straighten),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        decoration: _decoration('Unit, e.g. Packs'),
+                        validator: (v) =>
+                            v == null || v.trim().isEmpty ? 'Enter a unit' : null,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                // Min Threshold
-                TextFormField(
-                  controller: _minThresholdController,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: _inputDecoration('Minimum Warning Threshold Qty', Icons.warning_amber_rounded),
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: _quickUnits.map((u) {
+                    return ActionChip(
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: _field,
+                      side: const BorderSide(color: _border),
+                      label: Text(u, style: const TextStyle(color: _muted, fontSize: 11)),
+                      onPressed: () => setState(() => _unitController.text = u),
+                    );
+                  }).toList(),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
+                const SizedBox(height: 4),
                 // Actions
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                      child: const Text('Cancel', style: TextStyle(color: _muted)),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: _accent,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       onPressed: _submit,
-                      icon: const Icon(Icons.check, size: 18),
-                      label: const Text('ADD TO INVENTORY', style: TextStyle(fontWeight: FontWeight.bold)),
+                      icon: const Icon(Icons.check, size: 16),
+                      label: const Text(
+                        'ADD ITEM',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
@@ -176,17 +281,41 @@ class _AddStockDialogState extends State<AddStockDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
+  Widget _label(String text, {String? help}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            text,
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          if (help != null)
+            Text(help, style: const TextStyle(color: _muted, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _decoration(String hint) {
     return InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.white60, fontSize: 13),
-      prefixIcon: Icon(icon, color: Colors.white54, size: 18),
+      hintText: hint,
+      hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
       filled: true,
-      fillColor: const Color(0xFF2C2C2C),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      fillColor: _field,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: _border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: _border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: _accent),
       ),
     );
   }
