@@ -10,6 +10,7 @@ import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
 import 'citizen_drawer.dart';
+import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Citizen Dashboard Screen — Component 1: Early Warning & Evacuation
@@ -58,23 +59,34 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(FirebaseAuth.instance.currentUser?.uid ?? 'unknown')
+          .doc(ResponderController().currentUser?.email ?? 'unknown')
           .snapshots(),
       builder: (context, userSnap) {
+        final bool isLoading =
+            userSnap.connectionState == ConnectionState.waiting;
         final userData =
             userSnap.hasData && userSnap.data != null && userSnap.data!.exists
             ? (userSnap.data!.data() as Map<String, dynamic>)
             : <String, dynamic>{};
 
         final district = userData['district'] as String? ?? 'Colombo';
-        final citizenName = userData['fullName'] as String? ?? 'Citizen User';
+        final city = userData['city'] as String? ?? 'Colombo';
+        final citizenName =
+            userData['name'] as String? ??
+            userData['fullName'] as String? ??
+            'Citizen User';
         final citizenZone =
-            userData['alertZone'] as String? ?? 'Colombo Low-Lying Area';
+            userData['floodZone'] as String? ??
+            userData['district'] as String? ??
+            userData['zone'] as String? ??
+            userData['alertZone'] as String? ??
+            'Colombo Low-Lying Area';
 
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('warnings')
               .where('district', isEqualTo: district)
+              .where('city', isEqualTo: city)
               .snapshots(),
           builder: (context, warningsSnap) {
             WarningAlert? topAlert;
@@ -180,72 +192,89 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: const Color(0xFF1E293B)),
                           ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF00E676)
-                                      .withValues(alpha: 0.15),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(0xFF00E676)
-                                        .withValues(alpha: 0.4),
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.person_rounded,
-                                  color: Color(0xFF00E676),
-                                  size: 22,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      citizenName,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
+                          child: isLoading
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8.0,
+                                    ),
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Color(0xFF00E676),
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Sector: $citizenZone',
-                                      style: const TextStyle(
-                                        color: Color(0xFF38BDF8),
-                                        fontSize: 11,
+                                  ),
+                                )
+                              : Row(
+                                  children: [
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF00E676)
+                                            .withValues(alpha: 0.15),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: const Color(0xFF00E676)
+                                              .withValues(alpha: 0.4),
+                                        ),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
+                                      child: const Icon(
+                                        Icons.person_rounded,
+                                        color: Color(0xFF00E676),
+                                        size: 22,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            citizenName,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            'Sector: $citizenZone',
+                                            style: const TextStyle(
+                                              color: Color(0xFF38BDF8),
+                                              fontSize: 11,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF00E676)
+                                            .withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text(
+                                        'ACTIVE',
+                                        style: TextStyle(
+                                          color: Color(0xFF00E676),
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF00E676)
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'ACTIVE',
-                                  style: TextStyle(
-                                    color: Color(0xFF00E676),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
 
                         if (topAlert != null)

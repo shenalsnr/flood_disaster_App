@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class WarningAlert {
   final String id;
   final String district;
+  final String city;
   final String locationZone;
   final String hazardType;
   final double waterLevelMeters;
@@ -21,6 +22,7 @@ class WarningAlert {
   const WarningAlert({
     required this.id,
     required this.district,
+    required this.city,
     required this.locationZone,
     required this.hazardType,
     required this.waterLevelMeters,
@@ -37,6 +39,7 @@ class WarningAlert {
     return WarningAlert(
       id: doc.id,
       district: data['district'] as String? ?? 'All',
+      city: data['city'] as String? ?? 'All',
       locationZone: data['locationZone'] as String? ?? '',
       hazardType: data['hazardType'] as String? ?? '',
       waterLevelMeters: (data['waterLevelMeters'] as num?)?.toDouble() ?? 0.0,
@@ -54,6 +57,7 @@ class WarningAlert {
   Map<String, dynamic> toMap() {
     return {
       'district': district,
+      'city': city,
       'locationZone': locationZone,
       'hazardType': hazardType,
       'waterLevelMeters': waterLevelMeters,
@@ -69,6 +73,7 @@ class WarningAlert {
   WarningAlert copyWith({
     String? id,
     String? district,
+    String? city,
     String? locationZone,
     String? hazardType,
     double? waterLevelMeters,
@@ -80,6 +85,7 @@ class WarningAlert {
     return WarningAlert(
       id: id ?? this.id,
       district: district ?? this.district,
+      city: city ?? this.city,
       locationZone: locationZone ?? this.locationZone,
       hazardType: hazardType ?? this.hazardType,
       waterLevelMeters: waterLevelMeters ?? this.waterLevelMeters,
