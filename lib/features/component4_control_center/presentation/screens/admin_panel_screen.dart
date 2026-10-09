@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../data/services/admin_user_service.dart';
 import '../controllers/responder_controller.dart';
+import '../../../component1_evacuation/services/safe_zone_service.dart';
+import 'safe_zones_screen.dart';
 
 /// Administrator panel: create staff accounts with a role, see staff and
 /// citizens in separate lists, enable / disable and delete accounts.
@@ -342,6 +344,13 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             tooltip: 'Check database connection',
             icon: const Icon(Icons.wifi_find_outlined),
             onPressed: _checkConnection,
+          ),
+          IconButton(
+            tooltip: 'Safe zones',
+            icon: const Icon(Icons.add_location_alt_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SafeZonesScreen()),
+            ),
           ),
           IconButton(
             tooltip: 'Manage camps',
@@ -1064,29 +1073,36 @@ class _ManageCampsDialog extends StatefulWidget {
 }
 
 class _ManageCampsDialogState extends State<_ManageCampsDialog> {
-  final _ctrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
   String _id(String n) => AdminUserService.campIdFromName(n);
 
   List<_UserRow> _leadersOf(String camp) =>
       widget.leaders.where((l) => _id(l.area) == _id(camp)).toList();
 
-  Future<void> _add() async {
-    final name = _ctrl.text.trim();
-    if (name.isEmpty) return;
-    try {
-      await widget.service.addCamp(name).timeout(const Duration(seconds: 10));
-      _ctrl.clear();
-      widget.toast('$name added');
-    } catch (e) {
-      widget.toast('Could not add the camp: $e', error: true);
-    }
+  Future<void> _editZone(String name) async {
+    final saved = await openSafeZoneEditor(context, name: name);
+    if (saved != null) widget.toast(saved);
+  }
+
+  Widget _subtitle(String camp, SafeZone? z) {
+    const muted = Color(0xFF8E9BAE);
+    final n = _leadersOf(camp).length;
+    final located = z != null && z.hasLocation;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (n > 0)
+          Text('$n camp leader(s)',
+              style: const TextStyle(color: muted, fontSize: 11)),
+        Text(
+          located
+              ? 'On citizen map - ${z.occupied}/${z.capacity} (${z.stateLabel})'
+              : 'Not on the map yet - tap the pin to place it',
+          style: TextStyle(
+              color: located ? const Color(0xFF30D158) : const Color(0xFFFF9F0A),
+              fontSize: 11),
+        ),
+      ],
+    );
   }
 
   Future<bool> _confirm(String title, String body, String action) async {
@@ -1186,36 +1202,21 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
               if (l.area.isNotEmpty) byId.putIfAbsent(_id(l.area), () => l.area);
             }
             final names = byId.values.toList()..sort();
+            return StreamBuilder<List<SafeZone>>(
+              stream: SafeZoneService.instance.watch(),
+              builder: (context, zsnap) {
+                final zones = <String, SafeZone>{
+                  for (final z in zsnap.data ?? const <SafeZone>[]) z.id: z,
+                };
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _ctrl,
-                        style: const TextStyle(color: Colors.white),
-                        textCapitalization: TextCapitalization.words,
-                        decoration:
-                            _AdminPanelScreenState._decoration('New camp name'),
-                        onSubmitted: (_) => _add(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      style: IconButton.styleFrom(backgroundColor: accent),
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      onPressed: _add,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
                 Flexible(
                   child: names.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.all(16),
-                          child: Text('No camps yet. Add one above.',
+                          child: Text('No camps yet. Add one from the Safe zones page.',
                               style: TextStyle(color: muted, fontSize: 13)),
                         )
                       : ListView(
@@ -1232,22 +1233,37 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
                                 title: Text(c,
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 13)),
-                                subtitle: _leadersOf(c).isEmpty
-                                    ? null
-                                    : Text(
-                                        '${_leadersOf(c).length} camp leader(s)',
-                                        style: const TextStyle(
-                                            color: muted, fontSize: 11)),
+                                subtitle: _subtitle(c, zones[_id(c)]),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      tooltip: (zones[_id(c)]?.hasLocation ??
+                                              false)
+                                          ? 'Edit safe zone'
+                                          : 'Place on map',
+                                      icon: Icon(
+                                        (zones[_id(c)]?.hasLocation ?? false)
+                                            ? Icons.location_on
+                                            : Icons.add_location_alt_outlined,
+                                        color: (zones[_id(c)]?.hasLocation ??
+                                                false)
+                                            ? const Color(0xFF30D158)
+                                            : const Color(0xFFFF9F0A),
+                                        size: 20,
+                                      ),
+                                      onPressed: () => _editZone(c),
+                                    ),
+                                    IconButton(
+                                      visualDensity: VisualDensity.compact,
                                       tooltip: 'Rename',
                                       icon: const Icon(Icons.edit_outlined,
                                           color: muted, size: 20),
                                       onPressed: () => _rename(c),
                                     ),
                                     IconButton(
+                                      visualDensity: VisualDensity.compact,
                                       tooltip: 'Remove',
                                       icon: const Icon(Icons.delete_outline,
                                           color: accent, size: 20),
@@ -1260,6 +1276,8 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
                         ),
                 ),
               ],
+            );
+              },
             );
           },
         ),
@@ -1351,10 +1369,13 @@ class _CampSheetState extends State<_CampSheet> {
               const SizedBox(height: 6),
               Flexible(
                 child: shown.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Text('No camp matches your search.',
-                            style: TextStyle(color: muted, fontSize: 13)),
+                    ? Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                            widget.camps.isEmpty
+                                ? 'No safe zones yet. Add one first: Admin Panel > Manage camps.'
+                                : 'No camp matches your search.',
+                            style: const TextStyle(color: muted, fontSize: 13)),
                       )
                     : ListView(
                         shrinkWrap: true,
@@ -1373,16 +1394,7 @@ class _CampSheetState extends State<_CampSheet> {
                         ],
                       ),
               ),
-              ListTile(
-                leading: const Icon(Icons.add_circle_outline, color: accent),
-                title: Text(
-                    q.isEmpty || shown.isNotEmpty
-                        ? 'Add new camp'
-                        : 'Add "${_q.trim()}" as a new camp',
-                    style: const TextStyle(
-                        color: accent, fontWeight: FontWeight.bold)),
-                onTap: () => Navigator.pop(context, widget.newKey),
-              ),
+              const SizedBox(height: 8),
             ],
           ),
         ),
