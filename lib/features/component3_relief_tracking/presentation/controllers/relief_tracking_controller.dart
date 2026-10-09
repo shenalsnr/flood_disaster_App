@@ -16,6 +16,9 @@ class ReliefTrackingController extends ChangeNotifier {
       campName = zone;
     }
     campId = campIdFromName(campName);
+    // Only the built-in demo camp starts with a demo headcount; camps the
+    // administrator adds start empty.
+    if (campId != 'camp_neraya') evacueeCount = 0;
     _auth.addListener(_onAuthChanged);
     _startSync();
   }
