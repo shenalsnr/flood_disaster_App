@@ -497,17 +497,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               // Top Bar with Circular Back Button (Matching Image 1)
               Row(
                 children: [
-                  GestureDetector(
+                  if (Navigator.of(context).canPop())
+                    GestureDetector(
                     onTap: () {
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      } else {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const ResponderRegisterScreen(),
-                          ),
-                        );
-                      }
+                      Navigator.of(context).pop();
                     },
                     child: Container(
                       width: 42,
@@ -527,7 +520,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  if (Navigator.of(context).canPop()) const SizedBox(width: 14),
                   const Text(
                     'Secure Portal Login',
                     style: TextStyle(

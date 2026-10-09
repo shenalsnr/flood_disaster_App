@@ -12,7 +12,7 @@ import 'supply_admin_dashboard_screen.dart';
 import '../../../component4_control_center/presentation/screens/admin_panel_screen.dart';
 import 'personal_information_screen.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
-import '../../../component4_control_center/presentation/screens/sign_in_screen.dart';
+import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../widgets/leader_avatar.dart';
 
 class CampDashboardScreen extends StatefulWidget {
@@ -957,7 +957,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               await SessionService.clear();
               if (!context.mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const SignInScreen()),
+                MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
                 (route) => false,
               );
             },
