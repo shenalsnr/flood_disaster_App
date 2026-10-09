@@ -87,6 +87,42 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     }
   }
 
+  IconData _iconForHazard(String hazard) {
+    final lower = hazard.toLowerCase();
+    if (lower.contains('tree')) {
+      return Icons.park_rounded;
+    } else if (lower.contains('flood')) {
+      return Icons.waves_rounded;
+    } else if (lower.contains('landslide')) {
+      return Icons.landscape_rounded;
+    } else if (lower.contains('road') || lower.contains('blocked') || lower.contains('blockage')) {
+      return Icons.do_not_disturb_on_rounded;
+    } else if (lower.contains('building')) {
+      return Icons.home_outlined;
+    } else if (lower.contains('bridge')) {
+      return Icons.warning_amber_rounded;
+    }
+    return Icons.warning_amber_rounded;
+  }
+
+  Color _colorForHazard(String hazard) {
+    final lower = hazard.toLowerCase();
+    if (lower.contains('tree')) {
+      return const Color(0xFF22C55E); // Green
+    } else if (lower.contains('flood')) {
+      return const Color(0xFFFF5252); // Red / Coral
+    } else if (lower.contains('landslide')) {
+      return const Color(0xFFFFB300); // Amber
+    } else if (lower.contains('road') || lower.contains('blocked') || lower.contains('blockage')) {
+      return const Color(0xFFFF5252); // Red
+    } else if (lower.contains('building')) {
+      return const Color(0xFFCBD5E1); // Slate / White
+    } else if (lower.contains('bridge')) {
+      return const Color(0xFFFF9800); // Orange
+    }
+    return const Color(0xFFFFB300);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -467,7 +503,6 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                     for (var doc in snapshot.data!.docs) {
                       final data = doc.data() as Map<String, dynamic>;
                       final hazard = data['hazardType'] as String? ?? 'Hazard';
-                      final isFlood = hazard.toLowerCase().contains('flood');
                       reportsToDisplay.add(
                         HazardReportItem(
                           id: doc.id,
@@ -481,12 +516,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                           description: data['description'] as String? ??
                               'Ground hazard verified by district volunteer.',
                           reporter: data['reporterName'] as String? ?? 'Kapila Perera',
-                          icon: isFlood
-                              ? Icons.waves_rounded
-                              : Icons.landscape_rounded,
-                          iconColor: isFlood
-                              ? const Color(0xFFFF5252)
-                              : const Color(0xFFFFB300),
+                          icon: _iconForHazard(hazard),
+                          iconColor: _colorForHazard(hazard),
                           waterLevel: (data['waterDepth'] as num?)?.toDouble(),
                         ),
                       );
@@ -544,46 +575,51 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView(
-                children: [
-                  ..._defaultReports.map(
-                    (r) => _RecentReportCard(
-                      report: r,
-                      onTap: () => HazardReportDetailsSheet.show(context, r),
-                    ),
-                  ),
-                  _RecentReportCard(
-                    report: const HazardReportItem(
-                      id: 'rep-003',
-                      title: 'Fallen Tree - Power Line Down',
-                      location: 'Avissawella Road, Km 22',
-                      timeAgo: '3 hours ago',
-                      status: 'VERIFIED',
-                      hazardType: 'Obstruction',
-                      description:
-                          'Large Mara tree fell on high-tension power line. Road blocked. CEB notified.',
-                      reporter: 'Kapila Perera',
-                      icon: Icons.park_rounded,
-                      iconColor: Color(0xFF4ADE80),
-                    ),
-                    onTap: () => HazardReportDetailsSheet.show(
-                      context,
-                      const HazardReportItem(
-                        id: 'rep-003',
-                        title: 'Fallen Tree - Power Line Down',
-                        location: 'Avissawella Road, Km 22',
-                        timeAgo: '3 hours ago',
-                        status: 'VERIFIED',
-                        hazardType: 'Obstruction',
-                        description:
-                            'Large Mara tree fell on high-tension power line. Road blocked. CEB notified.',
-                        reporter: 'Kapila Perera',
-                        icon: Icons.park_rounded,
-                        iconColor: Color(0xFF4ADE80),
-                      ),
-                    ),
-                  ),
-                ],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('hazard_reports')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  List<HazardReportItem> allReports = [];
+                  if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                    for (var doc in snapshot.data!.docs) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final hazard = data['hazardType'] as String? ?? 'Hazard';
+                      allReports.add(
+                        HazardReportItem(
+                          id: doc.id,
+                          title: data['severity'] != null
+                              ? '$hazard (${data['severity']})'
+                              : hazard,
+                          location: data['location'] as String? ?? 'Field Sector',
+                          timeAgo: 'Just now',
+                          status: data['status'] as String? ?? 'VERIFIED',
+                          hazardType: hazard,
+                          description: data['description'] as String? ??
+                              'Ground hazard verified by district volunteer.',
+                          reporter: data['reporterName'] as String? ?? 'Kapila Perera',
+                          icon: _iconForHazard(hazard),
+                          iconColor: _colorForHazard(hazard),
+                          waterLevel: (data['waterDepth'] as num?)?.toDouble(),
+                        ),
+                      );
+                    }
+                  }
+                  if (allReports.isEmpty) {
+                    allReports = _defaultReports;
+                  }
+                  return ListView(
+                    children: allReports
+                        .map(
+                          (r) => _RecentReportCard(
+                            report: r,
+                            onTap: () => HazardReportDetailsSheet.show(context, r),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
               ),
             ),
           ],
