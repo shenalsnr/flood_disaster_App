@@ -29,6 +29,22 @@ Login is custom (Firestore `users/{email}`), the session is kept with `shared_pr
 | Member 3 | R P S N Rajapaksha | IT23818866 | Component 3 – Shelter Relief Tracker |
 | Member 4 | Nimantha L.N.A.I | IT23821040 | Component 4 – Responder Control Center |
 
+## Demo login accounts
+
+These accounts are for testing and marking only. Sign in on the login page with the email and password.
+
+| Account | Email | Password |
+|---------|-------|----------|
+| Member 1 – K.B.G.L. Ravihara | Lashan.ravihara@gmail.com | lashan666**N |
+| Member 2 – Viduranga R.A.D | dusha@gmail.com | dusha123 |
+| Member 3 – R P S N Rajapaksha | shenalsnr@gmail.com | shenal666**N |
+| Member 4 – Nimantha L.N.A.I | isurunimantha666@gmail.com | isuru666**N |
+| Administrator (Admin Dashboard) | admin@gmail.com | admin123 |
+
+Each account opens the dashboard for the role saved on it in Firestore (`users/{email}`). Emails are not case sensitive.
+
+> Demo credentials only. Do not reuse these passwords anywhere else, and replace them before any real deployment (passwords are stored in plain text in this prototype).
+
 ## Components
 
 | # | Component | Member | Folder | Key requirements |
@@ -83,7 +99,7 @@ Flutter (Dart SDK ^3.13), `firebase_core`, `cloud_firestore`, `firebase_auth`, `
    ```
    flutter run
    ```
-5. Sign in with an account created from Admin Panel → ADD STAFF (create the first admin directly in the `users` collection).
+5. Sign in with one of the demo accounts above, or create staff accounts from Admin Dashboard → Staff & Users → ADD STAFF.
 
 ## Project structure
 
