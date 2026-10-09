@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// 3-Step Wizard for Reporting Ground Hazards.
 /// - Step 1: 4 hazard tiles (Flash Flood, Landslide, Fallen Tree, Road Blocked).
@@ -25,6 +27,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   String _selectedHazard = 'Flash Flood';
   String _selectedSeverity = 'HIGH / CRITICAL';
   bool _photoAttached = false;
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
   String _selectedNote = 'Water rising rapidly near bridge. Road impassable for light vehicles.';
   bool _isSubmitting = false;
 
@@ -123,6 +127,55 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     return const Color(0xFF38BDF8);
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? picked = await _picker.pickImage(
+        source: source,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 85,
+      );
+
+      if (picked != null) {
+        setState(() {
+          _imageFile = File(picked.path);
+          _photoAttached = true;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(source == ImageSource.camera
+                      ? 'Photo evidence captured & GPS tagged.'
+                      : 'Gallery photo selected & attached.'),
+                ],
+              ),
+              backgroundColor: const Color(0xFF00E676),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to access image: $e'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   void _showAddPhotoSheet() {
     showModalBottomSheet(
       context: context,
@@ -157,6 +210,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ),
             const SizedBox(height: 16),
             ListTile(
+              contentPadding: EdgeInsets.zero,
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -165,21 +219,15 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
                 child: const Icon(Icons.camera_alt_rounded, color: Color(0xFFFF9800)),
               ),
-              title: const Text('Capture with Camera', style: TextStyle(color: Colors.white)),
+              title: const Text('Capture with Camera', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               subtitle: const Text('Auto-tags timestamp & GPS coordinates', style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(ctx);
-                setState(() => _photoAttached = true);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Photo evidence captured and GPS tagged.'),
-                    backgroundColor: Color(0xFF00E676),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                _pickImage(ImageSource.camera);
               },
             ),
             ListTile(
+              contentPadding: EdgeInsets.zero,
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -188,20 +236,36 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
                 child: const Icon(Icons.photo_library_rounded, color: Color(0xFF38BDF8)),
               ),
-              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white)),
+              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               subtitle: const Text('Upload field image from device', style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(ctx);
-                setState(() => _photoAttached = true);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Field photo attached.'),
-                    backgroundColor: Color(0xFF00E676),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                _pickImage(ImageSource.gallery);
               },
             ),
+            if (_imageFile != null) ...[
+              const Divider(color: Color(0xFF1E2D4A), height: 24),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                ),
+                title: const Text('Remove Attached Photo', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                subtitle: const Text('Clear the currently attached image', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  setState(() {
+                    _imageFile = null;
+                    _photoAttached = false;
+                  });
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -354,7 +418,58 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             const SizedBox(height: 10),
             _buildReviewRow('GPS Coordinates', '6.9271° N, 79.8612° E (±4m)'),
             const SizedBox(height: 10),
-            _buildReviewRow('Photo Evidence', _photoAttached ? 'Attached & Secured' : 'Optional (Skipped)'),
+            _buildReviewRow(
+              'Photo Evidence',
+              _imageFile != null
+                  ? 'Attached & Secured'
+                  : (_photoAttached ? 'Attached & Secured' : 'Optional (Skipped)'),
+            ),
+            if (_imageFile != null) ...[
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF1E2D4A)),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.file(
+                        _imageFile!,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        left: 10,
+                        bottom: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF060B14).withValues(alpha: 0.8),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.6)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.verified_rounded, color: Color(0xFF00E676), size: 14),
+                              SizedBox(width: 5),
+                              Text(
+                                'GEO-TAGGED & TIME-STAMPED',
+                                style: TextStyle(color: Color(0xFF00E676), fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 10),
             _buildReviewRow('Field Note', _selectedNote),
             const SizedBox(height: 26),
@@ -429,7 +544,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         'severity': _selectedSeverity,
         'location': 'Kolonnawa Basin, Kelani River Area',
         'description': _selectedNote,
-        'hasPhoto': _photoAttached,
+        'hasPhoto': _imageFile != null || _photoAttached,
+        'photoPath': _imageFile?.path ?? '',
         'reporterName': reporterName,
         'reporterEmail': user?.email ?? 'volunteer.kapila@dmc.org',
         'isVerified': true,
@@ -983,26 +1099,63 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           // ── Action Card 1: ADD PHOTO (RECOMMENDED) ────────────────────────
           _ConfirmActionCard(
             onTap: _showAddPhotoSheet,
-            leadingWidget: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1B2332),
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF28364C)),
-              ),
-              child: Center(
-                child: Icon(
-                  _photoAttached ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
-                  color: _photoAttached ? const Color(0xFF00E676) : const Color(0xFFFF9800),
-                  size: 26,
-                ),
-              ),
-            ),
-            title: _photoAttached ? 'PHOTO EVIDENCE ATTACHED' : 'ADD PHOTO (RECOMMENDED)',
-            subtitle: _photoAttached
-                ? 'GPS & timestamp locked with photo'
-                : 'Tap to open camera & secure evidence',
+            leadingWidget: _imageFile != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.file(
+                            _imageFile!,
+                            fit: BoxFit.cover,
+                          ),
+                          Positioned(
+                            right: 2,
+                            bottom: 2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF00E676),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: Color(0xFF060B14),
+                                size: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1B2332),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF28364C)),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        _photoAttached ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
+                        color: _photoAttached ? const Color(0xFF00E676) : const Color(0xFFFF9800),
+                        size: 26,
+                      ),
+                    ),
+                  ),
+            title: (_imageFile != null || _photoAttached)
+                ? 'PHOTO EVIDENCE ATTACHED'
+                : 'ADD PHOTO (RECOMMENDED)',
+            subtitle: _imageFile != null
+                ? 'Tap to change or remove photo'
+                : (_photoAttached
+                    ? 'GPS & timestamp locked with photo'
+                    : 'Tap to open camera & secure evidence'),
           ),
 
           const SizedBox(height: 14),
