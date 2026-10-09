@@ -12,6 +12,7 @@ class CitizenDrawer extends StatelessWidget {
 
   Future<void> _signOut(BuildContext context) async {
     try {
+      await SessionService.clear();
       await FirebaseAuth.instance.signOut();
       if (context.mounted) {
         Navigator.of(context).pushAndRemoveUntil(

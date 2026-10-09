@@ -53,7 +53,21 @@ class AuthFirebaseService {
       'role': 'campLeader',
       'password': 'Camp@2026',
     },
+    // Bootstrap administrator: always able to sign in so the first staff
+    // accounts can be created. Change this password before real use.
+    'admin@wesafe.gov.lk': {
+      'uid': 'admin@wesafe.gov.lk',
+      'fullName': 'System Administrator',
+      'email': 'admin@wesafe.gov.lk',
+      'phoneNumber': '',
+      'nic': '',
+      'floodZone': 'National Control',
+      'role': 'admin',
+      'password': 'Admin@2026',
+    },
   };
+
+  static const String _bootstrapAdminEmail = 'admin@wesafe.gov.lk';
 
   /// Save new user registration details to Cloud Firestore & in-memory cache
   Future<UserProfile> registerUser({
@@ -123,9 +137,11 @@ class AuthFirebaseService {
     final cleanEmail = email.toLowerCase().trim();
 
     Map<String, dynamic>? data;
+    var firestoreReachable = false;
 
     try {
       final doc = await _firestore.collection('users').doc(cleanEmail).get();
+      firestoreReachable = true;
       if (doc.exists && doc.data() != null) {
         data = doc.data()!;
         _offlineFallbackCache[cleanEmail] = data; // Keep cache in sync
@@ -135,12 +151,22 @@ class AuthFirebaseService {
       debugPrint('⚠️ Firestore read warning: $e. Using local cache.');
     }
 
-    // Check offline fallback cache if Firestore document wasn't fetched
-    data ??= _offlineFallbackCache[cleanEmail];
+    // Local cache is only used when Firestore could not be reached (offline),
+    // or for the bootstrap admin. This way an account the admin deleted
+    // from Firestore can no longer sign in.
+    if (data == null &&
+        (!firestoreReachable || cleanEmail == _bootstrapAdminEmail)) {
+      data = _offlineFallbackCache[cleanEmail];
+    }
 
     if (data == null) {
       throw Exception(
           'No account found with this email ($cleanEmail). Please complete registration first.');
+    }
+
+    if (data['isActive'] == false) {
+      throw Exception(
+          'This account has been disabled by the administrator. Please contact your administrator.');
     }
 
     final storedPassword = data['password'] as String? ?? '';
@@ -149,6 +175,33 @@ class AuthFirebaseService {
     }
 
     debugPrint('✅ User "$cleanEmail" authenticated successfully');
+    return UserProfile.fromMap(data, cleanEmail);
+  }
+
+  /// Loads an existing account without a password (used to restore a
+  /// remembered sign-in). Throws when the account is missing or disabled.
+  Future<UserProfile> loadUserByEmail(String email) async {
+    final cleanEmail = email.toLowerCase().trim();
+    Map<String, dynamic>? data;
+    var reachable = false;
+    try {
+      final doc = await _firestore.collection('users').doc(cleanEmail).get();
+      reachable = true;
+      if (doc.exists && doc.data() != null) {
+        data = doc.data()!;
+        _offlineFallbackCache[cleanEmail] = data;
+      }
+    } catch (e) {
+      debugPrint('loadUserByEmail read warning: $e');
+    }
+    if (data == null &&
+        (!reachable || cleanEmail == _bootstrapAdminEmail)) {
+      data = _offlineFallbackCache[cleanEmail];
+    }
+    if (data == null) throw Exception('Account not found.');
+    if (data['isActive'] == false) {
+      throw Exception('This account has been disabled by the administrator.');
+    }
     return UserProfile.fromMap(data, cleanEmail);
   }
 
