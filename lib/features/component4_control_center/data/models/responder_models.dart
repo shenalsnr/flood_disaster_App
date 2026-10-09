@@ -143,6 +143,8 @@ class UserProfile {
   final String email;
   final String phoneNumber;
   final String nic;
+  final String district;
+  final String city;
   final String floodZone;
   final String role; // responder, citizen, volunteer, campLeader
   final String? photoUrl;
@@ -153,6 +155,8 @@ class UserProfile {
     required this.email,
     required this.phoneNumber,
     required this.nic,
+    this.district = '',
+    this.city = '',
     required this.floodZone,
     required this.role,
     this.photoUrl,
@@ -165,6 +169,8 @@ class UserProfile {
       'email': email.toLowerCase().trim(),
       'phoneNumber': phoneNumber,
       'nic': nic,
+      'district': district,
+      'city': city,
       'floodZone': floodZone,
       'role': role,
       'password': ?password,
@@ -180,6 +186,8 @@ class UserProfile {
       email: map['email'] as String? ?? id,
       phoneNumber: map['phoneNumber'] as String? ?? '',
       nic: map['nic'] as String? ?? '',
+      district: map['district'] as String? ?? '',
+      city: map['city'] as String? ?? '',
       floodZone: map['floodZone'] as String? ?? '',
       role: map['role'] as String? ?? 'responder',
       photoUrl: map['photoUrl'] as String?,
@@ -192,6 +200,8 @@ class UserProfile {
     String? email,
     String? phoneNumber,
     String? nic,
+    String? district,
+    String? city,
     String? floodZone,
     String? role,
     String? photoUrl,
@@ -202,6 +212,8 @@ class UserProfile {
       email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       nic: nic ?? this.nic,
+      district: district ?? this.district,
+      city: city ?? this.city,
       floodZone: floodZone ?? this.floodZone,
       role: role ?? this.role,
       photoUrl: photoUrl ?? this.photoUrl,
