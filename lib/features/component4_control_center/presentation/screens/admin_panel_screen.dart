@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,7 +28,37 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   final _service = AdminUserService.instance;
   String _filter = 'all'; // 'all' or a role key
-  List<String> _knownCamps = const [];
+  List<String> _knownCamps = const []; // camps already given to leaders
+  List<String> _camps = const []; // camps added in the `camps` collection
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _campSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _campSub = _service.watchCamps().listen((snap) {
+      final names = snap.docs
+          .map((d) => (d.data()['name'] as String? ?? '').trim())
+          .where((n) => n.isNotEmpty)
+          .toList();
+      if (mounted) setState(() => _camps = names);
+    }, onError: (Object _) {});
+  }
+
+  @override
+  void dispose() {
+    _campSub?.cancel();
+    super.dispose();
+  }
+
+  /// Every camp that can be chosen: added camps, camps leaders already have,
+  /// and the default "Camp Nēraya". Spelling variants collapse to one entry.
+  List<String> get _allCamps {
+    final byId = <String, String>{};
+    for (final n in [..._camps, ..._knownCamps, 'Camp Nēraya']) {
+      byId.putIfAbsent(AdminUserService.campIdFromName(n), () => n.trim());
+    }
+    return byId.values.toList()..sort();
+  }
 
   String get _myEmail =>
       (ResponderController().currentUser?.email ?? '').toLowerCase().trim();
@@ -149,57 +180,38 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   }
 
   Future<void> _changeArea(_UserRow u) async {
-    final isCamp = u.role == 'campLeader';
-    final ctrl = TextEditingController(text: u.area);
+    String? chosen = u.area.isEmpty ? null : u.area;
+    var camps = _allCamps;
+    if (chosen != null && !camps.contains(chosen)) camps = [...camps, chosen];
     final picked = await showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
           backgroundColor: _card,
-          title: Text(
-              isCamp ? 'Camp for ${u.name}' : 'Assigned zone for ${u.name}',
+          title: Text('Camp for ${u.name}',
               style: const TextStyle(color: Colors.white, fontSize: 16)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: ctrl,
-                  style: const TextStyle(color: Colors.white),
-                  onChanged: (_) => setS(() {}),
-                  decoration: _decoration(isCamp
-                      ? 'Camp name, e.g. Camp Nēraya'
-                      : 'Zone name'),
+                _CampPicker(
+                  camps: camps,
+                  value: chosen,
+                  onChanged: (v) => setS(() => chosen = v),
+                  onAddNew: (name) async {
+                    await _service.addCamp(name);
+                    setS(() {
+                      if (!camps.contains(name)) camps = [...camps, name];
+                    });
+                  },
                 ),
-                if (isCamp && _knownCamps.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  const Text('Existing camps (tap to use)',
-                      style: TextStyle(color: _muted, fontSize: 11)),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: _knownCamps
-                        .map((c) => ActionChip(
-                              backgroundColor: _bg,
-                              side: const BorderSide(color: _border),
-                              label: Text(c,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 11)),
-                              onPressed: () => setS(() => ctrl.text = c),
-                            ))
-                        .toList(),
-                  ),
-                ],
-                if (isCamp) ...[
-                  const SizedBox(height: 10),
-                  const Text(
-                      'Leaders with the same camp name share that camp\'s '
-                      'supplies and requests. The change applies the next '
-                      'time the leader signs in.',
-                      style: TextStyle(color: _muted, fontSize: 11)),
-                ],
+                const SizedBox(height: 10),
+                const Text(
+                    'Leaders in the same camp share its supplies and '
+                    'requests. The change applies the next time the leader '
+                    'signs in.',
+                    style: TextStyle(color: _muted, fontSize: 11)),
               ],
             ),
           ),
@@ -208,19 +220,105 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancel', style: TextStyle(color: _muted))),
             TextButton(
-                onPressed: ctrl.text.trim().isEmpty
-                    ? null
-                    : () => Navigator.pop(ctx, ctrl.text.trim()),
+                onPressed: chosen == null ? null : () => Navigator.pop(ctx, chosen),
                 child: const Text('SAVE', style: TextStyle(color: _accent))),
           ],
         ),
       ),
     );
-    ctrl.dispose();
     if (picked != null && picked != u.area) {
       await _run(() => _service.setArea(u.email, picked),
           '${u.name} assigned to $picked');
     }
+  }
+
+  /// Add or remove camps in the list leaders can be assigned to.
+  Future<void> _manageCamps() async {
+    final ctrl = TextEditingController();
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) => AlertDialog(
+          backgroundColor: _card,
+          title: const Text('Manage camps',
+              style: TextStyle(color: Colors.white, fontSize: 16)),
+          content: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: ctrl,
+                        style: const TextStyle(color: Colors.white),
+                        textCapitalization: TextCapitalization.words,
+                        decoration: _decoration('New camp name'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      style: IconButton.styleFrom(backgroundColor: _accent),
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      onPressed: () async {
+                        final name = ctrl.text.trim();
+                        if (name.isEmpty) return;
+                        await _run(() => _service.addCamp(name), '$name added');
+                        ctrl.clear();
+                        setS(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: _allCamps.map((c) {
+                      final inUse = _knownCamps.any((k) =>
+                          AdminUserService.campIdFromName(k) ==
+                          AdminUserService.campIdFromName(c));
+                      return ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.holiday_village_outlined,
+                            color: _muted, size: 20),
+                        title: Text(c,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13)),
+                        subtitle: inUse
+                            ? const Text('Has a camp leader',
+                                style: TextStyle(color: _muted, fontSize: 11))
+                            : null,
+                        trailing: inUse
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    color: _accent, size: 20),
+                                onPressed: () async {
+                                  await _run(
+                                      () => _service.deleteCamp(c), '$c removed');
+                                  setS(() {});
+                                },
+                              ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Close', style: TextStyle(color: _muted))),
+          ],
+        ),
+      ),
+    );
+    ctrl.dispose();
   }
 
   Future<void> _resetPassword(_UserRow u) async {
@@ -264,7 +362,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       builder: (_) => _AddStaffDialog(
         service: _service,
         createdBy: _myEmail,
-        knownCamps: _knownCamps,
+        camps: _allCamps,
       ),
     );
     if (created == true) _toast('Staff account created');
@@ -303,6 +401,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         title: const Text('Admin Panel',
             style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(
+            tooltip: 'Manage camps',
+            icon: const Icon(Icons.holiday_village_outlined),
+            onPressed: _manageCamps,
+          ),
           IconButton(
             tooltip: 'Log out',
             icon: const Icon(Icons.logout),
@@ -495,14 +598,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         value: 'role',
                         child: Text('Change role',
                             style: TextStyle(color: Colors.white))),
-                  if (u.role == 'campLeader' || u.role == 'responder')
-                    PopupMenuItem(
+                  if (u.role == 'campLeader')
+                    const PopupMenuItem(
                         value: 'area',
-                        child: Text(
-                            u.role == 'campLeader'
-                                ? 'Change camp'
-                                : 'Change zone',
-                            style: const TextStyle(color: Colors.white))),
+                        child: Text('Change camp',
+                            style: TextStyle(color: Colors.white))),
                   const PopupMenuItem(
                       value: 'pw',
                       child: Text('Reset password',
@@ -560,11 +660,11 @@ class _UserRow {
 class _AddStaffDialog extends StatefulWidget {
   final AdminUserService service;
   final String createdBy;
-  final List<String> knownCamps;
+  final List<String> camps;
   const _AddStaffDialog({
     required this.service,
     required this.createdBy,
-    required this.knownCamps,
+    required this.camps,
   });
 
   @override
@@ -580,7 +680,8 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
-  final _area = TextEditingController();
+  String? _camp;
+  late List<String> _camps = List.of(widget.camps);
   final _password =
       TextEditingController(text: _AdminPanelScreenState._generatePassword());
   String _role = 'campLeader';
@@ -592,13 +693,16 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
     _name.dispose();
     _email.dispose();
     _phone.dispose();
-    _area.dispose();
     _password.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_role == 'campLeader' && _camp == null) {
+      setState(() => _error = 'Choose the camp this leader is assigned to.');
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
@@ -610,7 +714,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
             email: _email.text,
             phone: _phone.text,
             role: _role,
-            area: _area.text,
+            area: _role == 'campLeader' ? _camp! : '',
             password: _password.text.trim(),
             createdBy: widget.createdBy,
           )
@@ -627,17 +731,6 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
         _saving = false;
         _error = 'Could not create the account: $e';
       });
-    }
-  }
-
-  String _areaLabel() {
-    switch (_role) {
-      case 'campLeader':
-        return 'Assigned camp / area';
-      case 'responder':
-        return 'Assigned zone';
-      default:
-        return 'Area (optional)';
     }
   }
 
@@ -728,31 +821,24 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _area,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: dec(_areaLabel()),
-                  validator: (v) =>
-                      (_role == 'campLeader' && (v ?? '').trim().isEmpty)
-                          ? 'Enter the camp / area'
-                          : null,
-                ),
-                if (_role == 'campLeader' && widget.knownCamps.isNotEmpty) ...[
+                if (_role == 'campLeader') ...[
+                  const SizedBox(height: 14),
+                  const Text('Assigned camp',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13)),
                   const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: widget.knownCamps
-                        .map((c) => ActionChip(
-                              backgroundColor: const Color(0xFF0B101D),
-                              side: const BorderSide(color: Color(0xFF1E283D)),
-                              label: Text(c,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 11)),
-                              onPressed: () => setState(() => _area.text = c),
-                            ))
-                        .toList(),
+                  _CampPicker(
+                    camps: _camps,
+                    value: _camp,
+                    onChanged: (v) => setState(() => _camp = v),
+                    onAddNew: (name) async {
+                      await widget.service.addCamp(name);
+                      setState(() {
+                        if (!_camps.contains(name)) _camps = [..._camps, name];
+                      });
+                    },
                   ),
                 ],
                 const SizedBox(height: 10),
@@ -809,6 +895,108 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Drop-down list of camps with an "Add new camp" entry at the bottom.
+class _CampPicker extends StatelessWidget {
+  static const String _newKey = '__new_camp__';
+
+  final List<String> camps;
+  final String? value;
+  final ValueChanged<String> onChanged;
+  final Future<void> Function(String name) onAddNew;
+
+  const _CampPicker({
+    required this.camps,
+    required this.value,
+    required this.onChanged,
+    required this.onAddNew,
+  });
+
+  Future<void> _addNew(BuildContext context) async {
+    final ctrl = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131A2A),
+        title: const Text('Add new camp',
+            style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          style: const TextStyle(color: Colors.white),
+          decoration: _AdminPanelScreenState._decoration('Camp name'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel',
+                  style: TextStyle(color: Color(0xFF8E9BAE)))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: const Text('ADD',
+                  style: TextStyle(color: Color(0xFFFF5252)))),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name == null || name.isEmpty) return;
+    try {
+      await onAddNew(name).timeout(const Duration(seconds: 10));
+      onChanged(name);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Could not add the camp: $e'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final current = (value != null && camps.contains(value)) ? value : null;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B101D),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF1E283D)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: current,
+          dropdownColor: const Color(0xFF131A2A),
+          iconEnabledColor: const Color(0xFF8E9BAE),
+          hint: const Text('Choose a camp',
+              style: TextStyle(color: Color(0xFF5E6D82), fontSize: 13)),
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          items: [
+            for (final c in camps)
+              DropdownMenuItem(value: c, child: Text(c)),
+            const DropdownMenuItem(
+              value: _newKey,
+              child: Text('+ Add new camp…',
+                  style: TextStyle(
+                      color: Color(0xFFFF5252), fontWeight: FontWeight.bold)),
+            ),
+          ],
+          onChanged: (v) {
+            if (v == null) return;
+            if (v == _newKey) {
+              _addNew(context);
+            } else {
+              onChanged(v);
+            }
+          },
         ),
       ),
     );

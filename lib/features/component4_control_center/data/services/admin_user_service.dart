@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 /// Admin-side user management on the Firestore `users` collection.
 ///
@@ -11,6 +12,41 @@ class AdminUserService {
   static final AdminUserService instance = AdminUserService._();
 
   final _users = FirebaseFirestore.instance.collection('users');
+  final _camps = FirebaseFirestore.instance.collection('camps');
+
+  /// Same rule the Relief Tracker uses to turn a camp name into its data id
+  /// ("Camp Nēraya" -> camp_neraya), so spelling variants map to one camp.
+  static String campIdFromName(String name) {
+    const map = {
+      'ā': 'a', 'ē': 'e', 'ī': 'i', 'ō': 'o', 'ū': 'u',
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+    };
+    final b = StringBuffer();
+    for (final ch in name.trim().toLowerCase().split('')) {
+      b.write(map[ch] ?? ch);
+    }
+    final slug = b
+        .toString()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+    return slug.isEmpty ? 'camp' : slug;
+  }
+
+  /// Camps the admin can assign leaders to (Firestore `camps` collection).
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchCamps() =>
+      _camps.snapshots();
+
+  Future<void> addCamp(String name) async {
+    final clean = name.trim();
+    if (clean.isEmpty) throw StateError('Enter the camp name.');
+    await _camps.doc(campIdFromName(clean)).set({
+      'name': clean,
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteCamp(String name) =>
+      _camps.doc(campIdFromName(name)).delete();
 
   /// Roles an admin can assign. key = value stored in Firestore.
   static const Map<String, String> staffRoles = {
@@ -38,9 +74,19 @@ class AdminUserService {
     required String createdBy,
   }) async {
     final id = email.toLowerCase().trim();
-    final existing = await _users.doc(id).get();
-    if (existing.exists) {
-      throw StateError('An account with $id already exists.');
+    try {
+      final existing = await _users.doc(id).get(const GetOptions(source: Source.server));
+      if (existing.exists) {
+        throw StateError('An account with $id already exists.');
+      }
+    } on FirebaseException catch (e) {
+      debugPrint('createStaff check failed: ${e.code}');
+      if (e.code == 'unavailable') {
+        throw StateError(
+            'Cannot reach the database. Check that the phone/emulator has '
+            'internet and that Firestore is created in the Firebase project.');
+      }
+      rethrow;
     }
     await _users.doc(id).set({
       'uid': id,
