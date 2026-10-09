@@ -18,12 +18,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _nicController = TextEditingController();
+  final _districtController = TextEditingController();
+  final _cityController = TextEditingController();
   final _customSectorController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   String _selectedSector = 'Colombo Low-Lying Area (Kelani Bank Zone)';
-  final String _selectedRole = 'responder';
+
+  // CHANGED: every new registration is a CITIZEN by default
+  final String _selectedRole = 'citizen';
+
   bool _agreedToAlerts = true;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -44,10 +49,25 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _nicController.dispose();
+    _districtController.dispose();
+    _cityController.dispose();
     _customSectorController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  UserRole _roleFromString(String role) {
+    switch (role) {
+      case 'citizen':
+        return UserRole.citizen;
+      case 'volunteer':
+        return UserRole.volunteer;
+      case 'campLeader':
+        return UserRole.campLeader;
+      default:
+        return UserRole.responder;
+    }
   }
 
   Future<void> _submitRegistration() async {
@@ -78,9 +98,11 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
         email: _emailController.text.trim(),
         phoneNumber: _phoneController.text.trim(),
         nic: _nicController.text.trim(),
+        district: _districtController.text.trim(),
+        city: _cityController.text.trim(),
         floodZone: finalSector,
         password: _passwordController.text,
-        role: _selectedRole,
+        role: _selectedRole, // saved as 'citizen'
       );
 
       // 2. Set current user in app controller
@@ -109,18 +131,12 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
         ),
       );
 
-      // 4. Flow: Register -> Login (passing registered email and matching role)
+      // 4. Flow: Register -> Login (passing registered email and CITIZEN role)
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => ResponderLoginScreen(
             initialEmail: _emailController.text.trim(),
-            initialRole: _selectedRole == 'citizen'
-                ? UserRole.citizen
-                : _selectedRole == 'volunteer'
-                    ? UserRole.volunteer
-                    : _selectedRole == 'campLeader'
-                        ? UserRole.campLeader
-                        : UserRole.responder,
+            initialRole: _roleFromString(_selectedRole),
           ),
         ),
       );
@@ -198,7 +214,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
 
                 const SizedBox(height: 20),
 
-                // Top Info Card with Green Accent Bar (Matching Image 2)
+                // Top Info Card with Green Accent Bar
                 Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF0F172A),
@@ -213,7 +229,6 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                     child: IntrinsicHeight(
                       child: Row(
                         children: [
-                          // Left side content
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.all(14),
@@ -269,7 +284,6 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                               ),
                             ),
                           ),
-                          // Green Right Accent Stripe
                           Container(
                             width: 6,
                             decoration: const BoxDecoration(
@@ -316,7 +330,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
 
                 const SizedBox(height: 16),
 
-                // Field 3 & 4: PHONE NUMBER & NATIONAL ID (NIC) (2 Column Row)
+                // Field 3 & 4: PHONE NUMBER & NATIONAL ID (NIC)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -357,8 +371,57 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                               hint: 'e.g. 982341092V',
                               icon: Icons.badge_outlined,
                             ),
-                            validator: (v) => v == null || v.isEmpty
-                                ? 'Enter NIC'
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Enter NIC' : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Field: DISTRICT & CITY
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFieldLabel('DISTRICT'),
+                          TextFormField(
+                            controller: _districtController,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            decoration: _buildInputDecoration(
+                              hint: 'Enter district',
+                              icon: Icons.map_outlined,
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Enter district'
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFieldLabel('CITY'),
+                          TextFormField(
+                            controller: _cityController,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            decoration: _buildInputDecoration(
+                              hint: 'Enter city',
+                              icon: Icons.location_city_outlined,
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Enter city'
                                 : null,
                           ),
                         ],
@@ -436,7 +499,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                   ),
                 ),
 
-                // DYNAMIC FIELD: Custom Flood Zone when "Other" is selected!
+                // DYNAMIC FIELD: Custom Flood Zone when "Other" is selected
                 if (isCustomSector) ...[
                   const SizedBox(height: 12),
                   AnimatedContainer(
@@ -610,7 +673,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
 
                 const SizedBox(height: 26),
 
-                // Complete Registration Button (Matching Image 2)
+                // Complete Registration Button
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
