@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
+import 'leader_avatar.dart';
 
 class CampCapacityCard extends StatelessWidget {
   final ReliefTrackingController controller;
@@ -28,9 +29,7 @@ class CampCapacityCard extends StatelessWidget {
       progressColor = const Color(0xFF30D158); // Green accent
     }
 
-    final emptyItems = controller.inventoryItems
-        .where((i) => i.status == StockStatus.critical)
-        .toList();
+    final emptyItems = controller.shortageAlertItems;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,17 +40,10 @@ class CampCapacityCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 22,
-                  backgroundColor: const Color(0xFF1F2C46),
-                  child: const Text(
-                    'RS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+                LeaderAvatar(
+                  name: controller.leaderName,
+                  photoUrl: controller.leaderPhotoUrl,
+                  size: 44,
                 ),
                 const SizedBox(width: 12),
                 Column(
@@ -284,7 +276,7 @@ class CampCapacityCard extends StatelessWidget {
               ? const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'No empty items. All supplies are available.',
+                    'No empty items to request.',
                     style: TextStyle(color: Color(0xFF30D158), fontSize: 13),
                   ),
                 )

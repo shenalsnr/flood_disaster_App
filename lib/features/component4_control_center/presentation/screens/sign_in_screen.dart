@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import 'responder_login_screen.dart';
 import 'responder_register_screen.dart';
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
-import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -27,18 +24,13 @@ class _SignInScreenState extends State<SignInScreen> {
         );
         break;
       case UserRole.citizen:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
-        );
-        break;
       case UserRole.volunteer:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QuickHazardScreen()),
-        );
-        break;
       case UserRole.campLeader:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CampDashboardScreen()),
+        // Everyone signs in; the dashboard is chosen from the account's role.
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ResponderLoginScreen(initialRole: _selectedRole),
+          ),
         );
         break;
     }

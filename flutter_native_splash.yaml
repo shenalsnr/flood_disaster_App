@@ -1,0 +1,11 @@
+# Native (pre-Flutter) launch screen so there is no white flash on start-up.
+# Regenerate with: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0A1220"
+  image: assets/images/wesafe_logo.png
+  fullscreen: true
+  android_12:
+    color: "#0A1220"
+    image: assets/images/wesafe_logo.png
+    icon_background_color: "#0A1220"
+  web: false

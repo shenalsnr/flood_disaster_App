@@ -5,11 +5,9 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
-import 'alert_dashboard_screen.dart';
+import '../../data/services/session_service.dart';
+import 'role_router.dart';
 import 'responder_register_screen.dart';
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
-import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
   final UserRole initialRole;
@@ -107,25 +105,18 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
         ),
       );
 
-      // 4. Role-based routing based on authenticated user's role from Firestore
-      final role = user.role.toLowerCase();
-      if (role.contains('citizen')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
-        );
-      } else if (role.contains('volunteer')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QuickHazardScreen()),
-        );
-      } else if (role.contains('camp') || role.contains('leader')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CampDashboardScreen()),
-        );
+      // 4. Remember this sign-in (or forget it) for the next app start
+      if (_rememberCredentials) {
+        await SessionService.save(user.email);
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AlertDashboardScreen()),
-        );
+        await SessionService.clear();
       }
+      if (!mounted) return;
+
+      // 5. Role-based routing based on the role stored in Firestore
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => dashboardForRole(user.role)),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -153,7 +144,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-              'Please enter your email address first to receive the OTP code.'),
+            'Please enter your email address first to receive the OTP code.',
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -425,7 +417,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                            'Invalid OTP code. Please enter the code sent to your email.'),
+                          'Invalid OTP code. Please enter the code sent to your email.',
+                        ),
                         backgroundColor: Colors.redAccent,
                       ),
                     );
@@ -436,7 +429,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                            'Please enter a valid PIN or password (min 4 characters).'),
+                          'Please enter a valid PIN or password (min 4 characters).',
+                        ),
                         backgroundColor: Colors.redAccent,
                       ),
                     );
