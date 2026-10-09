@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
+import 'package:flood_disaster/features/component2_reporting/data/services/offline_report_service.dart';
+import 'package:flood_disaster/features/component2_reporting/presentation/screens/report_submission_status_screen.dart';
 
 /// Review Your Report Screen.
 /// Exactly matches the user's Figma/Mobile specification:
@@ -82,74 +85,73 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
     setState(() => _isSubmitting = true);
     final user = FirebaseAuth.instance.currentUser;
     final reporterName = user?.displayName ?? 'Kapila Perera';
+    final reportCode = '#FLD-${1000 + Random().nextInt(9000)}';
 
-    try {
-      await FirebaseFirestore.instance.collection('hazard_reports').add({
-        'hazardType': widget.hazard,
-        'severity': widget.severity,
-        'location': 'Kolonnawa, 6.9271° N, 79.8612° E',
-        'description': widget.note,
-        'hasPhoto': widget.imageFile != null,
-        'photoPath': widget.imageFile?.path ?? '',
-        'reporterName': reporterName,
-        'reporterEmail': user?.email ?? 'volunteer.kapila@dmc.org',
-        'isVerified': true,
-        'status': 'VERIFIED',
-        'timestamp': FieldValue.serverTimestamp(),
-        'latitude': widget.coordinates.latitude,
-        'longitude': widget.coordinates.longitude,
-      }).timeout(const Duration(seconds: 4));
-    } catch (e) {
-      debugPrint('Firestore submit fallback: $e');
+    final reportData = {
+      'localId': reportCode,
+      'hazardType': widget.hazard,
+      'severity': widget.severity,
+      'location': 'Kolonnawa, 6.9271° N, 79.8612° E',
+      'description': widget.note,
+      'hasPhoto': widget.imageFile != null,
+      'photoPath': widget.imageFile?.path ?? '',
+      'reporterName': reporterName,
+      'reporterEmail': user?.email ?? 'volunteer.kapila@dmc.org',
+      'isVerified': true,
+      'status': 'VERIFIED',
+      'latitude': widget.coordinates.latitude,
+      'longitude': widget.coordinates.longitude,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    final isOnline = await OfflineReportService.instance.checkOnline();
+
+    if (isOnline) {
+      try {
+        final onlinePayload = Map<String, dynamic>.from(reportData);
+        onlinePayload.remove('localId');
+        onlinePayload['timestamp'] = FieldValue.serverTimestamp();
+
+        await FirebaseFirestore.instance
+            .collection('hazard_reports')
+            .add(onlinePayload)
+            .timeout(const Duration(seconds: 4));
+
+        if (!mounted) return;
+        setState(() => _isSubmitting = false);
+
+        // Navigate directly to Online "Report Submitted!" Screen (Screenshot 1)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ReportSubmissionStatusScreen(
+              isOnline: true,
+              reportId: reportCode,
+              hazard: widget.hazard,
+            ),
+          ),
+        );
+        return;
+      } catch (e) {
+        debugPrint('Online submission failed, falling back to offline queue: $e');
+      }
     }
+
+    // Offline state: Store report safely in phone local storage (Screenshot 2)
+    await OfflineReportService.instance.queueReport(reportData);
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF334155)),
+    // Navigate directly to Offline "Report Saved." Screen (Screenshot 2)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReportSubmissionStatusScreen(
+          isOnline: false,
+          pendingCount: OfflineReportService.instance.pendingCount,
+          hazard: widget.hazard,
         ),
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle_rounded, color: Color(0xFF00E676), size: 28),
-            SizedBox(width: 10),
-            Text(
-              'Report Broadcasted!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Your ground assessment for "${widget.hazard}" (${widget.severity}) in Kolonnawa has been broadcasted to the Disaster Operations Room.',
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF22C55E),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context, true);
-            },
-            child: const Text('Back to Dashboard',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
