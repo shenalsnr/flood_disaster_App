@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
 import '../widgets/camp_capacity_card.dart';
 import '../widgets/supply_item_tile.dart';
 import '../widgets/add_stock_dialog.dart';
+import '../widgets/leaders_chat_panel.dart';
+import '../widgets/request_supply_dialog.dart';
+import '../widgets/supply_requests_list.dart';
+import 'relief_truck_tracking_screen.dart';
+import 'supply_admin_dashboard_screen.dart';
+import 'equipment_tracking_screen.dart';
 
 class CampDashboardScreen extends StatefulWidget {
   const CampDashboardScreen({super.key});
@@ -13,7 +22,8 @@ class CampDashboardScreen extends StatefulWidget {
 
 class _CampDashboardScreenState extends State<CampDashboardScreen> {
   late final ReliefTrackingController _controller;
-  int _currentIndex = 0; // 0: Dashboard, 1: Supplies, 2: Alerts, 3: Profile, 4: Team
+  int _currentIndex =
+      0; // 0: Dashboard, 1: Supplies, 2: Alerts, 3: Profile, 4: Team
 
   @override
   void initState() {
@@ -47,10 +57,78 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     );
   }
 
+  /// Opens the Request Supply form. When [item] is given the form is
+  /// pre-filled for it. After sending, a confirmation popup is shown.
+  Future<void> _showRequestSupplyDialog({ReliefItemModel? item}) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) =>
+          RequestSupplyDialog(controller: _controller, prefillItem: item),
+    );
+    if (!mounted || result == null) return;
+    await _showRequestSentPopup(result);
+  }
+
+  Future<void> _showRequestSentPopup(Map<String, dynamic> r) {
+    final queued = r['status'] == 'queued';
+    final qty = r['quantity'] as double;
+    final qtyText = qty == qty.roundToDouble()
+        ? qty.round().toString()
+        : qty.toString();
+    final color = queued ? const Color(0xFFFF9F0A) : const Color(0xFF30D158);
+
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131A2A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF1E283D)),
+        ),
+        title: Row(
+          children: [
+            Icon(queued ? Icons.cloud_off : Icons.check_circle, color: color),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                queued ? 'Request saved' : 'Request sent',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          queued
+              ? '${r['item']} ($qtyText ${r['unit']}) is saved on this phone. '
+                    'It will be sent to the DMC automatically when you are back online.'
+              : 'Your request for ${r['item']} ($qtyText ${r['unit']}) was sent to the DMC. '
+                    'It is now PENDING - the truck card on the Supplies page shows its status.',
+          style: const TextStyle(color: Color(0xFF8E9BAE), fontSize: 13),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF5252),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B101D), // Dark Navy Background matching Figma
+      backgroundColor: const Color(
+        0xFF0B101D,
+      ), // Dark Navy Background matching Figma
       body: SafeArea(
         child: IndexedStack(
           index: _currentIndex,
@@ -76,7 +154,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             });
           },
           backgroundColor: const Color(0xFF0D1424),
-          selectedItemColor: const Color(0xFFFF5252), // Active top accent highlight
+          selectedItemColor: const Color(
+            0xFFFF5252,
+          ), // Active top accent highlight
           unselectedItemColor: const Color(0xFF5E6D82),
           selectedFontSize: 11,
           unselectedFontSize: 11,
@@ -111,8 +191,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               label: 'Alerts',
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline_rounded),
-              label: 'Profile',
+              icon: const Icon(Icons.settings),
+              label: 'Settings',
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.people_outline_rounded),
@@ -129,7 +209,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        CampCapacityCard(controller: _controller),
+        CampCapacityCard(
+          controller: _controller,
+          onRequestSupply: (item) => _showRequestSupplyDialog(item: item),
+        ),
       ],
     );
   }
@@ -138,31 +221,122 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
   Widget _buildSuppliesTab() {
     final items = _controller.filteredInventory;
     final shipment = _controller.incomingShipment;
+    final req = _controller.activeRequest;
+    final status = (req?['status'] ?? '')
+        .toString(); // '' | pending | dispatched | arrived
+    final hasRequest = req != null;
+    final onTheWay = status == 'dispatched';
+    final arrived = status == 'arrived';
+    final isPending = status == 'pending';
+
+    // While a supply request is open, the truck card follows it:
+    // PENDING (waiting for the DMC) -> ON THE WAY (driver assigned) -> ARRIVED.
+    String reqText() {
+      final q = req?['quantityRequested'];
+      final qText = q is num
+          ? (q == q.roundToDouble() ? q.round().toString() : q.toString())
+          : '';
+      return '${req?['itemName'] ?? 'Supply'} - $qText ${req?['unit'] ?? ''}'
+          .trim();
+    }
+
+    final driverName = (req?['driverName'] ?? '').toString();
+    final driverPhone = hasRequest
+        ? (req['driverPhone'] ?? '').toString()
+        : shipment['driverPhone'] as String;
+
+    String cardTitle = shipment['title'] as String;
+    String cardSubtitle = shipment['subtitle'] as String;
+    String cardBadge = shipment['eta'] as String;
+    double? cardProgress = shipment['progress'] as double;
+    Color accent = const Color(0xFF30D158);
+    Color accentBg = const Color(0xFF063327);
+    IconData cardIcon = Icons.local_shipping_outlined;
+
+    if (isPending) {
+      cardTitle = 'Supply Request';
+      cardSubtitle = 'Waiting for DMC to assign a truck - ${reqText()}';
+      cardBadge = 'PENDING';
+      cardProgress = null;
+      accent = const Color(0xFFFF9F0A);
+      accentBg = const Color(0xFF382C1B);
+      cardIcon = Icons.hourglass_top;
+    } else if (onTheWay) {
+      cardTitle = 'Truck on the way';
+      cardSubtitle = 'Driver: $driverName - ${reqText()}';
+      cardBadge = 'ON THE WAY';
+      cardProgress = 0.65;
+      accent = const Color(0xFF448AFF);
+      accentBg = const Color(0xFF1B2A4A);
+    } else if (arrived) {
+      cardTitle = 'Truck arrived';
+      cardSubtitle =
+          'Driver: $driverName - ${reqText()}. Confirm when unloaded.';
+      cardBadge = 'ARRIVED';
+      cardProgress = 1.0;
+      cardIcon = Icons.check_circle_outline;
+    }
+
+    // Call is possible when there is a driver number to call.
+    final canCall = driverPhone.isNotEmpty && !isPending;
+    // Restock can be confirmed after arrival (or for the demo convoy).
+    final canRestock = hasRequest
+        ? arrived
+        : !(shipment['isRestocked'] as bool);
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Header: Title & Add Item Link
+        // Header: Title + clear action buttons
+        const Text(
+          'RATION & MEDICAL LOG',
+          style: TextStyle(
+            color: Color(0xFF7E8B9B),
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'RATION & MEDICAL LOG',
-              style: TextStyle(
-                color: Color(0xFF7E8B9B),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
+            Expanded(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFFF5252)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: _showAddStockDialog,
+                icon: const Icon(Icons.add, color: Color(0xFFFF5252), size: 18),
+                label: const Text(
+                  'ADD ITEM',
+                  style: TextStyle(
+                    color: Color(0xFFFF5252),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ),
-            GestureDetector(
-              onTap: _showAddStockDialog,
-              child: const Text(
-                '+ Add Item',
-                style: TextStyle(
-                  color: Color(0xFFFF5252),
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF5252),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: () => _showRequestSupplyDialog(),
+                icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                label: const Text(
+                  'REQUEST SUPPLY',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),
             ),
@@ -197,10 +371,29 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildSupplyFilterChip('All', 'All (18)', _controller.selectedSupplyFilter == 'All'),
-              _buildSupplyFilterChip('Depleted', 'Depleted (2)', _controller.selectedSupplyFilter == 'Depleted', outlineColor: const Color(0xFFFF3B30)),
-              _buildSupplyFilterChip('Low', 'Low (3)', _controller.selectedSupplyFilter == 'Low', outlineColor: const Color(0xFFFF9F0A)),
-              _buildSupplyFilterChip('Adequate', 'Adequate (13)', _controller.selectedSupplyFilter == 'Adequate', outlineColor: const Color(0xFF1E283D)),
+              _buildSupplyFilterChip(
+                'All',
+                'All (18)',
+                _controller.selectedSupplyFilter == 'All',
+              ),
+              _buildSupplyFilterChip(
+                'Depleted',
+                'Depleted (2)',
+                _controller.selectedSupplyFilter == 'Depleted',
+                outlineColor: const Color(0xFFFF3B30),
+              ),
+              _buildSupplyFilterChip(
+                'Low',
+                'Low (3)',
+                _controller.selectedSupplyFilter == 'Low',
+                outlineColor: const Color(0xFFFF9F0A),
+              ),
+              _buildSupplyFilterChip(
+                'Adequate',
+                'Adequate (13)',
+                _controller.selectedSupplyFilter == 'Adequate',
+                outlineColor: const Color(0xFF1E283D),
+              ),
             ],
           ),
         ),
@@ -208,125 +401,309 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 
         // Stock Items List
         ...items.map((item) {
-          return SupplyItemTile(
-            item: item,
-            onQuantityChanged: (delta) => _controller.updateStockQuantity(item.id, delta),
+          // Swipe left  -> mark EMPTY, swipe right -> mark LOW (M3-06).
+          // The card stays in the list; its colour/badge updates instead.
+          return Dismissible(
+            key: ValueKey('supply_${item.id}'),
+            background: _buildSwipeBackground(
+              alignment: Alignment.centerLeft,
+              color: const Color(0xFFFF9F0A),
+              icon: Icons.trending_down,
+              label: 'LOW',
+            ),
+            secondaryBackground: _buildSwipeBackground(
+              alignment: Alignment.centerRight,
+              color: const Color(0xFFFF3B30),
+              icon: Icons.remove_shopping_cart_outlined,
+              label: 'EMPTY',
+            ),
+            confirmDismiss: (direction) async {
+              final isEmpty = direction == DismissDirection.endToStart;
+              final previousQty = isEmpty
+                  ? _controller.markItemEmpty(item.id)
+                  : _controller.markItemLow(item.id);
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isEmpty
+                          ? '${item.name} marked EMPTY'
+                          : '${item.name} marked LOW',
+                    ),
+                    duration: const Duration(
+                      seconds: 30,
+                    ), // auto-hide after 30 s
+                    persist:
+                        false, // keep the timer even though there is an action
+                    showCloseIcon: true, // X button to close it at once
+                    closeIconColor: Colors.white,
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () =>
+                          _controller.restoreItemQuantity(item.id, previousQty),
+                    ),
+                  ),
+                );
+              return false; // keep the card in place
+            },
+            child: SupplyItemTile(
+              item: item,
+              onQuantityChanged: (delta) =>
+                  _controller.updateStockQuantity(item.id, delta),
+            ),
           );
         }),
 
         const SizedBox(height: 20),
 
-        // Incoming Shipment Tracking Tile (Matching Image 2 frame2)
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF131A2A),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E283D)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF063327),
-                          borderRadius: BorderRadius.circular(10),
+        // Incoming Shipment Tracking Tile (Matching Image 2 frame2).
+        // Hidden after the restock is confirmed; a new request brings it back.
+        if (_controller.showTruckCard)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131A2A),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF1E283D)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: accentBg,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(cardIcon, color: accent, size: 20),
                         ),
-                        child: const Icon(Icons.local_shipping_outlined, color: Color(0xFF30D158), size: 20),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            shipment['title'],
-                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            shipment['subtitle'],
-                            style: const TextStyle(color: Color(0xFF7E8B9B), fontSize: 11),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF063327),
-                      borderRadius: BorderRadius.circular(6),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cardTitle,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 170,
+                              child: Text(
+                                cardSubtitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF7E8B9B),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      shipment['eta'],
-                      style: const TextStyle(color: Color(0xFF30D158), fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: shipment['progress'],
-                  minHeight: 6,
-                  backgroundColor: const Color(0xFF1E283D),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF30D158)),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Action Buttons: Call Driver & Confirm Restock
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        side: const BorderSide(color: Color(0xFF2C3954)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Calling Driver: ${shipment['driverPhone']}')),
-                        );
-                      },
-                      icon: const Icon(Icons.phone_outlined, color: Colors.white, size: 16),
-                      label: const Text('Call Driver', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: shipment['isRestocked'] ? Colors.grey : Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: accentBg,
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      onPressed: shipment['isRestocked'] ? null : () => _controller.confirmRestock(),
                       child: Text(
-                        shipment['isRestocked'] ? 'Restocked' : 'Confirm Restock',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        cardBadge,
+                        style: TextStyle(
+                          color: accent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: cardProgress,
+                    minHeight: 6,
+                    backgroundColor: const Color(0xFF1E283D),
+                    valueColor: AlwaysStoppedAnimation<Color>(accent),
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 14),
+
+                // Action Buttons: Call Driver & Confirm Restock
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          side: const BorderSide(color: Color(0xFF2C3954)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: canCall
+                            ? () => _callDriver(driverPhone)
+                            : null,
+                        icon: const Icon(
+                          Icons.phone_outlined,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        label: const Text(
+                          'Call Driver',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: canRestock
+                              ? Colors.white
+                              : Colors.grey,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: canRestock
+                            ? () {
+                                _controller.confirmRestock();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Restock confirmed. Stock updated.',
+                                    ),
+                                    backgroundColor: Color(0xFF30D158),
+                                    showCloseIcon: true,
+                                  ),
+                                );
+                              }
+                            : null,
+                        child: Text(
+                          (!hasRequest && (shipment['isRestocked'] as bool))
+                              ? 'Restocked'
+                              : 'Confirm Restock',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
+
+        const SizedBox(height: 20),
+        SupplyRequestsList(campId: ReliefTrackingController.campId),
       ],
     );
   }
 
-  Widget _buildSupplyFilterChip(String value, String label, bool isSelected, {Color? outlineColor}) {
+  /// Coloured strip revealed behind a supply card while it is being swiped.
+  Widget _buildSwipeBackground({
+    required Alignment alignment,
+    required Color color,
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12), // same gap as SupplyItemTile
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      alignment: alignment,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Opens the phone dialler with the shipment driver's number (M3-09).
+  Future<void> _callDriver(String phone) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = Uri(scheme: 'tel', path: phone.replaceAll(' ', ''));
+    try {
+      final launched = await launchUrl(uri);
+      if (!launched) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not call $phone')),
+        );
+      }
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text('Could not call $phone')));
+    }
+  }
+
+  /// Sends depleted items to the DMC as an urgent resupply request (M3-08).
+  Future<void> _dispatchToDmc() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final count = await _controller.sendUrgentDispatch();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            count == 0
+                ? 'No depleted items to dispatch right now.'
+                : 'Urgent resupply request for $count item(s) sent to the DMC.',
+          ),
+          backgroundColor: count == 0 ? null : const Color(0xFF30D158),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Dispatch failed: $e'),
+          backgroundColor: const Color(0xFFFF3B30),
+        ),
+      );
+    }
+  }
+
+  Widget _buildSupplyFilterChip(
+    String value,
+    String label,
+    bool isSelected, {
+    Color? outlineColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(
@@ -337,7 +714,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             color: isSelected ? Colors.white : const Color(0xFF131A2A),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? Colors.white : (outlineColor ?? const Color(0xFF1E283D)),
+              color: isSelected
+                  ? Colors.white
+                  : (outlineColor ?? const Color(0xFF1E283D)),
               width: 1.5,
             ),
           ),
@@ -363,7 +742,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       children: [
         const Text(
           'Alerts',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 14),
 
@@ -372,10 +755,27 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildAlertFilterChip('All', 'All 12', _controller.selectedAlertFilter == 'All', activeColor: const Color(0xFFFF3B30)),
-              _buildAlertFilterChip('Critical', 'Critical 3', _controller.selectedAlertFilter == 'Critical'),
-              _buildAlertFilterChip('Low Stock', 'Low Stock 5', _controller.selectedAlertFilter == 'Low Stock'),
-              _buildAlertFilterChip('Logs', 'Logs 4', _controller.selectedAlertFilter == 'Logs'),
+              _buildAlertFilterChip(
+                'All',
+                'All 12',
+                _controller.selectedAlertFilter == 'All',
+                activeColor: const Color(0xFFFF3B30),
+              ),
+              _buildAlertFilterChip(
+                'Critical',
+                'Critical 3',
+                _controller.selectedAlertFilter == 'Critical',
+              ),
+              _buildAlertFilterChip(
+                'Low Stock',
+                'Low Stock 5',
+                _controller.selectedAlertFilter == 'Low Stock',
+              ),
+              _buildAlertFilterChip(
+                'Logs',
+                'Logs 4',
+                _controller.selectedAlertFilter == 'Logs',
+              ),
             ],
           ),
         ),
@@ -383,7 +783,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 
         const Text(
           'TODAY',
-          style: TextStyle(color: Color(0xFF7E8B9B), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+          style: TextStyle(
+            color: Color(0xFF7E8B9B),
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
+          ),
         ),
         const SizedBox(height: 10),
 
@@ -395,8 +800,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           Color cardBorderColor = isCritical
               ? const Color(0xFFFF3B30)
               : isLow
-                  ? const Color(0xFFFF9F0A)
-                  : const Color(0xFF30D158);
+              ? const Color(0xFFFF9F0A)
+              : const Color(0xFF30D158);
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -404,7 +809,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFF131A2A),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cardBorderColor.withValues(alpha: 0.6), width: 1.5),
+              border: Border.all(
+                color: cardBorderColor.withValues(alpha: 0.6),
+                width: 1.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,8 +830,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         isCritical
                             ? Icons.warning_amber_rounded
                             : isLow
-                                ? Icons.show_chart
-                                : Icons.check_circle_outline,
+                            ? Icons.show_chart
+                            : Icons.check_circle_outline,
                         color: cardBorderColor,
                         size: 20,
                       ),
@@ -439,19 +847,29 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                               Expanded(
                                 child: Text(
                                   alert['title'],
-                                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               Text(
                                 alert['time'],
-                                style: const TextStyle(color: Color(0xFF63738A), fontSize: 10),
+                                style: const TextStyle(
+                                  color: Color(0xFF63738A),
+                                  fontSize: 10,
+                                ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Text(
                             alert['subtitle'],
-                            style: const TextStyle(color: Color(0xFF8E9BAE), fontSize: 11),
+                            style: const TextStyle(
+                              color: Color(0xFF8E9BAE),
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
@@ -466,19 +884,36 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isLogs ? const Color(0xFF30D158) : const Color(0xFFFF3B30),
+                          backgroundColor: isLogs
+                              ? const Color(0xFF30D158)
+                              : const Color(0xFFFF3B30),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                         onPressed: () {
+                          // "DISPATCH SUPPLY" really notifies the DMC (M3-08 / FR12);
+                          // the other actions keep their existing behaviour.
+                          if (alert['actionText'] == 'DISPATCH SUPPLY') {
+                            _dispatchToDmc();
+                            return;
+                          }
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Triggered: ${alert['actionText']}')),
+                            SnackBar(
+                              content: Text(
+                                'Triggered: ${alert['actionText']}',
+                              ),
+                            ),
                           );
                         },
                         child: Text(
                           alert['actionText'],
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ),
@@ -488,11 +923,19 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1E283D),
                           foregroundColor: const Color(0xFF8E9BAE),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                         onPressed: () => _controller.dismissAlert(alert['id']),
-                        child: const Text('Dismiss', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                        child: const Text(
+                          'Dismiss',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -505,7 +948,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     );
   }
 
-  Widget _buildAlertFilterChip(String value, String label, bool isSelected, {Color? activeColor}) {
+  Widget _buildAlertFilterChip(
+    String value,
+    String label,
+    bool isSelected, {
+    Color? activeColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(
@@ -513,7 +961,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? (activeColor ?? const Color(0xFF1E283D)) : const Color(0xFF131A2A),
+            color: isSelected
+                ? (activeColor ?? const Color(0xFF1E283D))
+                : const Color(0xFF131A2A),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFF1E283D)),
           ),
@@ -537,7 +987,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       children: [
         const Text(
           'Profile',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
 
@@ -562,14 +1016,22 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 child: const Center(
                   child: Text(
                     'RS',
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 _controller.leaderName,
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -578,7 +1040,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF063327),
                   borderRadius: BorderRadius.circular(12),
@@ -590,7 +1055,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                     SizedBox(width: 6),
                     Text(
                       'ON DUTY',
-                      style: TextStyle(color: Color(0xFF30D158), fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Color(0xFF30D158),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -625,18 +1094,79 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             children: [
               const Text(
                 'ACCOUNT',
-                style: TextStyle(color: Color(0xFF7E8B9B), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                style: TextStyle(
+                  color: Color(0xFF7E8B9B),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
               ),
               const SizedBox(height: 12),
-              _buildAccountRow(Icons.person_outline, 'Personal Information', 'Name, ID, contact details'),
+              _buildAccountRow(
+                Icons.person_outline,
+                'Personal Information',
+                'Name, ID, contact details',
+              ),
               const Divider(color: Color(0xFF1E283D), height: 16),
-              _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', 'Camp Nēraya, Camp Dawn Ridge'),
+              _buildAccountRow(
+                Icons.night_shelter_outlined,
+                'Assigned Shelters',
+                'Camp Nēraya, Camp Dawn Ridge',
+              ),
               const Divider(color: Color(0xFF1E283D), height: 16),
               _buildAccountRow(
                 Icons.key_outlined,
                 'Role & Permissions',
                 'Relief Team Lead',
                 badgeText: 'VERIFIED',
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ReliefTruckTrackingScreen(),
+                    ),
+                  );
+                },
+                child: _buildAccountRow(
+                  Icons.local_shipping_outlined,
+                  'Fleet Tracking',
+                  'Live tracking of relief trucks',
+                ),
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SupplyAdminDashboardScreen(),
+                    ),
+                  );
+                },
+                child: _buildAccountRow(
+                  Icons.admin_panel_settings_outlined,
+                  'Supply Admin Dashboard',
+                  'Assign trucks to supply requests',
+                ),
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const EquipmentTrackingScreen(),
+                    ),
+                  );
+                },
+                child: _buildAccountRow(
+                  Icons.handyman_outlined,
+                  'Equipment Tracking',
+                  'Manage pumps, generators, etc.',
+                ),
               ),
             ],
           ),
@@ -651,12 +1181,14 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFF3B30),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Logging out...')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Logging out...')));
             },
             child: const Text(
               'Log out',
@@ -681,12 +1213,20 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           children: [
             Text(
               value,
-              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(color: Color(0xFF63738A), fontSize: 9, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Color(0xFF63738A),
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -694,7 +1234,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     );
   }
 
-  Widget _buildAccountRow(IconData icon, String title, String subtitle, {String? badgeText}) {
+  Widget _buildAccountRow(
+    IconData icon,
+    String title,
+    String subtitle, {
+    String? badgeText,
+  }) {
     return Row(
       children: [
         Container(
@@ -712,7 +1257,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 subtitle,
@@ -730,7 +1279,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             ),
             child: Text(
               badgeText,
-              style: const TextStyle(color: Color(0xFF30D158), fontSize: 9, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Color(0xFF30D158),
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           )
         else
@@ -739,104 +1292,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     );
   }
 
-  // --- TAB 4: TEAM / COMMUNITY CHAT (Image 3 frame5) ---
+  // --- TAB 4: TEAM / COMMUNITY CHAT (live chat between all camp leaders) ---
   Widget _buildTeamTab() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          color: const Color(0xFF131A2A),
-          child: const Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Color(0xFF1F2C46),
-                child: Icon(Icons.people, color: Colors.white, size: 16),
-              ),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Community Chat', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                  Text('● 12 online • Kolonnawa Zone 04', style: TextStyle(color: Color(0xFF30D158), fontSize: 10)),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildChatMessage('Nadeesha F.', 'Water levels rising near Gate B. We need sandbags urgently.', '10:42'),
-              const SizedBox(height: 10),
-              _buildChatMessage('Priya M.', 'Convoy B is 18 mins out with water + formula. Hang tight.', '10:44'),
-              const SizedBox(height: 10),
-              _buildChatMessage('Dr. Rohan Silva', 'Copy. Redirecting volunteers to Gate B now. Keep me posted on the ETA.', '10:45', isSelf: true),
-              const SizedBox(height: 10),
-              _buildChatMessage('Nadeesha F.', 'Can DMC expedite this one?', '10:47'),
-              const SizedBox(height: 10),
-              _buildChatMessage('Dr. Rohan Silva', 'Escalating to DMC now. Dispatch #MED-042 is in.', '10:48', isSelf: true),
-            ],
-          ),
-        ),
-
-        // Chat Input Bar
-        Container(
-          padding: const EdgeInsets.all(12),
-          color: const Color(0xFF131A2A),
-          child: Row(
-            children: [
-              const Icon(Icons.attach_file, color: Color(0xFF7E8B9B)),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: TextField(
-                  style: TextStyle(color: Colors.white, fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: 'Message the team...',
-                    hintStyle: TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: const Color(0xFFFF5252),
-                child: const Icon(Icons.send, color: Colors.white, size: 18),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChatMessage(String sender, String text, String time, {bool isSelf = false}) {
-    return Align(
-      alignment: isSelf ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 280),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelf ? const Color(0xFF1E2C48) : const Color(0xFF131A2A),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF1E283D)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(sender, style: TextStyle(color: isSelf ? const Color(0xFF448AFF) : const Color(0xFF30D158), fontWeight: FontWeight.bold, fontSize: 11)),
-            const SizedBox(height: 4),
-            Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
-            const SizedBox(height: 4),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(time, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 9)),
-            ),
-          ],
-        ),
-      ),
-    );
+    return LeadersChatPanel(controller: _controller);
   }
 }
