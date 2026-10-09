@@ -9,6 +9,13 @@ import '../../../component4_control_center/presentation/controllers/responder_co
 
 class ReliefTrackingController extends ChangeNotifier {
   ReliefTrackingController() {
+    // The camp comes from the account the administrator assigned.
+    final assigned = _auth.currentUser;
+    final zone = assigned?.floodZone.trim() ?? '';
+    if (assigned != null && assigned.role == 'campLeader' && zone.isNotEmpty) {
+      campName = zone;
+    }
+    campId = campIdFromName(campName);
     _auth.addListener(_onAuthChanged);
     _startSync();
   }
@@ -63,7 +70,26 @@ class ReliefTrackingController extends ChangeNotifier {
   // Real-time sync (FR9): headcount, open/closed and inventory
   // are mirrored to Firestore so every device sees the same data.
   // --------------------------------------------------------
-  static const String campId = 'camp_neraya';
+  /// Stable id derived from the camp's name, so every leader assigned to the
+  /// same camp shares the same data (e.g. "Camp Nēraya" -> camp_neraya).
+  late final String campId;
+
+  static String campIdFromName(String name) {
+    const map = {
+      'ā': 'a', 'ē': 'e', 'ī': 'i', 'ō': 'o', 'ū': 'u',
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+    };
+    final lower = name.trim().toLowerCase();
+    final b = StringBuffer();
+    for (final ch in lower.split('')) {
+      b.write(map[ch] ?? ch);
+    }
+    final slug = b
+        .toString()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+    return slug.isEmpty ? 'camp_neraya' : slug;
+  }
 
   /// True once the latest data came from the server (not only the local cache).
   bool isSynced = false;

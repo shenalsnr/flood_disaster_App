@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
 import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
 
@@ -17,11 +16,7 @@ class RequestSupplyDialog extends StatefulWidget {
   /// (the leader can still edit every field).
   final ReliefItemModel? prefillItem;
 
-  const RequestSupplyDialog({
-    super.key,
-    required this.controller,
-    this.prefillItem,
-  });
+  const RequestSupplyDialog({super.key, required this.controller, this.prefillItem});
 
   @override
   State<RequestSupplyDialog> createState() => _RequestSupplyDialogState();
@@ -50,8 +45,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
     final item = widget.prefillItem;
-    if (item != null &&
-        widget.controller.requestableItems.any((i) => i.id == item.id)) {
+    if (item != null && widget.controller.requestableItems.any((i) => i.id == item.id)) {
       _select(item);
     }
   }
@@ -76,17 +70,13 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
     _urgency = item.status == StockStatus.critical ? 'critical' : 'urgent';
   }
 
-  Map<String, dynamic> _result(
-    String status,
-    ReliefItemModel item,
-    double qty,
-  ) => {
-    'status': status, // 'sent' or 'queued' (no connection)
-    'item': item.name,
-    'quantity': qty,
-    'unit': item.unit,
-    'urgency': _urgency,
-  };
+  Map<String, dynamic> _result(String status, ReliefItemModel item, double qty) => {
+        'status': status, // 'sent' or 'queued' (no connection)
+        'item': item.name,
+        'quantity': qty,
+        'unit': item.unit,
+        'urgency': _urgency,
+      };
 
   Future<void> _submit(ReliefItemModel? item) async {
     if (item == null) {
@@ -163,20 +153,13 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                         color: _accent.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
-                        Icons.local_shipping_outlined,
-                        color: _accent,
-                      ),
+                      child: const Icon(Icons.local_shipping_outlined, color: _accent),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
                         'Request Supply',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -190,10 +173,8 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                 const SizedBox(height: 18),
 
                 // Which item (chosen from the list, not typed)
-                _label(
-                  'Which item do you need?',
-                  help: 'Only items marked LOW or EMPTY can be requested',
-                ),
+                _label('Which item do you need?',
+                    help: 'Only items marked LOW or EMPTY can be requested'),
                 if (items.isEmpty)
                   Container(
                     width: double.infinity,
@@ -211,25 +192,17 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                     ),
                   )
                 else
-                  ...items.map(
-                    (item) => _itemTile(item, item.id == _selectedItemId),
-                  ),
+                  ...items.map((item) => _itemTile(item, item.id == _selectedItemId)),
                 const SizedBox(height: 14),
 
                 if (items.isNotEmpty) ...[
                   // How many
-                  _label(
-                    'How many do you need?',
-                    help: selected == null
-                        ? 'Choose an item first'
-                        : 'Unit: ${selected.unit}',
-                  ),
+                  _label('How many do you need?',
+                      help: selected == null ? 'Choose an item first' : 'Unit: ${selected.unit}'),
                   TextFormField(
                     controller: _qtyCtrl,
                     enabled: selected != null,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     style: const TextStyle(color: Colors.white),
                     decoration: _decoration(
                       'e.g. 50',
@@ -237,9 +210,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                     ),
                     validator: (v) {
                       final n = double.tryParse((v ?? '').trim());
-                      return (n == null || n <= 0)
-                          ? 'Enter a number above 0'
-                          : null;
+                      return (n == null || n <= 0) ? 'Enter a number above 0' : null;
                     },
                   ),
                   const SizedBox(height: 14),
@@ -251,33 +222,15 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _urgencyChip(
-                      'normal',
-                      'Normal',
-                      'within a day',
-                      const Color(0xFF30D158),
-                    ),
-                    _urgencyChip(
-                      'urgent',
-                      'Urgent',
-                      'within hours',
-                      const Color(0xFFFF9F0A),
-                    ),
-                    _urgencyChip(
-                      'critical',
-                      'Critical',
-                      'right now',
-                      const Color(0xFFFF3B30),
-                    ),
+                    _urgencyChip('normal', 'Normal', 'within a day', const Color(0xFF30D158)),
+                    _urgencyChip('urgent', 'Urgent', 'within hours', const Color(0xFFFF9F0A)),
+                    _urgencyChip('critical', 'Critical', 'right now', const Color(0xFFFF3B30)),
                   ],
                 ),
                 const SizedBox(height: 14),
 
                 // Note
-                _label(
-                  'Note (optional)',
-                  help: 'Anything the DMC should know, e.g. road access',
-                ),
+                _label('Note (optional)', help: 'Anything the DMC should know, e.g. road access'),
                 TextFormField(
                   controller: _noteCtrl,
                   maxLines: 2,
@@ -288,13 +241,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
 
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(
-                    _error!,
-                    style: const TextStyle(
-                      color: Color(0xFFFF3B30),
-                      fontSize: 12,
-                    ),
-                  ),
+                  Text(_error!, style: const TextStyle(color: Color(0xFFFF3B30), fontSize: 12)),
                 ],
                 const SizedBox(height: 20),
 
@@ -304,43 +251,27 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                   children: [
                     TextButton(
                       onPressed: _sending ? null : () => Navigator.pop(context),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: _muted),
-                      ),
+                      child: const Text('Cancel', style: TextStyle(color: _muted)),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _accent,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      onPressed: (_sending || items.isEmpty)
-                          ? null
-                          : () => _submit(selected),
+                      onPressed: (_sending || items.isEmpty) ? null : () => _submit(selected),
                       icon: _sending
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.send, size: 16),
                       label: Text(
                         _sending ? 'SENDING...' : 'SEND REQUEST',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ),
                   ],
@@ -374,9 +305,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
           child: Row(
             children: [
               Icon(
-                selected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
+                selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 color: selected ? _accent : _muted,
                 size: 18,
               ),
@@ -385,18 +314,11 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'In stock: $qty ${item.unit}',
-                      style: const TextStyle(color: _muted, fontSize: 11),
-                    ),
+                    Text(item.name,
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                    Text('In stock: $qty ${item.unit}',
+                        style: const TextStyle(color: _muted, fontSize: 11)),
                   ],
                 ),
               ),
@@ -406,14 +328,8 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
-                  empty ? 'EMPTY' : 'LOW',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: Text(empty ? 'EMPTY' : 'LOW',
+                    style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -430,11 +346,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
         children: [
           Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
           ),
           if (help != null)
             Text(help, style: const TextStyle(color: _muted, fontSize: 11)),
@@ -443,12 +355,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
     );
   }
 
-  Widget _urgencyChip(
-    String value,
-    String title,
-    String subtitle,
-    Color color,
-  ) {
+  Widget _urgencyChip(String value, String title, String subtitle, Color color) {
     final selected = _urgency == value;
     return ChoiceChip(
       showCheckmark: false,

@@ -23,7 +23,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
   final _confirmPasswordController = TextEditingController(text: 'Secure@1234');
 
   String _selectedSector = 'Colombo Low-Lying Area (Kelani Bank Zone)';
-  final String _selectedRole = 'responder';
+  final String _selectedRole = 'citizen'; // self-signup is for citizens only
   bool _agreedToAlerts = true;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;

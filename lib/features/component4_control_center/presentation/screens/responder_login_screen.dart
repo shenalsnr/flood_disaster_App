@@ -10,6 +10,8 @@ import 'responder_register_screen.dart';
 import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
 import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
+import '../../../component3_relief_tracking/presentation/screens/supply_admin_dashboard_screen.dart';
+import 'admin_panel_screen.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
   final UserRole initialRole;
@@ -134,7 +136,16 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
       // 4. Role-based routing based on authenticated user's role from Firestore
       final role = user.role.toLowerCase();
-      if (role.contains('citizen')) {
+      if (role == 'admin') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const AdminPanelScreen()),
+        );
+      } else if (role.contains('dmc')) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (_) => const SupplyAdminDashboardScreen()),
+        );
+      } else if (role.contains('citizen')) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
         );

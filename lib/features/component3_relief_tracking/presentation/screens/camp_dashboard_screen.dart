@@ -9,6 +9,7 @@ import '../widgets/leaders_chat_panel.dart';
 import '../widgets/request_supply_dialog.dart';
 import '../widgets/supply_requests_list.dart';
 import 'supply_admin_dashboard_screen.dart';
+import '../../../component4_control_center/presentation/screens/admin_panel_screen.dart';
 import 'personal_information_screen.dart';
 import '../widgets/leader_avatar.dart';
 
@@ -530,7 +531,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
         ),
 
         const SizedBox(height: 20),
-        SupplyRequestsList(campId: ReliefTrackingController.campId),
+        SupplyRequestsList(campId: _controller.campId),
       ],
     );
   }
@@ -927,6 +928,13 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const SupplyAdminDashboardScreen()));
                 },
                 child: _buildAccountRow(Icons.admin_panel_settings_outlined, 'Supply Admin Dashboard', 'Assign trucks to supply requests'),
+              ),
+              const Divider(color: Color(0xFF1E283D), height: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPanelScreen()));
+                },
+                child: _buildAccountRow(Icons.manage_accounts_outlined, 'Admin Panel', 'Add staff, assign roles & camps'),
               ),
             ],
           ),

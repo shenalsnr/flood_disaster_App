@@ -157,7 +157,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     if (user == null || !_formKey.currentState!.validate()) return;
     final name = _nameCtrl.text.trim();
     final phone = _phoneCtrl.text.trim();
-    final zone = _zoneCtrl.text.trim();
+    final zone = user.floodZone; // assigned by the administrator
 
     setState(() => _saving = true);
     try {
@@ -330,14 +330,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 _label('NIC', help: _editing ? 'Cannot be changed' : null),
                 _value(user.nic),
                 const SizedBox(height: 16),
-                _label('Assigned area'),
-                _editing
-                    ? TextFormField(
-                        controller: _zoneCtrl,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _decoration('e.g. Kelani Basin Camp 01'),
-                      )
-                    : _value(user.floodZone),
+                _label('Assigned camp / area',
+                    help: _editing ? 'Set by the administrator' : null),
+                _value(user.floodZone),
                 if (_editing) ...[
                   const SizedBox(height: 22),
                   Row(
