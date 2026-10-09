@@ -65,9 +65,23 @@ class AuthFirebaseService {
       'role': 'admin',
       'password': 'Admin@2026',
     },
+    // Second bootstrap administrator (demo / coursework login).
+    'admin@gmail.com': {
+      'uid': 'admin@gmail.com',
+      'fullName': 'Administrator',
+      'email': 'admin@gmail.com',
+      'phoneNumber': '',
+      'nic': '',
+      'floodZone': 'National Control',
+      'role': 'admin',
+      'password': 'admin123',
+    },
   };
 
-  static const String _bootstrapAdminEmail = 'admin@wesafe.gov.lk';
+  static const Set<String> _bootstrapAdmins = {
+    'admin@wesafe.gov.lk',
+    'admin@gmail.com',
+  };
 
   /// Save new user registration details to Cloud Firestore & in-memory cache
   Future<UserProfile> registerUser({
@@ -75,11 +89,11 @@ class AuthFirebaseService {
     required String email,
     required String phoneNumber,
     required String nic,
-    String district = '',
-    String city = '',
     required String floodZone,
     required String password,
     required String role,
+    String district = '',
+    String city = '',
   }) async {
     final cleanEmail = email.toLowerCase().trim();
 
@@ -89,9 +103,9 @@ class AuthFirebaseService {
       'email': cleanEmail,
       'phoneNumber': phoneNumber.trim(),
       'nic': nic.trim(),
+      'floodZone': floodZone.trim(),
       'district': district.trim(),
       'city': city.trim(),
-      'floodZone': floodZone.trim(),
       'role': role,
       'password': password,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -122,8 +136,6 @@ class AuthFirebaseService {
       email: cleanEmail,
       phoneNumber: phoneNumber.trim(),
       nic: nic.trim(),
-      district: district.trim(),
-      city: city.trim(),
       floodZone: floodZone.trim(),
       role: role,
     );
@@ -155,7 +167,7 @@ class AuthFirebaseService {
     // or for the bootstrap admin. This way an account the admin deleted
     // from Firestore can no longer sign in.
     if (data == null &&
-        (!firestoreReachable || cleanEmail == _bootstrapAdminEmail)) {
+        (!firestoreReachable || _bootstrapAdmins.contains(cleanEmail))) {
       data = _offlineFallbackCache[cleanEmail];
     }
 
@@ -195,7 +207,7 @@ class AuthFirebaseService {
       debugPrint('loadUserByEmail read warning: $e');
     }
     if (data == null &&
-        (!reachable || cleanEmail == _bootstrapAdminEmail)) {
+        (!reachable || _bootstrapAdmins.contains(cleanEmail))) {
       data = _offlineFallbackCache[cleanEmail];
     }
     if (data == null) throw Exception('Account not found.');
