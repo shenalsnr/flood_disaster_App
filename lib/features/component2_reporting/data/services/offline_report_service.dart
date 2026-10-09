@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import '../../../../core/services/notification_service.dart';
 
 /// Offline Report Queue & Auto-Sync Service.
 /// Manages locally stored disaster hazard reports when there is no internet.
@@ -108,6 +109,8 @@ class OfflineReportService {
 
     _isSyncing = true;
     int syncedCount = 0;
+    String lastHazard = 'Hazard';
+    String lastLocation = 'Field Sector';
     debugPrint('Signal restored! Auto-submitting ${_memoryQueue.length} pending reports...');
 
     final List<Map<String, dynamic>> remaining = [];
@@ -127,6 +130,8 @@ class OfflineReportService {
             .timeout(const Duration(seconds: 4));
 
         syncedCount++;
+        lastHazard = report['hazardType'] as String? ?? 'Hazard';
+        lastLocation = report['location'] as String? ?? 'Field Sector';
         debugPrint('Successfully synced offline report: ${report['hazardType']}');
       } catch (e) {
         debugPrint('Failed to sync offline report, keeping in queue: $e');
@@ -137,6 +142,15 @@ class OfflineReportService {
     _memoryQueue.clear();
     _memoryQueue.addAll(remaining);
     _saveToDisk();
+
+    // Trigger Notification for auto-submitted reports!
+    if (syncedCount > 0) {
+      NotificationService.instance.showReportAutoSubmittedNotification(
+        hazardType: lastHazard,
+        location: lastLocation,
+        count: syncedCount,
+      );
+    }
 
     _isSyncing = false;
     return syncedCount;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/services/notification_service.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 import 'firebase_options.dart';
 
@@ -13,6 +14,9 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => debugPrint('Firebase initialized successfully'))
       .catchError((e) => debugPrint('Firebase init error: $e'));
+
+  // Initialize Notifications
+  await NotificationService.instance.initialize();
 
   // Force dark status bar icons to match the dark theme
   SystemChrome.setSystemUIOverlayStyle(
@@ -31,6 +35,7 @@ class WeSafeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: NotificationService.messengerKey,
       debugShowCheckedModeBanner: false,
       title: 'WeSafe — Flood Relief & Early Warning',
       theme: AppTheme.dark,
