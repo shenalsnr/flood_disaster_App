@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 enum AlertType { request, dispatch, notification }
+
 enum AlertStatus { pending, accepted, declined, completed }
 
 class InterCampAlertModel {
@@ -12,7 +13,7 @@ class InterCampAlertModel {
   final AlertType type;
   final AlertStatus status;
   final String timestamp;
-  
+
   // Dispatch details (if type is dispatch)
   final String? driverName;
   final String? driverContact;
