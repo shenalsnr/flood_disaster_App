@@ -55,6 +55,10 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_native_splash: ^2.4.8
 
+dependency_overrides:
+  url_launcher_ios: 6.3.2
+  path_provider_foundation: 2.4.0
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
