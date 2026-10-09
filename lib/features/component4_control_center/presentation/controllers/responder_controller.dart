@@ -56,7 +56,7 @@ class ResponderController extends ChangeNotifier {
   final List<IncidentReport> _incidents = [];
   List<IncidentReport> get incidents => List.unmodifiable(_incidents);
 
-  // Available Teams
+  // Available Teams (Mutable list so status updates dynamically)
   final List<EmergencyTeam> _teams = [
     const EmergencyTeam(
       id: 'TEAM-01',
@@ -64,12 +64,17 @@ class ResponderController extends ChangeNotifier {
       status: 'AVAILABLE',
       distance: '1.2 km Away',
       eta: '4 Mins',
+      etaMinutes: 4,
       equipment: '2x Zodiac Inflatable Boats & Water Rescue Gear',
       crewCount: 4,
       leader: 'Capt. Kasun Fernando',
       radioChannel: 'VHF CH-04',
       location: LatLng(6.9200, 79.8550),
-      speedKmh: 24.0,
+      speedKmh: 28.0,
+      vehicleType: 'Zodiac Rescue Boat',
+      callSign: 'ALPHA-01',
+      phoneNumber: '+94 77 482 1029',
+      fuelLevel: 96,
     ),
     const EmergencyTeam(
       id: 'TEAM-02',
@@ -77,12 +82,17 @@ class ResponderController extends ChangeNotifier {
       status: 'AVAILABLE',
       distance: '3.5 km Away',
       eta: '9 Mins',
+      etaMinutes: 9,
       equipment: '4x4 High-Clearance Troop Carrier & Chainsaws',
       crewCount: 6,
       leader: 'Lieut. M. Perera',
       radioChannel: 'VHF CH-06',
       location: LatLng(6.9350, 79.8700),
-      speedKmh: 30.0,
+      speedKmh: 32.0,
+      vehicleType: '4x4 Troop Carrier Truck',
+      callSign: 'BRAVO-02',
+      phoneNumber: '+94 71 892 3344',
+      fuelLevel: 88,
     ),
     const EmergencyTeam(
       id: 'TEAM-03',
@@ -90,28 +100,68 @@ class ResponderController extends ChangeNotifier {
       status: 'AVAILABLE',
       distance: '4.8 km Away',
       eta: '12 Mins',
+      etaMinutes: 12,
       equipment: 'Mobile Clinic, Stretcher Kit & 4 Medics',
       crewCount: 4,
       leader: 'Dr. S. Alwis (EMT Lead)',
       radioChannel: 'VHF CH-09',
       location: LatLng(6.9100, 79.8650),
-      speedKmh: 28.0,
+      speedKmh: 30.0,
+      vehicleType: 'Ambulance EMT Clinic',
+      callSign: 'MEDIC-03',
+      phoneNumber: '+94 76 345 6789',
+      fuelLevel: 92,
     ),
     const EmergencyTeam(
       id: 'TEAM-04',
+      name: 'Kelani Basin Water Patrol',
+      status: 'AVAILABLE',
+      distance: '6.1 km Away',
+      eta: '16 Mins',
+      etaMinutes: 16,
+      equipment: 'Rigid Hull Inflatable & Sonar Depth Finder',
+      crewCount: 5,
+      leader: 'Chief Diver Samantha',
+      radioChannel: 'VHF CH-07',
+      location: LatLng(6.9450, 79.8820),
+      speedKmh: 26.0,
+      vehicleType: 'Rigid Hull Watercraft',
+      callSign: 'DELTA-04',
+      phoneNumber: '+94 70 987 6543',
+      fuelLevel: 85,
+    ),
+    const EmergencyTeam(
+      id: 'TEAM-05',
       name: 'Colombo Fire Service Unit B',
       status: 'ON MISSION',
       distance: '0.8 km Away',
       eta: 'In Mission',
+      etaMinutes: 99,
       equipment: 'High-Volume Drainage Pump Truck',
       crewCount: 5,
       leader: 'Station Officer Wickrama',
       radioChannel: 'VHF CH-02',
       location: LatLng(6.9290, 79.8580),
       speedKmh: 0.0,
+      vehicleType: 'Heavy Drainage Pump Truck',
+      callSign: 'SIERRA-05',
+      phoneNumber: '+94 11 242 2222',
+      fuelLevel: 74,
     ),
   ];
+
   List<EmergencyTeam> get teams => List.unmodifiable(_teams);
+
+  // Teams sorted by ETA (Available first, then ascending etaMinutes)
+  List<EmergencyTeam> get sortedTeamsByEta {
+    final list = List<EmergencyTeam>.from(_teams);
+    list.sort((a, b) {
+      if (a.isAvailable && !b.isAvailable) return -1;
+      if (!a.isAvailable && b.isAvailable) return 1;
+      return a.etaMinutes.compareTo(b.etaMinutes);
+    });
+    return list;
+  }
 
   void setFilter(String filter) {
     _selectedSeverityFilter = filter;
@@ -169,10 +219,116 @@ class ResponderController extends ChangeNotifier {
     return 0;
   }
 
-  void assignTeamToIncident(IncidentReport incident, EmergencyTeam team) {
-    incident.assignedTeam = team;
+  // --- CRUD 2: DISPATCH OPERATIONS ---
+
+  // CREATE: Assign squad to incident
+  void assignTeamToIncident(
+    IncidentReport incident,
+    EmergencyTeam team, {
+    String? dispatchNotes,
+    String? priority,
+  }) {
+    final teamIndex = _teams.indexWhere((t) => t.id == team.id);
+    final updatedTeam = team.copyWith(status: 'EN ROUTE');
+    if (teamIndex != -1) {
+      _teams[teamIndex] = updatedTeam;
+    }
+
+    incident.assignedTeam = updatedTeam;
     incident.status = IncidentStatus.dispatched;
+    if (dispatchNotes != null) incident.dispatchNotes = dispatchNotes;
+    if (priority != null) incident.priorityLevel = priority;
+    incident.dispatchedAt = DateTime.now();
+
     _activeIncident = incident;
+    notifyListeners();
+  }
+
+  // UPDATE: Reassign incident to a different team
+  void reassignTeam({
+    required IncidentReport incident,
+    required EmergencyTeam newTeam,
+    required String reason,
+  }) {
+    // 1. Release previously assigned team back to AVAILABLE
+    if (incident.assignedTeam != null) {
+      final oldIndex =
+          _teams.indexWhere((t) => t.id == incident.assignedTeam!.id);
+      if (oldIndex != -1) {
+        _teams[oldIndex] = _teams[oldIndex].copyWith(status: 'AVAILABLE');
+      }
+    }
+
+    // 2. Mark newly selected team as EN ROUTE
+    final newIndex = _teams.indexWhere((t) => t.id == newTeam.id);
+    final assignedNewTeam = newTeam.copyWith(status: 'EN ROUTE');
+    if (newIndex != -1) {
+      _teams[newIndex] = assignedNewTeam;
+    }
+
+    // 3. Update incident record
+    incident.assignedTeam = assignedNewTeam;
+    incident.status = IncidentStatus.dispatched;
+    incident.dispatchNotes =
+        '${incident.dispatchNotes ?? ""}\n[REASSIGNED]: $reason (Now: ${newTeam.name})'
+            .trim();
+
+    _activeIncident = incident;
+    notifyListeners();
+  }
+
+  // UPDATE: Change dispatch status (EN ROUTE <-> ON SCENE)
+  void updateDispatchStatus(IncidentReport incident, String newStatus) {
+    if (incident.assignedTeam != null) {
+      final updatedTeam =
+          incident.assignedTeam!.copyWith(status: newStatus.toUpperCase());
+      incident.assignedTeam = updatedTeam;
+
+      final index = _teams.indexWhere((t) => t.id == updatedTeam.id);
+      if (index != -1) {
+        _teams[index] = updatedTeam;
+      }
+    }
+
+    if (newStatus.toUpperCase() == 'ON SCENE') {
+      incident.status = IncidentStatus.onScene;
+    } else if (newStatus.toUpperCase() == 'EN ROUTE') {
+      incident.status = IncidentStatus.dispatched;
+    }
+
+    notifyListeners();
+  }
+
+  // UPDATE: Change mission notes or priority
+  void updateDispatchDetails({
+    required IncidentReport incident,
+    String? notes,
+    String? priority,
+  }) {
+    if (notes != null) incident.dispatchNotes = notes;
+    if (priority != null) incident.priorityLevel = priority;
+    notifyListeners();
+  }
+
+  // DELETE: Cancel active dispatch (team busy, wrong assignment, stand down)
+  void cancelDispatch({
+    required IncidentReport incident,
+    required String cancellationReason,
+  }) {
+    // 1. Set assigned team back to AVAILABLE
+    if (incident.assignedTeam != null) {
+      final teamIndex =
+          _teams.indexWhere((t) => t.id == incident.assignedTeam!.id);
+      if (teamIndex != -1) {
+        _teams[teamIndex] = _teams[teamIndex].copyWith(status: 'AVAILABLE');
+      }
+    }
+
+    // 2. Revert incident status back to incoming / pending triage
+    incident.assignedTeam = null;
+    incident.status = IncidentStatus.incoming;
+    incident.cancellationReason = cancellationReason;
+
     notifyListeners();
   }
 
@@ -187,6 +343,15 @@ class ResponderController extends ChangeNotifier {
     required String notes,
     required int evacuatedCount,
   }) {
+    // Free team if assigned
+    if (incident.assignedTeam != null) {
+      final teamIndex =
+          _teams.indexWhere((t) => t.id == incident.assignedTeam!.id);
+      if (teamIndex != -1) {
+        _teams[teamIndex] = _teams[teamIndex].copyWith(status: 'AVAILABLE');
+      }
+    }
+
     incident.status = IncidentStatus.resolved;
     incident.resolutionType = resolutionType;
     incident.resolutionNotes = notes;
