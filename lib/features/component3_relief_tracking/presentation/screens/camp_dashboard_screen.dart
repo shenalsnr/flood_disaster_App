@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
@@ -13,6 +14,7 @@ import 'personal_information_screen.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../widgets/leader_avatar.dart';
+import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../../component1_evacuation/models/warning_alert.dart';
 
 class CampDashboardScreen extends StatefulWidget {
@@ -1039,8 +1041,45 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 
 /// Live list of the warnings an admin broadcasts (Firestore `warnings`).
 /// Resolved warnings are deleted by the admin, so they disappear here too.
-class _BroadcastWarningsSection extends StatelessWidget {
+class _BroadcastWarningsSection extends StatefulWidget {
   const _BroadcastWarningsSection();
+
+  @override
+  State<_BroadcastWarningsSection> createState() =>
+      _BroadcastWarningsSectionState();
+}
+
+class _BroadcastWarningsSectionState extends State<_BroadcastWarningsSection> {
+  /// Warnings this person cleared. Stored on this device only; the warning
+  /// itself stays in Firestore for everyone else.
+  Set<String> _cleared = {};
+
+  String get _key {
+    final email = ResponderController().currentUser?.email ?? 'anon';
+    return 'cleared_warnings_${email.toLowerCase().trim()}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      final saved = p.getStringList(_key) ?? const <String>[];
+      if (mounted) setState(() => _cleared = saved.toSet());
+    } catch (_) {}
+  }
+
+  Future<void> _clear(Iterable<String> ids) async {
+    setState(() => _cleared = {..._cleared, ...ids});
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setStringList(_key, _cleared.toList());
+    } catch (_) {}
+  }
 
   static const Color _card = Color(0xFF131A2A);
   static const Color _muted = Color(0xFF8E9BAE);
@@ -1073,7 +1112,9 @@ class _BroadcastWarningsSection extends StatelessWidget {
           .limit(20)
           .snapshots(),
       builder: (context, snap) {
-        final docs = snap.data?.docs ?? const [];
+        final docs = (snap.data?.docs ?? const <QueryDocumentSnapshot<Map<String, dynamic>>>[])
+            .where((d) => !_cleared.contains(d.id))
+            .toList();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1106,6 +1147,17 @@ class _BroadcastWarningsSection extends StatelessWidget {
                             fontWeight: FontWeight.bold)),
                   ),
                 ],
+                const Spacer(),
+                if (docs.isNotEmpty)
+                  GestureDetector(
+                    onTap: () => _clear(docs.map((d) => d.id)),
+                    child: const Text('CLEAR ALL',
+                        style: TextStyle(
+                            color: Color(0xFFFF3B30),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.6)),
+                  ),
               ],
             ),
             const SizedBox(height: 10),
@@ -1125,7 +1177,7 @@ class _BroadcastWarningsSection extends StatelessWidget {
                     style: TextStyle(color: _muted, fontSize: 12)),
               )
             else
-              ...docs.map((d) => _tile(WarningAlert.fromDoc(d))),
+              ...docs.map((d) => _tile(d.id, WarningAlert.fromDoc(d))),
             const SizedBox(height: 18),
           ],
         );
@@ -1133,7 +1185,7 @@ class _BroadcastWarningsSection extends StatelessWidget {
     );
   }
 
-  Widget _tile(WarningAlert w) {
+  Widget _tile(String id, WarningAlert w) {
     final color = _color(w.severity);
     final where = [w.locationZone, w.district]
         .where((e) => e.trim().isNotEmpty)
@@ -1178,6 +1230,11 @@ class _BroadcastWarningsSection extends StatelessWidget {
               Text(_ago(w.issuedTimestamp),
                   style:
                       const TextStyle(color: Color(0xFF63738A), fontSize: 10)),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => _clear([id]),
+                child: const Icon(Icons.close, color: _muted, size: 18),
+              ),
             ],
           ),
           if (where.isNotEmpty) ...[
