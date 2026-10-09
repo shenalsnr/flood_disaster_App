@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/models/relief_item_model.dart';
@@ -12,6 +13,7 @@ import 'personal_information_screen.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../widgets/leader_avatar.dart';
+import '../../../component1_evacuation/models/warning_alert.dart';
 
 class CampDashboardScreen extends StatefulWidget {
   const CampDashboardScreen({super.key});
@@ -649,6 +651,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
         ),
         const SizedBox(height: 14),
 
+        // Live broadcast warnings sent by the admin
+        const _BroadcastWarningsSection(),
+
         // Alert Filters
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -1029,5 +1034,178 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
   // --- TAB 4: TEAM / COMMUNITY CHAT (live chat between all camp leaders) ---
   Widget _buildTeamTab() {
     return LeadersChatPanel(controller: _controller);
+  }
+}
+
+/// Live list of the warnings an admin broadcasts (Firestore `warnings`).
+/// Resolved warnings are deleted by the admin, so they disappear here too.
+class _BroadcastWarningsSection extends StatelessWidget {
+  const _BroadcastWarningsSection();
+
+  static const Color _card = Color(0xFF131A2A);
+  static const Color _muted = Color(0xFF8E9BAE);
+
+  static Color _color(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'critical':
+        return const Color(0xFFFF3B30);
+      case 'warning':
+        return const Color(0xFFFF9F0A);
+      default:
+        return const Color(0xFFFFD60A);
+    }
+  }
+
+  static String _ago(DateTime t) {
+    final d = DateTime.now().difference(t);
+    if (d.inMinutes < 1) return 'Just now';
+    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
+    if (d.inHours < 24) return '${d.inHours} h ago';
+    return '${d.inDays} d ago';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('warnings')
+          .orderBy('issuedTimestamp', descending: true)
+          .limit(20)
+          .snapshots(),
+      builder: (context, snap) {
+        final docs = snap.data?.docs ?? const [];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.campaign_outlined,
+                    color: Color(0xFFFF3B30), size: 16),
+                const SizedBox(width: 6),
+                const Text(
+                  'BROADCAST WARNINGS FROM ADMIN',
+                  style: TextStyle(
+                      color: Color(0xFF7E8B9B),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8),
+                ),
+                if (docs.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF3B30),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text('${docs.length}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (snap.hasError)
+              const Text('Could not load warnings.',
+                  style: TextStyle(color: _muted, fontSize: 12))
+            else if (docs.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: _card,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF1E283D)),
+                ),
+                child: const Text('No active broadcast warnings.',
+                    style: TextStyle(color: _muted, fontSize: 12)),
+              )
+            else
+              ...docs.map((d) => _tile(WarningAlert.fromDoc(d))),
+            const SizedBox(height: 18),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _tile(WarningAlert w) {
+    final color = _color(w.severity);
+    final where = [w.locationZone, w.district]
+        .where((e) => e.trim().isNotEmpty)
+        .join(' · ');
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.7), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: color),
+                ),
+                child: Text(w.severity.toUpperCase(),
+                    style: TextStyle(
+                        color: color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  w.hazardType.isEmpty ? 'Flood warning' : w.hazardType,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text(_ago(w.issuedTimestamp),
+                  style:
+                      const TextStyle(color: Color(0xFF63738A), fontSize: 10)),
+            ],
+          ),
+          if (where.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.place_outlined, color: _muted, size: 14),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(where,
+                      style: const TextStyle(color: _muted, fontSize: 11.5)),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 6),
+          Text(
+            'Water level ${w.waterLevelMeters.toStringAsFixed(1)} m  ·  '
+            'Rainfall ${w.rainfallMm.toStringAsFixed(0)} mm',
+            style: const TextStyle(color: _muted, fontSize: 11.5),
+          ),
+          if (w.description.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(w.description,
+                style: const TextStyle(color: Colors.white, fontSize: 12.5)),
+          ],
+        ],
+      ),
+    );
   }
 }
