@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../../component1_evacuation/presentation/screens/c1_admin_metrics_screen.dart';
+import '../../../component3_relief_tracking/presentation/screens/supply_admin_dashboard_screen.dart';
 import '../../../component1_evacuation/services/safe_zone_service.dart';
 import '../../data/services/admin_user_service.dart';
 import '../../data/services/session_service.dart';
@@ -261,6 +263,12 @@ class AdminDashboardScreen extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
+          child: _action(Icons.local_shipping_outlined, 'Supply Admin Dashboard',
+              () => _open(context, const SupplyAdminDashboardScreen())),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
           child: _action(Icons.groups_outlined, 'Registered citizens',
               () => _open(context, const _CitizensScreen())),
         ),
@@ -280,13 +288,7 @@ class AdminDashboardScreen extends StatelessWidget {
             label: const Text('BROADCAST WARNING',
                 style: TextStyle(
                     fontWeight: FontWeight.bold, letterSpacing: 0.8)),
-            onPressed: () {
-              // Button only for now: the broadcast flow is not connected yet.
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Broadcast Warning is not connected yet.'),
-                backgroundColor: Color(0xFF1E293B),
-              ));
-            },
+            onPressed: () => _open(context, const C1AdminMetricsScreen()),
           ),
         ),
       ],
