@@ -15,6 +15,8 @@ import 'personal_information_screen.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
 import '../../../component4_control_center/presentation/screens/sign_in_screen.dart';
 import '../widgets/leader_avatar.dart';
+import 'relief_truck_tracking_screen.dart';
+import 'equipment_tracking_screen.dart';
 
 class CampDashboardScreen extends StatefulWidget {
   const CampDashboardScreen({super.key});

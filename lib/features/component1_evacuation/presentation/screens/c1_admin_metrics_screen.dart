@@ -29,6 +29,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
   final _formKey = GlobalKey<FormState>();
   final _waterController = TextEditingController();
   final _rainfallController = TextEditingController();
+  final _windController = TextEditingController();
   final _descController = TextEditingController();
   final _cityController = TextEditingController();
 
@@ -128,6 +129,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     _pulseCtrl.dispose();
     _waterController.dispose();
     _rainfallController.dispose();
+    _windController.dispose();
     _descController.dispose();
     _cityController.dispose();
     super.dispose();
@@ -147,6 +149,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       hazardType: _selectedHazard,
       waterLevelMeters: double.parse(_waterController.text),
       rainfallMm: double.parse(_rainfallController.text),
+      windSpeedKmh: double.parse(_windController.text),
       severity: _selectedSeverity,
       description: _descController.text.trim(),
       issuedTimestamp: DateTime.now(),
@@ -202,6 +205,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           : 'Watch';
       _waterController.text = alert.waterLevelMeters.toStringAsFixed(2);
       _rainfallController.text = alert.rainfallMm.toStringAsFixed(1);
+      _windController.text = alert.windSpeedKmh.toStringAsFixed(1);
       _descController.text = alert.description;
       _cityController.text = alert.city;
     });
@@ -223,6 +227,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     });
     _waterController.clear();
     _rainfallController.clear();
+    _windController.clear();
     _descController.clear();
     _cityController.clear();
     _formKey.currentState?.reset();
@@ -578,24 +583,33 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             ),
             const SizedBox(height: 14),
 
-            // Row 2: Water level + Rainfall inputs
+            // Row 3: Water level + Rainfall + Wind inputs
             Row(
               children: [
                 Expanded(
                   child: _buildNumericField(
                     controller: _waterController,
-                    label: 'Water Level (m)',
+                    label: 'Water (m)',
                     icon: Icons.water_rounded,
-                    hint: 'e.g. 3.8',
+                    hint: '3.8',
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _buildNumericField(
                     controller: _rainfallController,
-                    label: 'Rainfall (mm)',
+                    label: 'Rain (mm)',
                     icon: Icons.grain_rounded,
-                    hint: 'e.g. 120.5',
+                    hint: '120.5',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildNumericField(
+                    controller: _windController,
+                    label: 'Wind (km/h)',
+                    icon: Icons.air_rounded,
+                    hint: '65.0',
                   ),
                 ),
               ],
@@ -1008,15 +1022,22 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 _buildMetricChip(
                   icon: Icons.water_rounded,
                   label: 'Water',
-                  value: '${alert.waterLevelMeters.toStringAsFixed(2)} m',
+                  value: '${alert.waterLevelMeters.toStringAsFixed(2)}m',
                   color: const Color(0xFF42A5F5),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 6),
                 _buildMetricChip(
                   icon: Icons.grain_rounded,
-                  label: 'Rainfall',
-                  value: '${alert.rainfallMm.toStringAsFixed(1)} mm',
+                  label: 'Rain',
+                  value: '${alert.rainfallMm.toStringAsFixed(1)}mm',
                   color: const Color(0xFF26C6DA),
+                ),
+                const SizedBox(width: 6),
+                _buildMetricChip(
+                  icon: Icons.air_rounded,
+                  label: 'Wind',
+                  value: '${alert.windSpeedKmh.toStringAsFixed(1)}kph',
+                  color: const Color(0xFFB39DDB),
                 ),
                 const Spacer(),
                 // Edit button

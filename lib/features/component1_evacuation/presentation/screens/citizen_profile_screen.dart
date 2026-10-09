@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 
@@ -12,6 +15,71 @@ class CitizenProfileScreen extends StatefulWidget {
 
 class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isUploadingAvatar = false;
+
+  Future<void> _pickAndUploadImage(String email, ImageSource source) async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 70,
+        maxWidth: 800,
+      );
+      if (picked == null) return;
+
+      setState(() => _isUploadingAvatar = true);
+
+      // readAsBytes() works on both Web and Mobile platforms
+      final fileBytes = await picked.readAsBytes();
+      // Bypass Firebase Storage completely by converting to Base64
+      final base64String = base64Encode(fileBytes);
+
+      await _firestore.collection('users').doc(email).set(
+        {'photoUrl': base64String},
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload image: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
+  }
+
+  void _showImageSourceDialog(String email) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded, color: Colors.white),
+              title: const Text('Take Photo', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAndUploadImage(email, ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: Colors.white),
+              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAndUploadImage(email, ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _editProfile(Map<String, dynamic> currentData, String email) {
     final nameCtrl = TextEditingController(text: currentData['fullName'] ?? currentData['name']);
@@ -175,34 +243,83 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Premium Avatar
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF00E676).withValues(alpha: 0.3),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 8),
+                          GestureDetector(
+                            onTap: () => _showImageSourceDialog(emailStr),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                                        blurRadius: 20,
+                                        spreadRadius: 2,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xFF070B14),
+                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: data['photoUrl'] != null && data['photoUrl'].toString().isNotEmpty
+                                          ? (data['photoUrl'].toString().startsWith('http') 
+                                              ? Image.network(
+                                                  data['photoUrl'],
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
+                                                )
+                                              : Image.memory(
+                                                  base64Decode(data['photoUrl']),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
+                                                ))
+                                          : const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
+                                    ),
+                                  ),
+                                ),
+                                if (_isUploadingAvatar)
+                                  Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(alpha: 0.5),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(color: Color(0xFF00E676)),
+                                    ),
+                                  ),
+                                // Edit Badge
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1E293B),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: const Color(0xFF00E676), width: 2),
+                                    ),
+                                    child: const Icon(Icons.camera_alt_rounded, color: Color(0xFF00E676), size: 18),
+                                  ),
                                 ),
                               ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFF070B14),
-                                ),
-                                child: const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
-                              ),
                             ),
                           ),
                           const SizedBox(height: 24),

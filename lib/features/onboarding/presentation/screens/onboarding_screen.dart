@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../component2_reporting/presentation/screens/volunteer_dashboard_screen.dart';
+import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 
 /// Ultra-Premium Tactical Onboarding Screen for WeSafe Disaster Response.
 /// Replaces cartoon mockups with high-resolution 3D tactical command center
@@ -90,7 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 550),
-        pageBuilder: (_, _, _) => const VolunteerDashboardScreen(),
+        pageBuilder: (_, _, _) => const ResponderLoginScreen(),
         transitionsBuilder: (_, animation, _, child) => FadeTransition(
           opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: child,
