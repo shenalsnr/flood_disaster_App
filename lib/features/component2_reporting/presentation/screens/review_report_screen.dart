@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:flood_disaster/features/component2_reporting/data/services/offline_report_service.dart';
+import 'package:flood_disaster/features/component2_reporting/data/models/offline_hazard_report.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/report_submission_status_screen.dart';
 
 /// Review Your Report Screen.
@@ -144,6 +145,46 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
     setState(() => _isSubmitting = false);
 
     // Navigate directly to Offline "Report Saved." Screen (Screenshot 2)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReportSubmissionStatusScreen(
+          isOnline: false,
+          pendingCount: OfflineReportService.instance.pendingCount,
+          hazard: widget.hazard,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveAsDraft() async {
+    setState(() => _isSubmitting = true);
+    final user = FirebaseAuth.instance.currentUser;
+    final reporterName = user?.displayName ?? 'Kapila Perera';
+    final reportCode = '#DRAFT-${1000 + Random().nextInt(9000)}';
+    final now = DateTime.now();
+
+    final draft = OfflineHazardReport(
+      id: reportCode,
+      hazardType: widget.hazard,
+      severity: widget.severity,
+      location: 'Kolonnawa, 6.9271° N, 79.8612° E',
+      description: widget.note,
+      hasPhoto: widget.imageFile != null,
+      photoPath: widget.imageFile?.path,
+      reporterName: reporterName,
+      reporterEmail: user?.email ?? 'volunteer.kapila@dmc.org',
+      latitude: widget.coordinates.latitude,
+      longitude: widget.coordinates.longitude,
+      status: 'DRAFT',
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await OfflineReportService.instance.saveDraft(draft);
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -597,7 +638,35 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                 ),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
+
+              // ── Button: SAVE AS LOCAL DRAFT (SQLite) ───────────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF38BDF8),
+                    side: const BorderSide(
+                        color: Color(0xFF1E3A5F), width: 1.2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.storage_rounded, size: 18),
+                  label: const Text(
+                    'SAVE AS LOCAL DRAFT (SQLITE)',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  onPressed: _isSubmitting ? null : _saveAsDraft,
+                ),
+              ),
+
+              const SizedBox(height: 14),
 
               // ── Link: Edit Details (Vibrant Orange) ─────────────────────────
               Center(

@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/services/notification_service.dart';
+import '../models/offline_hazard_report.dart';
+import 'offline_hazard_database.dart';
 
-/// Offline Report Queue & Auto-Sync Service.
+/// Offline Report Queue & Auto-Sync Service backed by SQLite persistent storage.
 /// Manages locally stored disaster hazard reports when there is no internet.
 /// Periodically monitors internet connection and automatically broadcasts
 /// queued reports to Firebase Firestore as soon as device reconnects to a signal.
@@ -16,23 +17,11 @@ class OfflineReportService {
   }
 
   Timer? _syncTimer;
-  final List<Map<String, dynamic>> _memoryQueue = [];
   bool _isSyncing = false;
-
-  File get _queueFile {
-    final primaryDir = Directory('/data/user/0/com.example.flood_disaster/files');
-    if (primaryDir.existsSync()) {
-      return File('${primaryDir.path}/offline_hazard_queue.json');
-    }
-    final fallbackDir = Directory('/data/data/com.example.flood_disaster/files');
-    if (fallbackDir.existsSync()) {
-      return File('${fallbackDir.path}/offline_hazard_queue.json');
-    }
-    return File('${Directory.systemTemp.path}/offline_hazard_queue.json');
-  }
+  int _cachedPendingCount = 0;
 
   void _initAutoSync() {
-    _loadFromDisk();
+    _refreshCachedCount();
     // Run background auto-sync check every 12 seconds
     _syncTimer?.cancel();
     _syncTimer = Timer.periodic(const Duration(seconds: 12), (_) {
@@ -40,36 +29,11 @@ class OfflineReportService {
     });
   }
 
-  void _loadFromDisk() {
+  Future<void> _refreshCachedCount() async {
     try {
-      final file = _queueFile;
-      if (file.existsSync()) {
-        final content = file.readAsStringSync();
-        if (content.isNotEmpty) {
-          final List<dynamic> decoded = jsonDecode(content);
-          _memoryQueue.clear();
-          for (var item in decoded) {
-            if (item is Map<String, dynamic>) {
-              _memoryQueue.add(Map<String, dynamic>.from(item));
-            }
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Error loading offline queue: $e');
-    }
-  }
-
-  void _saveToDisk() {
-    try {
-      final file = _queueFile;
-      if (!file.parent.existsSync()) {
-        file.parent.createSync(recursive: true);
-      }
-      file.writeAsStringSync(jsonEncode(_memoryQueue));
-    } catch (e) {
-      debugPrint('Error saving offline queue to disk: $e');
-    }
+      _cachedPendingCount =
+          await OfflineHazardDatabase.instance.getPendingCount();
+    } catch (_) {}
   }
 
   /// Verifies active internet connectivity by checking Google DNS.
@@ -86,62 +50,94 @@ class OfflineReportService {
     return false;
   }
 
-  int get pendingCount {
-    if (_memoryQueue.isEmpty) {
-      _loadFromDisk();
-    }
-    return _memoryQueue.length;
+  int get pendingCount => _cachedPendingCount;
+
+  /// Returns actual live pending count from SQLite.
+  Future<int> getLivePendingCount() async {
+    try {
+      _cachedPendingCount =
+          await OfflineHazardDatabase.instance.getPendingCount();
+    } catch (_) {}
+    return _cachedPendingCount;
   }
 
-  /// Enqueues a new hazard report to offline storage.
+  /// Enqueues a new hazard report to SQLite offline storage as PENDING_SYNC.
   Future<void> queueReport(Map<String, dynamic> reportData) async {
-    _memoryQueue.add(reportData);
-    _saveToDisk();
-    debugPrint('Report added to offline queue. Total pending: ${_memoryQueue.length}');
+    final now = DateTime.now();
+    final localId = reportData['localId'] as String? ??
+        '#OFF-${now.millisecondsSinceEpoch ~/ 1000}';
+
+    final report = OfflineHazardReport(
+      id: localId,
+      hazardType: reportData['hazardType'] as String? ?? 'Hazard',
+      severity: reportData['severity'] as String? ?? 'MEDIUM',
+      description: reportData['description'] as String? ?? '',
+      location: reportData['location'] as String? ?? 'Field Location',
+      latitude: (reportData['latitude'] as num?)?.toDouble() ?? 6.9271,
+      longitude: (reportData['longitude'] as num?)?.toDouble() ?? 79.8612,
+      reporterName: reportData['reporterName'] as String? ?? 'Volunteer',
+      reporterEmail: reportData['reporterEmail'] as String? ?? '',
+      photoPath: reportData['photoPath'] as String?,
+      hasPhoto: reportData['hasPhoto'] as bool? ?? false,
+      status: 'PENDING_SYNC',
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await OfflineHazardDatabase.instance.insertReport(report);
+    await _refreshCachedCount();
+    debugPrint('Report added to SQLite offline storage. ID: $localId, Total pending: $_cachedPendingCount');
+  }
+
+  /// Saves a draft report directly into SQLite.
+  Future<void> saveDraft(OfflineHazardReport draft) async {
+    await OfflineHazardDatabase.instance.insertReport(draft);
+    await _refreshCachedCount();
   }
 
   /// Automatically syncs all queued reports to Firestore when signal is restored.
   Future<int> autoSyncPendingReports() async {
-    if (_isSyncing || _memoryQueue.isEmpty) return 0;
+    if (_isSyncing) return 0;
 
     final isOnline = await checkOnline();
     if (!isOnline) return 0;
+
+    final pendingReports =
+        await OfflineHazardDatabase.instance.getPendingReports();
+    if (pendingReports.isEmpty) {
+      _cachedPendingCount = 0;
+      return 0;
+    }
 
     _isSyncing = true;
     int syncedCount = 0;
     String lastHazard = 'Hazard';
     String lastLocation = 'Field Sector';
-    debugPrint('Signal restored! Auto-submitting ${_memoryQueue.length} pending reports...');
+    debugPrint('Signal restored! Auto-submitting ${pendingReports.length} SQLite pending reports...');
 
-    final List<Map<String, dynamic>> remaining = [];
-
-    for (var report in _memoryQueue) {
+    for (var report in pendingReports) {
       try {
-        final reportPayload = Map<String, dynamic>.from(report);
-        reportPayload.remove('localId');
-        reportPayload['syncedAt'] = FieldValue.serverTimestamp();
-        reportPayload['timestamp'] = FieldValue.serverTimestamp();
-        reportPayload['status'] = 'VERIFIED';
-        reportPayload['isVerified'] = true;
+        final payload = report.toFirestoreMap();
+        payload['syncedAt'] = FieldValue.serverTimestamp();
+        payload['timestamp'] = FieldValue.serverTimestamp();
 
         await FirebaseFirestore.instance
             .collection('hazard_reports')
-            .add(reportPayload)
+            .add(payload)
             .timeout(const Duration(seconds: 4));
 
+        // Mark as SYNCED in SQLite
+        await OfflineHazardDatabase.instance.markAsSynced(report.id);
         syncedCount++;
-        lastHazard = report['hazardType'] as String? ?? 'Hazard';
-        lastLocation = report['location'] as String? ?? 'Field Sector';
-        debugPrint('Successfully synced offline report: ${report['hazardType']}');
+        lastHazard = report.hazardType;
+        lastLocation = report.location;
+        debugPrint('Successfully synced offline report: ${report.id} - ${report.hazardType}');
       } catch (e) {
-        debugPrint('Failed to sync offline report, keeping in queue: $e');
-        remaining.add(report);
+        debugPrint('Failed to sync offline report ${report.id}, keeping in queue: $e');
       }
     }
 
-    _memoryQueue.clear();
-    _memoryQueue.addAll(remaining);
-    _saveToDisk();
+    await _refreshCachedCount();
 
     // Trigger Notification for auto-submitted reports!
     if (syncedCount > 0) {
@@ -154,5 +150,35 @@ class OfflineReportService {
 
     _isSyncing = false;
     return syncedCount;
+  }
+
+  /// Manually syncs a single offline report to Firestore.
+  Future<bool> syncSingleReport(OfflineHazardReport report) async {
+    final isOnline = await checkOnline();
+    if (!isOnline) return false;
+
+    try {
+      final payload = report.toFirestoreMap();
+      payload['syncedAt'] = FieldValue.serverTimestamp();
+      payload['timestamp'] = FieldValue.serverTimestamp();
+
+      await FirebaseFirestore.instance
+          .collection('hazard_reports')
+          .add(payload)
+          .timeout(const Duration(seconds: 4));
+
+      await OfflineHazardDatabase.instance.markAsSynced(report.id);
+      await _refreshCachedCount();
+
+      NotificationService.instance.showReportAutoSubmittedNotification(
+        hazardType: report.hazardType,
+        location: report.location,
+        count: 1,
+      );
+      return true;
+    } catch (e) {
+      debugPrint('Manual sync single report failed: $e');
+      return false;
+    }
   }
 }

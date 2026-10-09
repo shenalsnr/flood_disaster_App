@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../screens/c2_admin_hazard_dashboard_screen.dart';
+import '../screens/offline_draft_management_screen.dart';
 
 /// Navigation Drawer for District Volunteer (Component 2: Hazard Reporting).
 /// Matches the design in Screenshot 3, customized for the Volunteer workflow.
@@ -356,6 +357,19 @@ class VolunteerDrawer extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const C2AdminHazardDashboardScreen(),
+                    ),
+                  );
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.storage_rounded,
+                title: 'Offline Drafts (SQLite)',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const OfflineDraftManagementScreen(),
                     ),
                   );
                 },

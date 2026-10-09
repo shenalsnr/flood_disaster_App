@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/hazard_report_wizard_screen.dart';
+import 'package:flood_disaster/features/component2_reporting/presentation/screens/offline_draft_management_screen.dart';
 
 /// Screen displayed after submitting a hazard report.
 /// Matches the two user screenshots:
@@ -185,7 +186,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                       const SizedBox(height: 30),
 
                       // Dynamic Info Card
-                      isOnline ? _buildOnlineReportIdCard() : _buildOfflineQueueCard(),
+                      isOnline ? _buildOnlineReportIdCard() : _buildOfflineQueueCard(context),
 
                       const SizedBox(height: 24),
 
@@ -397,65 +398,87 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
   }
 
   // ── Offline State Card: 1 Report Pending Upload ───────────────────────────
-  Widget _buildOfflineQueueCard() {
+  // ── Offline State Card: 1 Report Pending Upload ───────────────────────────
+  Widget _buildOfflineQueueCard(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       decoration: BoxDecoration(
         color: const Color(0xFF0F1728),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF1E2B44),
+          color: const Color(0xFFFF9800).withValues(alpha: 0.4),
           width: 1.2,
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF192338),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF2B3A54),
-                width: 1.2,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const OfflineDraftManagementScreen(),
               ),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.sync_rounded,
-                color: Color(0xFFFF9800),
-                size: 24,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: Row(
               children: [
-                Text(
-                  '$pendingCount Report${pendingCount > 1 ? 's' : ''} Pending Upload',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF192338),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF2B3A54),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.storage_rounded,
+                      color: Color(0xFFFF9800),
+                      size: 24,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 3),
-                const Text(
-                  'Keep this app open or in the background',
-                  style: TextStyle(
-                    color: Color(0xFF8B9BB4),
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w400,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$pendingCount Report${pendingCount > 1 ? 's' : ''} Saved (SQLite)',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      const Text(
+                        'Saved permanently • Tap to manage drafts',
+                        style: TextStyle(
+                          color: Color(0xFF8B9BB4),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Color(0xFFFF9800),
+                  size: 14,
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

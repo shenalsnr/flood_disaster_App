@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:flood_disaster/features/component2_reporting/data/services/offline_report_service.dart';
+import 'package:flood_disaster/features/component2_reporting/data/services/offline_hazard_database.dart';
+import 'package:flood_disaster/features/component2_reporting/presentation/screens/offline_draft_management_screen.dart';
 
 /// Component 2: Hazard Community Reporter - Admin Dashboard
 /// Implements full Hazard Report Management CRUD:
@@ -793,9 +795,23 @@ class _C2AdminHazardDashboardScreenState
             ],
           ),
           actions: [
+            IconButton(
+              tooltip: 'Offline & Draft Reports (SQLite)',
+              icon: const Icon(Icons.storage_rounded, color: Color(0xFFFF9800)),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OfflineDraftManagementScreen(),
+                  ),
+                );
+                setState(() {});
+              },
+            ),
             Padding(
-              padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.only(right: 8),
               child: IconButton(
+                tooltip: 'Refresh & Auto-Sync',
                 icon: const Icon(Icons.refresh_rounded, color: Color(0xFF38BDF8)),
                 onPressed: () {
                   OfflineReportService.instance.autoSyncPendingReports();
@@ -811,6 +827,9 @@ class _C2AdminHazardDashboardScreenState
           children: [
             // ── Live Metrics Bar ─────────────────────────────────────────────
             _buildLiveMetricsHeader(),
+
+            // ── SQLite Offline Drafts Console Banner ─────────────────────────
+            _buildOfflineDraftsConsoleBanner(),
 
             // ── Search & Filter Row ──────────────────────────────────────────
             Padding(
@@ -1180,6 +1199,141 @@ class _C2AdminHazardDashboardScreenState
               Container(width: 1, height: 30, color: const Color(0xFF1E2B44)),
               _buildMiniMetric('$offlinePending', 'Offline Q', const Color(0xFFFF9800)),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Offline Drafts Console Banner ─────────────────────────────────────────
+  Widget _buildOfflineDraftsConsoleBanner() {
+    return FutureBuilder<List<int>>(
+      future: Future.wait([
+        OfflineHazardDatabase.instance.getPendingCount(),
+        OfflineHazardDatabase.instance.getDraftCount(),
+      ]),
+      builder: (context, snapshot) {
+        final pending = snapshot.data != null ? snapshot.data![0] : 0;
+        final drafts = snapshot.data != null ? snapshot.data![1] : 0;
+
+        return InkWell(
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const OfflineDraftManagementScreen(),
+              ),
+            );
+            setState(() {});
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF1E293B),
+                  const Color(0xFF0F172A),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: pending > 0
+                    ? const Color(0xFFFF9800).withValues(alpha: 0.5)
+                    : const Color(0xFF334155),
+                width: 1.2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF9800).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.storage_rounded,
+                    color: Color(0xFFFF9800),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'Offline Drafts & Queue (SQLite)',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          if (pending > 0) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF9800),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '$pending PENDING',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        '$pending queued for cloud sync • $drafts saved drafts • SQLite Active',
+                        style: const TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      Text(
+                        'MANAGE',
+                        style: TextStyle(
+                          color: Color(0xFF38BDF8),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(width: 3),
+                      Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xFF38BDF8), size: 10),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
