@@ -5,12 +5,15 @@ import 'citizen_profile_screen.dart';
 import 'citizen_settings_screen.dart';
 import 'c1_admin_metrics_screen.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
+import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
+import '../../../component4_control_center/data/services/session_service.dart';
 
 class CitizenDrawer extends StatelessWidget {
   const CitizenDrawer({super.key});
 
   Future<void> _signOut(BuildContext context) async {
     try {
+      await SessionService.clear();
       await FirebaseAuth.instance.signOut();
       if (context.mounted) {
         Navigator.of(context).pushAndRemoveUntil(
@@ -25,8 +28,8 @@ class CitizenDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final String displayName = user?.displayName ?? 'Citizen User';
+    final user = ResponderController().currentUser;
+    final String displayName = user?.fullName ?? 'Citizen User';
     final String email = user?.email ?? 'citizen@example.com';
 
     // Extract initials for the premium avatar

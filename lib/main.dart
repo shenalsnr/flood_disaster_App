@@ -2,15 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-
-
 import 'firebase_options.dart';
-import 'features/component4_control_center/presentation/screens/responder_register_screen.dart';
+import 'features/component4_control_center/presentation/screens/startup_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => debugPrint('Firebase initialized successfully'))
@@ -23,8 +20,6 @@ Future<void> main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-
-  // Removed the blocking connection_test query so the app can boot up immediately!
 
   runApp(const WeSafeApp());
 }
@@ -62,17 +57,15 @@ class WeSafeApp extends StatelessWidget {
             backgroundColor: const Color(0xFF00E676),
             foregroundColor: Colors.black,
             textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
           ),
         ),
       ),
-
-   
-
-      home: const CitizenDashboardScreen(),
-      
+      // Login page first. If "Remember credentials" was ticked, the gate
+      // restores the saved user straight to their dashboard.
+      home: const StartupGate(),
     );
   }
 }

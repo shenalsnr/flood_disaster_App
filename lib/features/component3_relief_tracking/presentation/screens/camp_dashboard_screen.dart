@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/models/relief_item_model.dart';
@@ -8,21 +10,24 @@ import '../widgets/add_stock_dialog.dart';
 import '../widgets/leaders_chat_panel.dart';
 import '../widgets/request_supply_dialog.dart';
 import '../widgets/supply_requests_list.dart';
-import 'relief_truck_tracking_screen.dart';
 import 'supply_admin_dashboard_screen.dart';
-import 'equipment_tracking_screen.dart';
-
+import '../../../component4_control_center/presentation/screens/admin_panel_screen.dart';
+import 'personal_information_screen.dart';
+import '../../../component4_control_center/data/services/session_service.dart';
+import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
+import '../widgets/leader_avatar.dart';
+ 
 class CampDashboardScreen extends StatefulWidget {
   const CampDashboardScreen({super.key});
-
+ 
   @override
   State<CampDashboardScreen> createState() => _CampDashboardScreenState();
 }
-
+ 
 class _CampDashboardScreenState extends State<CampDashboardScreen> {
   late final ReliefTrackingController _controller;
   int _currentIndex = 0; // 0: Dashboard, 1: Supplies, 2: Alerts, 3: Profile, 4: Team
-
+ 
   @override
   void initState() {
     super.initState();
@@ -31,13 +36,13 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       if (mounted) setState(() {});
     });
   }
-
+ 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-
+ 
   void _showAddStockDialog() {
     showDialog(
       context: context,
@@ -54,7 +59,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   /// Opens the Request Supply form. When [item] is given the form is
   /// pre-filled for it. After sending, a confirmation popup is shown.
   Future<void> _showRequestSupplyDialog({ReliefItemModel? item}) async {
@@ -66,13 +71,13 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     if (!mounted || result == null) return;
     await _showRequestSentPopup(result);
   }
-
+ 
   Future<void> _showRequestSentPopup(Map<String, dynamic> r) {
     final queued = r['status'] == 'queued';
     final qty = r['quantity'] as double;
     final qtyText = qty == qty.roundToDouble() ? qty.round().toString() : qty.toString();
     final color = queued ? const Color(0xFFFF9F0A) : const Color(0xFF30D158);
-
+ 
     return showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -114,7 +119,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +196,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   // --- TAB 0: DASHBOARD (Image 1 Iframe) ---
   Widget _buildDashboardTab() {
     return ListView(
@@ -204,7 +209,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ],
     );
   }
-
+ 
   // --- TAB 1: SUPPLIES (Image 2 frame2) ---
   Widget _buildSuppliesTab() {
     final items = _controller.filteredInventory;
@@ -215,7 +220,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     final onTheWay = status == 'dispatched';
     final arrived = status == 'arrived';
     final isPending = status == 'pending';
-
+ 
     // While a supply request is open, the truck card follows it:
     // PENDING (waiting for the DMC) -> ON THE WAY (driver assigned) -> ARRIVED.
     String reqText() {
@@ -225,12 +230,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           : '';
       return '${req?['itemName'] ?? 'Supply'} - $qText ${req?['unit'] ?? ''}'.trim();
     }
-
+ 
     final driverName = (req?['driverName'] ?? '').toString();
     final driverPhone = hasRequest
         ? (req?['driverPhone'] ?? '').toString()
         : shipment['driverPhone'] as String;
-
+ 
     String cardTitle = shipment['title'] as String;
     String cardSubtitle = shipment['subtitle'] as String;
     String cardBadge = shipment['eta'] as String;
@@ -238,7 +243,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     Color accent = const Color(0xFF30D158);
     Color accentBg = const Color(0xFF063327);
     IconData cardIcon = Icons.local_shipping_outlined;
-
+ 
     if (isPending) {
       cardTitle = 'Supply Request';
       cardSubtitle = 'Waiting for DMC to assign a truck - ${reqText()}';
@@ -261,12 +266,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       cardProgress = 1.0;
       cardIcon = Icons.check_circle_outline;
     }
-
+ 
     // Call is possible when there is a driver number to call.
     final canCall = driverPhone.isNotEmpty && !isPending;
     // Restock can be confirmed after arrival (or for the demo convoy).
     final canRestock = hasRequest ? arrived : !(shipment['isRestocked'] as bool);
-
+ 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -318,7 +323,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ],
         ),
         const SizedBox(height: 12),
-
+ 
         // Swipe Hint Banner
         Container(
           width: double.infinity,
@@ -340,7 +345,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ),
         ),
         const SizedBox(height: 14),
-
+ 
         // Category Filter Chips
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -354,7 +359,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ),
         ),
         const SizedBox(height: 16),
-
+ 
         // Stock Items List
         ...items.map((item) {
           // Swipe left  -> mark EMPTY, swipe right -> mark LOW (M3-06).
@@ -406,9 +411,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             ),
           );
         }),
-
+ 
         const SizedBox(height: 20),
-
+ 
         // Incoming Shipment Tracking Tile (Matching Image 2 frame2).
         // Hidden after the restock is confirmed; a new request brings it back.
         if (_controller.showTruckCard) Container(
@@ -479,7 +484,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-
+ 
               // Action Buttons: Call Driver & Confirm Restock
               Row(
                 children: [
@@ -528,13 +533,13 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             ],
           ),
         ),
-
+ 
         const SizedBox(height: 20),
-        SupplyRequestsList(campId: ReliefTrackingController.campId),
+        SupplyRequestsList(campId: _controller.campId),
       ],
     );
   }
-
+ 
   /// Coloured strip revealed behind a supply card while it is being swiped.
   Widget _buildSwipeBackground({
     required Alignment alignment,
@@ -567,7 +572,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   /// Opens the phone dialler with the shipment driver's number (M3-09).
   Future<void> _callDriver(String phone) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -581,7 +586,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       messenger.showSnackBar(SnackBar(content: Text('Could not call $phone')));
     }
   }
-
+ 
   /// Sends depleted items to the DMC as an urgent resupply request (M3-08).
   Future<void> _dispatchToDmc() async {
     final messenger = ScaffoldMessenger.of(context);
@@ -606,7 +611,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       );
     }
   }
-
+ 
   Widget _buildSupplyFilterChip(String value, String label, bool isSelected, {Color? outlineColor}) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -634,11 +639,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   // --- TAB 2: ALERTS (Image 3 alert d.) ---
   Widget _buildAlertsTab() {
     final alerts = _controller.filteredAlerts;
-
+ 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -647,7 +652,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 14),
-
+ 
         // Alert Filters
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -661,24 +666,24 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ),
         ),
         const SizedBox(height: 18),
-
+ 
         const Text(
           'TODAY',
           style: TextStyle(color: Color(0xFF7E8B9B), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
         ),
         const SizedBox(height: 10),
-
+ 
         ...alerts.map((alert) {
           final isCritical = alert['type'] == 'critical';
           final isLow = alert['type'] == 'low';
           final isLogs = alert['type'] == 'logs';
-
+ 
           Color cardBorderColor = isCritical
               ? const Color(0xFFFF3B30)
               : isLow
                   ? const Color(0xFFFF9F0A)
                   : const Color(0xFF30D158);
-
+ 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(14),
@@ -740,7 +745,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-
+ 
                 // Action Buttons
                 Row(
                   children: [
@@ -791,7 +796,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ],
     );
   }
-
+ 
   Widget _buildAlertFilterChip(String value, String label, bool isSelected, {Color? activeColor}) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -816,7 +821,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   // --- TAB 3: PROFILE (Image 4 profile d.) ---
   Widget _buildProfileTab() {
     return ListView(
@@ -827,7 +832,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-
+ 
         // Profile Card
         Container(
           width: double.infinity,
@@ -839,19 +844,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ),
           child: Column(
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F2C46),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    'RS',
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
+              LeaderAvatar(
+                name: _controller.leaderName,
+                photoUrl: _controller.leaderPhotoUrl,
+                size: 72,
               ),
               const SizedBox(height: 12),
               Text(
@@ -886,7 +882,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ),
         ),
         const SizedBox(height: 14),
-
+ 
         // Stats Row (14 Shelters, 3.2K People Aided, 98% Sync Uptime)
         Row(
           children: [
@@ -898,7 +894,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           ],
         ),
         const SizedBox(height: 18),
-
+ 
         // Account Settings List Card
         Container(
           padding: const EdgeInsets.all(16),
@@ -915,22 +911,18 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 style: TextStyle(color: Color(0xFF7E8B9B), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
               ),
               const SizedBox(height: 12),
-              _buildAccountRow(Icons.person_outline, 'Personal Information', 'Name, ID, contact details'),
-              const Divider(color: Color(0xFF1E283D), height: 16),
-              _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', 'Camp Nēraya, Camp Dawn Ridge'),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const PersonalInformationScreen()));
+                },
+                child: _buildAccountRow(Icons.person_outline, 'Personal Information', 'Name, photo, contact details'),
+              ),
               const Divider(color: Color(0xFF1E283D), height: 16),
               _buildAccountRow(
                 Icons.key_outlined,
                 'Role & Permissions',
                 'Relief Team Lead',
                 badgeText: 'VERIFIED',
-              ),
-              const Divider(color: Color(0xFF1E283D), height: 16),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ReliefTruckTrackingScreen()));
-                },
-                child: _buildAccountRow(Icons.local_shipping_outlined, 'Fleet Tracking', 'Live tracking of relief trucks'),
               ),
               const Divider(color: Color(0xFF1E283D), height: 16),
               GestureDetector(
@@ -942,15 +934,15 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               const Divider(color: Color(0xFF1E283D), height: 16),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EquipmentTrackingScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPanelScreen()));
                 },
-                child: _buildAccountRow(Icons.handyman_outlined, 'Equipment Tracking', 'Manage pumps, generators, etc.'),
+                child: _buildAccountRow(Icons.manage_accounts_outlined, 'Admin Panel', 'Add staff, assign roles & camps'),
               ),
             ],
           ),
         ),
         const SizedBox(height: 24),
-
+ 
         // Log out Button
         SizedBox(
           width: double.infinity,
@@ -961,9 +953,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Logging out...')),
+            onPressed: () async {
+              await SessionService.clear();
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
+                (route) => false,
               );
             },
             child: const Text(
@@ -975,7 +970,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ],
     );
   }
-
+ 
   Widget _buildProfileStatTile(String value, String label) {
     return Expanded(
       child: Container(
@@ -1001,7 +996,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ),
     );
   }
-
+ 
   Widget _buildAccountRow(IconData icon, String title, String subtitle, {String? badgeText}) {
     return Row(
       children: [
@@ -1046,9 +1041,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       ],
     );
   }
-
+ 
   // --- TAB 4: TEAM / COMMUNITY CHAT (live chat between all camp leaders) ---
   Widget _buildTeamTab() {
     return LeadersChatPanel(controller: _controller);
   }
 }
+

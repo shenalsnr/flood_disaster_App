@@ -330,6 +330,17 @@ class FirestoreService {
     });
   }
 
+  /// Hide requests from the camp's "Sent to DMC" list. The documents stay in
+  /// the database (the DMC / admin still sees them); they are only flagged.
+  Future<void> hideDmcRequestsForCamp(List<String> docIds) async {
+    if (docIds.isEmpty) return;
+    final batch = _db.batch();
+    for (final id in docIds) {
+      batch.update(_dmcDispatchRequests.doc(id), {'hiddenByCamp': true});
+    }
+    await batch.commit();
+  }
+
   /// Real-time stream of DMC dispatch requests, newest first.
   Stream<QuerySnapshot<Map<String, dynamic>>> streamDmcDispatchRequests() {
     return _dmcDispatchRequests

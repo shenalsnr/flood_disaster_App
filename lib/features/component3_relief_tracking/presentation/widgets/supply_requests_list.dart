@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../data/services/firestore_service.dart';
 
@@ -35,23 +36,48 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       stream: stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
-        final mine = snapshot.data!.docs
-            .where((d) => d.data()['campId'] == widget.campId)
-            .take(5)
+        final allMine = snapshot.data!.docs
+            .where((d) =>
+                d.data()['campId'] == widget.campId &&
+                d.data()['hiddenByCamp'] != true)
             .toList();
+        final mine = allMine.take(5).toList();
         if (mine.isEmpty) return const SizedBox.shrink();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'SENT TO DMC',
-              style: TextStyle(
-                color: Color(0xFF7E8B9B),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'SENT TO DMC',
+                  style: TextStyle(
+                    color: Color(0xFF7E8B9B),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _confirmClear(allMine.map((d) => d.id).toList()),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.delete_sweep_outlined, color: Color(0xFFFF5252), size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        'CLEAR',
+                        style: TextStyle(
+                          color: Color(0xFFFF5252),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             ...mine.map((d) => _buildTile(d.data())),
@@ -59,6 +85,52 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         );
       },
     );
+  }
+
+  Future<void> _confirmClear(List<String> docIds) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131A2A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF1E283D)),
+        ),
+        title: const Text(
+          'Clear this list?',
+          style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'The requests are removed from this list only. The DMC keeps its '
+          'own records, and any truck on the way will still be shown.',
+          style: TextStyle(color: Color(0xFF8E9BAE), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF8E9BAE))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF5252),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      // The list updates at once from the local copy; the server catches up
+      // in the background when there is a connection.
+      FirestoreService.instance
+          .hideDmcRequestsForCamp(docIds)
+          .catchError((Object e) => debugPrint('Clear failed: $e'));
+    } catch (e) {
+      debugPrint('Clear failed: $e');
+    }
   }
 
   Widget _buildTile(Map<String, dynamic> data) {
