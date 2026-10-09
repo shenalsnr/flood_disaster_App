@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 
 import 'firebase_options.dart';
@@ -9,7 +8,7 @@ import 'features/component4_control_center/presentation/screens/responder_regist
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => debugPrint('Firebase initialized successfully'))
@@ -67,7 +66,6 @@ class WeSafeApp extends StatelessWidget {
           ),
         ),
       ),
-
       home: const CitizenDashboardScreen(),
     );
   }
