@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flood_disaster/features/component2_reporting/presentation/screens/review_report_screen.dart';
 
 /// 3-Step Wizard for Reporting Ground Hazards.
 /// - Step 1: 4 hazard tiles (Flash Flood, Landslide, Fallen Tree, Road Blocked).
@@ -30,7 +29,6 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
   String _selectedNote = 'Water rising rapidly near bridge. Road impassable for light vehicles.';
-  bool _isSubmitting = false;
 
   final LatLng _hazardCoords = const LatLng(6.9271, 79.8612);
 
@@ -340,271 +338,6 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 )),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showReviewReportSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF09101E),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: _getHazardColor(_selectedHazard).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getHazardIcon(_selectedHazard),
-                    color: _getHazardColor(_selectedHazard),
-                    size: 26,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _selectedHazard,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _selectedSeverity,
-                        style: const TextStyle(
-                          color: Color(0xFFFF5252),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Divider(color: Color(0xFF1E2D4A)),
-            const SizedBox(height: 12),
-            _buildReviewRow('Location', 'Kolonnawa Basin, Kelani River Area'),
-            const SizedBox(height: 10),
-            _buildReviewRow('GPS Coordinates', '6.9271° N, 79.8612° E (±4m)'),
-            const SizedBox(height: 10),
-            _buildReviewRow(
-              'Photo Evidence',
-              _imageFile != null
-                  ? 'Attached & Secured'
-                  : (_photoAttached ? 'Attached & Secured' : 'Optional (Skipped)'),
-            ),
-            if (_imageFile != null) ...[
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  height: 120,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF1E2D4A)),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.file(
-                        _imageFile!,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        left: 10,
-                        bottom: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF060B14).withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.6)),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.verified_rounded, color: Color(0xFF00E676), size: 14),
-                              SizedBox(width: 5),
-                              Text(
-                                'GEO-TAGGED & TIME-STAMPED',
-                                style: TextStyle(color: Color(0xFF00E676), fontSize: 10, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 10),
-            _buildReviewRow('Field Note', _selectedNote),
-            const SizedBox(height: 26),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF9100),
-                  foregroundColor: const Color(0xFF140D07),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                onPressed: _isSubmitting
-                    ? null
-                    : () {
-                        Navigator.pop(ctx);
-                        _submitReport();
-                      },
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFF140D07),
-                        ),
-                      )
-                    : const Text(
-                        'CONFIRM & BROADCAST NOW',
-                        style: TextStyle(
-                          fontSize: 15.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReviewRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Color(0xFF8B9BB4), fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.3),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _submitReport() async {
-    setState(() => _isSubmitting = true);
-    final user = FirebaseAuth.instance.currentUser;
-    final reporterName = user?.displayName ?? 'Kapila Perera';
-
-    try {
-      await FirebaseFirestore.instance.collection('hazard_reports').add({
-        'hazardType': _selectedHazard,
-        'severity': _selectedSeverity,
-        'location': 'Kolonnawa Basin, Kelani River Area',
-        'description': _selectedNote,
-        'hasPhoto': _imageFile != null || _photoAttached,
-        'photoPath': _imageFile?.path ?? '',
-        'reporterName': reporterName,
-        'reporterEmail': user?.email ?? 'volunteer.kapila@dmc.org',
-        'isVerified': true,
-        'status': 'VERIFIED',
-        'timestamp': FieldValue.serverTimestamp(),
-        'latitude': _hazardCoords.latitude,
-        'longitude': _hazardCoords.longitude,
-      }).timeout(const Duration(seconds: 4));
-    } catch (e) {
-      debugPrint('Firestore submit fallback: $e');
-    }
-
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF334155)),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle_rounded, color: Color(0xFF00E676), size: 28),
-            SizedBox(width: 10),
-            Text(
-              'Report Broadcasted!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Your ground assessment for "$_selectedHazard" ($_selectedSeverity) in the Kolonnawa Basin has been broadcast to the Disaster Operations Room.',
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF9100),
-              foregroundColor: const Color(0xFF140D07),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context, true);
-            },
-            child: const Text('Back to Dashboard',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
@@ -1202,7 +935,23 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              onPressed: _showReviewReportSheet,
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewReportScreen(
+                      hazard: _selectedHazard,
+                      severity: _selectedSeverity,
+                      imageFile: _imageFile,
+                      note: _selectedNote,
+                      coordinates: _hazardCoords,
+                    ),
+                  ),
+                );
+                if (result == true && mounted) {
+                  Navigator.pop(context, true);
+                }
+              },
               child: const Text(
                 'REVIEW REPORT',
                 style: TextStyle(
