@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -84,6 +85,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             userData['alertZone'] as String? ??
             ResponderController().currentUser?.floodZone ??
             'Colombo Low-Lying Area';
+        final photoUrl = userData['photoUrl'] as String?;
 
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -225,11 +227,26 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                               .withValues(alpha: 0.4),
                                         ),
                                       ),
-                                      child: const Icon(
-                                        Icons.person_rounded,
-                                        color: Color(0xFF00E676),
-                                        size: 22,
-                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: photoUrl != null && photoUrl.isNotEmpty
+                                          ? (photoUrl.startsWith('http')
+                                              ? Image.network(
+                                                  photoUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
+                                                )
+                                              : Image.memory(
+                                                  base64Decode(photoUrl),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
+                                                ))
+                                          : const Icon(
+                                              Icons.person_rounded,
+                                              color: Color(0xFF00E676),
+                                              size: 22,
+                                            ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
@@ -383,7 +400,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 onTap: () =>
                                     _push(const EvacuationChecklistScreen()),
                                 icon: Icons.checklist_rounded,
-                                label: 'Go-Bag\nChecklist',
+                                label: 'Go Bag\nChecklist',
                                 color: const Color(0xFF00E676),
                               ),
                             ),

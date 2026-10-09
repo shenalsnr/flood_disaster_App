@@ -82,7 +82,7 @@ class _EvacuationChecklistScreenState
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'Go-Bag Checklist',
+          'Go Bag Checklist',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -149,7 +149,7 @@ class _EvacuationChecklistScreenState
                         ? const _EmptyState(
                             icon: Icons.backpack_rounded,
                             message:
-                                'Your Go-Bag is empty.\nAdd essential items above.',
+                                'Your Go Bag is empty.\nAdd essential items above.',
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),

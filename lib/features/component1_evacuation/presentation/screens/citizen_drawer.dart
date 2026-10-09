@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'citizen_profile_screen.dart';
 import 'citizen_settings_screen.dart';
@@ -73,36 +75,70 @@ class CitizenDrawer extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF00E676)
-                                .withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                    StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance.collection('users').doc(email).snapshots(),
+                      builder: (context, snap) {
+                        String? photoUrl;
+                        if (snap.hasData && snap.data!.exists) {
+                          final data = snap.data!.data() as Map<String, dynamic>;
+                          photoUrl = data['photoUrl'] as String?;
+                        }
+
+                        Widget avatarContent;
+                        if (photoUrl != null && photoUrl.isNotEmpty) {
+                          if (photoUrl.startsWith('http')) {
+                            avatarContent = Image.network(
+                              photoUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) => Center(
+                                child: Text(initials, style: const TextStyle(color: Color(0xFF070B14), fontSize: 22, fontWeight: FontWeight.w900)),
+                              ),
+                            );
+                          } else {
+                            avatarContent = Image.memory(
+                              base64Decode(photoUrl),
+                              fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) => Center(
+                                child: Text(initials, style: const TextStyle(color: Color(0xFF070B14), fontSize: 22, fontWeight: FontWeight.w900)),
+                              ),
+                            );
+                          }
+                        } else {
+                          avatarContent = Center(
+                            child: Text(
+                              initials,
+                              style: const TextStyle(
+                                color: Color(0xFF070B14),
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          clipBehavior: Clip.hardEdge,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          initials,
-                          style: const TextStyle(
-                            color: Color(0xFF070B14),
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
+                          child: avatarContent,
+                        );
+                      }
                     ),
                     const SizedBox(width: 16),
                     Expanded(
