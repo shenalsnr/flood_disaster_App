@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../component1_evacuation/presentation/screens/c1_admin_metrics_screen.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 
 /// Navigation Drawer for District Volunteer (Component 2: Hazard Reporting).
@@ -344,6 +345,19 @@ class VolunteerDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   _showSettingsBottomSheet(context);
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.admin_panel_settings_rounded,
+                title: 'Admin Dashboard',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const C1AdminMetricsScreen(),
+                    ),
+                  );
                 },
               ),
               _DrawerItem(
