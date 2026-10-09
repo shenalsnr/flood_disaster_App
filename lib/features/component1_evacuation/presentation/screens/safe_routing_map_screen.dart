@@ -1,22 +1,30 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart' hide Path;
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../services/safe_zone_service.dart';
 import 'battery_saving_nav_screen.dart';
 
 // ---------------------------------------------------------------------------
 // SafeRoutingMapScreen — Component 1: Early Warning & Evacuation
 // ---------------------------------------------------------------------------
-// Displays an OSM map centred on Ratnapura, Sri Lanka with:
-//   • A marker for the user's mock current location
-//   • A marker for the nearest safe zone shelter
-//   • A polyline showing the safe walking route
+// Shows the citizen the NEAREST OPEN safe zone on an OSM map.
 //
-// Firebase / geolocator hook-up points:
-//   • Replace _userLocation with a stream from geolocator (watchPosition)
-//   • Replace _routePoints with decoded route from a Directions API response
-//   • Replace _mapController.move() with live location updates
+// Safe zones come live from Firestore:
+//   camps/{id}       added by the administrator (name, location, capacity)
+//   campStatus/{id}  kept up to date by the camp leader (headcount, closed)
+// When the nearest shelter becomes full or is closed by its camp leader, the
+// route switches to the next nearest open shelter automatically.
+//
+// The citizen's own position comes from GPS (geolocator). If GPS is off or
+// permission is refused, a demo position in Ratnapura town is used instead.
 // ---------------------------------------------------------------------------
+
+enum _LocIssue { none, serviceOff, denied, deniedForever }
 
 class SafeRoutingMapScreen extends StatefulWidget {
   const SafeRoutingMapScreen({super.key});
@@ -26,43 +34,304 @@ class SafeRoutingMapScreen extends StatefulWidget {
 }
 
 class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
-    with TickerProviderStateMixin {
-  // ── Mock GPS data ──────────────────────────────────────────────────────────
-  // GEOLOCATOR HOOK: replace _userLocation with Geolocator.getPositionStream()
-  final LatLng _userLocation = const LatLng(6.6828, 80.3992); // Ratnapura town
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  static const LatLng _demoLocation = LatLng(6.6828, 80.3992); // Ratnapura town
 
-  // FIREBASE HOOK: load nearest shelter from Firestore (Component 3 provides
-  // shelter data; query by proximity to _userLocation)
-  final LatLng _safeZoneLocation = const LatLng(
-    6.6950,
-    80.4050,
-  ); // Mock shelter
+  LatLng _userLocation = _demoLocation;
+  bool _usingDemoLocation = true;
 
-  final String _safeZoneName = 'Rathnapura Central College';
+  List<SafeZone> _zones = const [];
+  bool _loaded = false;
+  String? _loadError;
+  String? _targetId; // the shelter the route currently points to
 
-  // Safe walking route polyline — replace with decoded directions API points
-  late final List<LatLng> _routePoints;
+  StreamSubscription<List<SafeZone>>? _zonesSub;
+  StreamSubscription<Position>? _positionSub;
+  StreamSubscription<ServiceStatus>? _serviceSub;
+
+  // Location alert: shown when GPS is off or permission is missing, and closed
+  // automatically as soon as the citizen turns location on.
+  _LocIssue _locIssue = _LocIssue.none;
+  bool _locating = false;
+  bool _dialogOpen = false;
+  bool _dismissedAlert = false;
 
   final MapController _mapController = MapController();
+  bool _mapReady = false;
   bool _isNavigating = false;
+  bool _fittedOnce = false;
 
   @override
   void initState() {
     super.initState();
-    // Mock route: a simplified 4-point path from user to shelter
-    _routePoints = [
-      _userLocation,
-      const LatLng(6.6855, 80.4005),
-      const LatLng(6.6900, 80.4030),
-      const LatLng(6.6925, 80.4042),
-      _safeZoneLocation,
-    ];
+    _zonesSub = SafeZoneService.instance.watch().listen((zones) {
+      if (!mounted) return;
+      _zones = zones;
+      _loaded = true;
+      _loadError = null;
+      _recompute();
+    }, onError: (Object e) {
+      if (!mounted) return;
+      setState(() {
+        _loaded = true;
+        _loadError = e.toString();
+      });
+    });
+    WidgetsBinding.instance.addObserver(this);
+    _startLocation();
+    try {
+      // Fires when the citizen switches the phone's location on or off.
+      _serviceSub = Geolocator.getServiceStatusStream().listen((status) {
+        if (status == ServiceStatus.enabled) {
+          _startLocation();
+        } else {
+          _positionSub?.cancel();
+          _positionSub = null;
+          _setIssue(_LocIssue.serviceOff);
+        }
+      }, onError: (Object _) {});
+    } catch (_) {}
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Back from the phone's settings: check again (permission may be given).
+    if (state == AppLifecycleState.resumed && _locIssue != _LocIssue.none) {
+      _startLocation();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _serviceSub?.cancel();
+    _zonesSub?.cancel();
+    _positionSub?.cancel();
     _mapController.dispose();
     super.dispose();
+  }
+
+  // ── GPS ────────────────────────────────────────────────────────────────────
+  Future<void> _startLocation() async {
+    if (_locating) return;
+    _locating = true;
+    try {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        _setIssue(_LocIssue.serviceOff);
+        return;
+      }
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied) {
+        _setIssue(_LocIssue.denied);
+        return;
+      }
+      if (perm == LocationPermission.deniedForever) {
+        _setIssue(_LocIssue.deniedForever);
+        return;
+      }
+      _setIssue(_LocIssue.none); // closes the alert if it is showing
+      final pos = await Geolocator.getCurrentPosition()
+          .timeout(const Duration(seconds: 20));
+      _onPosition(pos);
+      await _positionSub?.cancel();
+      _positionSub = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 25,
+        ),
+      ).listen(_onPosition, onError: (Object _) {});
+    } catch (_) {
+      // No GPS fix yet: the demo location stays until one arrives.
+    } finally {
+      _locating = false;
+    }
+  }
+
+  void _setIssue(_LocIssue issue) {
+    if (!mounted) return;
+    setState(() => _locIssue = issue);
+    if (issue == _LocIssue.none) {
+      _dismissedAlert = false;
+      if (_dialogOpen) {
+        _dialogOpen = false;
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    } else if (!_dialogOpen && !_dismissedAlert) {
+      _showLocationAlert();
+    }
+  }
+
+  Future<void> _showLocationAlert() async {
+    if (_dialogOpen || !mounted) return;
+    _dialogOpen = true;
+    final issue = _locIssue;
+    final String text;
+    final String button;
+    switch (issue) {
+      case _LocIssue.serviceOff:
+        text = 'Turn on your phone\'s location so we can find the nearest '
+            'safe zone to you.';
+        button = 'TURN ON LOCATION';
+        break;
+      case _LocIssue.denied:
+        text = 'Allow this app to use your location so we can find the '
+            'nearest safe zone to you.';
+        button = 'ALLOW LOCATION';
+        break;
+      case _LocIssue.deniedForever:
+        text = 'Location permission is blocked. Open the app settings and '
+            'allow Location so we can find the nearest safe zone to you.';
+        button = 'OPEN SETTINGS';
+        break;
+      case _LocIssue.none:
+        _dialogOpen = false;
+        return;
+    }
+    final action = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF141414),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: Colors.white12),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.location_off_outlined, color: Color(0xFFFF9F0A)),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Location is off',
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+            ),
+          ],
+        ),
+        content: Text(text, style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'later'),
+            child: const Text('Not now'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00E676),
+              foregroundColor: Colors.black,
+            ),
+            onPressed: () => Navigator.pop(ctx, 'go'),
+            child: Text(button,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    // null = the alert was closed by itself because location came on.
+    final closedByUser = action != null;
+    _dialogOpen = false;
+    if (!mounted || !closedByUser) return;
+    _dismissedAlert = true; // do not nag again; the chip can reopen it
+    if (action == 'go') {
+      switch (issue) {
+        case _LocIssue.serviceOff:
+          await Geolocator.openLocationSettings();
+          break;
+        case _LocIssue.denied:
+          _startLocation();
+          break;
+        case _LocIssue.deniedForever:
+          await Geolocator.openAppSettings();
+          break;
+        case _LocIssue.none:
+          break;
+      }
+    }
+  }
+
+  void _onPosition(Position p) {
+    if (!mounted) return;
+    _userLocation = LatLng(p.latitude, p.longitude);
+    _usingDemoLocation = false;
+    _recompute();
+  }
+
+  // ── Nearest open shelter ───────────────────────────────────────────────────
+  SafeZone? _zoneById(String? id) {
+    if (id == null) return null;
+    for (final z in _zones) {
+      if (z.id == id) return z;
+    }
+    return null;
+  }
+
+  double _distanceTo(SafeZone z) =>
+      SafeZoneService.distanceKm(_userLocation, z.point);
+
+  void _recompute() {
+    final open = _zones.where((z) => z.hasLocation && z.isOpen).toList()
+      ..sort((a, b) => _distanceTo(a).compareTo(_distanceTo(b)));
+    final next = open.isEmpty ? null : open.first;
+
+    // Tell the citizen when the shelter they were heading to is no longer
+    // available and the route has moved to another one.
+    final previous = _zoneById(_targetId);
+    String? notice;
+    if (_targetId != null && next?.id != _targetId) {
+      if (previous == null) {
+        notice = 'The previous safe zone is no longer available.';
+      } else if (!previous.isOpen) {
+        notice = '${previous.name} is now ${previous.stateLabel.toLowerCase()}.';
+      }
+      if (notice != null) {
+        notice = next == null
+            ? '$notice No other open shelter right now.'
+            : '$notice Rerouting to ${next.name}.';
+      }
+    }
+
+    final changed = next?.id != _targetId;
+    setState(() => _targetId = next?.id);
+
+    if (notice != null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(notice),
+          backgroundColor: const Color(0xFFFF9F0A),
+          duration: const Duration(seconds: 8),
+          showCloseIcon: true,
+        ));
+    }
+    if ((changed || !_fittedOnce) && next != null && !_isNavigating) {
+      _fitRoute(next);
+    }
+  }
+
+  void _fitRoute(SafeZone target) {
+    if (!_mapReady) return;
+    _fittedOnce = true;
+    try {
+      _mapController.fitCamera(
+        CameraFit.bounds(
+          bounds: LatLngBounds.fromPoints([_userLocation, target.point]),
+          padding: const EdgeInsets.fromLTRB(60, 170, 60, 360),
+          maxZoom: 16.5,
+        ),
+      );
+    } catch (_) {
+      // Map not ready yet; the next update will fit it.
+    }
+  }
+
+  Future<void> _callDmc() async {
+    final uri = Uri(scheme: 'tel', path: '117');
+    try {
+      await launchUrl(uri);
+    } catch (_) {}
   }
 
   void _animatedMapMove(
@@ -116,15 +385,14 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     controller.forward();
   }
 
-  void _navigateToBatterySaver() {
+  void _navigateToBatterySaver(SafeZone target) {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
             BatterySavingNavScreen(
-              safeZoneName: _safeZoneName,
-              // Pass live coords here when geolocator is integrated
+              safeZoneName: target.name,
               userLocation: _userLocation,
-              destination: _safeZoneLocation,
+              destination: target.point,
             ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -134,8 +402,40 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     );
   }
 
+  // ── Other shelters on the map (full / closed / farther open ones) ──────────
+  List<Marker> _otherZoneMarkers(SafeZone? target) {
+    final markers = <Marker>[];
+    for (final z in _zones) {
+      if (!z.hasLocation || z.id == target?.id) continue;
+      final color = z.state == SafeZoneState.open
+          ? const Color(0xFF00E676).withValues(alpha: 0.6)
+          : z.state == SafeZoneState.full
+              ? const Color(0xFFFF9F0A)
+              : const Color(0xFFFF5252);
+      markers.add(Marker(
+        point: z.point,
+        width: 44,
+        height: 44,
+        alignment: Alignment.topCenter,
+        child: Tooltip(
+          message: '${z.name} (${z.stateLabel})',
+          child: Icon(Icons.location_pin, color: color, size: 30),
+        ),
+      ));
+    }
+    return markers;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final target = _zoneById(_targetId);
+    final distanceKm = target == null ? 0.0 : _distanceTo(target);
+    // Walking pace about 4.5 km/h.
+    final walkMinutes = (distanceKm / 4.5 * 60).ceil().clamp(1, 9999).toInt();
+    final distanceText = distanceKm < 1
+        ? '${(distanceKm * 1000).round()} m'
+        : '${distanceKm.toStringAsFixed(1)} km';
+
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       extendBodyBehindAppBar: true,
@@ -161,18 +461,15 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
               ),
             ),
             Text(
-              'OpenStreetMap — Offline Ready',
+              'OpenStreetMap — Live shelter status',
               style: TextStyle(color: Colors.white54, fontSize: 11),
             ),
           ],
         ),
-        // Re-center action removed from AppBar, replaced by floating FAB below
       ),
       body: Stack(
         children: [
           // ── Map ───────────────────────────────────────────────────────────
-          // OFFLINE CACHE HOOK: wrap TileLayer with a CachedTileProvider
-          // (e.g. flutter_map_cache or flutter_map_tile_caching package)
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -181,31 +478,36 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
               minZoom: 10,
               maxZoom: 18,
               backgroundColor: const Color(0xFF1A1A2E),
+              onMapReady: () {
+                _mapReady = true;
+                final t = _zoneById(_targetId);
+                if (t != null) _fitRoute(t);
+              },
             ),
             children: [
-              // OSM tile layer — swap provider for offline cache later
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'dev.lasha.flood_disaster',
-                // OFFLINE HOOK: tileProvider: CachedTileProvider(),
               ),
 
-              // Safe route polyline
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: _routePoints,
-                    color: const Color(0xFF00E676),
-                    strokeWidth: 5.0,
-                    borderColor: const Color(0xFF00E676),
-                    borderStrokeWidth: 1.5,
-                  ),
-                ],
-              ),
+              // Route to the nearest open shelter (straight line)
+              if (target != null)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [_userLocation, target.point],
+                      color: const Color(0xFF00E676),
+                      strokeWidth: 5.0,
+                      borderColor: const Color(0xFF00E676),
+                      borderStrokeWidth: 1.5,
+                    ),
+                  ],
+                ),
 
-              // Markers layer
               MarkerLayer(
                 markers: [
+                  ..._otherZoneMarkers(target),
+
                   // User's current location
                   Marker(
                     point: _userLocation,
@@ -214,14 +516,15 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                     child: _UserLocationMarker(),
                   ),
 
-                  // Safe zone destination
-                  Marker(
-                    point: _safeZoneLocation,
-                    width: 80,
-                    height: 80,
-                    alignment: Alignment.topCenter,
-                    child: const _SafeZoneMarker(),
-                  ),
+                  // Nearest open safe zone
+                  if (target != null)
+                    Marker(
+                      point: target.point,
+                      width: 80,
+                      height: 80,
+                      alignment: Alignment.topCenter,
+                      child: const _SafeZoneMarker(),
+                    ),
                 ],
               ),
             ],
@@ -249,12 +552,42 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           // ── Legend pill ───────────────────────────────────────────────────
           Positioned(top: 105, left: 16, child: _MapLegend()),
 
+          if (_usingDemoLocation || _locIssue != _LocIssue.none)
+            Positioned(
+              top: 150,
+              left: 16,
+              child: GestureDetector(
+                onTap: _locIssue == _LocIssue.none
+                    ? null
+                    : () {
+                        _dismissedAlert = false;
+                        _showLocationAlert();
+                      },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFF9F0A)),
+                  ),
+                  child: Text(
+                    _locIssue == _LocIssue.none
+                        ? 'Finding your location...'
+                        : 'Location is off - tap to turn on (demo location shown)',
+                    style:
+                        const TextStyle(color: Color(0xFFFF9F0A), fontSize: 11),
+                  ),
+                ),
+              ),
+            ),
+
           // ── Battery Saver Action Button ───────────────────────────────────
           Positioned(
             top: 105,
             right: 16,
             child: GestureDetector(
-              onTap: _navigateToBatterySaver,
+              onTap: target == null ? null : () => _navigateToBatterySaver(target),
               child: Container(
                 width: 56,
                 height: 56,
@@ -286,7 +619,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            bottom: _isNavigating ? 180 : 280,
+            bottom: _isNavigating ? 180 : 300,
             right: 16,
             child: FloatingActionButton(
               heroTag: 'my_location_fab',
@@ -313,9 +646,17 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
             left: 0,
             right: 0,
             child: _BottomActionCard(
-              safeZoneName: _safeZoneName,
+              loading: !_loaded,
+              errorText: _loadError,
+              safeZoneName: target?.name,
+              walkMinutes: walkMinutes,
+              distanceText: distanceText,
+              fillText: target == null ? '-' : '${target.fillPercent}% full',
+              hasTarget: target != null,
               isNavigating: _isNavigating,
+              onCallDmc: _callDmc,
               onStartNavigation: () {
+                if (target == null) return;
                 setState(() {
                   _isNavigating = true;
                 });
@@ -515,19 +856,50 @@ class _MapLegend extends StatelessWidget {
   }
 }
 
+
 class _BottomActionCard extends StatelessWidget {
-  final String safeZoneName;
+  final bool loading;
+  final String? errorText;
+  final String? safeZoneName;
+  final int walkMinutes;
+  final String distanceText;
+  final String fillText;
+  final bool hasTarget;
   final bool isNavigating;
   final VoidCallback onStartNavigation;
+  final VoidCallback onCallDmc;
 
   const _BottomActionCard({
+    required this.loading,
+    required this.errorText,
     required this.safeZoneName,
+    required this.walkMinutes,
+    required this.distanceText,
+    required this.fillText,
+    required this.hasTarget,
     required this.isNavigating,
     required this.onStartNavigation,
+    required this.onCallDmc,
   });
 
   @override
   Widget build(BuildContext context) {
+    final String title;
+    final String subtitle;
+    if (loading) {
+      title = 'Looking for safe zones...';
+      subtitle = 'Nearest Safe Zone';
+    } else if (errorText != null) {
+      title = 'Could not load safe zones';
+      subtitle = 'Check your internet connection';
+    } else if (!hasTarget) {
+      title = 'No open safe zone right now';
+      subtitle = 'All shelters are full, closed or not set up yet';
+    } else {
+      title = safeZoneName ?? '';
+      subtitle = 'Nearest Safe Zone';
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
       decoration: BoxDecoration(
@@ -562,12 +934,17 @@ class _BottomActionCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: (hasTarget
+                          ? const Color(0xFF00E676)
+                          : const Color(0xFFFF9F0A))
+                      .withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.shield_rounded,
-                  color: Color(0xFF00E676),
+                child: Icon(
+                  hasTarget ? Icons.shield_rounded : Icons.warning_amber_rounded,
+                  color: hasTarget
+                      ? const Color(0xFF00E676)
+                      : const Color(0xFFFF9F0A),
                   size: 24,
                 ),
               ),
@@ -576,12 +953,13 @@ class _BottomActionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Nearest Safe Zone',
-                      style: TextStyle(color: Colors.white38, fontSize: 12),
+                    Text(
+                      subtitle,
+                      style:
+                          const TextStyle(color: Colors.white38, fontSize: 12),
                     ),
                     Text(
-                      safeZoneName,
+                      title,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -591,62 +969,92 @@ class _BottomActionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: const Column(
-                  children: [
-                    Text(
-                      '~18 min',
-                      style: TextStyle(
-                        color: Color(0xFFFFD740),
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+              if (hasTarget)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '~$walkMinutes min',
+                        style: const TextStyle(
+                          color: Color(0xFFFFD740),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'walk',
-                      style: TextStyle(color: Colors.white38, fontSize: 10),
-                    ),
-                  ],
+                      const Text(
+                        'walk',
+                        style: TextStyle(color: Colors.white38, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+
+          if (hasTarget) ...[
+            const SizedBox(height: 16),
+
+            // Route stats row
+            Row(
+              children: [
+                _RouteStat(
+                  icon: Icons.straighten,
+                  label: distanceText,
+                  sub: 'distance',
+                ),
+                const SizedBox(width: 12),
+                const _RouteStat(
+                  icon: Icons.check_circle_outline,
+                  label: 'Open',
+                  sub: 'shelter status',
+                ),
+                const SizedBox(width: 12),
+                _RouteStat(
+                  icon: Icons.people_alt_outlined,
+                  label: fillText,
+                  sub: 'shelter cap.',
+                ),
+              ],
+            ),
+          ],
+
+          if (!loading && errorText == null && !hasTarget) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFFF9F0A)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: onCallDmc,
+                icon: const Icon(Icons.phone_in_talk_outlined,
+                    color: Color(0xFFFF9F0A)),
+                label: const Text(
+                  'CALL DMC HOTLINE 117',
+                  style: TextStyle(
+                    color: Color(0xFFFF9F0A),
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
 
-          const SizedBox(height: 16),
-
-          // Route stats row
-          const Row(
-            children: [
-              _RouteStat(
-                icon: Icons.straighten,
-                label: '1.4 km',
-                sub: 'distance',
-              ),
-              SizedBox(width: 12),
-              _RouteStat(
-                icon: Icons.water_drop_outlined,
-                label: 'Flood-free',
-                sub: 'path status',
-              ),
-              SizedBox(width: 12),
-              _RouteStat(
-                icon: Icons.people_alt_outlined,
-                label: '65% full',
-                sub: 'shelter cap.',
-              ),
-            ],
-          ),
-
-          if (!isNavigating) ...[
+          if (!isNavigating && hasTarget) ...[
             const SizedBox(height: 20),
 
             // START NAVIGATING button
