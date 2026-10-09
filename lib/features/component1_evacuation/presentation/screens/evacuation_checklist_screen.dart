@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-
-// ---------------------------------------------------------------------------
-// Evacuation Checklist Screen — Component 1: Early Warning & Evacuation
-// ---------------------------------------------------------------------------
-// Personalized go-bag tracker. All state is local (StatefulWidget).
-// Replace _items list with a Firebase stream / Firestore collection later.
-// ---------------------------------------------------------------------------
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:ui';
 import '../../services/citizen_firestore_service.dart';
 
 // Model — mapped from Firestore DocumentSnapshot
@@ -71,10 +64,19 @@ class _EvacuationChecklistScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: const Color(0xFF070B14),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF121212),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              color: const Color(0xFF070B14).withValues(alpha: 0.7),
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -82,76 +84,108 @@ class _EvacuationChecklistScreenState
         title: const Text(
           'Go-Bag Checklist',
           style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            letterSpacing: 0.5,
+          ),
         ),
+        centerTitle: true,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestoreService.getChecklistItems(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error loading checklist', style: TextStyle(color: Colors.red)));
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-0.8, -0.6),
+            radius: 1.5,
+            colors: [Color(0xFF112240), Color(0xFF070B14)],
+          ),
+        ),
+        child: SafeArea(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: _firestoreService.getChecklistItems(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Error loading checklist',
+                      style: TextStyle(color: Colors.red)),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF00E676)),
+                );
+              }
 
-          final List<ChecklistItem> items = snapshot.data!.docs
-              .map((doc) => ChecklistItem.fromFirestore(doc))
-              .toList();
+              final List<ChecklistItem> items = snapshot.data!.docs
+                  .map((doc) => ChecklistItem.fromFirestore(doc))
+                  .toList();
 
-          final int packedCount = items.where((i) => i.isPacked).length;
-          final double progress = items.isEmpty ? 0 : packedCount / items.length;
+              final int packedCount = items.where((i) => i.isPacked).length;
+              final double progress =
+                  items.isEmpty ? 0 : packedCount / items.length;
 
-          return Column(
-            children: [
-              // ── Progress Header ──────────────────────────────────────────────
-              _ProgressHeader(progress: progress, packedCount: packedCount, total: items.length),
+              return Column(
+                children: [
+                  // ── Progress Header ──────────────────────────────────────────────
+                  _PremiumProgressHeader(
+                    progress: progress,
+                    packedCount: packedCount,
+                    total: items.length,
+                  ),
 
-              // ── Add Item Input ───────────────────────────────────────────────
-              _AddItemField(
-                controller: _addController,
-                onAdd: _addItem,
-              ),
+                  // ── Add Item Input ───────────────────────────────────────────────
+                  _PremiumAddItemField(
+                    controller: _addController,
+                    onAdd: _addItem,
+                  ),
 
-              // ── Checklist ────────────────────────────────────────────────────
-              Expanded(
-                child: items.isEmpty
-                    ? const _EmptyState(
-                        icon: Icons.checklist_rounded,
-                        message: 'Your checklist is empty.\nAdd items above.',
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return _ChecklistItemTile(
-                            key: ValueKey(item.id),
-                            item: item,
-                            onToggle: () => _togglePacked(item),
-                            onDelete: () => _deleteItem(item.id),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          );
-        },
+                  const SizedBox(height: 10),
+
+                  // ── Checklist ────────────────────────────────────────────────────
+                  Expanded(
+                    child: items.isEmpty
+                        ? const _EmptyState(
+                            icon: Icons.backpack_rounded,
+                            message:
+                                'Your Go-Bag is empty.\nAdd essential items above.',
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              return _PremiumChecklistItemTile(
+                                key: ValueKey(item.id),
+                                item: item,
+                                onToggle: () => _togglePacked(item),
+                                onDelete: () => _deleteItem(item.id),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Sub-widgets
+// Premium Sub-widgets
 // ---------------------------------------------------------------------------
 
-class _ProgressHeader extends StatelessWidget {
+class _PremiumProgressHeader extends StatelessWidget {
   final double progress;
   final int packedCount;
   final int total;
 
-  const _ProgressHeader({
+  const _PremiumProgressHeader({
     required this.progress,
     required this.packedCount,
     required this.total,
@@ -160,44 +194,88 @@ class _ProgressHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (progress * 100).toInt();
+    final isComplete = pct == 100 && total > 0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      color: const Color(0xFF141414),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF131B2B),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isComplete
+              ? const Color(0xFF00E676).withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.05),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isComplete
+                ? const Color(0xFF00E676).withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                pct == 100
-                    ? '✅ Go-Bag Ready!'
-                    : 'Pack your essentials before evacuating',
-                style: TextStyle(
-                  color: pct == 100 ? const Color(0xFF00E676) : Colors.white70,
-                  fontSize: 13,
-                  fontWeight: pct == 100 ? FontWeight.bold : FontWeight.normal,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isComplete ? 'Ready for Evacuation' : 'Packing Progress',
+                    style: TextStyle(
+                      color: isComplete ? const Color(0xFF00E676) : Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$packedCount of $total items packed',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '$pct%',
-                style: const TextStyle(
-                  color: Color(0xFF00E676),
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isComplete
+                      ? const Color(0xFF00E676).withValues(alpha: 0.15)
+                      : const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$pct%',
+                  style: TextStyle(
+                    color: isComplete
+                        ? const Color(0xFF00E676)
+                        : const Color(0xFF40C4FF),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 7,
-              backgroundColor: const Color(0xFF2A2A2A),
+              minHeight: 10,
+              backgroundColor: const Color(0xFF070B14),
               valueColor: AlwaysStoppedAnimation<Color>(
-                progress == 1.0 ? const Color(0xFF00E676) : const Color(0xFFFFD740),
+                isComplete ? const Color(0xFF00E676) : const Color(0xFF40C4FF),
               ),
             ),
           ),
@@ -207,66 +285,77 @@ class _ProgressHeader extends StatelessWidget {
   }
 }
 
-class _AddItemField extends StatelessWidget {
+class _PremiumAddItemField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onAdd;
 
-  const _AddItemField({required this.controller, required this.onAdd});
+  const _PremiumAddItemField({required this.controller, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF121212),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              key: const Key('checklist_add_field'),
-              controller: controller,
-              style: const TextStyle(color: Colors.white),
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText: 'Add new item (e.g. Rain coat)...',
-                hintStyle: const TextStyle(color: Colors.white38),
-                filled: true,
-                fillColor: const Color(0xFF1E1E1E),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF2A2A2A), width: 1.5),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF00E676), width: 1.5),
-                ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF131B2B),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              onSubmitted: (_) => onAdd(),
+              child: TextField(
+                key: const Key('checklist_add_field'),
+                controller: controller,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: 'Add new item (e.g. Flashlight)...',
+                  hintStyle: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    fontSize: 15,
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  border: InputBorder.none,
+                ),
+                onSubmitted: (_) => onAdd(),
+              ),
             ),
           ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 52,
-            height: 52,
-            child: ElevatedButton(
-              key: const Key('checklist_add_button'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00E676),
-                foregroundColor: Colors.black,
-                padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: onAdd,
+            child: Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00E676), Color(0xFF00C853)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              onPressed: onAdd,
-              child: const Icon(Icons.add_rounded, size: 26),
+              child: const Icon(
+                Icons.add_rounded,
+                color: Colors.black,
+                size: 30,
+              ),
             ),
           ),
         ],
@@ -275,12 +364,12 @@ class _AddItemField extends StatelessWidget {
   }
 }
 
-class _ChecklistItemTile extends StatelessWidget {
+class _PremiumChecklistItemTile extends StatelessWidget {
   final ChecklistItem item;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
 
-  const _ChecklistItemTile({
+  const _PremiumChecklistItemTile({
     super.key,
     required this.item,
     required this.onToggle,
@@ -289,90 +378,117 @@ class _ChecklistItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: ValueKey('dismissible_${item.id}'),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFB71C1C),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete_sweep_rounded,
-            color: Colors.white, size: 28),
-      ),
-      confirmDismiss: (_) async {
-        // Optional: confirm before delete
-        return true;
-      },
-      onDismissed: (_) => onDelete(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: item.isPacked
+            ? const Color(0xFF00E676).withValues(alpha: 0.05)
+            : const Color(0xFF131B2B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
           color: item.isPacked
-              ? const Color(0xFF0D1F0D)
-              : const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: item.isPacked
-                ? const Color(0xFF00E676).withValues(alpha: 0.4)
-                : const Color(0xFF2A2A2A),
-            width: 1.5,
-          ),
+              ? const Color(0xFF00E676).withValues(alpha: 0.2)
+              : Colors.white.withValues(alpha: 0.05),
+          width: 1.5,
         ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          minVerticalPadding: 12,
-          leading: GestureDetector(
-            onTap: onToggle,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: item.isPacked
-                    ? const Color(0xFF00E676)
-                    : Colors.transparent,
-                border: Border.all(
-                  color: item.isPacked
-                      ? const Color(0xFF00E676)
-                      : Colors.white38,
-                  width: 2,
-                ),
-              ),
-              child: item.isPacked
-                  ? const Icon(Icons.check_rounded,
-                      color: Colors.black, size: 18)
-                  : null,
+        boxShadow: [
+          if (!item.isPacked)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-          ),
-          title: Text(
-            item.name,
-            style: TextStyle(
-              color: item.isPacked ? Colors.white38 : Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              decoration:
-                  item.isPacked ? TextDecoration.lineThrough : TextDecoration.none,
-              decorationColor: Colors.white38,
-            ),
-          ),
-          subtitle: item.isPacked
-              ? const Text('Packed ✓',
-                  style: TextStyle(color: Color(0xFF00E676), fontSize: 11))
-              : null,
-          trailing: const Icon(Icons.swipe_left_rounded,
-              color: Colors.white24, size: 18),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: onToggle,
-        ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                // Animated Checkbox
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: item.isPacked
+                        ? const Color(0xFF00E676)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: item.isPacked
+                          ? const Color(0xFF00E676)
+                          : Colors.white.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                    boxShadow: item.isPacked
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                              blurRadius: 8,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: item.isPacked
+                      ? const Icon(Icons.check_rounded,
+                          color: Colors.black, size: 20)
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                
+                // Item Name
+                Expanded(
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: TextStyle(
+                      color: item.isPacked
+                          ? Colors.white.withValues(alpha: 0.4)
+                          : Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      decoration: item.isPacked
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      decorationColor: Colors.white.withValues(alpha: 0.4),
+                      decorationThickness: 2,
+                    ),
+                    child: Text(item.name),
+                  ),
+                ),
+                
+                // Delete Button
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF5252).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Color(0xFFFF5252),
+                      size: 20,
+                    ),
+                    tooltip: 'Delete Item',
+                    onPressed: () {
+                      // Haptic feedback or confirmation dialog can be added here
+                      onDelete();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -391,12 +507,24 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.white12),
-          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.03),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 64, color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          const SizedBox(height: 24),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white38, fontSize: 15),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 16,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
