@@ -144,7 +144,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-              'Please enter your email address first to receive the OTP code.'),
+            'Please enter your email address first to receive the OTP code.',
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -416,7 +417,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                            'Invalid OTP code. Please enter the code sent to your email.'),
+                          'Invalid OTP code. Please enter the code sent to your email.',
+                        ),
                         backgroundColor: Colors.redAccent,
                       ),
                     );
@@ -427,7 +429,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                            'Please enter a valid PIN or password (min 4 characters).'),
+                          'Please enter a valid PIN or password (min 4 characters).',
+                        ),
                         backgroundColor: Colors.redAccent,
                       ),
                     );

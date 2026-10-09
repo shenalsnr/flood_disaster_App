@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 import '../../models/warning_alert.dart';
 
@@ -71,16 +73,19 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
 
         final district = userData['district'] as String? ?? 'Colombo';
         final city = userData['city'] as String? ?? 'Colombo';
-        final citizenName =
-            userData['name'] as String? ??
-            userData['fullName'] as String? ??
-            'Citizen User';
+        String? firestoreName = userData['name'] as String? ?? userData['fullName'] as String?;
+        if (firestoreName == 'Citizen User' || firestoreName == null || firestoreName.isEmpty) {
+          firestoreName = null;
+        }
+        final citizenName = firestoreName ?? ResponderController().currentUser?.fullName ?? 'Citizen User';
         final citizenZone =
             userData['floodZone'] as String? ??
             userData['district'] as String? ??
             userData['zone'] as String? ??
             userData['alertZone'] as String? ??
+            ResponderController().currentUser?.floodZone ??
             'Colombo Low-Lying Area';
+        final photoUrl = userData['photoUrl'] as String?;
 
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -222,11 +227,26 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                               .withValues(alpha: 0.4),
                                         ),
                                       ),
-                                      child: const Icon(
-                                        Icons.person_rounded,
-                                        color: Color(0xFF00E676),
-                                        size: 22,
-                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: photoUrl != null && photoUrl.isNotEmpty
+                                          ? (photoUrl.startsWith('http')
+                                              ? Image.network(
+                                                  photoUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
+                                                )
+                                              : Image.memory(
+                                                  base64Decode(photoUrl),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
+                                                ))
+                                          : const Icon(
+                                              Icons.person_rounded,
+                                              color: Color(0xFF00E676),
+                                              size: 22,
+                                            ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
@@ -290,6 +310,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                   'Issued: ${DateFormat('dd MMM, HH:mm').format(topAlert.issuedTimestamp)}',
                               waterLevel: topAlert.waterLevelMeters,
                               rainfall: topAlert.rainfallMm,
+                              windSpeed: topAlert.windSpeedKmh,
                               severity: topAlert.severity,
                             ),
                           )
@@ -379,7 +400,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 onTap: () =>
                                     _push(const EvacuationChecklistScreen()),
                                 icon: Icons.checklist_rounded,
-                                label: 'Go-Bag\nChecklist',
+                                label: 'Go Bag\nChecklist',
                                 color: const Color(0xFF00E676),
                               ),
                             ),
@@ -669,12 +690,13 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
   }
 }
 
-class _PremiumCriticalAlertCard extends StatelessWidget {
+class _PremiumCriticalAlertCard extends StatefulWidget {
   final String title;
   final String body;
   final String time;
   final double waterLevel;
   final double rainfall;
+  final double windSpeed;
   final String severity;
 
   const _PremiumCriticalAlertCard({
@@ -683,133 +705,249 @@ class _PremiumCriticalAlertCard extends StatelessWidget {
     required this.time,
     required this.waterLevel,
     required this.rainfall,
+    required this.windSpeed,
     required this.severity,
   });
 
+  @override
+  State<_PremiumCriticalAlertCard> createState() => _PremiumCriticalAlertCardState();
+}
+
+class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> with SingleTickerProviderStateMixin {
+  late AnimationController _bgController;
+
   static const _gradients = {
-    'Watch': [Color(0xFF7B5800), Color(0xFF4A3500)],
-    'Warning': [Color(0xFFBF3600), Color(0xFF7A2000)],
-    'Critical': [Color(0xFFD32F2F), Color(0xFF9B0000)],
+    'Watch': [Color(0xFFFFB300), Color(0xFFFF8F00)],
+    'Warning': [Color(0xFFFF6D00), Color(0xFFE65100)],
+    'Critical': [Color(0xFFFF1744), Color(0xFFD50000)], // More vibrant reds
   };
 
   @override
+  void initState() {
+    super.initState();
+    _bgController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _bgController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final gradColors =
-        _gradients[severity] ??
-        [const Color(0xFFD32F2F), const Color(0xFF9B0000)];
+    final gradColors = _gradients[widget.severity] ?? [const Color(0xFFFF1744), const Color(0xFFD50000)];
+    final isCritical = widget.severity == 'Critical';
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [gradColors[0], gradColors[1].withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
-          width: 1.5,
-        ),
-        boxShadow: const [
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x66B71C1C),
-            blurRadius: 24,
-            offset: Offset(0, 10),
+            color: gradColors[1].withValues(alpha: 0.6),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          children: [
+            // Bottom layer: Vibrant Gradient
+            Positioned.fill(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'EMERGENCY ALERT',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2,
+                  gradient: LinearGradient(
+                    colors: [gradColors[0], gradColors[1]],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
               ),
-              _BlinkingDot(),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              height: 1.2,
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            body,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: 14,
-              height: 1.5,
-              fontWeight: FontWeight.w500,
+            
+            // Middle layer: Animated Rain & Water
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _bgController,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: _WeatherBackgroundPainter(
+                      _bgController.value,
+                      isCritical,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Live metrics row
-          Row(
-            children: [
-              _MetricPill(
-                icon: Icons.water_rounded,
-                label: '${waterLevel.toStringAsFixed(2)} m',
-                hint: 'Water Level',
+            
+            // Top layer: Content
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'EMERGENCY ALERT',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ),
+                      _BlinkingDot(),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.body,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 15,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Live metrics row
+                  Row(
+                    children: [
+                      _MetricPill(
+                        icon: Icons.water_rounded,
+                        label: '${widget.waterLevel.toStringAsFixed(2)} m',
+                        hint: 'Water Level',
+                      ),
+                      const SizedBox(width: 6),
+                      _MetricPill(
+                        icon: Icons.grain_rounded,
+                        label: '${widget.rainfall.toStringAsFixed(1)} mm',
+                        hint: 'Rainfall',
+                      ),
+                      const SizedBox(width: 6),
+                      _MetricPill(
+                        icon: Icons.air_rounded,
+                        label: '${widget.windSpeed.toStringAsFixed(1)} kph',
+                        hint: 'Wind Speed',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time_rounded, color: Colors.white.withValues(alpha: 0.7), size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        widget.time,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              _MetricPill(
-                icon: Icons.grain_rounded,
-                label: '${rainfall.toStringAsFixed(1)} mm',
-                hint: 'Rainfall',
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(
-                Icons.access_time_rounded,
-                color: Colors.white.withValues(alpha: 0.6),
-                size: 16,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                time,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+class _WeatherBackgroundPainter extends CustomPainter {
+  final double animationValue;
+  final bool isCritical;
+
+  _WeatherBackgroundPainter(this.animationValue, this.isCritical);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 1. Draw Rain
+    final paintRain = Paint()
+      ..color = Colors.white.withValues(alpha: 0.2)
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    final int dropCount = isCritical ? 40 : 20;
+    for (int i = 0; i < dropCount; i++) {
+      final double x = (i * 27.0) % size.width;
+      final double y = ((i * 53.0) + (animationValue * size.height * 2)) % size.height;
+      final double length = 10.0 + (i % 15);
+      canvas.drawLine(Offset(x, y), Offset(x - 2, y + length), paintRain); // slightly angled rain
+    }
+
+    // 2. Draw Back Water Wave (Slower)
+    final paintWaterBack = Paint()
+      ..color = const Color(0xFF000000).withValues(alpha: 0.15)
+      ..style = PaintingStyle.fill;
+      
+    final pathBack = Path();
+    final double baseHeightBack = size.height * 0.75;
+    pathBack.moveTo(0, size.height);
+    pathBack.lineTo(0, baseHeightBack);
+
+    for (double i = 0; i <= size.width; i++) {
+      final waveOffset = math.cos((i / 40) - (animationValue * math.pi * 2)) * 6;
+      pathBack.lineTo(i, baseHeightBack + waveOffset);
+    }
+    pathBack.lineTo(size.width, size.height);
+    pathBack.close();
+    canvas.drawPath(pathBack, paintWaterBack);
+
+    // 3. Draw Front Water Wave (Faster)
+    final paintWaterFront = Paint()
+      ..color = const Color(0xFF000000).withValues(alpha: 0.25)
+      ..style = PaintingStyle.fill;
+
+    final pathFront = Path();
+    final double baseHeightFront = size.height * 0.78;
+    pathFront.moveTo(0, size.height);
+    pathFront.lineTo(0, baseHeightFront);
+
+    for (double i = 0; i <= size.width; i++) {
+      final waveOffset = math.sin((i / 30) + (animationValue * math.pi * 4)) * 8;
+      pathFront.lineTo(i, baseHeightFront + waveOffset);
+    }
+    pathFront.lineTo(size.width, size.height);
+    pathFront.close();
+    canvas.drawPath(pathFront, paintWaterFront);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeatherBackgroundPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue;
   }
 }
 
@@ -983,7 +1121,7 @@ class _MiniAlertTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${alert.waterLevelMeters.toStringAsFixed(2)} m  •  ${alert.rainfallMm.toStringAsFixed(1)} mm',
+                  '${alert.waterLevelMeters.toStringAsFixed(2)} m  •  ${alert.rainfallMm.toStringAsFixed(1)} mm  •  ${alert.windSpeedKmh.toStringAsFixed(1)} kph',
                   style: const TextStyle(color: Colors.white54, fontSize: 11),
                 ),
               ],

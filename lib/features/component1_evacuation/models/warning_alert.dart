@@ -15,6 +15,7 @@ class WarningAlert {
   final String hazardType;
   final double waterLevelMeters;
   final double rainfallMm;
+  final double windSpeedKmh;
   final String severity; // "Watch" | "Warning" | "Critical"
   final String description;
   final DateTime issuedTimestamp;
@@ -27,6 +28,7 @@ class WarningAlert {
     required this.hazardType,
     required this.waterLevelMeters,
     required this.rainfallMm,
+    required this.windSpeedKmh,
     required this.severity,
     required this.description,
     required this.issuedTimestamp,
@@ -44,6 +46,7 @@ class WarningAlert {
       hazardType: data['hazardType'] as String? ?? '',
       waterLevelMeters: (data['waterLevelMeters'] as num?)?.toDouble() ?? 0.0,
       rainfallMm: (data['rainfallMm'] as num?)?.toDouble() ?? 0.0,
+      windSpeedKmh: (data['windSpeedKmh'] as num?)?.toDouble() ?? 0.0,
       severity: data['severity'] as String? ?? 'Watch',
       description: data['description'] as String? ?? '',
       issuedTimestamp: data['issuedTimestamp'] is Timestamp
@@ -62,6 +65,7 @@ class WarningAlert {
       'hazardType': hazardType,
       'waterLevelMeters': waterLevelMeters,
       'rainfallMm': rainfallMm,
+      'windSpeedKmh': windSpeedKmh,
       'severity': severity,
       'description': description,
       'issuedTimestamp': FieldValue.serverTimestamp(),
@@ -78,6 +82,7 @@ class WarningAlert {
     String? hazardType,
     double? waterLevelMeters,
     double? rainfallMm,
+    double? windSpeedKmh,
     String? severity,
     String? description,
     DateTime? issuedTimestamp,
@@ -90,6 +95,7 @@ class WarningAlert {
       hazardType: hazardType ?? this.hazardType,
       waterLevelMeters: waterLevelMeters ?? this.waterLevelMeters,
       rainfallMm: rainfallMm ?? this.rainfallMm,
+      windSpeedKmh: windSpeedKmh ?? this.windSpeedKmh,
       severity: severity ?? this.severity,
       description: description ?? this.description,
       issuedTimestamp: issuedTimestamp ?? this.issuedTimestamp,
