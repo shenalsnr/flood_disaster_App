@@ -1,6 +1,13 @@
 import 'package:flutter/foundation.dart';
 
-enum EquipmentStatus { available, assigned, inTransit, underMaintenance, decommissioned }
+enum EquipmentStatus {
+  available,
+  assigned,
+  inTransit,
+  underMaintenance,
+  decommissioned,
+}
+
 enum EquipmentCondition { excellent, good, fair, needsRepair, damaged }
 
 class EquipmentLog {
@@ -15,11 +22,7 @@ class EquipmentLog {
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'date': date,
-      'description': description,
-    };
+    return {'id': id, 'date': date, 'description': description};
   }
 
   factory EquipmentLog.fromMap(Map<String, dynamic> map) {
