@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
+import '../../../component2_reporting/presentation/screens/volunteer_dashboard_screen.dart';
 import '../widgets/onboarding_visuals.dart';
 
 /// Professional 3-step onboarding flow for WeSafe.
@@ -52,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 550),
-        pageBuilder: (_, _, _) => const CitizenDashboardScreen(),
+        pageBuilder: (_, _, _) => const VolunteerDashboardScreen(),
         transitionsBuilder: (_, animation, _, child) => FadeTransition(
           opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: child,

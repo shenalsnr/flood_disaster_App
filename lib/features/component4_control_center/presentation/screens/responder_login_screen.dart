@@ -8,7 +8,7 @@ import '../controllers/responder_controller.dart';
 import 'alert_dashboard_screen.dart';
 import 'responder_register_screen.dart';
 import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
+import '../../../component2_reporting/presentation/screens/volunteer_dashboard_screen.dart';
 import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
@@ -140,7 +140,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
         );
       } else if (role.contains('volunteer')) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QuickHazardScreen()),
+          MaterialPageRoute(builder: (_) => const VolunteerDashboardScreen()),
         );
       } else if (role.contains('camp') || role.contains('leader')) {
         Navigator.of(context).pushReplacement(
