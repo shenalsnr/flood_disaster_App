@@ -5,13 +5,9 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
-import 'alert_dashboard_screen.dart';
+import '../../data/services/session_service.dart';
+import 'role_router.dart';
 import 'responder_register_screen.dart';
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
-import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
-import '../../../component3_relief_tracking/presentation/screens/supply_admin_dashboard_screen.dart';
-import 'admin_panel_screen.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
   final UserRole initialRole;
@@ -28,7 +24,6 @@ class ResponderLoginScreen extends StatefulWidget {
 }
 
 class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
-  late UserRole _currentRole;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -38,33 +33,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
   @override
   void initState() {
     super.initState();
-    _currentRole = widget.initialRole;
+    // No demo credentials are pre-filled. Only an email carried over from
+    // registration is shown.
     if (widget.initialEmail != null && widget.initialEmail!.isNotEmpty) {
       _emailController.text = widget.initialEmail!;
-      _passwordController.text = 'Secure@1234';
-    } else {
-      _populateRoleCredentials();
-    }
-  }
-
-  void _populateRoleCredentials() {
-    switch (_currentRole) {
-      case UserRole.responder:
-        _emailController.text = 'n.perera@dispatched.gov.lk';
-        _passwordController.text = 'Disaster@2026';
-        break;
-      case UserRole.citizen:
-        _emailController.text = 'chamara.d@gmail.com';
-        _passwordController.text = 'Secure@1234';
-        break;
-      case UserRole.volunteer:
-        _emailController.text = 'volunteer.kapila@dmc.org';
-        _passwordController.text = 'Report@2026';
-        break;
-      case UserRole.campLeader:
-        _emailController.text = 'leader.rohan@relief.gov.lk';
-        _passwordController.text = 'Camp@2026';
-        break;
     }
   }
 
@@ -134,34 +106,18 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
         ),
       );
 
-      // 4. Role-based routing based on authenticated user's role from Firestore
-      final role = user.role.toLowerCase();
-      if (role == 'admin') {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AdminPanelScreen()),
-        );
-      } else if (role.contains('dmc')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (_) => const SupplyAdminDashboardScreen()),
-        );
-      } else if (role.contains('citizen')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
-        );
-      } else if (role.contains('volunteer')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QuickHazardScreen()),
-        );
-      } else if (role.contains('camp') || role.contains('leader')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CampDashboardScreen()),
-        );
+      // 4. Remember this sign-in (or forget it) for the next app start
+      if (_rememberCredentials) {
+        await SessionService.save(user.email);
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AlertDashboardScreen()),
-        );
+        await SessionService.clear();
       }
+      if (!mounted) return;
+
+      // 5. Role-based routing based on the role stored in Firestore
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => dashboardForRole(user.role)),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);

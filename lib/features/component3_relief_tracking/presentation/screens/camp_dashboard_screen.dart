@@ -11,6 +11,8 @@ import '../widgets/supply_requests_list.dart';
 import 'supply_admin_dashboard_screen.dart';
 import '../../../component4_control_center/presentation/screens/admin_panel_screen.dart';
 import 'personal_information_screen.dart';
+import '../../../component4_control_center/data/services/session_service.dart';
+import '../../../component4_control_center/presentation/screens/sign_in_screen.dart';
 import '../widgets/leader_avatar.dart';
 
 class CampDashboardScreen extends StatefulWidget {
@@ -951,9 +953,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Logging out...')),
+            onPressed: () async {
+              await SessionService.clear();
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const SignInScreen()),
+                (route) => false,
               );
             },
             child: const Text(

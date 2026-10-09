@@ -172,6 +172,33 @@ class AuthFirebaseService {
     return UserProfile.fromMap(data, cleanEmail);
   }
 
+  /// Loads an existing account without a password (used to restore a
+  /// remembered sign-in). Throws when the account is missing or disabled.
+  Future<UserProfile> loadUserByEmail(String email) async {
+    final cleanEmail = email.toLowerCase().trim();
+    Map<String, dynamic>? data;
+    var reachable = false;
+    try {
+      final doc = await _firestore.collection('users').doc(cleanEmail).get();
+      reachable = true;
+      if (doc.exists && doc.data() != null) {
+        data = doc.data()!;
+        _offlineFallbackCache[cleanEmail] = data;
+      }
+    } catch (e) {
+      debugPrint('loadUserByEmail read warning: $e');
+    }
+    if (data == null &&
+        (!reachable || cleanEmail == _bootstrapAdminEmail)) {
+      data = _offlineFallbackCache[cleanEmail];
+    }
+    if (data == null) throw Exception('Account not found.');
+    if (data['isActive'] == false) {
+      throw Exception('This account has been disabled by the administrator.');
+    }
+    return UserProfile.fromMap(data, cleanEmail);
+  }
+
   /// Update password in Cloud Firestore during Reset PIN / OTP flow
   Future<void> updatePassword({
     required String email,
