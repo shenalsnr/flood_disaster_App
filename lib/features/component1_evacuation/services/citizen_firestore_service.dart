@@ -1,11 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../component4_control_center/presentation/controllers/responder_controller.dart';
+
 class CitizenFirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   // Uses actual logged-in user ID, falls back to 'mock_user_123' if testing without login
-  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? 'mock_user_123';
+  String get currentUserId =>
+      ResponderController().currentUser?.email ??
+      FirebaseAuth.instance.currentUser?.uid ??
+      'mock_user_123';
 
   // ===========================================================================
   // 3. Citizen Profile & Safe Arrival Status
@@ -49,10 +54,10 @@ class CitizenFirestoreService {
         .doc(currentUserId)
         .collection('checklist')
         .add({
-      'itemName': itemName,
-      'isPacked': false,
-      'addedAt': FieldValue.serverTimestamp(),
-    });
+          'itemName': itemName,
+          'isPacked': false,
+          'addedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   /// Read: Fetch checklist items in real-time
@@ -91,15 +96,13 @@ class CitizenFirestoreService {
 
   /// Create: Add a new contact to the contacts sub-collection
   Future<void> addEmergencyContact(String name, String phoneNumber) async {
-    await _db
-        .collection('users')
-        .doc(currentUserId)
-        .collection('contacts')
-        .add({
-      'name': name,
-      'phoneNumber': phoneNumber,
-      'addedAt': FieldValue.serverTimestamp(),
-    });
+    await _db.collection('users').doc(currentUserId).collection('contacts').add(
+      {
+        'name': name,
+        'phoneNumber': phoneNumber,
+        'addedAt': FieldValue.serverTimestamp(),
+      },
+    );
   }
 
   /// Read: Fetch the contacts in real-time
@@ -113,16 +116,17 @@ class CitizenFirestoreService {
   }
 
   /// Update: Update the phoneNumber or name of a specific contact
-  Future<void> updateEmergencyContact(String docId, String newName, String newPhone) async {
+  Future<void> updateEmergencyContact(
+    String docId,
+    String newName,
+    String newPhone,
+  ) async {
     await _db
         .collection('users')
         .doc(currentUserId)
         .collection('contacts')
         .doc(docId)
-        .update({
-      'name': newName,
-      'phoneNumber': newPhone,
-    });
+        .update({'name': newName, 'phoneNumber': newPhone});
   }
 
   /// Delete: Delete the contact document

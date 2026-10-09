@@ -30,6 +30,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
   final _waterController = TextEditingController();
   final _rainfallController = TextEditingController();
   final _descController = TextEditingController();
+  final _cityController = TextEditingController();
 
   String _selectedDistrict = 'Colombo';
   String _selectedZone = 'Sector 1';
@@ -128,6 +129,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     _waterController.dispose();
     _rainfallController.dispose();
     _descController.dispose();
+    _cityController.dispose();
     super.dispose();
   }
 
@@ -140,6 +142,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     final alert = WarningAlert(
       id: _editingId ?? '',
       district: _selectedDistrict,
+      city: _cityController.text.trim().isEmpty ? 'All' : _cityController.text.trim(),
       locationZone: _selectedZone,
       hazardType: _selectedHazard,
       waterLevelMeters: double.parse(_waterController.text),
@@ -200,6 +203,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       _waterController.text = alert.waterLevelMeters.toStringAsFixed(2);
       _rainfallController.text = alert.rainfallMm.toStringAsFixed(1);
       _descController.text = alert.description;
+      _cityController.text = alert.city;
     });
     // Scroll up to the form
     Scrollable.ensureVisible(
@@ -220,6 +224,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     _waterController.clear();
     _rainfallController.clear();
     _descController.clear();
+    _cityController.clear();
     _formKey.currentState?.reset();
   }
 
@@ -523,12 +528,27 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             ],
 
             // Row 1: District
-            _buildDropdown(
-              label: 'Target District',
-              icon: Icons.map_rounded,
-              value: _selectedDistrict,
-              items: _districts,
-              onChanged: (v) => setState(() => _selectedDistrict = v!),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDropdown(
+                    label: 'Target District',
+                    icon: Icons.map_rounded,
+                    value: _selectedDistrict,
+                    items: _districts,
+                    onChanged: (v) => setState(() => _selectedDistrict = v!),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    controller: _cityController,
+                    label: 'City (Target)',
+                    icon: Icons.location_city_rounded,
+                    hint: 'e.g. Ambalangoda',
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 14),
 
@@ -707,6 +727,30 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           validator: (v) {
             if (v == null || v.isEmpty) return 'Required';
             if (double.tryParse(v) == null) return 'Invalid number';
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String hint,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          decoration: _inputDecoration(hint: hint, icon: icon),
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) return 'Required';
             return null;
           },
         ),

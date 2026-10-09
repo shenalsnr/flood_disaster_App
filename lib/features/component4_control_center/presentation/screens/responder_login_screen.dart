@@ -5,11 +5,9 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
-import 'alert_dashboard_screen.dart';
+import '../../data/services/session_service.dart';
+import 'role_router.dart';
 import 'responder_register_screen.dart';
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-import '../../../component2_reporting/presentation/screens/volunteer_dashboard_screen.dart';
-import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
   final UserRole initialRole;
@@ -26,7 +24,6 @@ class ResponderLoginScreen extends StatefulWidget {
 }
 
 class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
-  late UserRole _currentRole;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -36,33 +33,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
   @override
   void initState() {
     super.initState();
-    _currentRole = widget.initialRole;
+    // Only fill email if it was passed from the registration screen
     if (widget.initialEmail != null && widget.initialEmail!.isNotEmpty) {
       _emailController.text = widget.initialEmail!;
-      _passwordController.text = 'Secure@1234';
-    } else {
-      _populateRoleCredentials();
-    }
-  }
-
-  void _populateRoleCredentials() {
-    switch (_currentRole) {
-      case UserRole.responder:
-        _emailController.text = 'n.perera@dispatched.gov.lk';
-        _passwordController.text = 'Disaster@2026';
-        break;
-      case UserRole.citizen:
-        _emailController.text = 'chamara.d@gmail.com';
-        _passwordController.text = 'Secure@1234';
-        break;
-      case UserRole.volunteer:
-        _emailController.text = 'volunteer.kapila@dmc.org';
-        _passwordController.text = 'Report@2026';
-        break;
-      case UserRole.campLeader:
-        _emailController.text = 'leader.rohan@relief.gov.lk';
-        _passwordController.text = 'Camp@2026';
-        break;
     }
   }
 
@@ -132,25 +105,18 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
         ),
       );
 
-      // 4. Role-based routing based on authenticated user's role from Firestore
-      final role = user.role.toLowerCase();
-      if (role.contains('citizen')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
-        );
-      } else if (role.contains('volunteer')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const VolunteerDashboardScreen()),
-        );
-      } else if (role.contains('camp') || role.contains('leader')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CampDashboardScreen()),
-        );
+      // 4. Remember this sign-in (or forget it) for the next app start
+      if (_rememberCredentials) {
+        await SessionService.save(user.email);
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AlertDashboardScreen()),
-        );
+        await SessionService.clear();
       }
+      if (!mounted) return;
+
+      // 5. Role-based routing based on the role stored in Firestore
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => dashboardForRole(user.role)),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -527,7 +493,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Bar with Circular Back Button (Matching Image 1)
+              // Top Bar with Circular Back Button
               Row(
                 children: [
                   GestureDetector(
@@ -575,7 +541,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 22),
 
-              // Top Brand Card (Matching Image 1)
+              // Top Brand Card
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -634,14 +600,14 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 20),
 
-              // Field 1: OFFICIAL WORK EMAIL
+              // Field 1: EMAIL
               _buildFieldLabel('OFFICIAL WORK EMAIL'),
               TextField(
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 keyboardType: TextInputType.emailAddress,
                 decoration: _buildInputDecoration(
-                  hint: 'n.perera@dispatched.gov.lk',
+                  hint: 'Enter your email',
                   icon: Icons.email,
                 ),
               ),
@@ -655,7 +621,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 obscureText: _obscurePassword,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: _buildInputDecoration(
-                  hint: '••••••••••••',
+                  hint: 'Enter your password',
                   icon: Icons.lock,
                   suffix: IconButton(
                     icon: Icon(
@@ -674,7 +640,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 14),
 
-              // Remember credentials & Reset PIN? Row (Matching Image 1)
+              // Remember credentials & Reset PIN? Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -721,7 +687,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 36),
 
-              // Primary Button: AUTHENTICATE & LOGIN ➔ (Matching Image 1)
+              // Primary Button: AUTHENTICATE & LOGIN
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -777,7 +743,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
               const SizedBox(height: 22),
 
-              // Bottom Link: New officer? Registration (Matching Image 1)
+              // Bottom Link: New officer? Registration
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
