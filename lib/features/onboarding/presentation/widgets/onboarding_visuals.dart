@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -65,7 +66,9 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                   child: CustomPaint(
                     painter: _MapRoadsPainter(
                       roadColor: const Color(0xFF1E293B),
-                      highlightColor: AppColors.primaryLight.withValues(alpha: 0.8),
+                      highlightColor: AppColors.primaryLight.withValues(
+                        alpha: 0.8,
+                      ),
                     ),
                   ),
                 ),
@@ -77,9 +80,7 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                   bottom: 0,
                   height: 140,
                   child: CustomPaint(
-                    painter: _FloodWavesPainter(
-                      animValue: _controller.value,
-                    ),
+                    painter: _FloodWavesPainter(animValue: _controller.value),
                   ),
                 ),
 
@@ -127,7 +128,8 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF6B2C).withValues(alpha: 0.45),
+                          color: const Color(0xFFFF6B2C)
+                              .withValues(alpha: 0.45),
                           blurRadius: 16,
                           offset: const Offset(0, 8),
                         ),
@@ -148,7 +150,10 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                   right: 20,
                   bottom: 34 - floatOffset,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFFEF4444), Color(0xFFB91C1C)],
@@ -158,7 +163,8 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFEF4444).withValues(alpha: 0.45),
+                          color: const Color(0xFFEF4444)
+                              .withValues(alpha: 0.45),
                           blurRadius: 16,
                           offset: const Offset(0, 8),
                         ),
@@ -340,11 +346,7 @@ class _DetailedCitizenGraphic extends StatelessWidget {
         ),
 
         // Citizen high-fidelity vector illustration
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _RealisticPersonPainter(),
-          ),
-        ),
+        Positioned.fill(child: CustomPaint(painter: _RealisticPersonPainter())),
       ],
     );
   }
@@ -413,7 +415,10 @@ class _IPhoneMockup extends StatelessWidget {
                         width: 12,
                         height: 6,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            width: 1,
+                          ),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -668,7 +673,10 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: const Color(0xFF16A34A),
-                      border: Border.all(color: const Color(0xFF4ADE80), width: 2),
+                      border: Border.all(
+                        color: const Color(0xFF4ADE80),
+                        width: 2,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF22C55E).withValues(alpha: 0.6),
@@ -740,11 +748,7 @@ class _ShelterWaypointPin extends StatelessWidget {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.home_rounded,
-        color: Color(0xFF4ADE80),
-        size: 15,
-      ),
+      child: const Icon(Icons.home_rounded, color: Color(0xFF4ADE80), size: 15),
     );
   }
 }
@@ -769,7 +773,10 @@ class _ShelterBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0B291A).withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF16A34A).withValues(alpha: 0.8), width: 1.5),
+        border: Border.all(
+          color: const Color(0xFF16A34A).withValues(alpha: 0.8),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF22C55E).withValues(alpha: 0.25),
@@ -814,10 +821,7 @@ class _ShelterBadge extends StatelessWidget {
               ),
             ],
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: 8),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 8), trailing!],
         ],
       ),
     );
@@ -850,18 +854,50 @@ class _MapRoadsPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // Horizontal road blocks
-    canvas.drawLine(Offset(0, size.height * 0.25), Offset(size.width, size.height * 0.25), paint);
-    canvas.drawLine(Offset(0, size.height * 0.55), Offset(size.width, size.height * 0.55), paint);
-    canvas.drawLine(Offset(0, size.height * 0.8), Offset(size.width, size.height * 0.8), paint);
+    canvas.drawLine(
+      Offset(0, size.height * 0.25),
+      Offset(size.width, size.height * 0.25),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(0, size.height * 0.55),
+      Offset(size.width, size.height * 0.55),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(0, size.height * 0.8),
+      Offset(size.width, size.height * 0.8),
+      paint,
+    );
 
     // Vertical streets
-    canvas.drawLine(Offset(size.width * 0.3, 0), Offset(size.width * 0.3, size.height), paint);
-    canvas.drawLine(Offset(size.width * 0.65, 0), Offset(size.width * 0.65, size.height), paint);
-    canvas.drawLine(Offset(size.width * 0.85, 0), Offset(size.width * 0.85, size.height), secondaryPaint);
+    canvas.drawLine(
+      Offset(size.width * 0.3, 0),
+      Offset(size.width * 0.3, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.65, 0),
+      Offset(size.width * 0.65, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.85, 0),
+      Offset(size.width * 0.85, size.height),
+      secondaryPaint,
+    );
 
     // Diagonal arterial roads
-    canvas.drawLine(Offset(0, size.height * 0.1), Offset(size.width * 0.5, size.height * 0.9), secondaryPaint);
-    canvas.drawLine(Offset(size.width * 0.2, 0), Offset(size.width, size.height * 0.7), secondaryPaint);
+    canvas.drawLine(
+      Offset(0, size.height * 0.1),
+      Offset(size.width * 0.5, size.height * 0.9),
+      secondaryPaint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.2, 0),
+      Offset(size.width, size.height * 0.7),
+      secondaryPaint,
+    );
 
     // Highlight road (e.g. orange route in visual 1)
     if (highlightColor != Colors.transparent) {
@@ -914,12 +950,7 @@ class _FloodWavesPainter extends CustomPainter {
         w * 0.6,
         h * 0.45 + math.sin(animValue * math.pi * 2) * 6,
       )
-      ..quadraticBezierTo(
-        w * 0.85,
-        h * 0.65,
-        w,
-        h * 0.4,
-      )
+      ..quadraticBezierTo(w * 0.85, h * 0.65, w, h * 0.4)
       ..lineTo(w, h)
       ..lineTo(0, h)
       ..close();
@@ -929,10 +960,7 @@ class _FloodWavesPainter extends CustomPainter {
     // Front crest wave (light cyan)
     final frontWavePaint = Paint()
       ..shader = const LinearGradient(
-        colors: [
-          Color(0xFF38BDF8),
-          Color(0xFF0284C7),
-        ],
+        colors: [Color(0xFF38BDF8), Color(0xFF0284C7)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, w, h));
@@ -945,12 +973,7 @@ class _FloodWavesPainter extends CustomPainter {
         w * 0.7,
         h * 0.55 - math.cos(animValue * math.pi * 2) * 5,
       )
-      ..quadraticBezierTo(
-        w * 0.9,
-        h * 0.65,
-        w,
-        h * 0.5,
-      )
+      ..quadraticBezierTo(w * 0.9, h * 0.65, w, h * 0.5)
       ..lineTo(w, h)
       ..lineTo(0, h)
       ..close();
@@ -1059,10 +1082,7 @@ class _RealisticPersonPainter extends CustomPainter {
 
     // 4. Head Base & Profile Face (Facing Right towards Phone)
     // Head oval base
-    canvas.drawOval(
-      const Rect.fromLTWH(38, 42, 34, 38),
-      skinPaint,
-    );
+    canvas.drawOval(const Rect.fromLTWH(38, 42, 34, 38), skinPaint);
 
     // Facial profile features (forehead, nose, lips, chin)
     final faceProfile = Path()
@@ -1082,16 +1102,19 @@ class _RealisticPersonPainter extends CustomPainter {
     canvas.drawPath(faceProfile, skinPaint);
 
     // Ear
-    canvas.drawOval(
-      const Rect.fromLTWH(42, 54, 8, 13),
-      skinPaint,
-    );
+    canvas.drawOval(const Rect.fromLTWH(42, 54, 8, 13), skinPaint);
     // Inner ear curve
     final earInner = Paint()
       ..color = const Color(0xFFEA580C).withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
-    canvas.drawArc(const Rect.fromLTWH(44, 57, 4, 7), -1.5, 3.0, false, earInner);
+    canvas.drawArc(
+      const Rect.fromLTWH(44, 57, 4, 7),
+      -1.5,
+      3.0,
+      false,
+      earInner,
+    );
 
     // 5. Stylized Voluminous Wavy Black Hair
     final hair = Path()
@@ -1242,7 +1265,11 @@ class _StopHandPinPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(cx, size.height * 0.96), width: 16, height: 5),
+      Rect.fromCenter(
+        center: Offset(cx, size.height * 0.96),
+        width: 16,
+        height: 5,
+      ),
       ripplePaint,
     );
 
@@ -1268,15 +1295,31 @@ class _StopHandPinPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // Thumb
-    canvas.drawLine(Offset(cx - 5, cy + 3), Offset(cx - 8, cy + 1), fingerStroke);
+    canvas.drawLine(
+      Offset(cx - 5, cy + 3),
+      Offset(cx - 8, cy + 1),
+      fingerStroke,
+    );
     // Index
-    canvas.drawLine(Offset(cx - 3.5, cy), Offset(cx - 3.5, cy - 6), fingerStroke);
+    canvas.drawLine(
+      Offset(cx - 3.5, cy),
+      Offset(cx - 3.5, cy - 6),
+      fingerStroke,
+    );
     // Middle
     canvas.drawLine(Offset(cx - 1, cy), Offset(cx - 1, cy - 7.5), fingerStroke);
     // Ring
-    canvas.drawLine(Offset(cx + 1.5, cy), Offset(cx + 1.5, cy - 6.5), fingerStroke);
+    canvas.drawLine(
+      Offset(cx + 1.5, cy),
+      Offset(cx + 1.5, cy - 6.5),
+      fingerStroke,
+    );
     // Pinky
-    canvas.drawLine(Offset(cx + 4, cy + 1), Offset(cx + 4, cy - 4.5), fingerStroke);
+    canvas.drawLine(
+      Offset(cx + 4, cy + 1),
+      Offset(cx + 4, cy - 4.5),
+      fingerStroke,
+    );
   }
 
   @override
@@ -1316,8 +1359,16 @@ class _SubmergedHazardTrianglePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(w * 0.5, h * 0.28), Offset(w * 0.5, h * 0.58), markPaint);
-    canvas.drawCircle(Offset(w * 0.5, h * 0.72), 1.2, Paint()..color = Colors.white);
+    canvas.drawLine(
+      Offset(w * 0.5, h * 0.28),
+      Offset(w * 0.5, h * 0.58),
+      markPaint,
+    );
+    canvas.drawCircle(
+      Offset(w * 0.5, h * 0.72),
+      1.2,
+      Paint()..color = Colors.white,
+    );
 
     // Water ripple at base
     final ripple = Paint()
@@ -1328,7 +1379,8 @@ class _SubmergedHazardTrianglePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _SubmergedHazardTrianglePainter oldDelegate) => false;
+  bool shouldRepaint(covariant _SubmergedHazardTrianglePainter oldDelegate) =>
+      false;
 }
 
 /// Broadcasting signal ripples from hand
@@ -1350,7 +1402,10 @@ class _SignalWavesPainter extends CustomPainter {
         ..strokeWidth = 2.0;
 
       canvas.drawArc(
-        Rect.fromCircle(center: Offset(size.width * 0.2, size.height * 0.5), radius: radius),
+        Rect.fromCircle(
+          center: Offset(size.width * 0.2, size.height * 0.5),
+          radius: radius,
+        ),
         -math.pi / 2.5,
         math.pi * 0.8,
         false,
