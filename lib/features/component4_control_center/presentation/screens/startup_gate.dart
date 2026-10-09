@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../../data/services/session_service.dart';
 import '../controllers/responder_controller.dart';
+import 'responder_login_screen.dart';
 import 'role_router.dart';
 
 /// First screen of the app. If someone chose "Remember credentials" and did
 /// not log out, they are taken straight to their dashboard; otherwise the
-/// normal start screen is shown.
+/// login page is shown.
 class StartupGate extends StatefulWidget {
   const StartupGate({super.key});
 
@@ -29,11 +29,11 @@ class _StartupGateState extends State<StartupGate> {
         ResponderController().setCurrentUser(user);
         return dashboardForRole(user.role);
       } catch (_) {
-        // Account removed or disabled, or no data: fall back to start screen.
+        // Account removed or disabled, or no data: fall back to the login page.
         await SessionService.clear();
       }
     }
-    return const CitizenDashboardScreen();
+    return const ResponderLoginScreen();
   }
 
   @override

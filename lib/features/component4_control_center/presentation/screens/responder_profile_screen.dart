@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/services/auth_firebase_service.dart';
 
 import '../controllers/responder_controller.dart';
-import 'sign_in_screen.dart';
+import 'responder_login_screen.dart';
 import '../../data/services/session_service.dart';
 import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
@@ -580,7 +580,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   await SessionService.clear();
                   if (!context.mounted) return;
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const SignInScreen()),
+                    MaterialPageRoute(builder: (_) => const ResponderLoginScreen()),
                     (route) => false,
                   );
                 },
