@@ -460,7 +460,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 90),
       itemCount: users.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (_, i) => _tile(users[i], isStaff),
     );
   }

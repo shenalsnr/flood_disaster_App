@@ -81,7 +81,7 @@ class _LeaderAvatarState extends State<LeaderAvatar> {
         width: widget.size,
         height: widget.size,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _fallback(),
+        errorBuilder: (_, _, _) => _fallback(),
       );
     } else if (url != null && (url.startsWith('http://') || url.startsWith('https://'))) {
       child = Image.network(
@@ -89,7 +89,7 @@ class _LeaderAvatarState extends State<LeaderAvatar> {
         width: widget.size,
         height: widget.size,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _fallback(),
+        errorBuilder: (_, _, _) => _fallback(),
       );
     } else {
       child = _fallback();

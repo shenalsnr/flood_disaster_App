@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 enum TruckStatus { standingBy, enRoute, atDestination, returning }
 
