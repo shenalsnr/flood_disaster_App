@@ -42,15 +42,20 @@ extension UserRoleExtension on UserRole {
 class EmergencyTeam {
   final String id;
   final String name;
-  final String status; // Available, En Route, On Mission
+  final String status; // AVAILABLE, EN ROUTE, ON SCENE, ON MISSION
   final String distance;
   final String eta;
+  final int etaMinutes;
   final String equipment;
   final int crewCount;
   final String leader;
   final String radioChannel;
   final LatLng location;
   final double speedKmh;
+  final String vehicleType;
+  final String callSign;
+  final String phoneNumber;
+  final int fuelLevel;
 
   const EmergencyTeam({
     required this.id,
@@ -58,15 +63,60 @@ class EmergencyTeam {
     required this.status,
     required this.distance,
     required this.eta,
+    this.etaMinutes = 4,
     required this.equipment,
     required this.crewCount,
     required this.leader,
     required this.radioChannel,
     required this.location,
     this.speedKmh = 24.0,
+    this.vehicleType = 'Zodiac Rescue Boat',
+    this.callSign = 'ALPHA-1',
+    this.phoneNumber = '+94 77 482 1029',
+    this.fuelLevel = 94,
   });
 
   bool get isAvailable => status == 'AVAILABLE';
+  bool get isEnRoute => status == 'EN ROUTE';
+  bool get isOnScene => status == 'ON SCENE';
+
+  EmergencyTeam copyWith({
+    String? id,
+    String? name,
+    String? status,
+    String? distance,
+    String? eta,
+    int? etaMinutes,
+    String? equipment,
+    int? crewCount,
+    String? leader,
+    String? radioChannel,
+    LatLng? location,
+    double? speedKmh,
+    String? vehicleType,
+    String? callSign,
+    String? phoneNumber,
+    int? fuelLevel,
+  }) {
+    return EmergencyTeam(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      status: status ?? this.status,
+      distance: distance ?? this.distance,
+      eta: eta ?? this.eta,
+      etaMinutes: etaMinutes ?? this.etaMinutes,
+      equipment: equipment ?? this.equipment,
+      crewCount: crewCount ?? this.crewCount,
+      leader: leader ?? this.leader,
+      radioChannel: radioChannel ?? this.radioChannel,
+      location: location ?? this.location,
+      speedKmh: speedKmh ?? this.speedKmh,
+      vehicleType: vehicleType ?? this.vehicleType,
+      callSign: callSign ?? this.callSign,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      fuelLevel: fuelLevel ?? this.fuelLevel,
+    );
+  }
 }
 
 class IncidentReport {
@@ -88,6 +138,10 @@ class IncidentReport {
   String? resolutionNotes;
   String? resolutionType;
   int evacuatedCount;
+  String? dispatchNotes;
+  String? priorityLevel;
+  String? cancellationReason;
+  DateTime? dispatchedAt;
 
   IncidentReport({
     required this.id,
@@ -108,6 +162,10 @@ class IncidentReport {
     this.resolutionNotes,
     this.resolutionType,
     this.evacuatedCount = 0,
+    this.dispatchNotes,
+    this.priorityLevel,
+    this.cancellationReason,
+    this.dispatchedAt,
   });
 
   String get severityLabel {
