@@ -407,9 +407,9 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Kolonnawa, 6.9271° N, 79.8612° E',
-                            style: TextStyle(
+                          Text(
+                            'Kolonnawa, ${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14.5,
                               fontWeight: FontWeight.w700,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/review_report_screen.dart';
 
 /// 3-Step Wizard for Reporting Ground Hazards.
@@ -30,7 +31,80 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   final ImagePicker _picker = ImagePicker();
   String _selectedNote = 'Water rising rapidly near bridge. Road impassable for light vehicles.';
 
-  final LatLng _hazardCoords = const LatLng(6.9271, 79.8612);
+  LatLng _hazardCoords = const LatLng(6.9271, 79.8612);
+  bool _isLoadingLocation = false;
+  bool _hasGpsLock = false;
+  final MapController _mapController = MapController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentLocation();
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    setState(() => _isLoadingLocation = true);
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enable GPS / Location Services.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        setState(() => _isLoadingLocation = false);
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Location permission denied. Using fallback GPS.'),
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+          setState(() => _isLoadingLocation = false);
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() => _isLoadingLocation = false);
+        return;
+      }
+
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 8),
+        ),
+      );
+
+      if (mounted) {
+        setState(() {
+          _hazardCoords = LatLng(position.latitude, position.longitude);
+          _hasGpsLock = true;
+          _isLoadingLocation = false;
+        });
+        _mapController.move(_hazardCoords, 14.0);
+      }
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      if (mounted) {
+        setState(() => _isLoadingLocation = false);
+      }
+    }
+  }
 
   // Exact 4 hazard definitions from user screenshot
   final List<Map<String, dynamic>> _hazards = const [
@@ -712,12 +786,15 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 children: [
                   // Tactical Dark Map
                   FlutterMap(
+                    mapController: _mapController,
                     options: MapOptions(
                       initialCenter: _hazardCoords,
-                      initialZoom: 13.5,
-                      interactionOptions: const InteractionOptions(
-                        flags: InteractiveFlag.none, // Static preview
-                      ),
+                      initialZoom: 14.0,
+                      onTap: (tapPosition, point) {
+                        setState(() {
+                          _hazardCoords = point;
+                        });
+                      },
                     ),
                     children: [
                       TileLayer(
@@ -771,32 +848,82 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   Positioned(
                     top: 12,
                     left: 14,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF081220).withValues(alpha: 0.88),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFF00E676).withValues(alpha: 0.6),
-                          width: 1.2,
+                    child: GestureDetector(
+                      onTap: _fetchCurrentLocation,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF081220).withValues(alpha: 0.88),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _hasGpsLock
+                                ? const Color(0xFF00E676).withValues(alpha: 0.8)
+                                : const Color(0xFFFF9800).withValues(alpha: 0.8),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _hasGpsLock
+                                  ? Icons.check_circle_outline_rounded
+                                  : Icons.gps_fixed_rounded,
+                              color: _hasGpsLock
+                                  ? const Color(0xFF00E676)
+                                  : const Color(0xFFFF9800),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _isLoadingLocation
+                                  ? 'LOCATING...'
+                                  : (_hasGpsLock ? 'GPS LOCKED' : 'LOCK GPS'),
+                              style: TextStyle(
+                                color: _hasGpsLock
+                                    ? const Color(0xFF00E676)
+                                    : const Color(0xFFFF9800),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check_circle_outline_rounded,
-                              color: Color(0xFF00E676), size: 16),
-                          SizedBox(width: 6),
-                          Text(
-                            'GPS LOCKED',
-                            style: TextStyle(
-                              color: Color(0xFF00E676),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.8,
-                            ),
+                    ),
+                  ),
+
+                  // Top-Right Recenter Button
+                  Positioned(
+                    top: 12,
+                    right: 14,
+                    child: GestureDetector(
+                      onTap: _fetchCurrentLocation,
+                      child: Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF081220).withValues(alpha: 0.88),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF1E2D4A),
+                            width: 1.2,
                           ),
-                        ],
+                        ),
+                        child: _isLoadingLocation
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF00E676),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.my_location_rounded,
+                                color: Color(0xFF00E676),
+                                size: 18,
+                              ),
                       ),
                     ),
                   ),
@@ -818,9 +945,9 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ),
           ),
           const SizedBox(height: 3),
-          const Text(
-            'Coordinates: 6.9271° N, 79.8612° E (±4 meters)',
-            style: TextStyle(
+          Text(
+            'Coordinates: ${_hazardCoords.latitude.toStringAsFixed(4)}° N, ${_hazardCoords.longitude.toStringAsFixed(4)}° E (±4 meters)',
+            style: const TextStyle(
               color: Color(0xFF8B9BB4),
               fontSize: 13,
               fontWeight: FontWeight.w400,
