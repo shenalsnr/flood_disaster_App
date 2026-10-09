@@ -6,6 +6,7 @@ import 'citizen_settings_screen.dart';
 import 'c1_admin_metrics_screen.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
+import '../../../component4_control_center/data/services/session_service.dart';
 
 class CitizenDrawer extends StatelessWidget {
   const CitizenDrawer({super.key});
