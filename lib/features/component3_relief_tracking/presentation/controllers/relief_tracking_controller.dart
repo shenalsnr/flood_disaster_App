@@ -583,6 +583,18 @@ class ReliefTrackingController extends ChangeNotifier {
   /// the critical (depleted) band (FR12).
   void _setItem(int index, ReliefItemModel updated) {
     final before = inventoryItems[index];
+
+    // The item was available again (restocked) and has now run short once
+    // more: any earlier request for it is finished business, so close it and
+    // let this new shortage appear in the alerts and be requested again.
+    if (before.status == StockStatus.adequate &&
+        updated.status != StockStatus.adequate &&
+        hasOpenRequest(updated)) {
+      _openRequestItemIds.remove(updated.id);
+      _openRequestItemNames.remove(_nameKey(updated.name));
+      _resolveDmc(updated);
+    }
+
     inventoryItems[index] = updated;
     _pushItem(updated);
 
