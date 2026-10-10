@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
 
@@ -89,17 +90,23 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('warnings')
-              .where('district', isEqualTo: district)
-              .where('city', isEqualTo: city)
+              .where('district', whereIn: [district, 'All'])
               .snapshots(),
           builder: (context, warningsSnap) {
             WarningAlert? topAlert;
             List<WarningAlert> allAlerts = [];
 
-            if (warningsSnap.hasData && warningsSnap.data!.docs.isNotEmpty) {
+            if (warningsSnap.hasData) {
+              // City is matched here so broadcasts sent to city 'All' also arrive.
               allAlerts = warningsSnap.data!.docs
                   .map((d) => WarningAlert.fromDoc(d))
+                  .where((w) =>
+                      w.city.toLowerCase() == 'all' ||
+                      w.city.toLowerCase() == city.toLowerCase())
                   .toList();
+            }
+
+            if (allAlerts.isNotEmpty) {
 
               // Only run reduce if list is not empty, which we know it isn't
               topAlert = allAlerts.reduce(

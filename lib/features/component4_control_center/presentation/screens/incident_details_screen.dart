@@ -1,962 +1,199 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
+import '../widgets/c4_ui.dart';
 import 'assign_responder_screen.dart';
-import 'resolve_analysis_screen.dart';
+import 'broadcast_dialog.dart';
 import 'live_tracking_screen.dart';
+import 'resolve_analysis_screen.dart';
 
+/// Incident detail. Used as a full page on phones / tablets and as an
+/// embedded right-hand pane (embedded: true) on large screens.
 class IncidentDetailsScreen extends StatefulWidget {
   final IncidentReport incident;
+  final bool embedded;
+  final String? heroTag;
 
-  const IncidentDetailsScreen({super.key, required this.incident});
+  const IncidentDetailsScreen({
+    super.key,
+    required this.incident,
+    this.embedded = false,
+    this.heroTag,
+  });
 
   @override
   State<IncidentDetailsScreen> createState() => _IncidentDetailsScreenState();
 }
 
-class _IncidentDetailsScreenState extends State<IncidentDetailsScreen>
-    with TickerProviderStateMixin {
-  final ResponderController _controller = ResponderController();
-  bool _showCorroboratingList = false;
+class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
+  final ResponderController _c = ResponderController();
 
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
+  IncidentReport get incident => widget.incident;
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_onStateChange);
-
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    );
-    _fadeController.forward();
-
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
+    _c.addListener(_refresh);
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onStateChange);
-    _fadeController.dispose();
-    _pulseController.dispose();
+    _c.removeListener(_refresh);
     super.dispose();
   }
 
-  void _onStateChange() {
+  void _refresh() {
     if (mounted) setState(() {});
   }
 
-  void _showBroadcastDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 26),
-            SizedBox(width: 10),
-            Text('Broadcast Warning',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Text(
-          'Issue an instant high-priority evacuation warning to all residents within 2 km of ${widget.incident.location}?',
-          style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child:
-                const Text('CANCEL', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              _controller.broadcastZoneAlert(
-                zone: widget.incident.location,
-                title: 'IMMEDIATE EVACUATION: ${widget.incident.title}',
-                message:
-                    'High priority alert issued for all residents within 2 km of ${widget.incident.location}.',
-              );
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      'Emergency alert broadcast to ${widget.incident.location} cell towers!'),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
-            },
-            child: const Text('TRANSMIT WARNING'),
-          ),
-        ],
-      ),
-    );
+  void _snack(String m) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+
+  Future<void> _call() async {
+    final phone = incident.reporterPhone.replaceAll(' ', '');
+    if (phone.isEmpty) {
+      _snack('No phone number was given by the reporter.');
+      return;
+    }
+    final ok = await launchUrl(Uri.parse('tel:$phone'));
+    if (!ok && mounted) _snack('Could not open the phone app.');
   }
 
-  void _showCancelDispatchDialog() {
-    String? selectedReason;
-    final reasons = [
+  Future<void> _cancelDispatch() async {
+    const reasons = [
       'Wrong team assigned',
       'Incident resolved / false alarm',
       'Team unavailable',
       'Weather conditions unsafe',
       'Higher priority incident',
     ];
-
-    showDialog(
+    final reason = await showDialog<String>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
-            children: [
-              Icon(Icons.cancel_outlined, color: Color(0xFFEF4444), size: 24),
-              SizedBox(width: 10),
-              Text('Cancel Dispatch',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+      builder: (ctx) => SimpleDialog(
+        backgroundColor: C4.card,
+        title: const Text('Cancel dispatch - reason',
+            style: TextStyle(color: C4.text, fontSize: 16)),
+        children: [
+          for (final r in reasons)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, r),
+              child: Text(r, style: const TextStyle(color: C4.text)),
+            ),
+        ],
+      ),
+    );
+    if (reason == null) return;
+    _c.cancelDispatch(incident: incident, cancellationReason: reason);
+    _snack('Dispatch cancelled. Unit released.');
+  }
+
+  // ---------------------------------------------------------------------------
+  @override
+  Widget build(BuildContext context) {
+    final sev = C4.severity(incident.severity);
+    final w = MediaQuery.sizeOf(context).width;
+    final pad = Responsive.pad(w);
+    final heroH = widget.embedded ? 240.0 : (w >= 640 ? 300.0 : 230.0);
+
+    Widget photo = HazardPhoto(incident: incident, radius: 0);
+    if (widget.heroTag != null) {
+      photo = Hero(tag: widget.heroTag!, child: photo);
+    }
+
+    final content = SliverToBoxAdapter(
+      child: ResponsiveBody(
+        maxWidth: 820,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(pad, 16, pad, 24),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Select a cancellation reason:',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-              ),
-              const SizedBox(height: 12),
-              ...reasons.map((reason) {
-                final isSelected = selectedReason == reason;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => setDialogState(() => selectedReason = reason),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFEF4444).withValues(alpha: 0.15) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelected ? const Color(0xFFEF4444) : Colors.white12,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                            color: isSelected ? const Color(0xFFEF4444) : Colors.white38,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              reason,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
-                                fontSize: 13,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
+              FadeSlideIn(child: _header(sev)),
+              const SizedBox(height: 16),
+              FadeSlideIn(index: 1, child: _timeline()),
+              const SizedBox(height: 16),
+              FadeSlideIn(index: 2, child: _infoGrid(w)),
+              const SizedBox(height: 16),
+              FadeSlideIn(index: 3, child: _description()),
+              if (incident.assignedTeam != null) ...[
+                const SizedBox(height: 16),
+                FadeSlideIn(index: 4, child: _unitCard(incident.assignedTeam!)),
+              ],
+              if ((incident.dispatchNotes ?? '').isNotEmpty) ...[
+                const SizedBox(height: 16),
+                FadeSlideIn(index: 5, child: _notes()),
+              ],
+              if (incident.status == IncidentStatus.resolved) ...[
+                const SizedBox(height: 16),
+                FadeSlideIn(index: 5, child: _resolution()),
+              ],
+              if (widget.embedded) ...[
+                const SizedBox(height: 20),
+                _actions(),
+              ],
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('BACK', style: TextStyle(color: Colors.white54)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-                foregroundColor: Colors.white,
-              ),
-              onPressed: selectedReason == null
-                  ? null
-                  : () {
-                      _controller.cancelDispatch(
-                        incident: widget.incident,
-                        cancellationReason: selectedReason!,
-                      );
-                      Navigator.of(ctx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Dispatch cancelled: $selectedReason'),
-                          backgroundColor: const Color(0xFFEF4444),
-                        ),
-                      );
-                    },
-              child: const Text('CONFIRM CANCEL'),
-            ),
-          ],
         ),
       ),
     );
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final incident = widget.incident;
-    Color severityColor;
-    IconData hazardIcon;
-    switch (incident.severity) {
-      case IncidentSeverity.critical:
-        severityColor = const Color(0xFFEF4444);
-        break;
-      case IncidentSeverity.high:
-        severityColor = const Color(0xFFF59E0B);
-        break;
-      case IncidentSeverity.medium:
-        severityColor = const Color(0xFFFFB020);
-        break;
-      case IncidentSeverity.low:
-        severityColor = const Color(0xFF10B981);
-        break;
-    }
+    final scroll = CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          expandedHeight: heroH,
+          backgroundColor: C4.surface,
+          surfaceTintColor: Colors.transparent,
+          automaticallyImplyLeading: !widget.embedded,
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: Text('#${incident.shortId}',
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700)),
+          flexibleSpace: FlexibleSpaceBar(
+            collapseMode: CollapseMode.parallax,
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                photo,
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 4,
+                  child: ColoredBox(color: sev),
+                ),
+              ],
+            ),
+          ),
+        ),
+        content,
+      ],
+    );
 
-    switch (incident.hazardType.toLowerCase()) {
-      case 'flood':
-        hazardIcon = Icons.flood;
-        break;
-      case 'landslide':
-        hazardIcon = Icons.terrain;
-        break;
-      case 'blockage':
-        hazardIcon = Icons.block;
-        break;
-      case 'structure':
-        hazardIcon = Icons.foundation;
-        break;
-      default:
-        hazardIcon = Icons.warning_amber_rounded;
+    if (widget.embedded) {
+      return ColoredBox(color: C4.bg, child: scroll);
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B132B),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+      backgroundColor: C4.bg,
+      body: scroll,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: C4.surface,
+          border: Border(top: BorderSide(color: C4.border)),
         ),
-        title: Text(
-          'Incident #${incident.id}',
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Incident dispatch telemetry copied to clipboard.'),
-                  backgroundColor: Color(0xFF1E293B),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Top Badges Row
-                Row(
-                  children: [
-                    // Animated severity badge for critical incidents
-                    AnimatedBuilder(
-                      animation: _pulseAnimation,
-                      builder: (context, child) => Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: severityColor.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: severityColor, width: 1.5),
-                          boxShadow: incident.severity == IncidentSeverity.critical
-                              ? [
-                                  BoxShadow(
-                                    color: severityColor.withValues(alpha: _pulseAnimation.value * 0.3),
-                                    blurRadius: 8,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Text(
-                          incident.severityLabel,
-                          style: TextStyle(
-                            color: severityColor,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0284C7).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                        border:
-                            Border.all(color: const Color(0xFF0284C7), width: 1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(hazardIcon, color: const Color(0xFF38BDF8), size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            incident.hazardType.toUpperCase(),
-                            style: const TextStyle(
-                              color: Color(0xFF38BDF8),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(incident.status).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: _getStatusColor(incident.status)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(incident.status),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            incident.statusLabel,
-                            style: TextStyle(
-                              color: _getStatusColor(incident.status),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 14),
-
-                // Title
-                Text(
-                  incident.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Location & Coordinates Box with gradient
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF0F172A),
-                        const Color(0xFF0F172A).withValues(alpha: 0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.location_on,
-                                color: Color(0xFFFF6D00), size: 18),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  incident.location,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'GPS: ${incident.coordinates.latitude.toStringAsFixed(4)}° N, ${incident.coordinates.longitude.toStringAsFixed(4)}° E',
-                                  style: const TextStyle(
-                                    color: Color(0xFF94A3B8),
-                                    fontSize: 11,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Evidence Visualizer
-                Container(
-                  height: 180,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF334155)),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0B192C), Color(0xFF1E293B)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Subtle grid overlay
-                      ...List.generate(4, (i) => Positioned(
-                        left: 0,
-                        right: 0,
-                        top: (i + 1) * 36.0,
-                        child: Container(
-                          height: 0.5,
-                          color: const Color(0xFF1E293B).withValues(alpha: 0.5),
-                        ),
-                      )),
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF38BDF8).withValues(alpha: 0.08),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                hazardIcon,
-                                size: 40,
-                                color: const Color(0xFF38BDF8)
-                                    .withValues(alpha: 0.7),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'GROUND CAMERA EVIDENCE ATTACHED',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              'Captured via Volunteer Reporter App • SHA-256 Verified',
-                              style: TextStyle(
-                                  color: Color(0xFF64748B), fontSize: 10),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 12,
-                        left: 12,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.75),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF38BDF8)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.waves,
-                                  color: Color(0xFF38BDF8), size: 16),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Water Level: ${incident.waterDepth}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Timestamp overlay
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.access_time, color: Color(0xFF94A3B8), size: 12),
-                              const SizedBox(width: 4),
-                              Text(
-                                incident.timeAgo,
-                                style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Submitted Description
-                const Text(
-                  'SUBMITTED SITUATION REPORT',
-                  style: TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                  ),
-                  child: Text(
-                    incident.description,
-                    style: const TextStyle(
-                      color: Color(0xFFE2E8F0),
-                      fontSize: 13,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Assigned Team Info Card (if dispatched)
-                if (incident.assignedTeam != null) ...[
-                  _buildAssignedTeamCard(incident),
-                  const SizedBox(height: 16),
-                ],
-
-                // Corroborating Reports Card
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        dense: true,
-                        leading: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00E676).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.group_work_outlined,
-                              color: Color(0xFF00E676), size: 18),
-                        ),
-                        title: Text(
-                          'Corroborating Reports (${incident.corroboratingCount} Citizens)',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: const Text(
-                          'Multiple cross-verified submissions in sector',
-                          style: TextStyle(
-                              color: Color(0xFF64748B), fontSize: 11),
-                        ),
-                        trailing: IconButton(
-                          icon: AnimatedRotation(
-                            turns: _showCorroboratingList ? 0.5 : 0,
-                            duration: const Duration(milliseconds: 200),
-                            child: const Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Colors.white70,
-                            ),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _showCorroboratingList = !_showCorroboratingList;
-                            });
-                          },
-                        ),
-                      ),
-                      AnimatedCrossFade(
-                        firstChild: const SizedBox.shrink(),
-                        secondChild: Column(
-                          children: [
-                            const Divider(color: Color(0xFF1E293B), height: 1),
-                            _buildCitizenFeedbackTile(
-                                'Kamal Weerasinghe',
-                                'Water flowing into front garden. Power lines sparking.',
-                                '4 mins ago'),
-                            _buildCitizenFeedbackTile(
-                                'S. Jayawardena',
-                                'Road cut off from both sides. Need boat rescue.',
-                                '8 mins ago'),
-                            _buildCitizenFeedbackTile(
-                                'M. F. Farook',
-                                'Senior citizen stranded in ground floor room.',
-                                '11 mins ago'),
-                          ],
-                        ),
-                        crossFadeState: _showCorroboratingList
-                            ? CrossFadeState.showSecond
-                            : CrossFadeState.showFirst,
-                        duration: const Duration(milliseconds: 300),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Submitter Information
-                const Text(
-                  'REPORTER CREDENTIALS',
-                  style: TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF1E293B),
-                              const Color(0xFFFF6D00).withValues(alpha: 0.2),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.person, color: Color(0xFFFF6D00), size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              incident.reporterName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'Phone: ${incident.reporterPhone} • Tagged at ${incident.timeAgo}',
-                              style: const TextStyle(
-                                  color: Color(0xFF64748B), fontSize: 11),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00E676).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.phone,
-                              color: Color(0xFF00E676), size: 20),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Dialing reporter hotline: ${incident.reporterPhone}'),
-                                backgroundColor: const Color(0xFF1E293B),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Action Buttons (CRUD 2: Assign & Track Integration)
-                if (incident.assignedTeam != null) ...[
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00E676),
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 6,
-                      shadowColor: const Color(0xFF00E676).withValues(alpha: 0.4),
-                    ),
-                    icon: const Icon(Icons.gps_fixed_rounded, size: 20),
-                    label: Text(
-                      'TRACK ACTIVE SQUAD (${incident.assignedTeam!.name})',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => LiveTrackingScreen(incident: incident),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFFF6D00),
-                            side: const BorderSide(color: Color(0xFFFF6D00)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-                          label: const Text(
-                            'REASSIGN',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    AssignResponderScreen(incident: incident),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFEF4444),
-                            side: const BorderSide(color: Color(0xFFEF4444)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: const Icon(Icons.cancel_outlined, size: 18),
-                          label: const Text(
-                            'CANCEL',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onPressed: _showCancelDispatchDialog,
-                        ),
-                      ),
-                    ],
-                  ),
-                ] else ...[
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 6,
-                      shadowColor: const Color(0xFFFF6D00).withValues(alpha: 0.4),
-                    ),
-                    icon: const Icon(Icons.group_add_rounded, size: 20),
-                    label: const Text(
-                      'ASSIGN RESPONSE UNIT',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              AssignResponderScreen(incident: incident),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-
-                const SizedBox(height: 10),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.redAccent,
-                          side: const BorderSide(color: Colors.redAccent),
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        icon: const Icon(Icons.cell_tower, size: 16),
-                        label: const Text(
-                          'BROADCAST ALERT',
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                        onPressed: _showBroadcastDialog,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF00E676),
-                          side: const BorderSide(color: Color(0xFF00E676)),
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        icon: const Icon(Icons.check_circle_outline, size: 16),
-                        label: const Text(
-                          'RESOLVE INCIDENT',
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ResolveAnalysisScreen(incident: incident),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-              ],
+        child: SafeArea(
+          top: false,
+          child: ResponsiveBody(
+            maxWidth: 820,
+            shrinkHeight: true,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(pad, 10, pad, 10),
+              child: _actions(),
             ),
           ),
         ),
@@ -964,130 +201,161 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen>
     );
   }
 
-  // New: Assigned team info card with CRUD Update/Delete actions
-  Widget _buildAssignedTeamCard(IncidentReport incident) {
-    final team = incident.assignedTeam!;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF00E676).withValues(alpha: 0.08),
-            const Color(0xFF0F172A),
+  // ---------------------------------------------------------------------------
+  Widget _header(Color sev) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            C4Chip(label: incident.severityLabel, color: sev),
+            C4Chip(
+                label: incident.statusLabel,
+                color: C4.status(incident.status)),
+            if (incident.isVerified)
+              const C4Chip(
+                  label: 'VERIFIED', color: C4.green, icon: Icons.verified),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF00E676).withValues(alpha: 0.3),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) => Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF00E676),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF00E676).withValues(alpha: _pulseAnimation.value),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'ASSIGNED RESPONSE UNIT',
-                style: TextStyle(
-                  color: Color(0xFF00E676),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Text(
-                  team.callSign,
-                  style: const TextStyle(
-                    color: Color(0xFF38BDF8),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            team.name,
+        const SizedBox(height: 10),
+        Text(incident.title,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
+                color: C4.text, fontSize: 24, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            const Icon(Icons.place, size: 16, color: C4.accent),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(incident.location,
+                  style: const TextStyle(color: C4.muted, fontSize: 13)),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${team.leader} • Crew of ${team.crewCount} • ${team.radioChannel}',
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
-          ),
-          const SizedBox(height: 8),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text('Reported ${incident.timeAgo}',
+            style: const TextStyle(color: C4.muted, fontSize: 12)),
+      ],
+    );
+  }
+
+  /// Reported -> Dispatched -> On scene -> Resolved
+  Widget _timeline() {
+    const labels = ['Reported', 'Dispatched', 'On scene', 'Resolved'];
+    final current = IncidentStatus.values.indexOf(incident.status);
+    return C4Card(
+      child: Row(
+        children: [
+          for (var i = 0; i < labels.length; i++) ...[
+            Expanded(
+              child: Column(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOut,
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i <= current
+                          ? C4.status(IncidentStatus.values[i])
+                          : C4.surface,
+                      border: Border.all(
+                        color: i <= current ? Colors.transparent : C4.border,
+                      ),
+                    ),
+                    child: Icon(
+                      i < current ? Icons.check : Icons.circle,
+                      size: i < current ? 16 : 8,
+                      color: i <= current ? Colors.black87 : C4.border,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    labels[i],
+                    style: TextStyle(
+                      color: i <= current ? C4.text : C4.muted,
+                      fontSize: 10.5,
+                      fontWeight:
+                          i == current ? FontWeight.w800 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (i < labels.length - 1)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    height: 3,
+                    color: i < current ? C4.blue : C4.border,
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _infoGrid(double w) {
+    final tiles = <Widget>[
+      _info(Icons.water_rounded, 'WATER / CONDITION', incident.waterDepth),
+      _info(Icons.groups_2_outlined, 'CORROBORATING',
+          '${incident.corroboratingCount} report(s) nearby'),
+      _info(Icons.person_outline, 'REPORTER', incident.reporterName),
+      _info(Icons.my_location, 'COORDINATES',
+          '${incident.coordinates.latitude.toStringAsFixed(4)}, ${incident.coordinates.longitude.toStringAsFixed(4)}'),
+    ];
+    final cols = w >= 640 ? 2 : 1;
+    return LayoutBuilder(
+      builder: (context, cons) {
+        final itemW = (cons.maxWidth - (cols - 1) * 10) / cols;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [for (final t in tiles) SizedBox(width: itemW, child: t)],
+        );
+      },
+    );
+  }
+
+  Widget _info(IconData icon, String label, String value) {
+    return C4Card(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF070B14),
-              borderRadius: BorderRadius.circular(8),
+              color: C4.blue.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Row(
+            child: Icon(icon, size: 18, color: C4.blue),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: team.isEnRoute
-                        ? const Color(0xFFFFB020).withValues(alpha: 0.2)
-                        : const Color(0xFF00E676).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    team.status,
-                    style: TextStyle(
-                      color: team.isEnRoute ? const Color(0xFFFFB020) : const Color(0xFF00E676),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'ETA: ${team.eta} • ${team.distance}',
-                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
-                ),
-                const Spacer(),
-                const Icon(Icons.local_gas_station, color: Color(0xFF38BDF8), size: 13),
-                Text(
-                  ' ${team.fuelLevel}%',
-                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
-                ),
+                Text(label,
+                    style: const TextStyle(
+                        color: C4.muted,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8)),
+                const SizedBox(height: 2),
+                Text(value,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: C4.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -1096,61 +364,226 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen>
     );
   }
 
-  Color _getStatusColor(IncidentStatus status) {
-    switch (status) {
-      case IncidentStatus.incoming:
-        return const Color(0xFFFF6D00);
-      case IncidentStatus.dispatched:
-        return const Color(0xFF38BDF8);
-      case IncidentStatus.onScene:
-        return const Color(0xFF00E676);
-      case IncidentStatus.resolved:
-        return const Color(0xFF10B981);
-    }
-  }
-
-  Widget _buildCitizenFeedbackTile(
-      String author, String note, String timestamp) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+  Widget _description() {
+    return C4Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(Icons.person, color: Color(0xFF64748B), size: 14),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(author,
-                      style: const TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12)),
-                ],
-              ),
-              Text(timestamp,
-                  style:
-                      const TextStyle(color: Color(0xFF64748B), fontSize: 10)),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.only(left: 32),
-            child: Text(note,
-                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
+          const Text('FIELD REPORT',
+              style: TextStyle(
+                  color: C4.muted,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1)),
+          const SizedBox(height: 8),
+          Text(incident.description,
+              style: const TextStyle(color: C4.text, fontSize: 14, height: 1.5)),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _call,
+            icon: const Icon(Icons.call, size: 16),
+            label: const Text('Call reporter'),
           ),
         ],
       ),
     );
+  }
+
+  Widget _unitCard(EmergencyTeam t) {
+    return C4Card(
+      borderColor: C4.blue.withValues(alpha: 0.6),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: C4.blue.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child:
+                const Icon(Icons.local_shipping, color: C4.blue, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('ASSIGNED UNIT',
+                    style: TextStyle(
+                        color: C4.muted,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1)),
+                const SizedBox(height: 2),
+                Text(t.name,
+                    style: const TextStyle(
+                        color: C4.text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800)),
+                Text('${t.callSign} • ${t.vehicleType} • crew ${t.crewCount}',
+                    style: const TextStyle(color: C4.muted, fontSize: 12)),
+              ],
+            ),
+          ),
+          C4Chip(label: t.status, color: C4.blue),
+        ],
+      ),
+    );
+  }
+
+  Widget _notes() {
+    return C4Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('DISPATCH NOTES',
+              style: TextStyle(
+                  color: C4.muted,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1)),
+          const SizedBox(height: 6),
+          Text(incident.dispatchNotes!,
+              style: const TextStyle(color: C4.text, fontSize: 13, height: 1.4)),
+        ],
+      ),
+    );
+  }
+
+  Widget _resolution() {
+    return C4Card(
+      borderColor: C4.green,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.task_alt, color: C4.green, size: 18),
+            const SizedBox(width: 6),
+            Text(incident.resolutionType ?? 'Resolved',
+                style: const TextStyle(
+                    color: C4.green, fontWeight: FontWeight.w800)),
+            const Spacer(),
+            Text('${incident.evacuatedCount} evacuated',
+                style: const TextStyle(color: C4.muted, fontSize: 12)),
+          ]),
+          if ((incident.resolutionNotes ?? '').isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(incident.resolutionNotes!,
+                style: const TextStyle(color: C4.text, fontSize: 13)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  Widget _actions() {
+    final primaryStyle = FilledButton.styleFrom(
+      backgroundColor: C4.accent,
+      foregroundColor: Colors.white,
+      minimumSize: const Size.fromHeight(48),
+    );
+    final inc = incident;
+
+    Widget broadcast = OutlinedButton.icon(
+      onPressed: () => showBroadcastDialog(
+        context,
+        zone: inc.location,
+        title: 'IMMEDIATE EVACUATION: ${inc.title}',
+        message:
+            'High priority alert for all residents within 2 km of ${inc.location}.',
+        center: inc.coordinates,
+      ),
+      icon: const Icon(Icons.cell_tower, size: 18, color: Color(0xFFEF4444)),
+      label: const Text('Broadcast'),
+    );
+
+    switch (inc.status) {
+      case IncidentStatus.incoming:
+        return Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: FilledButton.icon(
+                style: primaryStyle,
+                icon: const Icon(Icons.local_shipping),
+                label: const Text('ASSIGN & DISPATCH'),
+                onPressed: () =>
+                    pushPage(context, AssignResponderScreen(incident: inc)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(flex: 2, child: broadcast),
+          ],
+        );
+      case IncidentStatus.dispatched:
+      case IncidentStatus.onScene:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: FilledButton.icon(
+                    style: primaryStyle,
+                    icon: const Icon(Icons.map),
+                    label: const Text('LIVE TRACKING'),
+                    onPressed: () =>
+                        pushPage(context, LiveTrackingScreen(incident: inc)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: C4.green,
+                      foregroundColor: Colors.black87,
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    icon: const Icon(Icons.task_alt),
+                    label: const Text('RESOLVE'),
+                    onPressed: () => pushPage(
+                        context, ResolveAnalysisScreen(incident: inc)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        pushPage(context, AssignResponderScreen(incident: inc)),
+                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    label: const Text('Reassign'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: broadcast),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.redAccent),
+                    onPressed: _cancelDispatch,
+                    icon: const Icon(Icons.close, size: 18),
+                    label: const Text('Cancel'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      case IncidentStatus.resolved:
+        return FilledButton.icon(
+          style: primaryStyle,
+          icon: const Icon(Icons.replay),
+          label: const Text('REOPEN INCIDENT'),
+          onPressed: () => _c.reopenIncident(inc),
+        );
+    }
   }
 }

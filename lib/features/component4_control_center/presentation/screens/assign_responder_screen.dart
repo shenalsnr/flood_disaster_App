@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import 'live_tracking_screen.dart';
+import '../widgets/c4_ui.dart';
 
 class AssignResponderScreen extends StatefulWidget {
   final IncidentReport incident;
@@ -160,7 +161,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     ),
                   ),
                   Text(
-                    '${_selectedTeam.name} is EN ROUTE to Incident #${widget.incident.id}',
+                    '${_selectedTeam.name} is EN ROUTE to Incident #${widget.incident.shortId}',
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
@@ -174,7 +175,9 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     // Navigate to Live Tracking Map
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => LiveTrackingScreen(incident: widget.incident),
+        builder: (_) => ResponsiveFrame(
+          child: LiveTrackingScreen(incident: widget.incident),
+        ),
       ),
     );
   }
@@ -1200,7 +1203,7 @@ class _DispatchConfirmationModalState
               children: [
                 _buildDossierRow(
                   'TARGET INCIDENT',
-                  '#${widget.incident.id} • ${widget.incident.title}',
+                  '#${widget.incident.shortId} • ${widget.incident.title}',
                   const Color(0xFFFF6D00),
                 ),
                 const Divider(color: Color(0xFF1E293B), height: 16),

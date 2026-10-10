@@ -131,7 +131,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Incident #${widget.incident.id} has been formally closed and marked resolved in National DMC database.',
+                'Incident #${widget.incident.shortId} has been formally closed and marked resolved in National DMC database.',
                 style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
               ),
               const SizedBox(height: 12),
@@ -270,7 +270,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                '#${incident.id}',
+                                '#${incident.shortId}',
                                 style: const TextStyle(
                                   color: Color(0xFF38BDF8),
                                   fontSize: 12,
