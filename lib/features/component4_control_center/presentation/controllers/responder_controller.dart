@@ -145,8 +145,9 @@ class ResponderController extends ChangeNotifier {
     isVerified: false,
   );
 
-  List<IncidentReport> get _active =>
-      _all.where((i) => !i.archived && i.status != IncidentStatus.resolved).toList();
+  List<IncidentReport> get _active => _all
+      .where((i) => !i.archived && i.status != IncidentStatus.resolved)
+      .toList();
 
   /// All open incidents, auto-ranked by severity (FR10).
   List<IncidentReport> get incidents {
@@ -162,8 +163,11 @@ class ResponderController extends ChangeNotifier {
     final list = _all
         .where((i) => !i.archived && i.status == IncidentStatus.resolved)
         .toList();
-    list.sort((a, b) => (b.createdAt ?? DateTime(2000))
-        .compareTo(a.createdAt ?? DateTime(2000)));
+    list.sort(
+      (a, b) => (b.createdAt ?? DateTime(2000)).compareTo(
+        a.createdAt ?? DateTime(2000),
+      ),
+    );
     return List.unmodifiable(list);
   }
 
@@ -182,7 +186,9 @@ class ResponderController extends ChangeNotifier {
     final sa = a.status == IncidentStatus.incoming ? 0 : 1;
     final sb = b.status == IncidentStatus.incoming ? 0 : 1;
     if (sa != sb) return sa.compareTo(sb);
-    return (b.createdAt ?? DateTime(2000)).compareTo(a.createdAt ?? DateTime(2000));
+    return (b.createdAt ?? DateTime(2000)).compareTo(
+      a.createdAt ?? DateTime(2000),
+    );
   }
 
   List<IncidentReport> get filteredIncidents {
@@ -235,7 +241,8 @@ class ResponderController extends ChangeNotifier {
         _all.add(fresh);
       } else {
         final old = _all[idx];
-        final sameCore = old.severity == fresh.severity &&
+        final sameCore =
+            old.severity == fresh.severity &&
             old.location == fresh.location &&
             old.description == fresh.description &&
             old.hazardType == fresh.hazardType &&
@@ -629,7 +636,9 @@ class ResponderController extends ChangeNotifier {
   // Dispatch operations (write to hazard_reports + responseUnits)
   // ---------------------------------------------------------------------------
   Future<void> _writeIncident(
-      IncidentReport incident, Map<String, dynamic> data) async {
+    IncidentReport incident,
+    Map<String, dynamic> data,
+  ) async {
     if (incident.isPlaceholder) return;
     try {
       await _reports.doc(incident.id).set({
@@ -751,8 +760,8 @@ class ResponderController extends ChangeNotifier {
     if (priority != null) incident.priorityLevel = priority;
     notifyListeners();
     _writeIncident(incident, {
-      if (notes != null) 'dispatchNotes': notes,
-      if (priority != null) 'priorityLevel': priority,
+      'dispatchNotes': ?notes,
+      'priorityLevel': ?priority,
     });
   }
 

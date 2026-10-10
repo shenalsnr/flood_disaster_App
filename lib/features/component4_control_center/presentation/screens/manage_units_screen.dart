@@ -47,10 +47,12 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
   }
 
   void _snack(String m, {bool error = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(m),
-      backgroundColor: error ? Colors.orange : const Color(0xFF10B981),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(m),
+        backgroundColor: error ? Colors.orange : const Color(0xFF10B981),
+      ),
+    );
   }
 
   Future<void> _openForm([EmergencyTeam? existing]) async {
@@ -59,55 +61,61 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
     final callSign = TextEditingController(text: existing?.callSign ?? '');
     final vehicle = TextEditingController(text: existing?.vehicleType ?? '');
     final leader = TextEditingController(text: existing?.leader ?? '');
-    final crew =
-        TextEditingController(text: '${existing?.crewCount ?? 4}');
+    final crew = TextEditingController(text: '${existing?.crewCount ?? 4}');
     final phone = TextEditingController(text: existing?.phoneNumber ?? '');
     final radio = TextEditingController(text: existing?.radioChannel ?? '');
     final equipment = TextEditingController(text: existing?.equipment ?? '');
     final lat = TextEditingController(
-        text: (existing?.location.latitude ?? 6.9271).toString());
+      text: (existing?.location.latitude ?? 6.9271).toString(),
+    );
     final lng = TextEditingController(
-        text: (existing?.location.longitude ?? 79.8612).toString());
+      text: (existing?.location.longitude ?? 79.8612).toString(),
+    );
     final eta = TextEditingController(text: '${existing?.etaMinutes ?? 10}');
     String status = existing?.status ?? 'AVAILABLE';
     final formKey = GlobalKey<FormState>();
 
     InputDecoration deco(String l) => InputDecoration(
-          labelText: l,
-          labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-          filled: true,
-          fillColor: const Color(0xFF0F172A),
-          isDense: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF334155)),
-          ),
-        );
+      labelText: l,
+      labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+      filled: true,
+      fillColor: const Color(0xFF0F172A),
+      isDense: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFF334155)),
+      ),
+    );
 
-    Widget field(TextEditingController c, String l,
-            {bool number = false, bool required = false}) =>
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: TextFormField(
-            controller: c,
-            keyboardType: number
-                ? const TextInputType.numberWithOptions(decimal: true, signed: true)
-                : TextInputType.text,
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-            decoration: deco(l),
-            validator: required
-                ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
-                : null,
-          ),
-        );
+    Widget field(
+      TextEditingController c,
+      String l, {
+      bool number = false,
+      bool required = false,
+    }) => Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextFormField(
+        controller: c,
+        keyboardType: number
+            ? const TextInputType.numberWithOptions(decimal: true, signed: true)
+            : TextInputType.text,
+        style: const TextStyle(color: Colors.white, fontSize: 13),
+        decoration: deco(l),
+        validator: required
+            ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
+            : null,
+      ),
+    );
 
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
-          title: Text(isEdit ? 'Edit response unit' : 'Add response unit',
-              style: const TextStyle(color: Colors.white, fontSize: 16)),
+          title: Text(
+            isEdit ? 'Edit response unit' : 'Add response unit',
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
           content: SizedBox(
             width: 400,
             child: Form(
@@ -117,27 +125,42 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     field(name, 'Unit name', required: true),
-                    field(callSign, 'Call sign (e.g. ALPHA-01)', required: true),
+                    field(
+                      callSign,
+                      'Call sign (e.g. ALPHA-01)',
+                      required: true,
+                    ),
                     field(vehicle, 'Vehicle type'),
                     field(leader, 'Team leader'),
                     field(crew, 'Crew count', number: true),
                     field(phone, 'Phone'),
                     field(radio, 'Radio channel'),
                     field(equipment, 'Equipment'),
-                    Row(children: [
-                      Expanded(child: field(lat, 'Latitude', number: true)),
-                      const SizedBox(width: 8),
-                      Expanded(child: field(lng, 'Longitude', number: true)),
-                    ]),
+                    Row(
+                      children: [
+                        Expanded(child: field(lat, 'Latitude', number: true)),
+                        const SizedBox(width: 8),
+                        Expanded(child: field(lng, 'Longitude', number: true)),
+                      ],
+                    ),
                     field(eta, 'ETA (minutes)', number: true),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       dropdownColor: const Color(0xFF1E293B),
                       decoration: deco('Status'),
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      items: const ['AVAILABLE', 'EN ROUTE', 'ON SCENE', 'OFF DUTY']
-                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                          .toList(),
+                      items:
+                          const [
+                                'AVAILABLE',
+                                'EN ROUTE',
+                                'ON SCENE',
+                                'OFF DUTY',
+                              ]
+                              .map(
+                                (s) =>
+                                    DropdownMenuItem(value: s, child: Text(s)),
+                              )
+                              .toList(),
                       onChanged: (v) => setS(() => status = v ?? status),
                     ),
                   ],
@@ -148,8 +171,10 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCEL',
-                  style: TextStyle(color: Colors.white54)),
+              child: const Text(
+                'CANCEL',
+                style: TextStyle(color: Colors.white54),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -207,14 +232,19 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E293B),
-        title: const Text('Delete unit?',
-            style: TextStyle(color: Colors.white)),
-        content: Text('${t.name} (${t.callSign}) will be removed permanently.',
-            style: const TextStyle(color: Color(0xFFCBD5E1))),
+        title: const Text(
+          'Delete unit?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          '${t.name} (${t.callSign}) will be removed permanently.',
+          style: const TextStyle(color: Color(0xFFCBD5E1)),
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCEL')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('CANCEL'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () => Navigator.pop(ctx, true),
@@ -244,8 +274,10 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B132B),
         foregroundColor: Colors.white,
-        title: const Text('Response Units',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+        title: const Text(
+          'Response Units',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFFFF6D00),
@@ -256,12 +288,18 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       ),
       body: units.isEmpty
           ? const Center(
-              child: Text('No response units yet.',
-                  style: TextStyle(color: Colors.white54)))
+              child: Text(
+                'No response units yet.',
+                style: TextStyle(color: Colors.white54),
+              ),
+            )
           : GridView.builder(
               padding: EdgeInsets.fromLTRB(
-                  Responsive.pad(MediaQuery.sizeOf(context).width), 16,
-                  Responsive.pad(MediaQuery.sizeOf(context).width), 96),
+                Responsive.pad(MediaQuery.sizeOf(context).width),
+                16,
+                Responsive.pad(MediaQuery.sizeOf(context).width),
+                96,
+              ),
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 520,
                 mainAxisExtent: 150,
@@ -276,75 +314,98 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                   key: ValueKey(t.id),
                   index: i,
                   child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF334155)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.local_shipping_outlined,
+                            color: color,
+                          ),
                         ),
-                        child: Icon(Icons.local_shipping_outlined, color: color),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(t.name,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.name,
                                 style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14)),
-                            const SizedBox(height: 2),
-                            Text(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
                                 '${t.callSign} • ${t.vehicleType} • crew ${t.crewCount}',
                                 style: const TextStyle(
-                                    color: Color(0xFF94A3B8), fontSize: 11)),
-                            if (t.leader.isNotEmpty)
-                              Text('Leader: ${t.leader}',
-                                  style: const TextStyle(
-                                      color: Color(0xFF94A3B8), fontSize: 11)),
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
+                                  color: Color(0xFF94A3B8),
+                                  fontSize: 11,
+                                ),
                               ),
-                              child: Text(t.status,
+                              if (t.leader.isNotEmpty)
+                                Text(
+                                  'Leader: ${t.leader}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  t.status,
                                   style: TextStyle(
-                                      color: color,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ],
+                                    color: color,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        tooltip: 'Edit',
-                        icon: const Icon(Icons.edit_outlined,
-                            color: Color(0xFF38BDF8)),
-                        onPressed: () => _openForm(t),
-                      ),
-                      IconButton(
-                        tooltip: 'Delete',
-                        icon: const Icon(Icons.delete_outline,
-                            color: Colors.redAccent),
-                        onPressed: () => _confirmDelete(t),
-                      ),
-                    ],
+                        IconButton(
+                          tooltip: 'Edit',
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: Color(0xFF38BDF8),
+                          ),
+                          onPressed: () => _openForm(t),
+                        ),
+                        IconButton(
+                          tooltip: 'Delete',
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.redAccent,
+                          ),
+                          onPressed: () => _confirmDelete(t),
+                        ),
+                      ],
+                    ),
                   ),
-                ));
+                );
               },
             ),
     );
