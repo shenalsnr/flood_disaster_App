@@ -454,18 +454,24 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Text(
-                  'Live Tracking Map',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                const Flexible(
+                  child: Text(
+                    'Live Tracking Map',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
               ],
             ),
             Text(
               '${team.name} ➔ Incident #${widget.incident.id}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
             ),
           ],
@@ -995,7 +1001,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
             children: [
               const Icon(Icons.radio_rounded, color: Color(0xFF38BDF8), size: 24),
               const SizedBox(width: 10),
-              Column(
+              Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -1012,8 +1018,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                         const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
                   ),
                 ],
-              ),
-              const Spacer(),
+              )),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -1551,7 +1557,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             const SizedBox(height: 8),
 
             SizedBox(
-              height: 240,
+              height: (MediaQuery.sizeOf(context).height * 0.32).clamp(140.0, 240.0),
               child: ListView(
                 children: widget.availableTeams
                     .where((t) => t.id != widget.currentTeam.id)

@@ -154,12 +154,15 @@ class _BatterySavingNavScreenState extends State<BatterySavingNavScreen>
             // ── Directional Arrow ──────────────────────────────────────────
             Expanded(
               child: Center(
-                child: ScaleTransition(
-                  scale: _arrowPulse,
-                  child: AnimatedBuilder(
-                    animation: _arrowRotate,
-                    builder: (_, _) => _DirectionalArrow(
-                      bearingRadians: _arrowRotate.value,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: ScaleTransition(
+                    scale: _arrowPulse,
+                    child: AnimatedBuilder(
+                      animation: _arrowRotate,
+                      builder: (_, _) => _DirectionalArrow(
+                        bearingRadians: _arrowRotate.value,
+                      ),
                     ),
                   ),
                 ),

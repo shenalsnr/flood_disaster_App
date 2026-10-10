@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'core/responsive/screen_fit.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/notification_service.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
@@ -39,6 +40,7 @@ class WeSafeApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'WeSafe — Flood Relief & Early Warning',
       theme: AppTheme.dark,
+      builder: ScreenFit.appBuilder,
       home: const SplashScreen(),
     );
   }
