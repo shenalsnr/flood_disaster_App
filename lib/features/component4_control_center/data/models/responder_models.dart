@@ -76,6 +76,48 @@ class EmergencyTeam {
     this.fuelLevel = 94,
   });
 
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'status': status,
+        'distance': distance,
+        'eta': eta,
+        'etaMinutes': etaMinutes,
+        'equipment': equipment,
+        'crewCount': crewCount,
+        'leader': leader,
+        'radioChannel': radioChannel,
+        'lat': location.latitude,
+        'lng': location.longitude,
+        'speedKmh': speedKmh,
+        'vehicleType': vehicleType,
+        'callSign': callSign,
+        'phoneNumber': phoneNumber,
+        'fuelLevel': fuelLevel,
+      };
+
+  factory EmergencyTeam.fromMap(String id, Map<String, dynamic> m) {
+    double d(dynamic v, double f) => v is num ? v.toDouble() : f;
+    int i(dynamic v, int f) => v is num ? v.toInt() : f;
+    return EmergencyTeam(
+      id: id,
+      name: m['name'] as String? ?? id,
+      status: m['status'] as String? ?? 'AVAILABLE',
+      distance: m['distance'] as String? ?? '-',
+      eta: m['eta'] as String? ?? '-',
+      etaMinutes: i(m['etaMinutes'], 10),
+      equipment: m['equipment'] as String? ?? '',
+      crewCount: i(m['crewCount'], 1),
+      leader: m['leader'] as String? ?? '',
+      radioChannel: m['radioChannel'] as String? ?? '',
+      location: LatLng(d(m['lat'], 6.9271), d(m['lng'], 79.8612)),
+      speedKmh: d(m['speedKmh'], 24.0),
+      vehicleType: m['vehicleType'] as String? ?? 'Rescue Vehicle',
+      callSign: m['callSign'] as String? ?? id,
+      phoneNumber: m['phoneNumber'] as String? ?? '',
+      fuelLevel: i(m['fuelLevel'], 100),
+    );
+  }
+
   bool get isAvailable => status == 'AVAILABLE';
   bool get isEnRoute => status == 'EN ROUTE';
   bool get isOnScene => status == 'ON SCENE';
@@ -132,7 +174,12 @@ class IncidentReport {
   final String reporterName;
   final String reporterPhone;
   final bool isVerified;
-  final String timeAgo;
+  final String _timeAgo;
+  final String? localId;
+  final String reporterEmail;
+  final String? photoUrl;
+  DateTime? createdAt;
+  bool archived;
   IncidentStatus status;
   EmergencyTeam? assignedTeam;
   String? resolutionNotes;
@@ -156,7 +203,12 @@ class IncidentReport {
     required this.reporterName,
     required this.reporterPhone,
     required this.isVerified,
-    required this.timeAgo,
+    String timeAgo = '',
+    this.localId,
+    this.reporterEmail = '',
+    this.photoUrl,
+    this.createdAt,
+    this.archived = false,
     this.status = IncidentStatus.incoming,
     this.assignedTeam,
     this.resolutionNotes,
@@ -166,7 +218,41 @@ class IncidentReport {
     this.priorityLevel,
     this.cancellationReason,
     this.dispatchedAt,
-  });
+  }) : _timeAgo = timeAgo;
+
+  /// Short readable id for UI (report code if present, else trimmed doc id).
+  String get shortId {
+    final l = localId;
+    if (l != null && l.isNotEmpty) return l;
+    return id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+  }
+
+  bool get isPlaceholder => id == 'NONE';
+
+  /// Live "x mins ago" text computed from [createdAt] (falls back to text).
+  String get timeAgo {
+    final c = createdAt;
+    if (c == null) return _timeAgo.isEmpty ? 'Just now' : _timeAgo;
+    final diff = DateTime.now().difference(c);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} Mins Ago';
+    if (diff.inHours < 24) return '${diff.inHours} Hrs Ago';
+    return '${diff.inDays} Days Ago';
+  }
+
+  /// Sort weight: lower = more urgent (FR10).
+  int get severityRank {
+    switch (severity) {
+      case IncidentSeverity.critical:
+        return 0;
+      case IncidentSeverity.high:
+        return 1;
+      case IncidentSeverity.medium:
+        return 2;
+      case IncidentSeverity.low:
+        return 3;
+    }
+  }
 
   String get severityLabel {
     switch (severity) {

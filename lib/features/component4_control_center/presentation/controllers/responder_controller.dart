@@ -1,16 +1,32 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
+
 import '../../data/models/responder_models.dart';
 
+/// Component 4 controller.
+///
+/// Public API is unchanged for the screens, but everything is now backed by
+/// Firestore instead of mock data:
+///
+///  * `hazard_reports`  (written by Component 2)  -> incident queue (READ)
+///        + dispatch fields written back by the dispatcher (UPDATE):
+///          dispatchStatus, assignedUnitId, assignedUnitName, dispatchNotes,
+///          priorityLevel, dispatchedAt, cancellationReason, resolutionType,
+///          resolutionNotes, evacuatedCount, resolvedAt, archived
+///        Component 2's own `status` field is never touched.
+///  * `responseUnits`   -> rescue units (full CRUD)
+///  * `warnings`        -> zone broadcasts to citizens (full CRUD)
 class ResponderController extends ChangeNotifier {
   static final ResponderController _instance = ResponderController._internal();
   factory ResponderController() => _instance;
+  ResponderController._internal();
 
-  ResponderController._internal() {
-    _initMockData();
-  }
-
-  // Active Logged-in User
+  // ---------------------------------------------------------------------------
+  // Logged-in user
+  // ---------------------------------------------------------------------------
   UserProfile? _currentUser = const UserProfile(
     uid: 'n.perera@dispatched.gov.lk',
     fullName: 'Nadeeka Perera',
@@ -35,15 +51,15 @@ class ResponderController extends ChangeNotifier {
     }
   }
 
-  // Active filter for triage list
+  // ---------------------------------------------------------------------------
+  // UI state
+  // ---------------------------------------------------------------------------
   String _selectedSeverityFilter = 'ALL';
   String get selectedSeverityFilter => _selectedSeverityFilter;
 
-  // Selected Incident for details/actions
   IncidentReport? _activeIncident;
   IncidentReport? get activeIncident => _activeIncident;
 
-  // Duty status
   bool _isOnDuty = true;
   bool get isOnDuty => _isOnDuty;
 
@@ -52,13 +68,370 @@ class ResponderController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // List of incidents
-  final List<IncidentReport> _incidents = [];
-  List<IncidentReport> get incidents => List.unmodifiable(_incidents);
+  void setFilter(String filter) {
+    _selectedSeverityFilter = filter;
+    notifyListeners();
+  }
 
-  // Available Teams (Mutable list so status updates dynamically)
-  final List<EmergencyTeam> _teams = [
-    const EmergencyTeam(
+  void setActiveIncident(IncidentReport incident) {
+    _activeIncident = incident;
+    notifyListeners();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Firestore wiring (lazy: starts the first time data is requested)
+  // ---------------------------------------------------------------------------
+  bool _started = false;
+  bool _liveOk = false;
+  String? _syncError;
+  bool get isLive => _liveOk;
+  String? get syncError => _syncError;
+
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _repSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _unitSub;
+
+  CollectionReference<Map<String, dynamic>> get _reports =>
+      FirebaseFirestore.instance.collection('hazard_reports');
+  CollectionReference<Map<String, dynamic>> get _units =>
+      FirebaseFirestore.instance.collection('responseUnits');
+  CollectionReference<Map<String, dynamic>> get _warnings =>
+      FirebaseFirestore.instance.collection('warnings');
+
+  void _ensureStarted() {
+    if (_started) return;
+    _started = true;
+    try {
+      _unitSub = _units.snapshots().listen(_onUnits, onError: _onErr);
+      _repSub = _reports.snapshots().listen(_onReports, onError: _onErr);
+    } catch (e) {
+      _onErr(e);
+    }
+  }
+
+  /// Call after sign-out so the next login starts fresh streams.
+  Future<void> stopSync() async {
+    await _repSub?.cancel();
+    await _unitSub?.cancel();
+    _repSub = null;
+    _unitSub = null;
+    _started = false;
+    _liveOk = false;
+  }
+
+  void _onErr(Object e) {
+    _syncError = e.toString();
+    _liveOk = false;
+    debugPrint('[ResponderController] Firestore error: $e');
+    notifyListeners();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Incidents
+  // ---------------------------------------------------------------------------
+  final List<IncidentReport> _all = [];
+
+  static final IncidentReport _placeholder = IncidentReport(
+    id: 'NONE',
+    title: 'No active incidents',
+    hazardType: 'None',
+    severity: IncidentSeverity.low,
+    location: 'Waiting for new field reports...',
+    coordinates: const LatLng(6.9271, 79.8612),
+    waterDepth: 'N/A',
+    description: 'No incident reports are available right now.',
+    corroboratingCount: 0,
+    reporterName: '-',
+    reporterPhone: '',
+    isVerified: false,
+  );
+
+  List<IncidentReport> get _active =>
+      _all.where((i) => !i.archived && i.status != IncidentStatus.resolved).toList();
+
+  /// All open incidents, auto-ranked by severity (FR10).
+  List<IncidentReport> get incidents {
+    _ensureStarted();
+    final list = _active;
+    list.sort(_compareIncidents);
+    return List.unmodifiable(list);
+  }
+
+  /// Resolved but not archived (history list).
+  List<IncidentReport> get resolvedIncidents {
+    _ensureStarted();
+    final list = _all
+        .where((i) => !i.archived && i.status == IncidentStatus.resolved)
+        .toList();
+    list.sort((a, b) => (b.createdAt ?? DateTime(2000))
+        .compareTo(a.createdAt ?? DateTime(2000)));
+    return List.unmodifiable(list);
+  }
+
+  /// Incident to show when a screen needs "the current one". Never throws,
+  /// returns a placeholder when the queue is empty.
+  IncidentReport get focusIncident {
+    final a = _activeIncident;
+    if (a != null && !a.archived) return a;
+    final list = incidents;
+    return list.isEmpty ? _placeholder : list.first;
+  }
+
+  static int _compareIncidents(IncidentReport a, IncidentReport b) {
+    final r = a.severityRank.compareTo(b.severityRank);
+    if (r != 0) return r;
+    final sa = a.status == IncidentStatus.incoming ? 0 : 1;
+    final sb = b.status == IncidentStatus.incoming ? 0 : 1;
+    if (sa != sb) return sa.compareTo(sb);
+    return (b.createdAt ?? DateTime(2000)).compareTo(a.createdAt ?? DateTime(2000));
+  }
+
+  List<IncidentReport> get filteredIncidents {
+    final all = incidents;
+    if (_selectedSeverityFilter == 'ALL') return all;
+    return all.where((i) {
+      switch (_selectedSeverityFilter) {
+        case 'CRITICAL':
+          return i.severity == IncidentSeverity.critical;
+        case 'HIGH':
+          return i.severity == IncidentSeverity.high;
+        case 'MED':
+          return i.severity == IncidentSeverity.medium;
+        case 'LOW':
+          return i.severity == IncidentSeverity.low;
+      }
+      return true;
+    }).toList();
+  }
+
+  int countFor(String filter) {
+    final all = incidents;
+    switch (filter) {
+      case 'ALL':
+        return all.length;
+      case 'CRITICAL':
+        return all.where((i) => i.severity == IncidentSeverity.critical).length;
+      case 'HIGH':
+        return all.where((i) => i.severity == IncidentSeverity.high).length;
+      case 'MED':
+        return all.where((i) => i.severity == IncidentSeverity.medium).length;
+      case 'LOW':
+        return all.where((i) => i.severity == IncidentSeverity.low).length;
+    }
+    return 0;
+  }
+
+  // --- snapshot -> model ------------------------------------------------------
+
+  void _onReports(QuerySnapshot<Map<String, dynamic>> snap) {
+    _liveOk = true;
+    _syncError = null;
+
+    final seen = <String>{};
+    for (final doc in snap.docs) {
+      final fresh = _fromDoc(doc.id, doc.data());
+      seen.add(doc.id);
+      final idx = _all.indexWhere((i) => i.id == doc.id);
+      if (idx == -1) {
+        _all.add(fresh);
+      } else {
+        final old = _all[idx];
+        final sameCore = old.severity == fresh.severity &&
+            old.location == fresh.location &&
+            old.description == fresh.description &&
+            old.hazardType == fresh.hazardType &&
+            old.photoUrl == fresh.photoUrl;
+        if (sameCore) {
+          // Keep the same object so open screens stay in sync.
+          _copyMutable(fresh, old);
+        } else {
+          _all[idx] = fresh;
+          if (_activeIncident?.id == fresh.id) _activeIncident = fresh;
+        }
+      }
+    }
+    _all.removeWhere((i) => !seen.contains(i.id));
+    if (_activeIncident != null && !seen.contains(_activeIncident!.id)) {
+      _activeIncident = null;
+    }
+    _computeCorroboration();
+    notifyListeners();
+  }
+
+  void _copyMutable(IncidentReport from, IncidentReport to) {
+    to.status = from.status;
+    to.assignedTeam = from.assignedTeam;
+    to.resolutionNotes = from.resolutionNotes;
+    to.resolutionType = from.resolutionType;
+    to.evacuatedCount = from.evacuatedCount;
+    to.dispatchNotes = from.dispatchNotes;
+    to.priorityLevel = from.priorityLevel;
+    to.cancellationReason = from.cancellationReason;
+    to.dispatchedAt = from.dispatchedAt;
+    to.archived = from.archived;
+    to.createdAt = from.createdAt;
+  }
+
+  IncidentSeverity _parseSeverity(String raw) {
+    final u = raw.toUpperCase();
+    if (u.contains('CRITICAL')) return IncidentSeverity.critical;
+    if (u.contains('HIGH')) return IncidentSeverity.high;
+    if (u.contains('MED') || u.contains('MODERATE')) {
+      return IncidentSeverity.medium;
+    }
+    if (u.contains('LOW')) return IncidentSeverity.low;
+    return IncidentSeverity.medium;
+  }
+
+  IncidentStatus _parseStatus(String? raw) {
+    switch (raw) {
+      case 'dispatched':
+        return IncidentStatus.dispatched;
+      case 'onScene':
+        return IncidentStatus.onScene;
+      case 'resolved':
+        return IncidentStatus.resolved;
+      default:
+        return IncidentStatus.incoming;
+    }
+  }
+
+  String _statusKey(IncidentStatus s) {
+    switch (s) {
+      case IncidentStatus.incoming:
+        return 'incoming';
+      case IncidentStatus.dispatched:
+        return 'dispatched';
+      case IncidentStatus.onScene:
+        return 'onScene';
+      case IncidentStatus.resolved:
+        return 'resolved';
+    }
+  }
+
+  DateTime? _toDate(dynamic v) {
+    if (v is Timestamp) return v.toDate();
+    if (v is String) return DateTime.tryParse(v);
+    return null;
+  }
+
+  IncidentReport _fromDoc(String id, Map<String, dynamic> d) {
+    final hazard = (d['hazardType'] as String?) ?? 'Hazard';
+    final location = (d['location'] as String?) ?? 'Unknown location';
+    final lat = (d['latitude'] as num?)?.toDouble() ?? 6.9271;
+    final lng = (d['longitude'] as num?)?.toDouble() ?? 79.8612;
+    final depth = d['waterDepth'];
+    final photo = (d['photoUrl'] as String?);
+
+    final unitId = d['assignedUnitId'] as String?;
+    EmergencyTeam? team;
+    if (unitId != null && unitId.isNotEmpty) {
+      final i = _teams.indexWhere((t) => t.id == unitId);
+      if (i != -1) {
+        team = _teams[i];
+      } else {
+        team = EmergencyTeam(
+          id: unitId,
+          name: (d['assignedUnitName'] as String?) ?? unitId,
+          status: 'EN ROUTE',
+          distance: '-',
+          eta: '-',
+          equipment: '',
+          crewCount: 1,
+          leader: '',
+          radioChannel: '',
+          location: LatLng(lat, lng),
+        );
+      }
+    }
+
+    return IncidentReport(
+      id: id,
+      localId: d['localId'] as String?,
+      title: '$hazard Report',
+      hazardType: hazard,
+      severity: _parseSeverity((d['severity'] as String?) ?? ''),
+      location: location,
+      coordinates: LatLng(lat, lng),
+      waterDepth: depth is num ? '${depth}m reported' : 'Not reported',
+      description: (d['description'] as String?)?.trim().isNotEmpty == true
+          ? d['description'] as String
+          : 'No description provided by the reporter.',
+      corroboratingCount: 1,
+      reporterName: (d['reporterName'] as String?) ?? 'Volunteer',
+      reporterPhone: (d['reporterPhone'] as String?) ?? '',
+      reporterEmail: (d['reporterEmail'] as String?) ?? '',
+      isVerified: (d['isVerified'] as bool?) ?? false,
+      photoUrl: (photo != null && photo.startsWith('http')) ? photo : null,
+      createdAt: _toDate(d['timestamp']),
+      archived: (d['archived'] as bool?) ?? false,
+      status: _parseStatus(d['dispatchStatus'] as String?),
+      assignedTeam: team,
+      resolutionNotes: d['resolutionNotes'] as String?,
+      resolutionType: d['resolutionType'] as String?,
+      evacuatedCount: (d['evacuatedCount'] as num?)?.toInt() ?? 0,
+      dispatchNotes: d['dispatchNotes'] as String?,
+      priorityLevel: d['priorityLevel'] as String?,
+      cancellationReason: d['cancellationReason'] as String?,
+      dispatchedAt: _toDate(d['dispatchedAt']),
+    );
+  }
+
+  /// Corroborating count = this report + other reports of the same hazard
+  /// type within 1 km in the last 24 h (computed from real data).
+  void _computeCorroboration() {
+    const dist = Distance();
+    final now = DateTime.now();
+    for (var k = 0; k < _all.length; k++) {
+      final a = _all[k];
+      var n = 1;
+      for (final b in _all) {
+        if (identical(a, b) || b.archived) continue;
+        if (b.hazardType != a.hazardType) continue;
+        final t = b.createdAt;
+        if (t != null && now.difference(t).inHours > 24) continue;
+        if (dist.as(LengthUnit.Meter, a.coordinates, b.coordinates) <= 1000) {
+          n++;
+        }
+      }
+      if (n != a.corroboratingCount) {
+        _all[k] = IncidentReport(
+          id: a.id,
+          localId: a.localId,
+          title: a.title,
+          hazardType: a.hazardType,
+          severity: a.severity,
+          location: a.location,
+          coordinates: a.coordinates,
+          waterDepth: a.waterDepth,
+          description: a.description,
+          corroboratingCount: n,
+          reporterName: a.reporterName,
+          reporterPhone: a.reporterPhone,
+          reporterEmail: a.reporterEmail,
+          isVerified: a.isVerified,
+          photoUrl: a.photoUrl,
+          createdAt: a.createdAt,
+          archived: a.archived,
+          status: a.status,
+          assignedTeam: a.assignedTeam,
+          resolutionNotes: a.resolutionNotes,
+          resolutionType: a.resolutionType,
+          evacuatedCount: a.evacuatedCount,
+          dispatchNotes: a.dispatchNotes,
+          priorityLevel: a.priorityLevel,
+          cancellationReason: a.cancellationReason,
+          dispatchedAt: a.dispatchedAt,
+        );
+        if (_activeIncident?.id == a.id) _activeIncident = _all[k];
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Response units (CRUD)
+  // ---------------------------------------------------------------------------
+  static const List<EmergencyTeam> _defaultTeams = [
+    EmergencyTeam(
       id: 'TEAM-01',
       name: 'Colombo Rescue Squad A',
       status: 'AVAILABLE',
@@ -76,7 +449,7 @@ class ResponderController extends ChangeNotifier {
       phoneNumber: '+94 77 482 1029',
       fuelLevel: 96,
     ),
-    const EmergencyTeam(
+    EmergencyTeam(
       id: 'TEAM-02',
       name: 'Disaster Response Unit 02',
       status: 'AVAILABLE',
@@ -94,7 +467,7 @@ class ResponderController extends ChangeNotifier {
       phoneNumber: '+94 71 892 3344',
       fuelLevel: 88,
     ),
-    const EmergencyTeam(
+    EmergencyTeam(
       id: 'TEAM-03',
       name: 'Red Cross Auxiliary EMT Group',
       status: 'AVAILABLE',
@@ -112,7 +485,7 @@ class ResponderController extends ChangeNotifier {
       phoneNumber: '+94 76 345 6789',
       fuelLevel: 92,
     ),
-    const EmergencyTeam(
+    EmergencyTeam(
       id: 'TEAM-04',
       name: 'Kelani Basin Water Patrol',
       status: 'AVAILABLE',
@@ -130,19 +503,19 @@ class ResponderController extends ChangeNotifier {
       phoneNumber: '+94 70 987 6543',
       fuelLevel: 85,
     ),
-    const EmergencyTeam(
+    EmergencyTeam(
       id: 'TEAM-05',
       name: 'Colombo Fire Service Unit B',
-      status: 'ON MISSION',
+      status: 'AVAILABLE',
       distance: '0.8 km Away',
-      eta: 'In Mission',
-      etaMinutes: 99,
+      eta: '6 Mins',
+      etaMinutes: 6,
       equipment: 'High-Volume Drainage Pump Truck',
       crewCount: 5,
       leader: 'Station Officer Wickrama',
       radioChannel: 'VHF CH-02',
       location: LatLng(6.9290, 79.8580),
-      speedKmh: 0.0,
+      speedKmh: 30.0,
       vehicleType: 'Heavy Drainage Pump Truck',
       callSign: 'SIERRA-05',
       phoneNumber: '+94 11 242 2222',
@@ -150,10 +523,17 @@ class ResponderController extends ChangeNotifier {
     ),
   ];
 
-  List<EmergencyTeam> get teams => List.unmodifiable(_teams);
+  // Shown until the first Firestore snapshot arrives.
+  final List<EmergencyTeam> _teams = List.of(_defaultTeams);
+  bool _seeding = false;
 
-  // Teams sorted by ETA (Available first, then ascending etaMinutes)
+  List<EmergencyTeam> get teams {
+    _ensureStarted();
+    return List.unmodifiable(_teams);
+  }
+
   List<EmergencyTeam> get sortedTeamsByEta {
+    _ensureStarted();
     final list = List<EmergencyTeam>.from(_teams);
     list.sort((a, b) {
       if (a.isAvailable && !b.isAvailable) return -1;
@@ -163,111 +543,160 @@ class ResponderController extends ChangeNotifier {
     return list;
   }
 
-  void setFilter(String filter) {
-    _selectedSeverityFilter = filter;
+  void _onUnits(QuerySnapshot<Map<String, dynamic>> snap) {
+    if (snap.docs.isEmpty) {
+      _seedDefaultUnits();
+      return;
+    }
+    _teams
+      ..clear()
+      ..addAll(snap.docs.map((d) => EmergencyTeam.fromMap(d.id, d.data())));
+    // Re-link teams on already loaded incidents.
+    for (final i in _all) {
+      final t = i.assignedTeam;
+      if (t == null) continue;
+      final idx = _teams.indexWhere((x) => x.id == t.id);
+      if (idx != -1) i.assignedTeam = _teams[idx];
+    }
     notifyListeners();
   }
 
-  void setActiveIncident(IncidentReport incident) {
-    _activeIncident = incident;
-    notifyListeners();
+  Future<void> _seedDefaultUnits() async {
+    if (_seeding) return;
+    _seeding = true;
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      for (final t in _defaultTeams) {
+        batch.set(_units.doc(t.id), t.toMap());
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint('[ResponderController] seed units failed: $e');
+    } finally {
+      _seeding = false;
+    }
   }
 
-  List<IncidentReport> get filteredIncidents {
-    if (_selectedSeverityFilter == 'ALL') {
-      return _incidents;
-    }
-    return _incidents.where((i) {
-      if (_selectedSeverityFilter == 'CRITICAL') {
-        return i.severity == IncidentSeverity.critical;
-      }
-      if (_selectedSeverityFilter == 'HIGH') {
-        return i.severity == IncidentSeverity.high;
-      }
-      if (_selectedSeverityFilter == 'MED') {
-        return i.severity == IncidentSeverity.medium;
-      }
-      if (_selectedSeverityFilter == 'LOW') {
-        return i.severity == IncidentSeverity.low;
-      }
-      return true;
-    }).toList();
+  /// CREATE a response unit.
+  Future<void> addUnit(EmergencyTeam team) async {
+    final id = team.id.isEmpty
+        ? 'UNIT-${DateTime.now().millisecondsSinceEpoch}'
+        : team.id;
+    await _units.doc(id).set({
+      ...team.toMap(),
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 
-  int countFor(String filter) {
-    if (filter == 'ALL') return _incidents.length;
-    if (filter == 'CRITICAL') {
-      return _incidents
-          .where((i) => i.severity == IncidentSeverity.critical)
-          .length;
-    }
-    if (filter == 'HIGH') {
-      return _incidents
-          .where((i) => i.severity == IncidentSeverity.high)
-          .length;
-    }
-    if (filter == 'MED') {
-      return _incidents
-          .where((i) => i.severity == IncidentSeverity.medium)
-          .length;
-    }
-    if (filter == 'LOW') {
-      return _incidents
-          .where((i) => i.severity == IncidentSeverity.low)
-          .length;
-    }
-    return 0;
+  /// UPDATE a response unit's details.
+  Future<void> updateUnit(EmergencyTeam team) async {
+    await _units.doc(team.id).set({
+      ...team.toMap(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
-  // --- CRUD 2: DISPATCH OPERATIONS ---
+  /// DELETE a response unit. Returns an error message, or null on success.
+  Future<String?> deleteUnit(String id) async {
+    final idx = _teams.indexWhere((t) => t.id == id);
+    if (idx != -1 && !_teams[idx].isAvailable) {
+      return 'This unit is on a mission. Resolve or cancel its dispatch first.';
+    }
+    if (_teams.length <= 1) {
+      return 'At least one response unit must remain.';
+    }
+    await _units.doc(id).delete();
+    return null;
+  }
 
-  // CREATE: Assign squad to incident
+  Future<void> _setUnit(String id, Map<String, dynamic> data) async {
+    try {
+      await _units.doc(id).set({
+        ...data,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('[ResponderController] unit write failed: $e');
+    }
+  }
+
+  void _setLocalTeam(EmergencyTeam team) {
+    final i = _teams.indexWhere((t) => t.id == team.id);
+    if (i != -1) _teams[i] = team;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Dispatch operations (write to hazard_reports + responseUnits)
+  // ---------------------------------------------------------------------------
+  Future<void> _writeIncident(
+      IncidentReport incident, Map<String, dynamic> data) async {
+    if (incident.isPlaceholder) return;
+    try {
+      await _reports.doc(incident.id).set({
+        ...data,
+        'dispatchUpdatedAt': FieldValue.serverTimestamp(),
+        'dispatcherEmail': _currentUser?.email ?? '',
+      }, SetOptions(merge: true));
+    } catch (e) {
+      _onErr(e);
+    }
+  }
+
+  // CREATE: assign a unit to an incident
   void assignTeamToIncident(
     IncidentReport incident,
     EmergencyTeam team, {
     String? dispatchNotes,
     String? priority,
   }) {
-    final teamIndex = _teams.indexWhere((t) => t.id == team.id);
     final updatedTeam = team.copyWith(status: 'EN ROUTE');
-    if (teamIndex != -1) {
-      _teams[teamIndex] = updatedTeam;
-    }
+    _setLocalTeam(updatedTeam);
 
     incident.assignedTeam = updatedTeam;
     incident.status = IncidentStatus.dispatched;
     if (dispatchNotes != null) incident.dispatchNotes = dispatchNotes;
     if (priority != null) incident.priorityLevel = priority;
     incident.dispatchedAt = DateTime.now();
+    incident.cancellationReason = null;
 
     _activeIncident = incident;
     notifyListeners();
+
+    _writeIncident(incident, {
+      'dispatchStatus': _statusKey(IncidentStatus.dispatched),
+      'assignedUnitId': updatedTeam.id,
+      'assignedUnitName': updatedTeam.name,
+      'dispatchNotes': incident.dispatchNotes ?? '',
+      'priorityLevel': incident.priorityLevel ?? '',
+      'dispatchedAt': FieldValue.serverTimestamp(),
+      'cancellationReason': FieldValue.delete(),
+    });
+    _setUnit(updatedTeam.id, {
+      'status': 'EN ROUTE',
+      'assignedIncidentId': incident.id,
+    });
   }
 
-  // UPDATE: Reassign incident to a different team
+  // UPDATE: reassign incident to a different unit
   void reassignTeam({
     required IncidentReport incident,
     required EmergencyTeam newTeam,
     required String reason,
   }) {
-    // 1. Release previously assigned team back to AVAILABLE
-    if (incident.assignedTeam != null) {
-      final oldIndex =
-          _teams.indexWhere((t) => t.id == incident.assignedTeam!.id);
-      if (oldIndex != -1) {
-        _teams[oldIndex] = _teams[oldIndex].copyWith(status: 'AVAILABLE');
-      }
+    final old = incident.assignedTeam;
+    if (old != null) {
+      final released = old.copyWith(status: 'AVAILABLE');
+      _setLocalTeam(released);
+      _setUnit(old.id, {
+        'status': 'AVAILABLE',
+        'assignedIncidentId': FieldValue.delete(),
+      });
     }
 
-    // 2. Mark newly selected team as EN ROUTE
-    final newIndex = _teams.indexWhere((t) => t.id == newTeam.id);
-    final assignedNewTeam = newTeam.copyWith(status: 'EN ROUTE');
-    if (newIndex != -1) {
-      _teams[newIndex] = assignedNewTeam;
-    }
+    final assigned = newTeam.copyWith(status: 'EN ROUTE');
+    _setLocalTeam(assigned);
 
-    // 3. Update incident record
-    incident.assignedTeam = assignedNewTeam;
+    incident.assignedTeam = assigned;
     incident.status = IncidentStatus.dispatched;
     incident.dispatchNotes =
         '${incident.dispatchNotes ?? ""}\n[REASSIGNED]: $reason (Now: ${newTeam.name})'
@@ -275,31 +704,44 @@ class ResponderController extends ChangeNotifier {
 
     _activeIncident = incident;
     notifyListeners();
+
+    _writeIncident(incident, {
+      'dispatchStatus': _statusKey(IncidentStatus.dispatched),
+      'assignedUnitId': assigned.id,
+      'assignedUnitName': assigned.name,
+      'dispatchNotes': incident.dispatchNotes ?? '',
+    });
+    _setUnit(assigned.id, {
+      'status': 'EN ROUTE',
+      'assignedIncidentId': incident.id,
+    });
   }
 
-  // UPDATE: Change dispatch status (EN ROUTE <-> ON SCENE)
+  // UPDATE: EN ROUTE <-> ON SCENE
   void updateDispatchStatus(IncidentReport incident, String newStatus) {
-    if (incident.assignedTeam != null) {
-      final updatedTeam =
-          incident.assignedTeam!.copyWith(status: newStatus.toUpperCase());
+    final up = newStatus.toUpperCase();
+    final t = incident.assignedTeam;
+    if (t != null) {
+      final updatedTeam = t.copyWith(status: up);
       incident.assignedTeam = updatedTeam;
-
-      final index = _teams.indexWhere((t) => t.id == updatedTeam.id);
-      if (index != -1) {
-        _teams[index] = updatedTeam;
-      }
+      _setLocalTeam(updatedTeam);
+      _setUnit(updatedTeam.id, {'status': up});
     }
 
-    if (newStatus.toUpperCase() == 'ON SCENE') {
+    if (up == 'ON SCENE') {
       incident.status = IncidentStatus.onScene;
-    } else if (newStatus.toUpperCase() == 'EN ROUTE') {
+    } else if (up == 'EN ROUTE') {
       incident.status = IncidentStatus.dispatched;
     }
-
     notifyListeners();
+
+    _writeIncident(incident, {
+      'dispatchStatus': _statusKey(incident.status),
+      if (up == 'ON SCENE') 'onSceneAt': FieldValue.serverTimestamp(),
+    });
   }
 
-  // UPDATE: Change mission notes or priority
+  // UPDATE: notes / priority
   void updateDispatchDetails({
     required IncidentReport incident,
     String? notes,
@@ -308,48 +750,59 @@ class ResponderController extends ChangeNotifier {
     if (notes != null) incident.dispatchNotes = notes;
     if (priority != null) incident.priorityLevel = priority;
     notifyListeners();
+    _writeIncident(incident, {
+      if (notes != null) 'dispatchNotes': notes,
+      if (priority != null) 'priorityLevel': priority,
+    });
   }
 
-  // DELETE: Cancel active dispatch (team busy, wrong assignment, stand down)
+  // DELETE: cancel an active dispatch
   void cancelDispatch({
     required IncidentReport incident,
     required String cancellationReason,
   }) {
-    // 1. Set assigned team back to AVAILABLE
-    if (incident.assignedTeam != null) {
-      final teamIndex =
-          _teams.indexWhere((t) => t.id == incident.assignedTeam!.id);
-      if (teamIndex != -1) {
-        _teams[teamIndex] = _teams[teamIndex].copyWith(status: 'AVAILABLE');
-      }
+    final t = incident.assignedTeam;
+    if (t != null) {
+      _setLocalTeam(t.copyWith(status: 'AVAILABLE'));
+      _setUnit(t.id, {
+        'status': 'AVAILABLE',
+        'assignedIncidentId': FieldValue.delete(),
+      });
     }
 
-    // 2. Revert incident status back to incoming / pending triage
     incident.assignedTeam = null;
     incident.status = IncidentStatus.incoming;
     incident.cancellationReason = cancellationReason;
-
     notifyListeners();
+
+    _writeIncident(incident, {
+      'dispatchStatus': _statusKey(IncidentStatus.incoming),
+      'assignedUnitId': FieldValue.delete(),
+      'assignedUnitName': FieldValue.delete(),
+      'cancellationReason': cancellationReason,
+    });
   }
 
   void updateIncidentStatus(IncidentReport incident, IncidentStatus status) {
     incident.status = status;
     notifyListeners();
+    _writeIncident(incident, {'dispatchStatus': _statusKey(status)});
   }
 
+  // UPDATE: resolve (leaves the active queue, unit becomes available)
   void resolveIncident({
     required IncidentReport incident,
     required String resolutionType,
     required String notes,
     required int evacuatedCount,
   }) {
-    // Free team if assigned
-    if (incident.assignedTeam != null) {
-      final teamIndex =
-          _teams.indexWhere((t) => t.id == incident.assignedTeam!.id);
-      if (teamIndex != -1) {
-        _teams[teamIndex] = _teams[teamIndex].copyWith(status: 'AVAILABLE');
-      }
+    final t = incident.assignedTeam;
+    if (t != null) {
+      _setLocalTeam(t.copyWith(status: 'AVAILABLE'));
+      _setUnit(t.id, {
+        'status': 'AVAILABLE',
+        'assignedIncidentId': FieldValue.delete(),
+      });
     }
 
     incident.status = IncidentStatus.resolved;
@@ -357,143 +810,94 @@ class ResponderController extends ChangeNotifier {
     incident.resolutionNotes = notes;
     incident.evacuatedCount = evacuatedCount;
     notifyListeners();
+
+    _writeIncident(incident, {
+      'dispatchStatus': _statusKey(IncidentStatus.resolved),
+      'resolutionType': resolutionType,
+      'resolutionNotes': notes,
+      'evacuatedCount': evacuatedCount,
+      'resolvedAt': FieldValue.serverTimestamp(),
+    });
   }
 
-  void broadcastZoneAlert({
+  // UPDATE: reopen a resolved incident
+  void reopenIncident(IncidentReport incident) {
+    incident.status = IncidentStatus.incoming;
+    incident.assignedTeam = null;
+    notifyListeners();
+    _writeIncident(incident, {
+      'dispatchStatus': _statusKey(IncidentStatus.incoming),
+      'assignedUnitId': FieldValue.delete(),
+      'assignedUnitName': FieldValue.delete(),
+      'resolvedAt': FieldValue.delete(),
+    });
+  }
+
+  // DELETE (soft): remove from the dispatcher's lists. The volunteer's report
+  // itself is kept (Component 2 data is never hard-deleted from here).
+  void archiveIncident(IncidentReport incident) {
+    incident.archived = true;
+    if (_activeIncident?.id == incident.id) _activeIncident = null;
+    notifyListeners();
+    _writeIncident(incident, {'archived': true});
+  }
+
+  // ---------------------------------------------------------------------------
+  // Zone broadcast -> `warnings` (what Component 1 citizens read)  [CREATE]
+  // ---------------------------------------------------------------------------
+  Future<void> broadcastZoneAlert({
     required String zone,
     required String title,
     required String message,
-  }) {
-    // Adds a newly spawned critical broadcast report
-    _incidents.insert(
-      0,
-      IncidentReport(
-        id: 'BRD-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}',
-        title: 'BROADCAST: $title',
-        hazardType: 'Zone Evacuation',
-        severity: IncidentSeverity.critical,
-        location: zone,
-        coordinates: const LatLng(6.9271, 79.8612),
-        waterDepth: 'N/A (Evacuation Order)',
-        description: message,
-        corroboratingCount: 1,
-        reporterName: 'Dispatcher Station #04 (DMC Official)',
-        reporterPhone: '117 (DMC)',
-        isVerified: true,
-        timeAgo: 'Just Now',
-        status: IncidentStatus.dispatched,
-      ),
-    );
-    notifyListeners();
+    String district = 'All',
+    String city = 'All',
+    String severity = 'Critical', // Watch | Warning | Critical
+    String hazardType = 'Evacuation',
+    LatLng? center,
+    double radiusKm = 2,
+    String? areaName,
+    List<double>? bbox,
+  }) async {
+    await _warnings.add({
+      'district': district.trim().isEmpty ? 'All' : district.trim(),
+      'city': city.trim().isEmpty ? 'All' : city.trim(),
+      'locationZone': zone,
+      'hazardType': hazardType,
+      'waterLevelMeters': 0.0,
+      'rainfallMm': 0.0,
+      'windSpeedKmh': 0.0,
+      'severity': severity,
+      'description': title.trim().isEmpty ? message : '$title - $message',
+      'issuedTimestamp': FieldValue.serverTimestamp(),
+      // extra fields for the map-based broadcast (ignored by Component 1)
+      'centerLat': center?.latitude,
+      'centerLng': center?.longitude,
+      'radiusKm': radiusKm,
+      'areaName': areaName,
+      'bbox': bbox,
+      'issuedBy': _currentUser?.email ?? '',
+      'source': 'dispatcher',
+    });
   }
 
-  void _initMockData() {
-    _incidents.clear();
-    _incidents.addAll([
-      IncidentReport(
-        id: 'FLD-2026-089',
-        title: 'Severe Flash Flood (Level 4)',
-        hazardType: 'Flood',
-        severity: IncidentSeverity.critical,
-        location: 'Colombo Sector 4 (Low-Lying Area - Temple Rd)',
-        coordinates: const LatLng(6.9271, 79.8612),
-        waterDepth: '1.5m Rising Fast (Submerged Roads)',
-        description:
-            'Water level has risen above 1.5 meters on the main residential street. Two cars are partially submerged. Citizens are retreating to second-story houses. Rain continues heavily.',
-        corroboratingCount: 5,
-        reporterName: 'D. S. Silva (Verified Citizen)',
-        reporterPhone: '+94 77 482 1029',
-        isVerified: true,
-        timeAgo: '1 Min Ago',
-        status: IncidentStatus.incoming,
-      ),
-      IncidentReport(
-        id: 'LND-2026-042',
-        title: 'Landslide Blockage & Debris',
-        hazardType: 'Landslide',
-        severity: IncidentSeverity.critical,
-        location: 'Kandy Road — Km Marker 42 (Hill Cut)',
-        coordinates: const LatLng(6.9400, 79.8800),
-        waterDepth: 'Mud & Rockfall (Road Inaccessible)',
-        description:
-            'Heavy mudflow blocked both lanes. Two commercial trucks stranded. Risk of further earth slip from upper terrace.',
-        corroboratingCount: 4,
-        reporterName: 'Police Patrol Unit 3',
-        reporterPhone: '+94 11 243 3333',
-        isVerified: true,
-        timeAgo: '5 Mins Ago',
-        status: IncidentStatus.incoming,
-      ),
-      IncidentReport(
-        id: 'FLD-2026-077',
-        title: 'Canal Overflow & Sluice Gate Jam',
-        hazardType: 'Flood',
-        severity: IncidentSeverity.critical,
-        location: 'Kelani Basin — Sector 2 Bund',
-        coordinates: const LatLng(6.9520, 79.8900),
-        waterDepth: '2.1m (Warning Level Exceeded)',
-        description:
-            'Canal embankment overflowing into surrounding residential settlements. Immediate sandbagging or evacuation required.',
-        corroboratingCount: 8,
-        reporterName: 'Irrigation Dept Inspector',
-        reporterPhone: '+94 71 229 9840',
-        isVerified: true,
-        timeAgo: '8 Mins Ago',
-        status: IncidentStatus.incoming,
-      ),
-      IncidentReport(
-        id: 'TRE-2026-031',
-        title: 'Large Tree Fall on Main Road',
-        hazardType: 'Blockage',
-        severity: IncidentSeverity.high,
-        location: 'Colombo Sector 2 (Outer Ring)',
-        coordinates: const LatLng(6.9150, 79.8690),
-        waterDepth: '0.3m Localized Puddle',
-        description:
-            'Large banyan tree fallen across power lines and road. Electricity severed for sector 2.',
-        corroboratingCount: 3,
-        reporterName: 'Sunil Wickramasinghe (Volunteer)',
-        reporterPhone: '+94 70 331 4455',
-        isVerified: true,
-        timeAgo: '12 Mins Ago',
-        status: IncidentStatus.incoming,
-      ),
-      IncidentReport(
-        id: 'BRG-2026-019',
-        title: 'Suspension Bridge Foundation Weakened',
-        hazardType: 'Structure',
-        severity: IncidentSeverity.high,
-        location: 'Ganga Addara Footbridge',
-        coordinates: const LatLng(6.9310, 79.8640),
-        waterDepth: 'Turbulent River Current',
-        description:
-            'High water current eroding the western concrete foundation. Pedestrian crossing should be cordoned off immediately.',
-        corroboratingCount: 2,
-        reporterName: 'Grama Niladhari Officer',
-        reporterPhone: '+94 77 901 2345',
-        isVerified: true,
-        timeAgo: '18 Mins Ago',
-        status: IncidentStatus.incoming,
-      ),
-      IncidentReport(
-        id: 'DRN-2026-014',
-        title: 'Minor Drain Overflow on Lane B',
-        hazardType: 'Drainage',
-        severity: IncidentSeverity.low,
-        location: 'Sector 1 Residential Lane B',
-        coordinates: const LatLng(6.9050, 79.8580),
-        waterDepth: '0.2m (Ankle Depth)',
-        description:
-            'Storm drain backed up due to leaf debris. Water flowing on sidewalk but residences are dry.',
-        corroboratingCount: 1,
-        reporterName: 'K. Perera (Citizen)',
-        reporterPhone: '+94 76 555 4321',
-        isVerified: false,
-        timeAgo: '25 Mins Ago',
-        status: IncidentStatus.incoming,
-      ),
-    ]);
+  /// UPDATE a broadcast.
+  Future<void> updateBroadcast(String id, Map<String, dynamic> data) async {
+    await _warnings.doc(id).update({
+      ...data,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 
-    _activeIncident = _incidents.first;
+  /// DELETE (withdraw) a broadcast.
+  Future<void> deleteBroadcast(String id) => _warnings.doc(id).delete();
+
+  /// Stream of broadcasts issued from the control center (READ).
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchBroadcasts() =>
+      _warnings.where('source', isEqualTo: 'dispatcher').snapshots();
+
+  // small helper for screens
+  static double kmBetween(LatLng a, LatLng b) {
+    const d = Distance();
+    return d.as(LengthUnit.Meter, a, b) / 1000.0;
   }
 }

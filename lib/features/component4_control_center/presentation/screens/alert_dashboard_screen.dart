@@ -1,12 +1,23 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
-import 'incident_details_screen.dart';
-import 'live_tracking_screen.dart';
+import '../widgets/c4_ui.dart';
 import 'assign_responder_screen.dart';
+import 'broadcast_dialog.dart';
+import 'broadcast_history_screen.dart';
+import 'incident_details_screen.dart';
+import 'incident_history_screen.dart';
+import 'live_tracking_screen.dart';
+import 'manage_units_screen.dart';
 import 'responder_profile_screen.dart';
 
+/// Dispatcher home. Fully responsive:
+///  - phone:   single column + bottom NavigationBar
+///  - tablet:  card grid + NavigationRail
+///  - desktop: list on the left, live detail pane on the right
 class AlertDashboardScreen extends StatefulWidget {
   const AlertDashboardScreen({super.key});
 
@@ -14,1002 +25,457 @@ class AlertDashboardScreen extends StatefulWidget {
   State<AlertDashboardScreen> createState() => _AlertDashboardScreenState();
 }
 
-class _AlertDashboardScreenState extends State<AlertDashboardScreen>
-    with TickerProviderStateMixin {
-  final ResponderController _controller = ResponderController();
-  int _bottomNavIndex = 0;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-
-  // Animation controllers
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  late AnimationController _fadeInController;
-  late Animation<double> _fadeInAnimation;
-  late AnimationController _statusBarController;
-  late Animation<double> _statusBarSlide;
-
-  // Live clock
-  Timer? _clockTimer;
-  String _currentTime = '';
+class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
+  final ResponderController _c = ResponderController();
+  final TextEditingController _search = TextEditingController();
+  String _q = '';
+  Timer? _tick;
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_onStateChange);
-
-    // Pulse animation for live indicators
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
-    // Fade in for initial load
-    _fadeInController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _fadeInAnimation = CurvedAnimation(
-      parent: _fadeInController,
-      curve: Curves.easeOut,
-    );
-    _fadeInController.forward();
-
-    // Status bar slide in
-    _statusBarController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _statusBarSlide = CurvedAnimation(
-      parent: _statusBarController,
-      curve: Curves.easeOutCubic,
-    );
-    _statusBarController.forward();
-
-    // Start live clock
-    _updateClock();
-    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) => _updateClock());
-  }
-
-  void _updateClock() {
-    final now = DateTime.now();
-    final h = now.hour.toString().padLeft(2, '0');
-    final m = now.minute.toString().padLeft(2, '0');
-    final s = now.second.toString().padLeft(2, '0');
-    if (mounted) setState(() => _currentTime = '$h:$m:$s');
+    _c.addListener(_refresh);
+    // keeps "x mins ago" fresh
+    _tick = Timer.periodic(const Duration(seconds: 30), (_) => _refresh());
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onStateChange);
-    _searchController.dispose();
-    _pulseController.dispose();
-    _fadeInController.dispose();
-    _statusBarController.dispose();
-    _clockTimer?.cancel();
+    _tick?.cancel();
+    _c.removeListener(_refresh);
+    _search.dispose();
     super.dispose();
   }
 
-  void _onStateChange() {
+  void _refresh() {
     if (mounted) setState(() {});
   }
 
-  void _showBroadcastDialog() {
-    final titleController = TextEditingController(text: 'IMMEDIATE EVACUATION ORDER');
-    final zoneController = TextEditingController(text: 'Sector 4 Low-Lying Area');
-    final messageController = TextEditingController(
-      text:
-          'Water level in Kalu Ganga / Kelani Basin critical. Flash flood imminent. Evacuate to Central College immediately.',
-    );
+  List<IncidentReport> _visible() {
+    final q = _q.trim().toLowerCase();
+    return _c.filteredIncidents.where((i) {
+      if (q.isEmpty) return true;
+      return i.title.toLowerCase().contains(q) ||
+          i.location.toLowerCase().contains(q) ||
+          i.hazardType.toLowerCase().contains(q) ||
+          i.shortId.toLowerCase().contains(q);
+    }).toList();
+  }
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.cell_tower, color: Colors.redAccent, size: 26),
-            SizedBox(width: 10),
-            Text(
-              'BROADCAST ZONE ALERT',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+  void _snack(String m) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+  }
+
+  void _go(int i) {
+    if (i == 0) return;
+    if (i == 3) {
+      pushPage(context, const ResponderProfileScreen());
+      return;
+    }
+    final focus = _c.focusIncident;
+    if (focus.isPlaceholder) {
+      _snack('No active incident yet.');
+      return;
+    }
+    if (i == 1) pushPage(context, LiveTrackingScreen(incident: focus));
+    if (i == 2) pushPage(context, AssignResponderScreen(incident: focus));
+  }
+
+  void _openIncident(IncidentReport incident, ScreenSize size) {
+    _c.setActiveIncident(incident);
+    if (size == ScreenSize.expanded) return; // shown in the right-hand pane
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 320),
+        pageBuilder: (_, __, ___) => IncidentDetailsScreen(
+          incident: incident,
+          heroTag: 'inc-photo-${incident.id}',
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Broadcast emergency alarm directly to all citizen mobile devices in target perimeter.',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'TARGET ZONE',
-                style: TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              TextField(
-                controller: zoneController,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFF0F172A),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF334155)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'ALERT TITLE',
-                style: TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              TextField(
-                controller: titleController,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFF0F172A),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF334155)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'CITIZEN WARNING INSTRUCTION',
-                style: TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              TextField(
-                controller: messageController,
-                maxLines: 3,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFF0F172A),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF334155)),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        transitionsBuilder: (_, a, __, child) => FadeTransition(
+          opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
+          child: child,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-            ),
-            icon: const Icon(Icons.send_rounded, size: 16),
-            label: const Text('TRANSMIT ALERT'),
-            onPressed: () {
-              _controller.broadcastZoneAlert(
-                zone: zoneController.text,
-                title: titleController.text,
-                message: messageController.text,
-              );
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'Targeted zone alert transmitted via Cellular Emergency Broadcast!'),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
-            },
-          ),
-        ],
       ),
     );
   }
 
-  void _onBottomNavTap(int index) {
-    if (index == _bottomNavIndex) return;
+  // ---------------------------------------------------------------------------
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, cons) {
+        final size = Responsive.ofWidth(cons.maxWidth);
+        final list = _visible();
 
-    if (index == 0) {
-      setState(() => _bottomNavIndex = 0);
-    } else if (index == 1) {
-      // Live Tracking Map
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => LiveTrackingScreen(
-            incident: _controller.activeIncident ?? _controller.incidents.first,
-          ),
-        ),
-      );
-    } else if (index == 2) {
-      // Assign Responder
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => AssignResponderScreen(
-            incident: _controller.activeIncident ?? _controller.incidents.first,
-          ),
-        ),
-      );
-    } else if (index == 3) {
-      // Profile
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const ResponderProfileScreen(),
-        ),
-      );
-    }
+        final Widget listPane = _ListPane(
+          size: size,
+          width: cons.maxWidth,
+          incidents: list,
+          selectedId: size == ScreenSize.expanded
+              ? (_c.activeIncident?.id ??
+                  (list.isNotEmpty ? list.first.id : null))
+              : null,
+          search: _search,
+          onSearch: (v) => setState(() => _q = v),
+          onOpen: (i) => _openIncident(i, size),
+        );
+
+        Widget body = listPane;
+        if (size == ScreenSize.expanded) {
+          IncidentReport? sel;
+          for (final i in list) {
+            if (i.id == _c.activeIncident?.id) sel = i;
+          }
+          sel ??= list.isNotEmpty ? list.first : null;
+          body = Row(
+            children: [
+              SizedBox(width: 450, child: listPane),
+              const VerticalDivider(width: 1, color: C4.border),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: sel == null
+                      ? const _EmptyState(key: ValueKey('empty-detail'))
+                      : IncidentDetailsScreen(
+                          key: ValueKey(sel.id),
+                          incident: sel,
+                          embedded: true,
+                        ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        final compact = size == ScreenSize.compact;
+
+        return Scaffold(
+          backgroundColor: C4.bg,
+          appBar: _buildAppBar(compact),
+          body: compact
+              ? body
+              : Row(
+                  children: [
+                    NavigationRail(
+                      backgroundColor: C4.surface,
+                      extended: size == ScreenSize.expanded,
+                      selectedIndex: 0,
+                      indicatorColor: C4.accent.withValues(alpha: 0.2),
+                      selectedIconTheme: const IconThemeData(color: C4.accent),
+                      unselectedIconTheme:
+                          const IconThemeData(color: C4.muted),
+                      selectedLabelTextStyle: const TextStyle(
+                          color: C4.accent, fontWeight: FontWeight.bold),
+                      unselectedLabelTextStyle:
+                          const TextStyle(color: C4.muted),
+                      onDestinationSelected: _go,
+                      destinations: const [
+                        NavigationRailDestination(
+                            icon: Icon(Icons.crisis_alert_outlined),
+                            selectedIcon: Icon(Icons.crisis_alert),
+                            label: Text('Incidents')),
+                        NavigationRailDestination(
+                            icon: Icon(Icons.map_outlined),
+                            selectedIcon: Icon(Icons.map),
+                            label: Text('Live map')),
+                        NavigationRailDestination(
+                            icon: Icon(Icons.local_shipping_outlined),
+                            selectedIcon: Icon(Icons.local_shipping),
+                            label: Text('Dispatch')),
+                        NavigationRailDestination(
+                            icon: Icon(Icons.person_outline),
+                            selectedIcon: Icon(Icons.person),
+                            label: Text('Profile')),
+                      ],
+                    ),
+                    const VerticalDivider(width: 1, color: C4.border),
+                    Expanded(child: body),
+                  ],
+                ),
+          bottomNavigationBar: compact
+              ? Theme(
+                  data: Theme.of(context).copyWith(
+                    navigationBarTheme: NavigationBarThemeData(
+                      backgroundColor: C4.surface,
+                      indicatorColor: C4.accent.withValues(alpha: 0.2),
+                      labelTextStyle: WidgetStateProperty.all(
+                        const TextStyle(color: C4.muted, fontSize: 11),
+                      ),
+                      iconTheme: WidgetStateProperty.resolveWith(
+                        (s) => IconThemeData(
+                          color: s.contains(WidgetState.selected)
+                              ? C4.accent
+                              : C4.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: NavigationBar(
+                    selectedIndex: 0,
+                    onDestinationSelected: _go,
+                    destinations: const [
+                      NavigationDestination(
+                          icon: Icon(Icons.crisis_alert_outlined),
+                          selectedIcon: Icon(Icons.crisis_alert),
+                          label: 'Incidents'),
+                      NavigationDestination(
+                          icon: Icon(Icons.map_outlined),
+                          selectedIcon: Icon(Icons.map),
+                          label: 'Live map'),
+                      NavigationDestination(
+                          icon: Icon(Icons.local_shipping_outlined),
+                          selectedIcon: Icon(Icons.local_shipping),
+                          label: 'Dispatch'),
+                      NavigationDestination(
+                          icon: Icon(Icons.person_outline),
+                          selectedIcon: Icon(Icons.person),
+                          label: 'Profile'),
+                    ],
+                  ),
+                )
+              : null,
+        );
+      },
+    );
   }
+
+  PreferredSizeWidget _buildAppBar(bool compact) {
+    return AppBar(
+      backgroundColor: C4.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      titleSpacing: 16,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _c.currentUser?.fullName ?? 'Dispatcher',
+            style: const TextStyle(
+                color: C4.text, fontWeight: FontWeight.w800, fontSize: 16),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const Text(
+            'DISPATCH CONTROL CENTER',
+            style: TextStyle(
+                color: C4.blue,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1),
+          ),
+        ],
+      ),
+      actions: [
+        if (compact)
+          IconButton(
+            tooltip: 'Broadcast zone alert',
+            icon: const Icon(Icons.cell_tower, color: Color(0xFFEF4444)),
+            onPressed: () => showBroadcastDialog(context),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFDC2626)),
+              icon: const Icon(Icons.cell_tower, size: 18),
+              label: const Text('BROADCAST'),
+              onPressed: () => showBroadcastDialog(context),
+            ),
+          ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, color: C4.muted),
+          color: C4.card,
+          onSelected: (v) {
+            if (v == 'units') pushPage(context, const ManageUnitsScreen(), frame: false);
+            if (v == 'broadcasts') {
+              pushPage(context, const BroadcastHistoryScreen(), frame: false);
+            }
+            if (v == 'history') {
+              pushPage(context, const IncidentHistoryScreen(), frame: false);
+            }
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(
+                value: 'units',
+                child: ListTile(
+                    leading: Icon(Icons.local_shipping_outlined, color: C4.blue),
+                    title: Text('Response units',
+                        style: TextStyle(color: C4.text)))),
+            PopupMenuItem(
+                value: 'broadcasts',
+                child: ListTile(
+                    leading: Icon(Icons.cell_tower, color: C4.accent),
+                    title: Text('Broadcast history',
+                        style: TextStyle(color: C4.text)))),
+            PopupMenuItem(
+                value: 'history',
+                child: ListTile(
+                    leading: Icon(Icons.task_alt, color: C4.green),
+                    title: Text('Resolved incidents',
+                        style: TextStyle(color: C4.text)))),
+          ],
+        ),
+        const SizedBox(width: 4),
+      ],
+    );
+  }
+}
+
+// =============================================================================
+// Left / main list pane
+// =============================================================================
+class _ListPane extends StatelessWidget {
+  final ScreenSize size;
+  final double width;
+  final List<IncidentReport> incidents;
+  final String? selectedId;
+  final TextEditingController search;
+  final ValueChanged<String> onSearch;
+  final ValueChanged<IncidentReport> onOpen;
+
+  const _ListPane({
+    required this.size,
+    required this.width,
+    required this.incidents,
+    required this.selectedId,
+    required this.search,
+    required this.onSearch,
+    required this.onOpen,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = _controller.filteredIncidents.where((i) {
-      if (_searchQuery.isEmpty) return true;
-      return i.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          i.location.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          i.id.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    final c = ResponderController();
+    final pad = Responsive.pad(width);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B132B),
-        elevation: 0,
-        title: Row(
-          children: [
-            // Animated shield icon with glow
-            AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) => Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF6D00).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF6D00).withValues(alpha: _pulseAnimation.value * 0.3),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.shield, color: Color(0xFFFF6D00), size: 20),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _controller.currentUser?.fullName ?? 'Nadeeka Perera',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  _controller.currentUser?.roleTitle ??
-                      'DISPATCHER #04 • DMC CONTROL',
-                  style: const TextStyle(
-                    color: Color(0xFF38BDF8),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFDC2626),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              icon: const Icon(Icons.cell_tower, size: 16),
-              label: const Text(
-                'BROADCAST',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-              onPressed: _showBroadcastDialog,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.white70),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const ResponderProfileScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeInAnimation,
-          child: Column(
-            children: [
-              // Animated Status & Quick Summary Bar
-              SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, -1),
-                  end: Offset.zero,
-                ).animate(_statusBarSlide),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF0F172A),
-                        const Color(0xFF0F172A).withValues(alpha: 0.95),
-                      ],
-                    ),
-                    border: const Border(
-                      bottom: BorderSide(color: Color(0xFF1E293B), width: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      // Animated live pulse dot
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) => Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00E676),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF00E676).withValues(alpha: _pulseAnimation.value),
-                                blurRadius: 6,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'DISPATCH STATION: ON DUTY',
-                        style: TextStyle(
-                          color: Color(0xFF00E676),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Live clock
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          _currentTime,
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) => Icon(
-                          Icons.sync,
-                          color: Color.lerp(
-                            const Color(0xFF38BDF8).withValues(alpha: 0.5),
-                            const Color(0xFF38BDF8),
-                            _pulseAnimation.value,
-                          ),
-                          size: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'LIVE',
-                        style: TextStyle(
-                          color: Color(0xFF38BDF8),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Mini Spatial Overview Banner with hover effect
-              _buildMapBanner(),
-
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (val) => setState(() => _searchQuery = val),
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color(0xFF0F172A),
-                    hintText: 'Search by Sector, ID (#FLD-089) or Hazard...',
-                    hintStyle:
-                        const TextStyle(color: Color(0xFF475569), fontSize: 12),
-                    prefixIcon: const Icon(Icons.search,
-                        color: Color(0xFF64748B), size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.close,
-                                color: Colors.white54, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF1E293B)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF1E293B)),
-                    ),
-                  ),
-                ),
-              ),
-
-              // SEVERITY FILTER TABS
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildSeverityFilterChip(
-                          'ALL', _controller.countFor('ALL'), const Color(0xFF64748B)),
-                      const SizedBox(width: 8),
-                      _buildSeverityFilterChip('CRITICAL',
-                          _controller.countFor('CRITICAL'), const Color(0xFFEF4444)),
-                      const SizedBox(width: 8),
-                      _buildSeverityFilterChip(
-                          'HIGH', _controller.countFor('HIGH'), const Color(0xFFF59E0B)),
-                      const SizedBox(width: 8),
-                      _buildSeverityFilterChip(
-                          'MED', _controller.countFor('MED'), const Color(0xFFFFB020)),
-                      const SizedBox(width: 8),
-                      _buildSeverityFilterChip(
-                          'LOW', _controller.countFor('LOW'), const Color(0xFF10B981)),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Triage Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'INCOMING REPORTS • SORTED BY SEVERITY',
-                      style: TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    Text(
-                      '${filteredList.length} items',
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Incident List with staggered animations
-              Expanded(
-                child: filteredList.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.check_circle_outline,
-                                color: Color(0xFF00E676), size: 48),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No incidents in $_searchQuery ${_controller.selectedSeverityFilter} filter',
-                              style: const TextStyle(color: Color(0xFF94A3B8)),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 4),
-                        itemCount: filteredList.length,
-                        itemBuilder: (context, index) {
-                          final incident = filteredList[index];
-                          return _AnimatedIncidentCard(
-                            index: index,
-                            child: _buildIncidentTriageCard(incident),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Color(0xFF1E293B), width: 0.5),
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _bottomNavIndex,
-          onTap: _onBottomNavTap,
-          backgroundColor: const Color(0xFF0B132B),
-          selectedItemColor: const Color(0xFFFF6D00),
-          unselectedItemColor: const Color(0xFF64748B),
-          type: BottomNavigationBarType.fixed,
-          selectedFontSize: 11,
-          unselectedFontSize: 11,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.warning_amber_rounded),
-              label: 'Alerts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.alt_route_rounded),
-              label: 'Live Track',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people_alt_outlined),
-              label: 'Teams',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMapBanner() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => LiveTrackingScreen(
-              incident: _controller.activeIncident ??
-                  _controller.incidents.first,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF334155)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0284C7).withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.map_outlined,
-                  color: Color(0xFFFF6D00), size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Text(
-                        'Multi-Agency Map & Coordinates Feed',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(width: 6),
-                      Icon(Icons.open_in_new,
-                          color: Colors.white54, size: 14),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${_controller.incidents.length} active incidents • ${_controller.teams.where((t) => t.isAvailable).length} available rescue units',
-                    style: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSeverityFilterChip(String label, int count, Color color) {
-    final isSelected = _controller.selectedSeverityFilter == label;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      child: ChoiceChip(
-        selected: isSelected,
-        label: Text('$label ($count)'),
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
-          fontSize: 11,
-          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-        ),
-        selectedColor: color,
-        backgroundColor: const Color(0xFF1E293B),
-        side: BorderSide(
-          color: isSelected ? color : const Color(0xFF334155),
-          width: 1,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onSelected: (val) {
-          if (val) _controller.setFilter(label);
-        },
-      ),
-    );
-  }
-
-  Widget _buildIncidentTriageCard(IncidentReport incident) {
-    Color severityColor;
-    switch (incident.severity) {
-      case IncidentSeverity.critical:
-        severityColor = const Color(0xFFEF4444);
-        break;
-      case IncidentSeverity.high:
-        severityColor = const Color(0xFFF59E0B);
-        break;
-      case IncidentSeverity.medium:
-        severityColor = const Color(0xFFFFB020);
-        break;
-      case IncidentSeverity.low:
-        severityColor = const Color(0xFF10B981);
-        break;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111E36),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: incident.severity == IncidentSeverity.critical
-              ? severityColor.withValues(alpha: 0.5)
-              : const Color(0xFF1E293B),
-          width: incident.severity == IncidentSeverity.critical ? 1.5 : 1,
-        ),
-        boxShadow: incident.severity == IncidentSeverity.critical
-            ? [
-                BoxShadow(
-                  color: severityColor.withValues(alpha: 0.1),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            _controller.setActiveIncident(incident);
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    IncidentDetailsScreen(incident: incident),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.05, 0),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      )),
-                      child: child,
-                    ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 350),
-              ),
-            );
-          },
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: _Banner(pad: pad)),
+        SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Badges & Time
+                TextField(
+                  controller: search,
+                  onChanged: onSearch,
+                  style: const TextStyle(color: C4.text, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Search location, hazard or ID',
+                    hintStyle: const TextStyle(color: C4.muted, fontSize: 13),
+                    prefixIcon:
+                        const Icon(Icons.search, color: C4.muted, size: 20),
+                    filled: true,
+                    fillColor: C4.card,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: C4.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: C4.border),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _filter(c, 'ALL', C4.muted),
+                      _filter(c, 'CRITICAL', C4.severity(IncidentSeverity.critical)),
+                      _filter(c, 'HIGH', C4.severity(IncidentSeverity.high)),
+                      _filter(c, 'MED', C4.severity(IncidentSeverity.medium)),
+                      _filter(c, 'LOW', C4.severity(IncidentSeverity.low)),
+                    ],
+                  ),
+                ),
+                if (c.syncError != null) ...[
+                  const SizedBox(height: 10),
+                  C4Card(
+                    borderColor: Colors.orange,
+                    child: Text(
+                      'Sync problem: ${c.syncError}',
+                      style: const TextStyle(color: Colors.orange, fontSize: 12),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: severityColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: severityColor, width: 1),
-                      ),
-                      child: Text(
-                        incident.severityLabel,
+                    const Text('PRIORITY QUEUE',
                         style: TextStyle(
-                          color: severityColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (incident.isVerified)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF38BDF8)
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.verified,
-                                color: Color(0xFF38BDF8), size: 12),
-                            SizedBox(width: 4),
-                            Text(
-                              'VERIFIED',
-                              style: TextStyle(
-                                color: Color(0xFF38BDF8),
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const Spacer(),
-                    // Animated time badge for critical
-                    if (incident.severity == IncidentSeverity.critical)
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: severityColor.withValues(alpha: _pulseAnimation.value * 0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            incident.timeAgo,
-                            style: TextStyle(
-                              color: severityColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      Text(
-                        incident.timeAgo,
-                        style: const TextStyle(
-                          color: Color(0xFF64748B),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                // Incident Title & Hazard Tag
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        incident.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '#${incident.id}',
-                        style: const TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 6),
-
-                // Location with pin icon
-                Row(
-                  children: [
-                    const Icon(Icons.location_on,
-                        color: Color(0xFFFF6D00), size: 14),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        incident.location,
-                        style: const TextStyle(
-                          color: Color(0xFFCBD5E1),
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                // Divider
-                const Divider(color: Color(0xFF1E293B), height: 1),
-
-                const SizedBox(height: 8),
-
-                // Bottom row: Corroboration & Status button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.people_outline,
-                            color: Color(0xFF94A3B8), size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${incident.corroboratingCount} Reports',
-                          style: const TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: C4.muted,
                             fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: incident.status == IncidentStatus.incoming
-                            ? const Color(0xFFFF6D00)
-                            : incident.status == IncidentStatus.dispatched
-                                ? const Color(0xFF38BDF8)
-                                : const Color(0xFF10B981),
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (incident.status == IncidentStatus.incoming
-                                    ? const Color(0xFFFF6D00)
-                                    : incident.status == IncidentStatus.dispatched
-                                        ? const Color(0xFF38BDF8)
-                                        : const Color(0xFF10B981))
-                                .withValues(alpha: 0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            incident.statusLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.chevron_right,
-                              color: Colors.white, size: 14),
-                        ],
-                      ),
-                    ),
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2)),
+                    const SizedBox(width: 8),
+                    const Text('sorted by severity',
+                        style: TextStyle(color: C4.border, fontSize: 11)),
                   ],
                 ),
+                const SizedBox(height: 10),
               ],
             ),
+          ),
+        ),
+        if (incidents.isEmpty)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: _EmptyState(),
+          )
+        else
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(pad, 0, pad, 24),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 520,
+                mainAxisExtent: 130,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, i) {
+                  final inc = incidents[i];
+                  return FadeSlideIn(
+                    key: ValueKey(inc.id),
+                    index: i,
+                    child: _IncidentCard(
+                      incident: inc,
+                      selected: inc.id == selectedId,
+                      heroEnabled: size != ScreenSize.expanded,
+                      onTap: () => onOpen(inc),
+                    ),
+                  );
+                },
+                childCount: incidents.length,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _filter(ResponderController c, String label, Color color) {
+    final selected = c.selectedSeverityFilter == label;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        showCheckmark: false,
+        selected: selected,
+        onSelected: (_) => c.setFilter(label),
+        backgroundColor: C4.card,
+        selectedColor: color.withValues(alpha: 0.22),
+        side: BorderSide(color: selected ? color : C4.border),
+        label: Text(
+          '$label  ${c.countFor(label)}',
+          style: TextStyle(
+            color: selected ? color : C4.muted,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
           ),
         ),
       ),
@@ -1017,57 +483,299 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen>
   }
 }
 
-// Staggered entrance animation for incident cards
-class _AnimatedIncidentCard extends StatefulWidget {
-  final int index;
-  final Widget child;
-
-  const _AnimatedIncidentCard({required this.index, required this.child});
-
-  @override
-  State<_AnimatedIncidentCard> createState() => _AnimatedIncidentCardState();
-}
-
-class _AnimatedIncidentCardState extends State<_AnimatedIncidentCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
-    // Stagger based on index
-    Future.delayed(Duration(milliseconds: 80 * widget.index), () {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+// =============================================================================
+// Banner with photo + live stats
+// =============================================================================
+class _Banner extends StatelessWidget {
+  final double pad;
+  const _Banner({required this.pad});
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: widget.child,
+    final c = ResponderController();
+    final live = c.isLive;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
+      child: FadeSlideIn(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/onboard_early_warning.jpg',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(color: C4.card),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF070B14).withValues(alpha: 0.92),
+                        const Color(0xFF070B14).withValues(alpha: 0.55),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        PulseDot(color: live ? C4.green : Colors.orange),
+                        const SizedBox(width: 8),
+                        Text(
+                          live ? 'LIVE - synced with field reports' : 'CONNECTING...',
+                          style: TextStyle(
+                            color: live ? C4.green : Colors.orange,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Flood response overview',
+                      style: TextStyle(
+                          color: C4.text,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        _stat('ACTIVE', c.countFor('ALL'), C4.blue),
+                        _stat('CRITICAL', c.countFor('CRITICAL'),
+                            C4.severity(IncidentSeverity.critical)),
+                        _stat('UNITS FREE',
+                            c.teams.where((t) => t.isAvailable).length, C4.green),
+                        _stat('RESOLVED', c.resolvedIncidents.length, C4.muted),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _stat(String label, int value, Color color) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AnimatedCount(
+            value: value,
+            style: TextStyle(
+                color: color, fontSize: 26, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+                color: C4.muted,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Incident card
+// =============================================================================
+class _IncidentCard extends StatelessWidget {
+  final IncidentReport incident;
+  final bool selected;
+  final bool heroEnabled;
+  final VoidCallback onTap;
+
+  const _IncidentCard({
+    required this.incident,
+    required this.selected,
+    required this.heroEnabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sev = C4.severity(incident.severity);
+    final st = C4.status(incident.status);
+    final urgent = incident.severity == IncidentSeverity.critical &&
+        incident.status == IncidentStatus.incoming;
+
+    Widget photo = HazardPhoto(incident: incident, radius: 0);
+    if (heroEnabled) {
+      photo = Hero(tag: 'inc-photo-${incident.id}', child: photo);
+    }
+
+    return Tappable(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        decoration: BoxDecoration(
+          color: selected ? C4.card.withValues(alpha: 1) : C4.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? sev : C4.border,
+            width: selected ? 1.6 : 1,
+          ),
+          boxShadow: urgent
+              ? [BoxShadow(color: sev.withValues(alpha: 0.25), blurRadius: 14)]
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 5, color: sev),
+              SizedBox(width: 92, child: photo),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          if (urgent) ...[
+                            PulseDot(color: sev, size: 8),
+                            const SizedBox(width: 6),
+                          ],
+                          C4Chip(label: incident.severityLabel, color: sev),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: C4Chip(label: incident.statusLabel, color: st),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        incident.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: C4.text,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.place_outlined,
+                              size: 13, color: C4.muted),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(
+                              incident.location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: C4.muted, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.schedule, size: 12, color: C4.muted),
+                          const SizedBox(width: 3),
+                          Text(incident.timeAgo,
+                              style: const TextStyle(
+                                  color: C4.muted, fontSize: 11)),
+                          const SizedBox(width: 10),
+                          const Icon(Icons.groups_2_outlined,
+                              size: 13, color: C4.muted),
+                          const SizedBox(width: 3),
+                          Text('${incident.corroboratingCount}',
+                              style: const TextStyle(
+                                  color: C4.muted, fontSize: 11)),
+                          if (incident.assignedTeam != null) ...[
+                            const SizedBox(width: 10),
+                            const Icon(Icons.local_shipping_outlined,
+                                size: 13, color: C4.blue),
+                            const SizedBox(width: 3),
+                            Flexible(
+                              child: Text(
+                                incident.assignedTeam!.callSign,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: C4.blue, fontSize: 11),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Empty state (photo + message)
+// =============================================================================
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: FadeSlideIn(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(60),
+                child: Image.asset(
+                  'assets/images/onboard_safe_shelter.jpg',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(
+                      Icons.verified_outlined,
+                      size: 64,
+                      color: C4.green),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('All clear',
+                  style: TextStyle(
+                      color: C4.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              const Text(
+                'No open incidents match this view.\nNew volunteer reports appear here automatically.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: C4.muted, fontSize: 13, height: 1.4),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

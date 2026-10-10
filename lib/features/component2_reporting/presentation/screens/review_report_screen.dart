@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -112,6 +113,21 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
         final onlinePayload = Map<String, dynamic>.from(reportData);
         onlinePayload.remove('localId');
         onlinePayload['timestamp'] = FieldValue.serverTimestamp();
+
+        // Upload the photo so dispatchers (other devices) can see it.
+        if (widget.imageFile != null) {
+          try {
+            final ref = FirebaseStorage.instance.ref(
+              'hazard_photos/${DateTime.now().millisecondsSinceEpoch}_${user?.uid ?? 'anon'}.jpg',
+            );
+            await ref
+                .putFile(File(widget.imageFile!.path))
+                .timeout(const Duration(seconds: 15));
+            onlinePayload['photoUrl'] = await ref.getDownloadURL();
+          } catch (_) {
+            // Photo upload failed - the report itself is still submitted.
+          }
+        }
 
         await FirebaseFirestore.instance
             .collection('hazard_reports')
