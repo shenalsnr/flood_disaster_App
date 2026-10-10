@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/responsive/screen_fit.dart';
 import 'dart:ui';
 
 import '../../services/citizen_firestore_service.dart';
@@ -138,7 +139,8 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
+            child: ScrollFill(
+              child: Column(
               children: [
                 const Spacer(flex: 2),
 
@@ -193,6 +195,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
                   ),
                 ),
               ],
+            ),
             ),
           ),
         ),
@@ -287,12 +290,12 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 64),
+        const SizedBox(height: 40),
 
         // ── Mark as Safe Button with Ripple ──────────────────────────────
         SizedBox(
-          width: 280,
-          height: 280,
+          width: ScreenFit.square(context, 280, heightFraction: 0.36),
+          height: ScreenFit.square(context, 280, heightFraction: 0.36),
           child: Stack(
             children: [
               // Ripple rings (only animate when idle)

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/responsive/screen_fit.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -102,7 +103,8 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         ),
         child: SafeArea(
-          child: Column(
+          child: ScrollFill(
+            child: Column(
             children: [
               const Spacer(flex: 5),
               _buildLogo(),
@@ -117,13 +119,21 @@ class _SplashScreenState extends State<SplashScreen>
               const SizedBox(height: 22),
             ],
           ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildLogo() {
+    // Shrinks on small / short phones so the splash never overflows.
+    final box = ScreenFit.square(context, 300, heightFraction: 0.38);
     return SizedBox(
+      width: box,
+      height: box,
+      child: FittedBox(
+      fit: BoxFit.contain,
+      child: SizedBox(
       width: 300,
       height: 300,
       child: Stack(
@@ -181,6 +191,8 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
         ],
+      ),
+      ),
       ),
     );
   }
