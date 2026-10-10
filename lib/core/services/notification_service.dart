@@ -24,12 +24,11 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const initSettings = InitializationSettings(
-      android: androidSettings,
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
     );
+
+    const initSettings = InitializationSettings(android: androidSettings);
 
     await _localNotifications.initialize(
       settings: initSettings,
@@ -39,8 +38,10 @@ class NotificationService {
     );
 
     // Request Android 13+ permission
-    final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
     }
@@ -100,10 +101,43 @@ class NotificationService {
     }
 
     // 3. Trigger In-App Tactical Banner
-    _showInAppSyncBanner(
-      title: title,
-      body: body,
-      hazardType: hazardType,
+    _showInAppSyncBanner(title: title, body: body, hazardType: hazardType);
+  }
+
+  /// Displays an emergency alert pop-up using local notifications
+  Future<void> showEmergencyAlert({
+    required String hazardType,
+    required String description,
+  }) async {
+    final androidNotificationDetails = AndroidNotificationDetails(
+      'emergency_alerts_channel',
+      'Emergency Alerts',
+      channelDescription:
+          'High priority alerts for natural disasters and emergencies.',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+      fullScreenIntent: true,
+      color: const Color(0xFFFF1744),
+      ledColor: const Color(0xFFFF1744),
+      ledOnMs: 1000,
+      ledOffMs: 500,
+      enableLights: true,
+      enableVibration: true,
+      styleInformation: const BigTextStyleInformation(''),
+    );
+
+    final notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+    );
+
+    final int notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    await _localNotifications.show(
+      id: notificationId,
+      title: '🚨 EMERGENCY ALERT: $hazardType',
+      body: description,
+      notificationDetails: notificationDetails,
     );
   }
 
@@ -164,7 +198,9 @@ class NotificationService {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF00E676).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),

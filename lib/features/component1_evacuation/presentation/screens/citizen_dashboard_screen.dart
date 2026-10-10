@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +15,7 @@ import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
 import 'citizen_drawer.dart';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
+import '../../../../core/services/notification_service.dart';
 
 // ---------------------------------------------------------------------------
 // Citizen Dashboard Screen — Component 1: Early Warning & Evacuation
@@ -35,6 +37,13 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
+  // Background listener for real-time notifications
+  StreamSubscription<QuerySnapshot>? _warningSubscription;
+
+  // Assume the currently logged-in citizen's district and city are already loaded into the state
+  String currentCitizenDistrict = 'Colombo';
+  String currentCitizenCity = 'Colombo';
+
   @override
   void initState() {
     super.initState();
@@ -45,12 +54,251 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _listenToEmergencyWarnings();
+  }
+
+  bool _isFirstSnapshot = true;
+
+  Future<void> _listenToEmergencyWarnings() async {
+    // 0. Fetch the actual logged-in user's district and city from Firestore first!
+    final email = ResponderController().currentUser?.email ?? 'unknown';
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(email)
+        .get();
+
+    if (userDoc.exists && userDoc.data() != null) {
+      final userData = userDoc.data()!;
+      currentCitizenDistrict = userData['district'] as String? ?? 'Colombo';
+      currentCitizenCity = userData['city'] as String? ?? 'Colombo';
+    }
+
+    debugPrint(
+      "🚨 [Local Notifications] Starting listener for District: $currentCitizenDistrict, City: $currentCitizenCity",
+    );
+
+    // 1. Broaden the query to catch 'All' districts too (like the UI does)
+    final Stream<QuerySnapshot> warningStream = FirebaseFirestore.instance
+        .collection('warnings')
+        .where('district', whereIn: [currentCitizenDistrict, 'All'])
+        .snapshots();
+
+    _warningSubscription = warningStream.listen(
+      (snapshot) {
+        // 2. Ignore the initial load so old warnings don't trigger alerts
+        if (_isFirstSnapshot) {
+          _isFirstSnapshot = false;
+          debugPrint(
+            "🚨 [Local Notifications] Initial load ignored (${snapshot.docs.length} existing warnings)",
+          );
+          return;
+        }
+
+        debugPrint(
+          "🚨 [Local Notifications] Stream fired! Documents: ${snapshot.docChanges.length}",
+        );
+        for (var change in snapshot.docChanges) {
+          // 3. Trigger on BOTH newly added AND modified documents (helpful for testing)
+          if (change.type == DocumentChangeType.added ||
+              change.type == DocumentChangeType.modified) {
+            final data = change.doc.data() as Map<String, dynamic>?;
+
+            if (data != null) {
+              final docCity = data['city']?.toString().toLowerCase() ?? '';
+              final targetCity = currentCitizenCity.toLowerCase();
+
+              // 4. Filter city in code to handle 'All' (like the UI does)
+              if (docCity == 'all' || docCity == targetCity) {
+                final hazardType = data['hazardType'] ?? 'Unknown Hazard';
+                final description =
+                    data['description'] ??
+                    'An emergency has been reported in your area. Please stay safe.';
+
+                debugPrint(
+                  "🚨 [Local Notifications] Triggering local alert for: $hazardType (Type: ${change.type.name})",
+                );
+                NotificationService.instance.showEmergencyAlert(
+                  hazardType: hazardType,
+                  description: description,
+                );
+              } else {
+                debugPrint(
+                  "🚨 [Local Notifications] Ignored warning for different city: $docCity",
+                );
+              }
+            }
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint(
+          "🚨 [Local Notifications] Error listening to warnings stream: $error",
+        );
+      },
+    );
   }
 
   @override
   void dispose() {
+    _warningSubscription?.cancel();
     _pulseController.dispose();
     super.dispose();
+  }
+
+  void _showNotificationCenter(
+    BuildContext context,
+    List<WarningAlert> alerts,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.75,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.notifications_active_rounded,
+                        color: Color(0xFF38BDF8),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Notification Center',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: Color(0xFF1E293B), thickness: 1.5),
+              Expanded(
+                child: alerts.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No active alerts in your area.',
+                          style: TextStyle(color: Colors.white54, fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: alerts.length,
+                        itemBuilder: (context, index) {
+                          final alert = alerts[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF131B2B),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.05),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: alert.severity == 'Critical'
+                                            ? const Color(0xFFFF1744)
+                                                  .withValues(alpha: 0.2)
+                                            : const Color(0xFFFFD740)
+                                                  .withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        alert.severity.toUpperCase(),
+                                        style: TextStyle(
+                                          color: alert.severity == 'Critical'
+                                              ? const Color(0xFFFF1744)
+                                              : const Color(0xFFFFD740),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      DateFormat('MMM dd, HH:mm')
+                                          .format(alert.issuedTimestamp),
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  '${alert.hazardType} — ${alert.locationZone}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  alert.description,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _push(Widget screen) {
@@ -174,8 +422,35 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                   ],
                 ),
                 actions: [
+                  Center(
+                    child: Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: () =>
+                              _showNotificationCenter(context, allAlerts),
+                        ),
+                        if (allAlerts.isNotEmpty)
+                          Positioned(
+                            right: 12,
+                            top: 12,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFF1744),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Center(child: _AlertLevelBadge(level: alertLevel)),
                   ),
                 ],
