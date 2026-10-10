@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -45,6 +47,15 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   String? _loadError;
   String? _targetId; // the shelter the route currently points to
 
+  // Real road / footpath route (from OpenStreetMap routing). Empty while it is
+  // loading or when offline - then a straight line is shown as a fallback.
+  List<LatLng> _routePoints = const [];
+  double? _routeKm;
+  double? _routeMinutes;
+  String? _routeTargetId;
+  LatLng? _routeFrom;
+  bool _routeLoading = false;
+
   StreamSubscription<List<SafeZone>>? _zonesSub;
   StreamSubscription<Position>? _positionSub;
   StreamSubscription<ServiceStatus>? _serviceSub;
@@ -64,19 +75,22 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   @override
   void initState() {
     super.initState();
-    _zonesSub = SafeZoneService.instance.watch().listen((zones) {
-      if (!mounted) return;
-      _zones = zones;
-      _loaded = true;
-      _loadError = null;
-      _recompute();
-    }, onError: (Object e) {
-      if (!mounted) return;
-      setState(() {
+    _zonesSub = SafeZoneService.instance.watch().listen(
+      (zones) {
+        if (!mounted) return;
+        _zones = zones;
         _loaded = true;
-        _loadError = e.toString();
-      });
-    });
+        _loadError = null;
+        _recompute();
+      },
+      onError: (Object e) {
+        if (!mounted) return;
+        setState(() {
+          _loaded = true;
+          _loadError = e.toString();
+        });
+      },
+    );
     WidgetsBinding.instance.addObserver(this);
     _startLocation();
     try {
@@ -134,8 +148,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
         return;
       }
       _setIssue(_LocIssue.none); // closes the alert if it is showing
-      final pos = await Geolocator.getCurrentPosition()
-          .timeout(const Duration(seconds: 20));
+      final pos = await Geolocator.getCurrentPosition().timeout(
+        const Duration(seconds: 20),
+      );
       _onPosition(pos);
       await _positionSub?.cancel();
       _positionSub = Geolocator.getPositionStream(
@@ -173,17 +188,20 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     final String button;
     switch (issue) {
       case _LocIssue.serviceOff:
-        text = 'Turn on your phone\'s location so we can find the nearest '
+        text =
+            'Turn on your phone\'s location so we can find the nearest '
             'safe zone to you.';
         button = 'TURN ON LOCATION';
         break;
       case _LocIssue.denied:
-        text = 'Allow this app to use your location so we can find the '
+        text =
+            'Allow this app to use your location so we can find the '
             'nearest safe zone to you.';
         button = 'ALLOW LOCATION';
         break;
       case _LocIssue.deniedForever:
-        text = 'Location permission is blocked. Open the app settings and '
+        text =
+            'Location permission is blocked. Open the app settings and '
             'allow Location so we can find the nearest safe zone to you.';
         button = 'OPEN SETTINGS';
         break;
@@ -224,8 +242,10 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
               foregroundColor: Colors.black,
             ),
             onPressed: () => Navigator.pop(ctx, 'go'),
-            child: Text(button,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              button,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -284,7 +304,8 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
       if (previous == null) {
         notice = 'The previous safe zone is no longer available.';
       } else if (!previous.isOpen) {
-        notice = '${previous.name} is now ${previous.stateLabel.toLowerCase()}.';
+        notice =
+            '${previous.name} is now ${previous.stateLabel.toLowerCase()}.';
       }
       if (notice != null) {
         notice = next == null
@@ -299,15 +320,122 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     if (notice != null) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(
-          content: Text(notice),
-          backgroundColor: const Color(0xFFFF9F0A),
-          duration: const Duration(seconds: 8),
-          showCloseIcon: true,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(notice),
+            backgroundColor: const Color(0xFFFF9F0A),
+            duration: const Duration(seconds: 8),
+            showCloseIcon: true,
+          ),
+        );
     }
     if ((changed || !_fittedOnce) && next != null && !_isNavigating) {
       _fitRoute(next);
+    }
+    _maybeFetchRoute(next);
+  }
+
+  // ── Road route (like Google Maps) ──────────────────────────────────────────
+  void _maybeFetchRoute(SafeZone? target) {
+    if (target == null) {
+      if (_routePoints.isNotEmpty) {
+        setState(() {
+          _routePoints = const [];
+          _routeKm = null;
+          _routeMinutes = null;
+          _routeTargetId = null;
+        });
+      }
+      return;
+    }
+    final sameTarget = _routeTargetId == target.id;
+    final movedM = _routeFrom == null
+        ? 1e9
+        : const Distance().as(LengthUnit.Meter, _routeFrom!, _userLocation);
+    // Re-request only for a new shelter or after moving about 60 m.
+    if (_routeLoading ||
+        (sameTarget && movedM < 60 && _routePoints.isNotEmpty)) {
+      return;
+    }
+    _fetchRoute(target);
+  }
+
+  Future<List<dynamic>?> _getJson(String url) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+    try {
+      final req = await client.getUrl(Uri.parse(url));
+      req.headers.set('User-Agent', 'dev.lasha.flood_disaster');
+      final res = await req.close().timeout(const Duration(seconds: 12));
+      if (res.statusCode != 200) return null;
+      final body = await res.transform(utf8.decoder).join();
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      if (json['code'] != 'Ok') return null;
+      return json['routes'] as List<dynamic>;
+    } catch (_) {
+      return null;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<void> _fetchRoute(SafeZone target) async {
+    _routeLoading = true;
+    final from = _userLocation;
+    final to = target.point;
+    final coords =
+        '${from.longitude},${from.latitude};${to.longitude},${to.latitude}';
+    const q = 'overview=full&geometries=geojson';
+
+    // Walking route first, driving route (road shape) as a backup.
+    var routes = await _getJson(
+      'https://routing.openstreetmap.de/routed-foot/route/v1/foot/$coords?$q',
+    );
+    var walking = true;
+    routes ??= await _getJson(
+      'https://router.project-osrm.org/route/v1/driving/$coords?$q',
+    );
+    if (routes == null) walking = false;
+
+    _routeLoading = false;
+    if (!mounted) return;
+
+    if (routes == null || routes.isEmpty) {
+      // Offline / service down: keep showing the straight line.
+      setState(() {
+        _routePoints = const [];
+        _routeKm = null;
+        _routeMinutes = null;
+        _routeTargetId = target.id;
+        _routeFrom = from;
+      });
+      return;
+    }
+
+    final r = routes.first as Map<String, dynamic>;
+    final coordsList =
+        ((r['geometry'] as Map<String, dynamic>)['coordinates']
+            as List<dynamic>);
+    final pts = coordsList
+        .map((c) => LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble()))
+        .toList();
+    final km = (r['distance'] as num).toDouble() / 1000;
+    // Driving duration is not a walking time, so derive it from distance.
+    final minutes = walking
+        ? (r['duration'] as num).toDouble() / 60
+        : km / 4.5 * 60;
+
+    setState(() {
+      _routePoints = pts;
+      _routeKm = km;
+      _routeMinutes = minutes;
+      _routeTargetId = target.id;
+      _routeFrom = from;
+    });
+    // If the shelter or position changed while loading, fetch again.
+    if (_targetId != null && _targetId != target.id) {
+      _maybeFetchRoute(_zoneById(_targetId));
+    } else if (!_isNavigating && _mapReady) {
+      _fitRoute(target);
     }
   }
 
@@ -317,7 +445,11 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     try {
       _mapController.fitCamera(
         CameraFit.bounds(
-          bounds: LatLngBounds.fromPoints([_userLocation, target.point]),
+          bounds: LatLngBounds.fromPoints([
+            _userLocation,
+            target.point,
+            ..._routePoints,
+          ]),
           padding: const EdgeInsets.fromLTRB(60, 170, 60, 360),
           maxZoom: 16.5,
         ),
@@ -410,18 +542,20 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
       final color = z.state == SafeZoneState.open
           ? const Color(0xFF00E676).withValues(alpha: 0.6)
           : z.state == SafeZoneState.full
-              ? const Color(0xFFFF9F0A)
-              : const Color(0xFFFF5252);
-      markers.add(Marker(
-        point: z.point,
-        width: 44,
-        height: 44,
-        alignment: Alignment.topCenter,
-        child: Tooltip(
-          message: '${z.name} (${z.stateLabel})',
-          child: Icon(Icons.location_pin, color: color, size: 30),
+          ? const Color(0xFFFF9F0A)
+          : const Color(0xFFFF5252);
+      markers.add(
+        Marker(
+          point: z.point,
+          width: 44,
+          height: 44,
+          alignment: Alignment.topCenter,
+          child: Tooltip(
+            message: '${z.name} (${z.stateLabel})',
+            child: Icon(Icons.location_pin, color: color, size: 30),
+          ),
         ),
-      ));
+      );
     }
     return markers;
   }
@@ -429,9 +563,22 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   @override
   Widget build(BuildContext context) {
     final target = _zoneById(_targetId);
-    final distanceKm = target == null ? 0.0 : _distanceTo(target);
+    final hasRoad =
+        target != null &&
+        _routeTargetId == target.id &&
+        _routePoints.isNotEmpty;
+    // Real road distance when available, otherwise straight-line distance.
+    final distanceKm = target == null
+        ? 0.0
+        : (hasRoad && _routeKm != null ? _routeKm! : _distanceTo(target));
     // Walking pace about 4.5 km/h.
-    final walkMinutes = (distanceKm / 4.5 * 60).ceil().clamp(1, 9999).toInt();
+    final walkMinutes =
+        (hasRoad && _routeMinutes != null
+                ? _routeMinutes!
+                : distanceKm / 4.5 * 60)
+            .ceil()
+            .clamp(1, 9999)
+            .toInt();
     final distanceText = distanceKm < 1
         ? '${(distanceKm * 1000).round()} m'
         : '${distanceKm.toStringAsFixed(1)} km';
@@ -490,12 +637,15 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                 userAgentPackageName: 'dev.lasha.flood_disaster',
               ),
 
-              // Route to the nearest open shelter (straight line)
+              // Route to the nearest open shelter along real roads
+              // (falls back to a straight line while loading / offline)
               if (target != null)
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: [_userLocation, target.point],
+                      points: hasRoad
+                          ? [_userLocation, ..._routePoints, target.point]
+                          : [_userLocation, target.point],
                       color: const Color(0xFF00E676),
                       strokeWidth: 5.0,
                       borderColor: const Color(0xFF00E676),
@@ -564,19 +714,21 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                         _showLocationAlert();
                       },
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFFFF9F0A)),
                   ),
                   child: Text(
-                    _locIssue == _LocIssue.none
-                        ? 'Finding your location...'
-                        : 'Location is off - tap to turn on (demo location shown)',
-                    style:
-                        const TextStyle(color: Color(0xFFFF9F0A), fontSize: 11),
+                    _locIssue == _LocIssue.none ? 'Finding your location...' : 'Location is off - tap to turn on (demo location shown)',
+                    style: const TextStyle(
+                      color: Color(0xFFFF9F0A),
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ),
@@ -587,7 +739,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
             top: 105,
             right: 16,
             child: GestureDetector(
-              onTap: target == null ? null : () => _navigateToBatterySaver(target),
+              onTap: target == null
+                  ? null
+                  : () => _navigateToBatterySaver(target),
               child: Container(
                 width: 56,
                 height: 56,
@@ -856,7 +1010,6 @@ class _MapLegend extends StatelessWidget {
   }
 }
 
-
 class _BottomActionCard extends StatelessWidget {
   final bool loading;
   final String? errorText;
@@ -934,14 +1087,17 @@ class _BottomActionCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: (hasTarget
-                          ? const Color(0xFF00E676)
-                          : const Color(0xFFFF9F0A))
-                      .withValues(alpha: 0.15),
+                  color:
+                      (hasTarget
+                              ? const Color(0xFF00E676)
+                              : const Color(0xFFFF9F0A))
+                          .withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  hasTarget ? Icons.shield_rounded : Icons.warning_amber_rounded,
+                  hasTarget
+                      ? Icons.shield_rounded
+                      : Icons.warning_amber_rounded,
                   color: hasTarget
                       ? const Color(0xFF00E676)
                       : const Color(0xFFFF9F0A),
@@ -955,8 +1111,10 @@ class _BottomActionCard extends StatelessWidget {
                   children: [
                     Text(
                       subtitle,
-                      style:
-                          const TextStyle(color: Colors.white38, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 12,
+                      ),
                     ),
                     Text(
                       title,
@@ -1040,8 +1198,10 @@ class _BottomActionCard extends StatelessWidget {
                   ),
                 ),
                 onPressed: onCallDmc,
-                icon: const Icon(Icons.phone_in_talk_outlined,
-                    color: Color(0xFFFF9F0A)),
+                icon: const Icon(
+                  Icons.phone_in_talk_outlined,
+                  color: Color(0xFFFF9F0A),
+                ),
                 label: const Text(
                   'CALL DMC HOTLINE 117',
                   style: TextStyle(
