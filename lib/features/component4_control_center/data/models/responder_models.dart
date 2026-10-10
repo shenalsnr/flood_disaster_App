@@ -4,12 +4,7 @@ enum IncidentSeverity { critical, high, medium, low }
 
 enum IncidentStatus { incoming, dispatched, onScene, resolved }
 
-enum UserRole {
-  citizen,
-  volunteer,
-  campLeader,
-  responder,
-}
+enum UserRole { citizen, volunteer, campLeader, responder }
 
 extension UserRoleExtension on UserRole {
   String get displayName {
@@ -77,23 +72,23 @@ class EmergencyTeam {
   });
 
   Map<String, dynamic> toMap() => {
-        'name': name,
-        'status': status,
-        'distance': distance,
-        'eta': eta,
-        'etaMinutes': etaMinutes,
-        'equipment': equipment,
-        'crewCount': crewCount,
-        'leader': leader,
-        'radioChannel': radioChannel,
-        'lat': location.latitude,
-        'lng': location.longitude,
-        'speedKmh': speedKmh,
-        'vehicleType': vehicleType,
-        'callSign': callSign,
-        'phoneNumber': phoneNumber,
-        'fuelLevel': fuelLevel,
-      };
+    'name': name,
+    'status': status,
+    'distance': distance,
+    'eta': eta,
+    'etaMinutes': etaMinutes,
+    'equipment': equipment,
+    'crewCount': crewCount,
+    'leader': leader,
+    'radioChannel': radioChannel,
+    'lat': location.latitude,
+    'lng': location.longitude,
+    'speedKmh': speedKmh,
+    'vehicleType': vehicleType,
+    'callSign': callSign,
+    'phoneNumber': phoneNumber,
+    'fuelLevel': fuelLevel,
+  };
 
   factory EmergencyTeam.fromMap(String id, Map<String, dynamic> m) {
     double d(dynamic v, double f) => v is num ? v.toDouble() : f;
@@ -203,7 +198,7 @@ class IncidentReport {
     required this.reporterName,
     required this.reporterPhone,
     required this.isVerified,
-    String timeAgo = '',
+    this._timeAgo = '',
     this.localId,
     this.reporterEmail = '',
     this.photoUrl,
@@ -218,7 +213,7 @@ class IncidentReport {
     this.priorityLevel,
     this.cancellationReason,
     this.dispatchedAt,
-  }) : _timeAgo = timeAgo;
+  });
 
   /// Short readable id for UI (report code if present, else trimmed doc id).
   String get shortId {
@@ -378,4 +373,3 @@ class UserProfile {
     }
   }
 }
-

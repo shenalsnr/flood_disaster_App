@@ -1,8 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+
 import 'dart:math' as math;
 
 import '../../models/warning_alert.dart';
@@ -73,11 +74,17 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
 
         final district = userData['district'] as String? ?? 'Colombo';
         final city = userData['city'] as String? ?? 'Colombo';
-        String? firestoreName = userData['name'] as String? ?? userData['fullName'] as String?;
-        if (firestoreName == 'Citizen User' || firestoreName == null || firestoreName.isEmpty) {
+        String? firestoreName =
+            userData['name'] as String? ?? userData['fullName'] as String?;
+        if (firestoreName == 'Citizen User' ||
+            firestoreName == null ||
+            firestoreName.isEmpty) {
           firestoreName = null;
         }
-        final citizenName = firestoreName ?? ResponderController().currentUser?.fullName ?? 'Citizen User';
+        final citizenName =
+            firestoreName ??
+            ResponderController().currentUser?.fullName ??
+            'Citizen User';
         final citizenZone =
             userData['floodZone'] as String? ??
             userData['district'] as String? ??
@@ -100,14 +107,15 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
               // City is matched here so broadcasts sent to city 'All' also arrive.
               allAlerts = warningsSnap.data!.docs
                   .map((d) => WarningAlert.fromDoc(d))
-                  .where((w) =>
-                      w.city.toLowerCase() == 'all' ||
-                      w.city.toLowerCase() == city.toLowerCase())
+                  .where(
+                    (w) =>
+                        w.city.toLowerCase() == 'all' ||
+                        w.city.toLowerCase() == city.toLowerCase(),
+                  )
                   .toList();
             }
 
             if (allAlerts.isNotEmpty) {
-
               // Only run reduce if list is not empty, which we know it isn't
               topAlert = allAlerts.reduce(
                 (a, b) =>
@@ -234,20 +242,42 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                         ),
                                       ),
                                       clipBehavior: Clip.hardEdge,
-                                      child: photoUrl != null && photoUrl.isNotEmpty
+                                      child:
+                                          photoUrl != null &&
+                                              photoUrl.isNotEmpty
                                           ? (photoUrl.startsWith('http')
-                                              ? Image.network(
-                                                  photoUrl,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) =>
-                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
-                                                )
-                                              : Image.memory(
-                                                  base64Decode(photoUrl),
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) =>
-                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
-                                                ))
+                                                ? Image.network(
+                                                    photoUrl,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) => const Icon(
+                                                          Icons.person_rounded,
+                                                          color: Color(
+                                                            0xFF00E676,
+                                                          ),
+                                                          size: 22,
+                                                        ),
+                                                  )
+                                                : Image.memory(
+                                                    base64Decode(photoUrl),
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) => const Icon(
+                                                          Icons.person_rounded,
+                                                          color: Color(
+                                                            0xFF00E676,
+                                                          ),
+                                                          size: 22,
+                                                        ),
+                                                  ))
                                           : const Icon(
                                               Icons.person_rounded,
                                               color: Color(0xFF00E676),
@@ -716,10 +746,12 @@ class _PremiumCriticalAlertCard extends StatefulWidget {
   });
 
   @override
-  State<_PremiumCriticalAlertCard> createState() => _PremiumCriticalAlertCardState();
+  State<_PremiumCriticalAlertCard> createState() =>
+      _PremiumCriticalAlertCardState();
 }
 
-class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> with SingleTickerProviderStateMixin {
+class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
 
   static const _gradients = {
@@ -745,14 +777,19 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
 
   @override
   Widget build(BuildContext context) {
-    final gradColors = _gradients[widget.severity] ?? [const Color(0xFFFF1744), const Color(0xFFD50000)];
+    final gradColors =
+        _gradients[widget.severity] ??
+        [const Color(0xFFFF1744), const Color(0xFFD50000)];
     final isCritical = widget.severity == 'Critical';
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: gradColors[1].withValues(alpha: 0.6),
@@ -777,7 +814,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                 ),
               ),
             ),
-            
+
             // Middle layer: Animated Rain & Water
             Positioned.fill(
               child: AnimatedBuilder(
@@ -792,7 +829,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                 },
               ),
             ),
-            
+
             // Top layer: Content
             Padding(
               padding: const EdgeInsets.all(24),
@@ -807,7 +844,11 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                           color: Colors.white.withValues(alpha: 0.25),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
@@ -870,7 +911,11 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      Icon(Icons.access_time_rounded, color: Colors.white.withValues(alpha: 0.7), size: 16),
+                      Icon(
+                        Icons.access_time_rounded,
+                        color: Colors.white.withValues(alpha: 0.7),
+                        size: 16,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         widget.time,
@@ -909,23 +954,29 @@ class _WeatherBackgroundPainter extends CustomPainter {
     final int dropCount = isCritical ? 40 : 20;
     for (int i = 0; i < dropCount; i++) {
       final double x = (i * 27.0) % size.width;
-      final double y = ((i * 53.0) + (animationValue * size.height * 2)) % size.height;
+      final double y =
+          ((i * 53.0) + (animationValue * size.height * 2)) % size.height;
       final double length = 10.0 + (i % 15);
-      canvas.drawLine(Offset(x, y), Offset(x - 2, y + length), paintRain); // slightly angled rain
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x - 2, y + length),
+        paintRain,
+      ); // slightly angled rain
     }
 
     // 2. Draw Back Water Wave (Slower)
     final paintWaterBack = Paint()
       ..color = const Color(0xFF000000).withValues(alpha: 0.15)
       ..style = PaintingStyle.fill;
-      
+
     final pathBack = Path();
     final double baseHeightBack = size.height * 0.75;
     pathBack.moveTo(0, size.height);
     pathBack.lineTo(0, baseHeightBack);
 
     for (double i = 0; i <= size.width; i++) {
-      final waveOffset = math.cos((i / 40) - (animationValue * math.pi * 2)) * 6;
+      final waveOffset =
+          math.cos((i / 40) - (animationValue * math.pi * 2)) * 6;
       pathBack.lineTo(i, baseHeightBack + waveOffset);
     }
     pathBack.lineTo(size.width, size.height);
@@ -943,7 +994,8 @@ class _WeatherBackgroundPainter extends CustomPainter {
     pathFront.lineTo(0, baseHeightFront);
 
     for (double i = 0; i <= size.width; i++) {
-      final waveOffset = math.sin((i / 30) + (animationValue * math.pi * 4)) * 8;
+      final waveOffset =
+          math.sin((i / 30) + (animationValue * math.pi * 4)) * 8;
       pathFront.lineTo(i, baseHeightFront + waveOffset);
     }
     pathFront.lineTo(size.width, size.height);

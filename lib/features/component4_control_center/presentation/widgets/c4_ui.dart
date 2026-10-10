@@ -150,9 +150,12 @@ Future<T?> pushPage<T>(BuildContext context, Widget page, {bool frame = true}) {
     PageRouteBuilder<T>(
       transitionDuration: const Duration(milliseconds: 280),
       reverseTransitionDuration: const Duration(milliseconds: 220),
-      pageBuilder: (_, __, ___) => frame ? ResponsiveFrame(child: page) : page,
-      transitionsBuilder: (_, anim, __, child) {
-        final curved = CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
+      pageBuilder: (_, _, _) => frame ? ResponsiveFrame(child: page) : page,
+      transitionsBuilder: (_, anim, _, child) {
+        final curved = CurvedAnimation(
+          parent: anim,
+          curve: Curves.easeOutCubic,
+        );
         return FadeTransition(
           opacity: curved,
           child: SlideTransition(
@@ -188,7 +191,10 @@ class FadeSlideIn extends StatelessWidget {
       curve: Interval(i * 70 / total, 1.0, curve: Curves.easeOutCubic),
       builder: (context, v, child) => Opacity(
         opacity: v.clamp(0.0, 1.0),
-        child: Transform.translate(offset: Offset(0, 18 * (1 - v)), child: child),
+        child: Transform.translate(
+          offset: Offset(0, 18 * (1 - v)),
+          child: child,
+        ),
       ),
       child: child,
     );
@@ -207,7 +213,7 @@ class AnimatedCount extends StatelessWidget {
       tween: Tween<double>(begin: 0, end: value.toDouble()),
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutCubic,
-      builder: (_, v, __) => Text('${v.round()}', style: style),
+      builder: (_, v, _) => Text('${v.round()}', style: style),
     );
   }
 }
@@ -269,7 +275,7 @@ class _PulseDotState extends State<PulseDot>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) => Container(
+      builder: (_, _) => Container(
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(
@@ -309,14 +315,17 @@ class HazardPhoto extends StatelessWidget {
   });
 
   Widget _asset() => Image.asset(
-        C4.fallbackPhoto(incident.hazardType),
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
-          color: C4.card,
-          child: Icon(C4.hazardIcon(incident.hazardType),
-              color: C4.muted, size: 32),
-        ),
-      );
+    C4.fallbackPhoto(incident.hazardType),
+    fit: BoxFit.cover,
+    errorBuilder: (_, _, _) => Container(
+      color: C4.card,
+      child: Icon(
+        C4.hazardIcon(incident.hazardType),
+        color: C4.muted,
+        size: 32,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +347,7 @@ class HazardPhoto extends StatelessWidget {
                   duration: const Duration(milliseconds: 350),
                   child: child,
                 ),
-                errorBuilder: (_, __, ___) => _asset(),
+                errorBuilder: (_, _, _) => _asset(),
               )
             else
               _asset(),
@@ -369,7 +378,12 @@ class C4Chip extends StatelessWidget {
   final String label;
   final Color color;
   final IconData? icon;
-  const C4Chip({super.key, required this.label, required this.color, this.icon});
+  const C4Chip({
+    super.key,
+    required this.label,
+    required this.color,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
