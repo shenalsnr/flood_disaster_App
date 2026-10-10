@@ -36,8 +36,13 @@ List<_Leader> _leadersFrom(QuerySnapshot<Map<String, dynamic>>? snap) {
     if (m['isActive'] == false) continue;
     final email = (m['email'] ?? d.id).toString();
     final name = (m['fullName'] ?? '').toString().trim();
-    out.add(_Leader(
-        email, name.isEmpty ? email : name, (m['floodZone'] ?? '').toString()));
+    out.add(
+      _Leader(
+        email,
+        name.isEmpty ? email : name,
+        (m['floodZone'] ?? '').toString(),
+      ),
+    );
   }
   out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   return out;
@@ -50,10 +55,9 @@ List<_Leader> _leadersFrom(QuerySnapshot<Map<String, dynamic>>? snap) {
 Future<String?> openSafeZoneEditor(BuildContext context, {String? name}) async {
   var zones = const <SafeZone>[];
   try {
-    zones = await SafeZoneService.instance
-        .watch()
-        .first
-        .timeout(const Duration(seconds: 6));
+    zones = await SafeZoneService.instance.watch().first.timeout(
+      const Duration(seconds: 6),
+    );
   } catch (_) {}
   SafeZone? existing;
   final clean = (name ?? '').trim();
@@ -81,7 +85,10 @@ class SafeZonesScreen extends StatelessWidget {
   const SafeZonesScreen({super.key});
 
   Future<void> _openEditor(
-      BuildContext context, SafeZone? zone, List<SafeZone> zones) async {
+    BuildContext context,
+    SafeZone? zone,
+    List<SafeZone> zones,
+  ) async {
     final messenger = ScaffoldMessenger.of(context);
     final saved = await Navigator.of(context).push<String>(
       MaterialPageRoute(
@@ -92,25 +99,37 @@ class SafeZonesScreen extends StatelessWidget {
       ),
     );
     if (saved != null) {
-      messenger.showSnackBar(SnackBar(
-          content: Text(saved), backgroundColor: _green, showCloseIcon: true));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(saved),
+          backgroundColor: _green,
+          showCloseIcon: true,
+        ),
+      );
     }
   }
 
-  Future<void> _delete(BuildContext context, SafeZone zone,
-      List<_Leader> leaders) async {
+  Future<void> _delete(
+    BuildContext context,
+    SafeZone zone,
+    List<_Leader> leaders,
+  ) async {
     final messenger = ScaffoldMessenger.of(context);
     final assigned = leaders
-        .where((l) =>
-            AdminUserService.campIdFromName(l.zone) == zone.id &&
-            l.zone.isNotEmpty)
+        .where(
+          (l) =>
+              AdminUserService.campIdFromName(l.zone) == zone.id &&
+              l.zone.isNotEmpty,
+        )
         .toList();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _card,
-        title: const Text('Delete safe zone?',
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Delete safe zone?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
           '"${zone.name}" will disappear from the citizens\' Safe Route map.'
           '${assigned.isEmpty ? '' : '\n\nLeaders assigned to it will be left without a camp.'}',
@@ -118,19 +137,23 @@ class SafeZonesScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Delete', style: TextStyle(color: _accent))),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: _accent)),
+          ),
         ],
       ),
     );
     if (ok != true) return;
     try {
       await AdminUserService.instance
-          .deleteCamp(zone.name,
-              unassignEmails: assigned.map((l) => l.email).toList())
+          .deleteCamp(
+            zone.name,
+            unassignEmails: assigned.map((l) => l.email).toList(),
+          )
           .timeout(const Duration(seconds: 8));
     } on TimeoutException {
       // Saved on this phone, it will sync when the connection is back.
@@ -139,7 +162,8 @@ class SafeZonesScreen extends StatelessWidget {
       return;
     }
     messenger.showSnackBar(
-        SnackBar(content: Text('${zone.name} deleted'), showCloseIcon: true));
+      SnackBar(content: Text('${zone.name} deleted'), showCloseIcon: true),
+    );
   }
 
   @override
@@ -156,67 +180,76 @@ class SafeZonesScreen extends StatelessWidget {
               backgroundColor: _bg,
               appBar: AppBar(
                 backgroundColor: _bg,
-                title: const Text('Safe Zones',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                title: const Text(
+                  'Safe Zones',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
               floatingActionButton: FloatingActionButton.extended(
                 backgroundColor: _accent,
                 foregroundColor: Colors.white,
                 onPressed: () => _openEditor(context, null, zones),
                 icon: const Icon(Icons.add_location_alt_outlined),
-                label: const Text('ADD SAFE ZONE',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'ADD SAFE ZONE',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              body: Builder(builder: (context) {
-                if (snap.hasError) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        'Could not load safe zones. Check the Firestore rules '
-                        'for "camps" and "campStatus".\n${snap.error}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: _muted),
+              body: Builder(
+                builder: (context) {
+                  if (snap.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'Could not load safe zones. Check the Firestore rules '
+                          'for "camps" and "campStatus".\n${snap.error}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: _muted),
+                        ),
                       ),
-                    ),
-                  );
-                }
-                if (!snap.hasData) {
-                  return const Center(
-                      child: CircularProgressIndicator(color: _accent));
-                }
-                if (zones.isEmpty) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text(
-                        'No safe zones yet.\nTap ADD SAFE ZONE to place one on the map.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: _muted),
-                      ),
-                    ),
-                  );
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                  itemCount: zones.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, i) {
-                    final z = zones[i];
-                    final zoneLeaders = leaders
-                        .where((l) =>
-                            l.zone.isNotEmpty &&
-                            AdminUserService.campIdFromName(l.zone) == z.id)
-                        .toList();
-                    return _ZoneCard(
-                      zone: z,
-                      leaderNames: zoneLeaders.map((l) => l.name).toList(),
-                      onEdit: () => _openEditor(context, z, zones),
-                      onDelete: () => _delete(context, z, leaders),
                     );
-                  },
-                );
-              }),
+                  }
+                  if (!snap.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: _accent),
+                    );
+                  }
+                  if (zones.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text(
+                          'No safe zones yet.\nTap ADD SAFE ZONE to place one on the map.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: _muted),
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                    itemCount: zones.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (context, i) {
+                      final z = zones[i];
+                      final zoneLeaders = leaders
+                          .where(
+                            (l) =>
+                                l.zone.isNotEmpty &&
+                                AdminUserService.campIdFromName(l.zone) == z.id,
+                          )
+                          .toList();
+                      return _ZoneCard(
+                        zone: z,
+                        leaderNames: zoneLeaders.map((l) => l.name).toList(),
+                        onEdit: () => _openEditor(context, z, zones),
+                        onDelete: () => _delete(context, z, leaders),
+                      );
+                    },
+                  );
+                },
+              ),
             );
           },
         );
@@ -267,28 +300,39 @@ class _ZoneCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.location_on,
-                    color: zone.hasLocation ? _green : _muted, size: 22),
+                Icon(
+                  Icons.location_on,
+                  color: zone.hasLocation ? _green : _muted,
+                  size: 22,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(zone.name,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold)),
+                  child: Text(
+                    zone.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: stateColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(zone.stateLabel,
-                      style: TextStyle(
-                          color: stateColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold)),
+                  child: Text(
+                    zone.stateLabel,
+                    style: TextStyle(
+                      color: stateColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 PopupMenuButton<String>(
                   color: _card,
@@ -368,17 +412,20 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
   static const LatLng _defaultCenter = LatLng(6.6828, 80.3992); // Ratnapura
 
   late final TextEditingController _name = TextEditingController(
-      text: widget.zone?.name ?? widget.presetName ?? '');
+    text: widget.zone?.name ?? widget.presetName ?? '',
+  );
   late final TextEditingController _capacity = TextEditingController(
-      text: (widget.zone?.capacity ?? 0) > 0
-          ? widget.zone!.capacity.toString()
-          : '');
+    text: (widget.zone?.capacity ?? 0) > 0
+        ? widget.zone!.capacity.toString()
+        : '',
+  );
   final TextEditingController _search = TextEditingController();
   final MapController _map = MapController();
   bool _mapReady = false;
 
-  late LatLng? _point =
-      widget.zone?.hasLocation == true ? widget.zone!.point : null;
+  late LatLng? _point = widget.zone?.hasLocation == true
+      ? widget.zone!.point
+      : null;
   List<_Place> _results = const [];
   bool _searching = false;
   String? _searchMsg;
@@ -450,8 +497,10 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _searchMsg =
-          'Search failed. Check the internet connection and try again.');
+      setState(
+        () => _searchMsg =
+            'Search failed. Check the internet connection and try again.',
+      );
     } finally {
       if (mounted) setState(() => _searching = false);
     }
@@ -489,8 +538,10 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
     }
     final id = AdminUserService.campIdFromName(name);
     if (!_isEdit && widget.existingIds.contains(id)) {
-      setState(() => _error =
-          '"$name" already exists. Open it from the list to edit it.');
+      setState(
+        () => _error =
+            '"$name" already exists. Open it from the list to edit it.',
+      );
       return;
     }
 
@@ -532,14 +583,17 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
         filled: true,
         fillColor: _card,
         enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _border)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _border),
+        ),
         focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _accent)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _accent),
+        ),
         disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _border)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _border),
+        ),
       );
 
   @override
@@ -548,8 +602,10 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
       backgroundColor: _bg,
       appBar: AppBar(
         backgroundColor: _bg,
-        title: Text(_isEdit ? 'Edit safe zone' : 'Add safe zone',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          _isEdit ? 'Edit safe zone' : 'Add safe zone',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: Column(
         children: [
@@ -598,7 +654,9 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: _accent),
+                                strokeWidth: 2,
+                                color: _accent,
+                              ),
                             ),
                           )
                         : IconButton(
@@ -623,8 +681,9 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                             ? 'Search a place above, or tap the map to place it'
                             : 'Location: ${_point!.latitude.toStringAsFixed(5)}, ${_point!.longitude.toStringAsFixed(5)}  (tap the map to adjust)'),
                     style: TextStyle(
-                        color: _searchMsg == null ? _muted : _orange,
-                        fontSize: 12),
+                      color: _searchMsg == null ? _muted : _orange,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
@@ -666,8 +725,11 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                               width: 48,
                               height: 48,
                               alignment: Alignment.topCenter,
-                              child: const Icon(Icons.location_pin,
-                                  color: _green, size: 44),
+                              child: const Icon(
+                                Icons.location_pin,
+                                color: _green,
+                                size: 44,
+                              ),
                             ),
                           ],
                         ),
@@ -690,24 +752,35 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
                         itemCount: _results.length,
-                        separatorBuilder: (_, __) =>
+                        separatorBuilder: (_, _) =>
                             const Divider(height: 1, color: _border),
                         itemBuilder: (_, i) {
                           final r = _results[i];
                           return ListTile(
                             dense: true,
-                            leading: const Icon(Icons.place_outlined,
-                                color: _accent, size: 20),
-                            title: Text(r.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13)),
-                            subtitle: Text(r.label,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: _muted, fontSize: 11)),
+                            leading: const Icon(
+                              Icons.place_outlined,
+                              color: _accent,
+                              size: 20,
+                            ),
+                            title: Text(
+                              r.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                            subtitle: Text(
+                              r.label,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: _muted,
+                                fontSize: 11,
+                              ),
+                            ),
                             onTap: () => _choose(r),
                           );
                         },
@@ -720,8 +793,10 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
           if (_error != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(_error!,
-                  style: const TextStyle(color: _accent, fontSize: 12)),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: _accent, fontSize: 12),
+              ),
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
@@ -733,7 +808,8 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                   backgroundColor: _accent,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: _saving ? null : _save,
                 child: _saving
@@ -741,9 +817,14 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : Text(_isEdit ? 'SAVE CHANGES' : 'ADD SAFE ZONE',
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        _isEdit ? 'SAVE CHANGES' : 'ADD SAFE ZONE',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
               ),
             ),
           ),

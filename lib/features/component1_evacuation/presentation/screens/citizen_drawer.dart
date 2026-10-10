@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'citizen_profile_screen.dart';
 import 'citizen_settings_screen.dart';
-import 'c1_admin_metrics_screen.dart';
+
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
@@ -230,20 +230,7 @@ class CitizenDrawer extends StatelessWidget {
                 },
               ),
 
-              // ── Admin Tools Shortcut (For Presentation) ─────────────────────
-              _DrawerItem(
-                icon: Icons.admin_panel_settings_rounded,
-                title: 'Admin Dashboard',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const C1AdminMetricsScreen(),
-                    ),
-                  );
-                },
-              ),
+
 
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
