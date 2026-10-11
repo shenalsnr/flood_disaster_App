@@ -8,6 +8,7 @@ import '../../data/services/admin_user_service.dart';
 import '../controllers/responder_controller.dart';
 import '../../../component1_evacuation/services/safe_zone_service.dart';
 import 'safe_zones_screen.dart';
+import '../../../../core/services/email_service.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// Administrator panel: create staff accounts with a role, see staff and
@@ -297,7 +298,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   }
 
   Future<void> _addStaff() async {
-    final created = await showDialog<bool>(
+    final created = await showDialog<Map<String, String>>(
       context: context,
       builder: (_) => _AddStaffDialog(
         service: _service,
@@ -305,7 +306,51 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         camps: _allCamps,
       ),
     );
-    if (created == true) _toast('Staff account created');
+    if (created == null) return;
+    _toast('Staff account created');
+    final email = created['email'] ?? '';
+    final name = created['name'] ?? '';
+    final role = AdminUserService.roleLabel(created['role'] ?? '');
+    final camp = created['camp'] ?? '';
+    final password = created['password'] ?? '';
+    if (EmailService.isConfigured) {
+      final err = await EmailService.sendStaffAccount(
+        toEmail: email,
+        toName: name,
+        role: role,
+        camp: camp,
+        password: password,
+      );
+      if (err == null) {
+        _toast('Account details emailed to $email');
+      } else if (mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Email was not sent'),
+            content: SingleChildScrollView(
+              child: SelectableText(
+                  'The account was created, but the email failed.\n\n$err\n\n'
+                  'Password for $email: $password'),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+            ],
+          ),
+        );
+      }
+    } else {
+      // Email service not configured yet: open the email app, ready to send.
+      final ok = await EmailService.openEmailApp(
+        toEmail: email,
+        toName: name,
+        role: role,
+        camp: camp,
+        password: password,
+      );
+      if (!ok) _toast('Could not open an email app. Give the password manually.');
+    }
   }
 
   static String _generatePassword() {
@@ -748,7 +793,13 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
           )
           .timeout(const Duration(seconds: 10));
       if (!mounted) return;
-      Navigator.pop(context, true);
+      Navigator.pop(context, <String, String>{
+        'email': _email.text.trim().toLowerCase(),
+        'name': _name.text.trim(),
+        'role': _role,
+        'camp': _role == 'campLeader' ? (_camp ?? '') : '',
+        'password': _password.text.trim(),
+      });
     } on StateError catch (e) {
       setState(() {
         _saving = false;
