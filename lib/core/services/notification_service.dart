@@ -107,6 +107,41 @@ class NotificationService {
     );
   }
 
+  /// Sound + phone notification for a broadcast warning sent from the
+  /// Control Center (Component 4) and shown to camp leaders (Component 3).
+  Future<void> showBroadcastAlert({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    try {
+      HapticFeedback.heavyImpact();
+      SystemSound.play(SystemSoundType.alert);
+    } catch (_) {}
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        'c4_broadcast_alerts',
+        'Control Center Alerts',
+        channelDescription: 'Warnings broadcast by the Disaster Control Center.',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        enableLights: true,
+        color: Color(0xFFFF1744),
+      );
+      await _localNotifications.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(android: androidDetails),
+        payload: 'c4_broadcast',
+      );
+    } catch (e) {
+      debugPrint('Broadcast notification failed: $e');
+    }
+  }
+
   /// Displays an in-app banner at the top of the current screen.
   void _showInAppSyncBanner({
     required String title,

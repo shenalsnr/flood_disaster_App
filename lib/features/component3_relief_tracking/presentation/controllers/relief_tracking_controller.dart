@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Color;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../data/models/relief_item_model.dart';
 import '../../data/models/evacuee_model.dart';
 import '../../data/services/firestore_service.dart';
@@ -18,13 +22,72 @@ class ReliefTrackingController extends ChangeNotifier {
     campId = campIdFromName(campName);
     _auth.addListener(_onAuthChanged);
     _startSync();
+    _watchAssignment();
   }
 
   /// The logged-in user (set by the login screen). The leader's name, role
   /// and photo shown in this component come from here.
   final ResponderController _auth = ResponderController();
 
-  void _onAuthChanged() => notifyListeners();
+  void _onAuthChanged() {
+    // Until the live account listener is running, follow the login profile
+    // (it may finish loading after this screen was created).
+    if (_userSub == null) {
+      final u = _auth.currentUser;
+      if (u != null) _applyZone(u.floodZone, u.role);
+      _watchAssignment();
+    }
+    notifyListeners();
+  }
+
+  StreamSubscription<dynamic>? _userSub;
+  String? _watchedEmail;
+
+  /// Follows the leader's account in Firestore, so a camp the administrator
+  /// assigns (or changes) shows up straight away, without logging in again.
+  void _watchAssignment() {
+    final email = (_auth.currentUser?.email ?? '').trim().toLowerCase();
+    if (email.isEmpty || email == _watchedEmail) return;
+    _watchedEmail = email;
+    _userSub?.cancel();
+    try {
+      _userSub = FirebaseFirestore.instance
+          .collection('users')
+          .doc(email)
+          .snapshots()
+          .listen((snap) {
+        final d = snap.data();
+        if (d == null) return;
+        _applyZone((d['floodZone'] ?? '').toString(), (d['role'] ?? '').toString());
+      }, onError: (Object e) => debugPrint('Assignment sync error: $e'));
+    } catch (e) {
+      debugPrint('Assignment sync not started: $e');
+    }
+  }
+
+  /// Switches the whole dashboard to the camp named [zone] (or to "No camp
+  /// assigned") and restarts the camp-based live data.
+  void _applyZone(String zone, String role) {
+    final z = zone.trim();
+    final newName = (role == 'campLeader' && z.isNotEmpty) ? z : 'No camp assigned';
+    if (newName == campName) return;
+    campName = newName;
+    campId = campIdFromName(newName);
+    chatCamp = newName;
+    inventoryItems = [];
+    evacueeCount = 0;
+    maxCapacity = 0;
+    isShelterClosed = false;
+    activeRequest = null;
+    showTruckCard = false;
+    _statusSub?.cancel();
+    _itemsSub?.cancel();
+    _requestsSub?.cancel();
+    _warnSub?.cancel();
+    _incSub?.cancel();
+    _startSync();
+    notifyListeners();
+  }
 
   // Dr. Rohan Silva - Camp Info State
   String get leaderName {
@@ -76,7 +139,7 @@ class ReliefTrackingController extends ChangeNotifier {
   // --------------------------------------------------------
   /// Stable id derived from the camp's name, so every leader assigned to the
   /// same camp shares the same data (e.g. "Camp Nēraya" -> camp_neraya).
-  late final String campId;
+  late String campId;
 
   static String campIdFromName(String name) {
     const map = {
@@ -101,6 +164,8 @@ class ReliefTrackingController extends ChangeNotifier {
   StreamSubscription<dynamic>? _statusSub;
   StreamSubscription<dynamic>? _itemsSub;
   StreamSubscription<dynamic>? _requestsSub;
+  StreamSubscription<dynamic>? _warnSub;
+  StreamSubscription<dynamic>? _incSub;
 
   /// The camp's newest supply request that is not finished yet (null when
   /// there is none). Its `status` moves pending -> dispatched (truck assigned,
@@ -222,6 +287,8 @@ class ReliefTrackingController extends ChangeNotifier {
       }, onError: (Object e) {
         debugPrint('Supply requests sync error: $e');
       });
+      _startWarningSync();
+      _startIncidentSync();
     } catch (e) {
       // Firebase unavailable (e.g. not initialised): keep working locally.
       debugPrint('Sync not started: $e');
@@ -298,6 +365,9 @@ class ReliefTrackingController extends ChangeNotifier {
     _statusSub?.cancel();
     _itemsSub?.cancel();
     _requestsSub?.cancel();
+    _warnSub?.cancel();
+    _incSub?.cancel();
+    _userSub?.cancel();
     super.dispose();
   }
 
@@ -372,7 +442,247 @@ class ReliefTrackingController extends ChangeNotifier {
   // Alerts shown on the Alerts tab (filled from real events only).
   List<Map<String, dynamic>> alertList = [];
 
+  /// Official warnings broadcast from the Control Center (Component 4) or the
+  /// Component 1 admin, read live from the Firestore `warnings` collection.
+  List<Map<String, dynamic>> warningAlerts = [];
+  final Set<String> _dismissedWarnings = {};
+  List<Map<String, dynamic>> _warningsRaw = [];
+
+  /// Everything shown on the Alerts tab: broadcast warnings first, then the
+  /// camp's own alerts.
+  List<Map<String, dynamic>> get allAlerts =>
+      [...warningAlerts, ...incidentAlerts, ...stockAlerts, ...alertList];
+
+  final Set<String> _dismissedStock = {};
+
+  /// Real stock alerts of this camp: empty items (critical) and low items,
+  /// except items that already have an open supply request.
+  List<Map<String, dynamic>> get stockAlerts {
+    final out = <Map<String, dynamic>>[];
+    for (final i in inventoryItems) {
+      if (i.status == StockStatus.adequate || hasOpenRequest(i)) continue;
+      final id = 'stock_${i.id}';
+      if (_dismissedStock.contains(id)) continue;
+      final empty = i.status == StockStatus.critical;
+      out.add({
+        'id': id,
+        'itemId': i.id,
+        'type': empty ? 'critical' : 'low',
+        'title': empty ? '${i.name} - Depleted' : '${i.name} - Low Stock',
+        'subtitle': empty
+            ? '$campName: ${i.name} is almost finished. Immediate resupply required.'
+            : '$campName: ${i.name} is below its minimum level. Restock recommended.',
+        'time': i.lastUpdated.isEmpty ? '' : i.lastUpdated,
+        'actionText': empty ? 'DISPATCH SUPPLY' : 'REQUEST SUPPLY',
+      });
+    }
+    return out;
+  }
+
+  void _startWarningSync() {
+    _warnSub = FirebaseFirestore.instance
+        .collection('warnings')
+        .snapshots()
+        .listen((snap) {
+      final list = <Map<String, dynamic>>[];
+      for (final d in snap.docs) {
+        final m = d.data();
+        // Only warnings broadcast from the Control Center (Component 4).
+        if (m['source'] != 'dispatcher') continue;
+        final ts = (m['issuedTimestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
+        list.add({...m, '_id': d.id, '_ts': ts});
+      }
+      list.sort((a, b) =>
+          (b['_ts'] as DateTime).compareTo(a['_ts'] as DateTime));
+      _warningsRaw = list.take(20).toList();
+      _rebuildWarningAlerts();
+      _notifyNewWarnings();
+    }, onError: (Object e) => debugPrint('Warnings sync error: $e'));
+  }
+
+  // ---- Incidents approved / dispatched in the Control Center (C4) --------
+  List<Map<String, dynamic>> incidentAlerts = [];
+  List<Map<String, dynamic>> _incidentsRaw = [];
+  final Set<String> _dismissedIncidents = {};
+  int? _lastSeenIncidentMs;
+
+  /// Hazard reports the Control Center has taken up (a response team was
+  /// dispatched / is on scene). Resolved or archived ones disappear.
+  void _startIncidentSync() {
+    _incSub = FirebaseFirestore.instance
+        .collection('hazard_reports')
+        .snapshots()
+        .listen((snap) {
+      final list = <Map<String, dynamic>>[];
+      for (final d in snap.docs) {
+        final m = d.data();
+        final st = m['dispatchStatus'];
+        if (st != 'dispatched' && st != 'onScene') continue;
+        if (m['archived'] == true) continue;
+        final ts = (m['dispatchedAt'] as Timestamp?)?.toDate() ??
+            (m['timestamp'] as Timestamp?)?.toDate() ??
+            DateTime.now();
+        list.add({...m, '_id': d.id, '_ts': ts});
+      }
+      list.sort((a, b) =>
+          (b['_ts'] as DateTime).compareTo(a['_ts'] as DateTime));
+      _incidentsRaw = list.take(20).toList();
+      _rebuildIncidentAlerts();
+      _notifyNewIncidents();
+    }, onError: (Object e) => debugPrint('Incident sync error: $e'));
+  }
+
+  String _incidentTitle(Map<String, dynamic> m) {
+    final sev = (m['severity'] ?? '').toString();
+    final hazard = (m['hazardType'] ?? 'Incident').toString();
+    final prefix = sev.isEmpty ? '' : '${sev.toUpperCase()} · ';
+    return '$prefix$hazard incident';
+  }
+
+  String _incidentBody(Map<String, dynamic> m) {
+    final loc = (m['location'] ?? '').toString().trim();
+    final team = (m['assignedUnitName'] ?? '').toString().trim();
+    final onScene = m['dispatchStatus'] == 'onScene';
+    final parts = <String>[
+      if (loc.isNotEmpty) 'Location: $loc',
+      if (team.isNotEmpty) onScene ? '$team is on scene' : '$team dispatched',
+    ];
+    return parts.isEmpty ? 'Approved by the Control Center.' : parts.join('\n');
+  }
+
+  void _rebuildIncidentAlerts() {
+    String two(int n) => n.toString().padLeft(2, '0');
+    incidentAlerts = _incidentsRaw
+        .where((m) => !_dismissedIncidents.contains(m['_id']))
+        .map((m) {
+      final sev = (m['severity'] ?? '').toString().toLowerCase();
+      final ts = m['_ts'] as DateTime;
+      final color = sev.contains('critical')
+          ? const Color(0xFFFF1744)
+          : sev.contains('high')
+              ? const Color(0xFFFF6D00)
+              : const Color(0xFFFF9F0A);
+      return <String, dynamic>{
+        'id': 'inc_${m['_id']}',
+        'type': 'incident',
+        'color': color,
+        'title': _incidentTitle(m),
+        'subtitle': _incidentBody(m),
+        'time': '${two(ts.day)}/${two(ts.month)} ${two(ts.hour)}:${two(ts.minute)}',
+        'actionText': '',
+      };
+    }).toList();
+    notifyListeners();
+  }
+
+  Future<void> _notifyNewIncidents() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _lastSeenIncidentMs ??= prefs.getInt('c3_last_incident_ms') ??
+          DateTime.now().millisecondsSinceEpoch;
+      final since = _lastSeenIncidentMs!;
+      var newest = since;
+      final fresh = _incidentsRaw
+          .where((m) => (m['_ts'] as DateTime).millisecondsSinceEpoch > since)
+          .toList()
+          .reversed;
+      for (final m in fresh) {
+        final ts = (m['_ts'] as DateTime).millisecondsSinceEpoch;
+        if (ts > newest) newest = ts;
+        await NotificationService.instance.showBroadcastAlert(
+          id: (ts ~/ 1000) + 7,
+          title: '\u{1F6A8} ${_incidentTitle(m)}',
+          body: _incidentBody(m).replaceAll('\n', ' · '),
+        );
+      }
+      _lastSeenIncidentMs = newest;
+      await prefs.setInt('c3_last_incident_ms', newest);
+    } catch (e) {
+      debugPrint('Incident notify failed: $e');
+    }
+  }
+
+  static const _lastSeenKey = 'c3_last_warning_ms';
+  int? _lastSeenMs;
+
+  /// Sound + phone notification for every broadcast that arrived since the
+  /// last one this phone was told about (also catches ones that came while
+  /// the app was closed, the next time it opens).
+  Future<void> _notifyNewWarnings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _lastSeenMs ??= prefs.getInt(_lastSeenKey) ?? DateTime.now().millisecondsSinceEpoch;
+      final since = _lastSeenMs!;
+      var newest = since;
+      final fresh = _warningsRaw
+          .where((m) => (m['_ts'] as DateTime).millisecondsSinceEpoch > since)
+          .toList()
+          .reversed; // oldest first
+      for (final m in fresh) {
+        final ts = (m['_ts'] as DateTime).millisecondsSinceEpoch;
+        if (ts > newest) newest = ts;
+        final sev = (m['severity'] ?? 'Warning').toString();
+        final hazard = (m['hazardType'] ?? 'Warning').toString();
+        final place = (m['areaName'] ?? m['locationZone'] ?? '').toString().trim();
+        final desc = (m['description'] ?? '').toString().trim();
+        await NotificationService.instance.showBroadcastAlert(
+          id: ts ~/ 1000,
+          title: '\u{1F6A8} ${sev.toUpperCase()} - $hazard',
+          body: place.isEmpty ? desc : '$desc (Area: $place)',
+        );
+      }
+      _lastSeenMs = newest;
+      await prefs.setInt(_lastSeenKey, newest);
+    } catch (e) {
+      debugPrint('Warning notify failed: $e');
+    }
+  }
+
+  void _rebuildWarningAlerts() {
+    String two(int n) => n.toString().padLeft(2, '0');
+    warningAlerts = _warningsRaw
+        .where((m) => !_dismissedWarnings.contains(m['_id']))
+        .map((m) {
+      final sev = (m['severity'] ?? 'Warning').toString();
+      final ts = m['_ts'] as DateTime;
+      final hazard = (m['hazardType'] ?? 'Warning').toString();
+      final place = (m['areaName'] ?? m['locationZone'] ?? '').toString().trim();
+      final desc = (m['description'] ?? '').toString().trim();
+      final color = sev.toLowerCase() == 'critical'
+          ? const Color(0xFFFF1744)
+          : sev.toLowerCase() == 'watch'
+              ? const Color(0xFF40C4FF)
+              : const Color(0xFFFF9F0A);
+      return <String, dynamic>{
+        'id': 'warn_${m['_id']}',
+        'type': 'broadcast',
+        'severity': sev.toLowerCase(),
+        'color': color,
+        'title': '${sev.toUpperCase()} · $hazard',
+        'subtitle': place.isEmpty ? desc : (desc.isEmpty ? place : '$desc\nArea: $place'),
+        'time': '${two(ts.day)}/${two(ts.month)} ${two(ts.hour)}:${two(ts.minute)}',
+        'actionText': '',
+      };
+    }).toList();
+    notifyListeners();
+  }
+
   void dismissAlert(String id) {
+    if (id.startsWith('warn_')) {
+      _dismissedWarnings.add(id.substring(5));
+      _rebuildWarningAlerts();
+      return;
+    }
+    if (id.startsWith('inc_')) {
+      _dismissedIncidents.add(id.substring(4));
+      _rebuildIncidentAlerts();
+      return;
+    }
+    if (id.startsWith('stock_')) {
+      _dismissedStock.add(id);
+      notifyListeners();
+      return;
+    }
     alertList.removeWhere((a) => a['id'] == id);
     notifyListeners();
   }
@@ -382,7 +692,7 @@ class ReliefTrackingController extends ChangeNotifier {
 
   // Filtering State
   String selectedSupplyFilter = 'All'; // 'All' | 'Depleted' | 'Low' | 'Adequate'
-  String selectedAlertFilter = 'All'; // 'All' | 'Critical' | 'Low Stock' | 'Logs'
+  String selectedAlertFilter = 'All'; // 'All' | 'Warnings' | 'Critical' | 'Low Stock' | 'Logs'
   String inventorySearchQuery = '';
 
   List<ReliefItemModel> get filteredInventory {
@@ -401,17 +711,25 @@ class ReliefTrackingController extends ChangeNotifier {
   }
 
   List<Map<String, dynamic>> get filteredAlerts {
-    return alertList.where((alert) {
-      if (selectedAlertFilter == 'Critical') {
-        return alert['type'] == 'critical';
-      } else if (selectedAlertFilter == 'Low Stock') {
-        return alert['type'] == 'low';
-      } else if (selectedAlertFilter == 'Logs') {
-        return alert['type'] == 'logs';
+    return allAlerts.where((alert) {
+      switch (selectedAlertFilter) {
+        case 'Warnings':
+          return alert['type'] == 'broadcast';
+        case 'Incidents':
+          return alert['type'] == 'incident';
+        case 'Critical':
+          return alert['type'] == 'critical';
+        case 'Low Stock':
+          return alert['type'] == 'low';
+        case 'Logs':
+          return alert['type'] == 'logs';
       }
       return true;
     }).toList();
   }
+
+  int alertCount(String type) =>
+      allAlerts.where((a) => a['type'] == type).length;
 
   // Stock Actions
   void updateStockQuantity(String id, double delta) {

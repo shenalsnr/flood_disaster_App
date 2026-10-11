@@ -685,10 +685,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildAlertFilterChip('All', 'All ${_controller.alertList.length}', _controller.selectedAlertFilter == 'All', activeColor: const Color(0xFFFF1744)),
-              _buildAlertFilterChip('Critical', 'Critical ${_controller.alertList.where((a) => a['type'] == 'critical').length}', _controller.selectedAlertFilter == 'Critical'),
-              _buildAlertFilterChip('Low Stock', 'Low Stock ${_controller.alertList.where((a) => a['type'] == 'low').length}', _controller.selectedAlertFilter == 'Low Stock'),
-              _buildAlertFilterChip('Logs', 'Logs ${_controller.alertList.where((a) => a['type'] == 'logs').length}', _controller.selectedAlertFilter == 'Logs'),
+              _buildAlertFilterChip('All', 'All ${_controller.allAlerts.length}', _controller.selectedAlertFilter == 'All', activeColor: const Color(0xFFFF1744)),
+              _buildAlertFilterChip('Warnings', 'Warnings ${_controller.alertCount('broadcast')}', _controller.selectedAlertFilter == 'Warnings', activeColor: const Color(0xFFFF9F0A)),
+              _buildAlertFilterChip('Incidents', 'Incidents ${_controller.alertCount('incident')}', _controller.selectedAlertFilter == 'Incidents', activeColor: const Color(0xFFFF6D00)),
+              _buildAlertFilterChip('Critical', 'Critical ${_controller.alertCount('critical')}', _controller.selectedAlertFilter == 'Critical'),
+              _buildAlertFilterChip('Low Stock', 'Low Stock ${_controller.alertCount('low')}', _controller.selectedAlertFilter == 'Low Stock'),
+              _buildAlertFilterChip('Logs', 'Logs ${_controller.alertCount('logs')}', _controller.selectedAlertFilter == 'Logs'),
             ],
           ),
         ),
@@ -715,8 +717,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           final isCritical = alert['type'] == 'critical';
           final isLow = alert['type'] == 'low';
           final isLogs = alert['type'] == 'logs';
+          final isBroadcast = alert['type'] == 'broadcast' || alert['type'] == 'incident';
 
-          Color cardBorderColor = isCritical
+          Color cardBorderColor = isBroadcast
+              ? (alert['color'] as Color)
+              : isCritical
               ? const Color(0xFFFF1744)
               : isLow
                   ? const Color(0xFFFF9F0A)
@@ -743,7 +748,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        isCritical
+                        alert['type'] == 'incident'
+                            ? Icons.crisis_alert
+                            : isBroadcast
+                            ? Icons.campaign_outlined
+                            : isCritical
                             ? Icons.warning_amber_rounded
                             : isLow
                                 ? Icons.show_chart
@@ -787,6 +796,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 // Action Buttons
                 Row(
                   children: [
+                    if (!isBroadcast) ...[
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -802,6 +812,14 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                             _dispatchToDmc();
                             return;
                           }
+                          if (alert['actionText'] == 'REQUEST SUPPLY') {
+                            final matches = _controller.inventoryItems
+                                .where((i) => i.id == alert['itemId'])
+                                .toList();
+                            _showRequestSupplyDialog(
+                                item: matches.isEmpty ? null : matches.first);
+                            return;
+                          }
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Triggered: ${alert['actionText']}')),
                           );
@@ -813,9 +831,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    ],
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
                           backgroundColor: const Color(0xFF1E293B),
                           foregroundColor: const Color(0xFF8E9BAE),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -967,7 +987,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 child: _buildAccountRow(Icons.person_outline, 'Personal Information', 'Name, photo, contact details'),
               ),
               const Divider(color: Color(0xFF1E293B), height: 16),
-              _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', _controller.campName),
+              _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', _controller.campName, showArrow: false),
               const Divider(color: Color(0xFF1E293B), height: 16),
               _buildAccountRow(
                 Icons.key_outlined,
@@ -1034,7 +1054,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     );
   }
 
-  Widget _buildAccountRow(IconData icon, String title, String subtitle, {String? badgeText}) {
+  Widget _buildAccountRow(IconData icon, String title, String subtitle, {String? badgeText, bool showArrow = true}) {
     return Row(
       children: [
         Container(
@@ -1073,7 +1093,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               style: const TextStyle(color: Color(0xFF00E676), fontSize: 9, fontWeight: FontWeight.bold),
             ),
           )
-        else
+        else if (showArrow)
           const Icon(Icons.chevron_right, color: Color(0xFF5E6D82), size: 18),
       ],
     );
