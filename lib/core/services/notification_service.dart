@@ -24,11 +24,12 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const initSettings = InitializationSettings(android: androidSettings);
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+    );
 
     await _localNotifications.initialize(
       settings: initSettings,
@@ -38,10 +39,8 @@ class NotificationService {
     );
 
     // Request Android 13+ permission
-    final androidPlugin = _localNotifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
+    final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
     }
@@ -101,44 +100,46 @@ class NotificationService {
     }
 
     // 3. Trigger In-App Tactical Banner
-    _showInAppSyncBanner(title: title, body: body, hazardType: hazardType);
+    _showInAppSyncBanner(
+      title: title,
+      body: body,
+      hazardType: hazardType,
+    );
   }
 
-  /// Displays an emergency alert pop-up using local notifications
-  Future<void> showEmergencyAlert({
-    required String hazardType,
-    required String description,
+  /// Sound + phone notification for a broadcast warning sent from the
+  /// Control Center (Component 4) and shown to camp leaders (Component 3).
+  Future<void> showBroadcastAlert({
+    required int id,
+    required String title,
+    required String body,
   }) async {
-    final androidNotificationDetails = AndroidNotificationDetails(
-      'emergency_alerts_channel',
-      'Emergency Alerts',
-      channelDescription:
-          'High priority alerts for natural disasters and emergencies.',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker',
-      fullScreenIntent: true,
-      color: const Color(0xFFFF1744),
-      ledColor: const Color(0xFFFF1744),
-      ledOnMs: 1000,
-      ledOffMs: 500,
-      enableLights: true,
-      enableVibration: true,
-      styleInformation: const BigTextStyleInformation(''),
-    );
-
-    final notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-    );
-
-    final int notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
-    await _localNotifications.show(
-      id: notificationId,
-      title: '🚨 EMERGENCY ALERT: $hazardType',
-      body: description,
-      notificationDetails: notificationDetails,
-    );
+    try {
+      HapticFeedback.heavyImpact();
+      SystemSound.play(SystemSoundType.alert);
+    } catch (_) {}
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        'c4_broadcast_alerts',
+        'Control Center Alerts',
+        channelDescription: 'Warnings broadcast by the Disaster Control Center.',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        enableLights: true,
+        color: Color(0xFFFF1744),
+      );
+      await _localNotifications.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(android: androidDetails),
+        payload: 'c4_broadcast',
+      );
+    } catch (e) {
+      debugPrint('Broadcast notification failed: $e');
+    }
   }
 
   /// Displays an in-app banner at the top of the current screen.
@@ -198,9 +199,7 @@ class NotificationService {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: const Color(0xFF00E676).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),

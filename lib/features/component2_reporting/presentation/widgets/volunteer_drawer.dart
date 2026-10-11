@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../component4_control_center/data/services/session_service.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../screens/c2_admin_hazard_dashboard_screen.dart';
 import '../screens/offline_draft_management_screen.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Navigation Drawer for District Volunteer (Component 2: Hazard Reporting).
 /// Matches the design in Screenshot 3, customized for the Volunteer workflow.
@@ -23,7 +25,7 @@ class VolunteerDrawer extends StatelessWidget {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFF070B14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Color(0xFF334155)),
@@ -66,6 +68,9 @@ class VolunteerDrawer extends StatelessWidget {
 
     if (shouldLogout != true) return;
 
+    // Forget the remembered login so the next app start asks for it again.
+    await SessionService.clear();
+
     try {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
@@ -84,7 +89,7 @@ class VolunteerDrawer extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFF070B14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Color(0xFF334155)),
@@ -138,7 +143,7 @@ class VolunteerDrawer extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFF070B14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Color(0xFF334155)),
@@ -241,20 +246,20 @@ class VolunteerDrawer extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
+                          colors: [Color(0xFFFF9F0A), Color(0xFFFF5722)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF9800).withValues(alpha: 0.35),
+                            color: const Color(0xFFFF9F0A).withValues(alpha: 0.35),
                             blurRadius: 14,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: ClipOval(
-                        child: Image.asset(
+                        child: Unfiltered(child: Image.asset(
                           'assets/images/volunteer_avatar.png',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
@@ -270,7 +275,7 @@ class VolunteerDrawer extends StatelessWidget {
                               ),
                             );
                           },
-                        ),
+                        )),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -473,7 +478,7 @@ class VolunteerDrawer extends StatelessWidget {
   static void _showSettingsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFF070B14),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -501,6 +506,7 @@ class VolunteerDrawer extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
+                const ThemeToggleTile(contentPadding: EdgeInsets.zero),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   activeTrackColor: const Color(0xFF00E676),

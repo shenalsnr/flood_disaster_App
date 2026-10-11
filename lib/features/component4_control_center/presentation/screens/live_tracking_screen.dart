@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import 'resolve_analysis_screen.dart';
+import '../../../../core/theme/appearance.dart';
 
 class LiveTrackingScreen extends StatefulWidget {
   final IncidentReport incident;
@@ -198,7 +199,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             SnackBar(
               content: Text(
                   'Team Reassigned! ${newTeam.name} (${newTeam.callSign}) is now EN ROUTE.'),
-              backgroundColor: const Color(0xFF38BDF8),
+              backgroundColor: const Color(0xFF40C4FF),
             ),
           );
         },
@@ -229,18 +230,18 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           backgroundColor: const Color(0xFF1E293B),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+            side: const BorderSide(color: Color(0xFFFF5252), width: 1.5),
           ),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withValues(alpha: 0.2),
+                  color: const Color(0xFFFF5252).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.cancel_rounded,
-                    color: Color(0xFFEF4444), size: 22),
+                    color: Color(0xFFFF5252), size: 22),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -263,16 +264,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
+                    color: const Color(0xFF131B2B),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                      color: const Color(0xFFFF5252).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.warning_amber_rounded,
-                          color: Color(0xFFEF4444), size: 18),
+                          color: Color(0xFFFF5252), size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -301,14 +302,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
+                    color: const Color(0xFF131B2B),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: const Color(0xFF334155)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: selectedReason,
-                      dropdownColor: const Color(0xFF0F172A),
+                      dropdownColor: const Color(0xFF131B2B),
                       isExpanded: true,
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       items: cancellationReasons.map((r) {
@@ -344,7 +345,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                     hintText: 'Enter optional operator notes...',
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     filled: true,
-                    fillColor: const Color(0xFF0F172A),
+                    fillColor: const Color(0xFF131B2B),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: Color(0xFF334155)),
@@ -362,7 +363,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
+                backgroundColor: const Color(0xFFFF5252),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -383,16 +384,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: const Color(0xFF0F172A),
+                    backgroundColor: const Color(0xFF070B14),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: Color(0xFFEF4444)),
+                      side: const BorderSide(color: Color(0xFFFF5252)),
                     ),
                     content: Row(
                       children: [
                         const Icon(Icons.info_outline,
-                            color: Color(0xFFEF4444), size: 18),
+                            color: Color(0xFFFF5252), size: 18),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -425,7 +426,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF070B14),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B132B),
+        backgroundColor: const Color(0xFF070B14),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
@@ -440,14 +441,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
+                    color: const Color(0xFF40C4FF).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFF38BDF8), width: 0.8),
+                    border: Border.all(color: const Color(0xFF40C4FF), width: 0.8),
                   ),
                   child: const Text(
                     'M4-07',
                     style: TextStyle(
-                      color: Color(0xFF38BDF8),
+                      color: Color(0xFF40C4FF),
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
                     ),
@@ -483,12 +484,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
             decoration: BoxDecoration(
               color: isOnScene
-                  ? const Color(0xFF38BDF8).withValues(alpha: 0.2)
+                  ? const Color(0xFF40C4FF).withValues(alpha: 0.2)
                   : const Color(0xFF00E676).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isOnScene
-                    ? const Color(0xFF38BDF8)
+                    ? const Color(0xFF40C4FF)
                     : const Color(0xFF00E676),
               ),
             ),
@@ -499,7 +500,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   height: 6,
                   decoration: BoxDecoration(
                     color: isOnScene
-                        ? const Color(0xFF38BDF8)
+                        ? const Color(0xFF40C4FF)
                         : const Color(0xFF00E676),
                     shape: BoxShape.circle,
                   ),
@@ -509,7 +510,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   _dispatchStatus,
                   style: TextStyle(
                     color: isOnScene
-                        ? const Color(0xFF38BDF8)
+                        ? const Color(0xFF40C4FF)
                         : const Color(0xFF00E676),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
@@ -524,7 +525,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
       body: Stack(
         children: [
           // FlutterMap
-          FlutterMap(
+          Unfiltered(child: FlutterMap(
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _squadLocation,
@@ -542,7 +543,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 polylines: [
                   Polyline(
                     points: _routePoints,
-                    color: const Color(0xFF38BDF8),
+                    color: const Color(0xFF40C4FF),
                     strokeWidth: 4.5,
                   ),
                 ],
@@ -609,12 +610,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       child: Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEF4444),
+                          color: const Color(0xFFFF5252),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFEF4444)
+                              color: const Color(0xFFFF5252)
                                   .withValues(alpha: 0.6),
                               blurRadius: 14,
                             ),
@@ -628,7 +629,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 ],
               ),
             ],
-          ),
+          )),
 
           // Top Floating Tactical HUD Compass & Coords
           Positioned(
@@ -637,7 +638,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF0B132B).withValues(alpha: 0.9),
+                color: const Color(0xFF131B2B).withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: const Color(0xFF1E293B)),
                 boxShadow: const [
@@ -647,7 +648,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               child: Row(
                 children: [
                   const Icon(Icons.explore_rounded,
-                      color: Color(0xFF38BDF8), size: 14),
+                      color: Color(0xFF40C4FF), size: 14),
                   const SizedBox(width: 6),
                   Text(
                     'HDG: 042° NE • GPS: ${_squadLocation.latitude.toStringAsFixed(3)}°N, ${_squadLocation.longitude.toStringAsFixed(3)}°E',
@@ -672,7 +673,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 FloatingActionButton.small(
                   heroTag: 'center_squad',
                   backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: const Color(0xFF38BDF8),
+                  foregroundColor: const Color(0xFF40C4FF),
                   tooltip: 'Center on Response Squad',
                   onPressed: () => _mapController.move(_squadLocation, 14.5),
                   child: const Icon(Icons.navigation_rounded),
@@ -681,7 +682,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 FloatingActionButton.small(
                   heroTag: 'center_incident',
                   backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: const Color(0xFFEF4444),
+                  foregroundColor: const Color(0xFFFF5252),
                   tooltip: 'Center on Incident',
                   onPressed: () => _mapController.move(_incidentLocation, 14.5),
                   child: const Icon(Icons.crisis_alert_rounded),
@@ -698,7 +699,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF0B132B),
+                color: const Color(0xFF131B2B),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
                 boxShadow: const [
@@ -735,14 +736,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF38BDF8)
+                                    color: const Color(0xFF40C4FF)
                                         .withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     team.callSign,
                                     style: const TextStyle(
-                                      color: Color(0xFF38BDF8),
+                                      color: Color(0xFF40C4FF),
                                       fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -766,11 +767,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F172A),
+                          color: const Color(0xFF131B2B),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: isOnScene
-                                ? const Color(0xFF38BDF8)
+                                ? const Color(0xFF40C4FF)
                                 : const Color(0xFF00E676),
                             width: 1.5,
                           ),
@@ -781,7 +782,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                               isOnScene ? 'ON SCENE' : 'ETA $_minutesLeft MINS',
                               style: TextStyle(
                                 color: isOnScene
-                                    ? const Color(0xFF38BDF8)
+                                    ? const Color(0xFF40C4FF)
                                     : const Color(0xFF00E676),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
@@ -811,7 +812,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Row(
                         children: [
                           const Icon(Icons.water,
-                              color: Color(0xFF38BDF8), size: 12),
+                              color: Color(0xFF40C4FF), size: 12),
                           const SizedBox(width: 4),
                           Text(
                             'Water Level on Route: ${widget.incident.waterDepth}',
@@ -823,7 +824,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Text(
                         '${(_routeProgress * 100).toInt()}% En Route',
                         style: const TextStyle(
-                          color: Color(0xFF38BDF8),
+                          color: Color(0xFF40C4FF),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -838,7 +839,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       backgroundColor: const Color(0xFF1E293B),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isOnScene
-                            ? const Color(0xFF38BDF8)
+                            ? const Color(0xFF40C4FF)
                             : const Color(0xFFFF6D00),
                       ),
                       minHeight: 6,
@@ -854,8 +855,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Expanded(
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF38BDF8),
-                            side: const BorderSide(color: Color(0xFF38BDF8)),
+                            foregroundColor: const Color(0xFF40C4FF),
+                            side: const BorderSide(color: Color(0xFF40C4FF)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -912,14 +913,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.cancel_outlined,
-                              color: const Color(0xFFEF4444)
+                              color: const Color(0xFFFF5252)
                                   .withValues(alpha: 0.8),
                               size: 14),
                           const SizedBox(width: 6),
                           Text(
                             'CANCEL DISPATCH (STAND DOWN / REASSIGN)',
                             style: TextStyle(
-                              color: const Color(0xFFEF4444)
+                              color: const Color(0xFFFF5252)
                                   .withValues(alpha: 0.9),
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -977,9 +978,9 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF0B132B),
+        color: Color(0xFF131B2B),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFF38BDF8), width: 2)),
+        border: Border(top: BorderSide(color: Color(0xFF40C4FF), width: 2)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -999,7 +1000,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           const SizedBox(height: 14),
           Row(
             children: [
-              const Icon(Icons.radio_rounded, color: Color(0xFF38BDF8), size: 24),
+              const Icon(Icons.radio_rounded, color: Color(0xFF40C4FF), size: 24),
               const SizedBox(width: 10),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1142,8 +1143,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           // Direct Phone Call Option
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF38BDF8),
-              side: const BorderSide(color: Color(0xFF38BDF8)),
+              foregroundColor: const Color(0xFF40C4FF),
+              side: const BorderSide(color: Color(0xFF40C4FF)),
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -1276,14 +1277,14 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
+                  color: const Color(0xFF131B2B),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: const Color(0xFF334155)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: reassignReason,
-                    dropdownColor: const Color(0xFF0F172A),
+                    dropdownColor: const Color(0xFF131B2B),
                     isExpanded: true,
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                     items: reasons.map((r) {
@@ -1324,7 +1325,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF0B132B),
+        color: Color(0xFF131B2B),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(top: BorderSide(color: Color(0xFFFF6D00), width: 2)),
       ),
@@ -1464,7 +1465,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     'ON SCENE',
                     Icons.pin_drop_rounded,
                     _selectedStatus == 'ON SCENE',
-                    const Color(0xFF38BDF8),
+                    const Color(0xFF40C4FF),
                     () => setState(() => _selectedStatus = 'ON SCENE'),
                   ),
                 ),
@@ -1489,7 +1490,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               style: const TextStyle(color: Colors.white, fontSize: 12),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF0F172A),
+                fillColor: const Color(0xFF131B2B),
                 hintText: 'Enter mission briefing updates...',
                 hintStyle: const TextStyle(color: Color(0xFF475569)),
                 border: OutlineInputBorder(
@@ -1557,7 +1558,9 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             const SizedBox(height: 8),
 
             SizedBox(
-              height: (MediaQuery.sizeOf(context).height * 0.32).clamp(140.0, 240.0),
+              height: (MediaQuery.sizeOf(context).height * 0.32)
+                  .clamp(140.0, 240.0)
+                  .toDouble(),
               child: ListView(
                 children: widget.availableTeams
                     .where((t) => t.id != widget.currentTeam.id)
@@ -1566,7 +1569,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFF131B2B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: team.isAvailable
@@ -1581,7 +1584,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                               ? Icons.directions_boat
                               : Icons.local_shipping,
                           color: team.isAvailable
-                              ? const Color(0xFF38BDF8)
+                              ? const Color(0xFF40C4FF)
                               : Colors.white24,
                           size: 20,
                         ),
@@ -1652,7 +1655,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? activeColor.withValues(alpha: 0.2)
-              : const Color(0xFF0F172A),
+              : const Color(0xFF131B2B),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected ? activeColor : const Color(0xFF334155),

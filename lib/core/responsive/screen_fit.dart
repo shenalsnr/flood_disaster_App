@@ -1,6 +1,9 @@
+import '../services/offline_sync.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
+import '../theme/appearance.dart';
 
 /// App-wide helpers that make every screen adapt to the phone it runs on
 /// (small / large phones, short screens, landscape, big system font size).
@@ -19,7 +22,7 @@ class ScreenFit {
     );
     return MediaQuery(
       data: mq.copyWith(textScaler: scaler),
-      child: child ?? const SizedBox.shrink(),
+      child: AppearanceScope(child: OfflineBanner(child: child ?? const SizedBox.shrink())),
     );
   }
 

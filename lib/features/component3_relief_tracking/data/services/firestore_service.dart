@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Central Firestore service for Component 3: Relief Tracking.
@@ -42,7 +43,7 @@ class FirestoreService {
       'role': role,
       'campId': campId,
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Real-time stream of all supplier requests, newest first.
@@ -88,7 +89,7 @@ class FirestoreService {
     await _interCampAlerts.doc(docId).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Real-time stream of all inter-camp alerts, newest first.
@@ -119,7 +120,7 @@ class FirestoreService {
       'historyLogs': [],
       'maintenanceRecords': [],
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Update equipment status/condition.
@@ -130,7 +131,7 @@ class FirestoreService {
     await _equipments.doc(id).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Delete an equipment record.
@@ -176,7 +177,7 @@ class FirestoreService {
       'actualArrivalTime': null,
       'routeHistory': [],
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Update truck fields (e.g. status change).
@@ -184,7 +185,7 @@ class FirestoreService {
     await _trucks.doc(id).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Delete a truck record.
@@ -223,7 +224,7 @@ class FirestoreService {
       'maxCapacity': maxCapacity,
       'isShelterClosed': isShelterClosed,
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   // ========================================================
@@ -249,7 +250,7 @@ class FirestoreService {
     await _campStatus.doc(campId).collection('supplyItems').doc(itemId).set({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   // ========================================================
@@ -268,7 +269,7 @@ class FirestoreService {
     await _dmcDispatchRequests.doc(docId).set({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   // ========================================================
@@ -291,7 +292,7 @@ class FirestoreService {
       'campName': campName,
       'text': text,
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Real-time stream of the latest [limit] chat messages, newest first.
@@ -310,7 +311,7 @@ class FirestoreService {
       'text': text,
       'edited': true,
       'editedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// "Delete for everyone": the text is removed for all leaders and the
@@ -319,7 +320,7 @@ class FirestoreService {
     await _leaderChat.doc(messageId).update({
       'text': '',
       'deleted': true,
-    });
+    }).queued();
   }
 
   /// Mark an existing DMC request as resolved (no-op if it does not exist).
@@ -327,7 +328,7 @@ class FirestoreService {
     await _dmcDispatchRequests.doc(docId).update({
       'status': 'resolved',
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Hide requests from the camp's "Sent to DMC" list. The documents stay in

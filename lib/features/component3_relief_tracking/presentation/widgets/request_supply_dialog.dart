@@ -23,9 +23,9 @@ class RequestSupplyDialog extends StatefulWidget {
 }
 
 class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
-  static const Color _card = Color(0xFF131A2A);
-  static const Color _field = Color(0xFF0B101D);
-  static const Color _border = Color(0xFF1E283D);
+  static const Color _card = Color(0xFF131B2B);
+  static const Color _field = Color(0xFF131B2B);
+  static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
 
@@ -206,7 +206,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                     style: const TextStyle(color: Colors.white),
                     decoration: _decoration(
                       'e.g. 50',
-                      suffix: selected?.unit,
+                      suffix: selected == null ? null : selected.unit,
                     ),
                     validator: (v) {
                       final n = double.tryParse((v ?? '').trim());
@@ -222,9 +222,9 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _urgencyChip('normal', 'Normal', 'within a day', const Color(0xFF30D158)),
+                    _urgencyChip('normal', 'Normal', 'within a day', const Color(0xFF00E676)),
                     _urgencyChip('urgent', 'Urgent', 'within hours', const Color(0xFFFF9F0A)),
-                    _urgencyChip('critical', 'Critical', 'right now', const Color(0xFFFF3B30)),
+                    _urgencyChip('critical', 'Critical', 'right now', const Color(0xFFFF1744)),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -241,7 +241,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
 
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Color(0xFFFF3B30), fontSize: 12)),
+                  Text(_error!, style: const TextStyle(color: Color(0xFFFF1744), fontSize: 12)),
                 ],
                 const SizedBox(height: 20),
 
@@ -256,6 +256,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                         backgroundColor: _accent,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -286,7 +287,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
 
   Widget _itemTile(ReliefItemModel item, bool selected) {
     final empty = item.status == StockStatus.critical;
-    final color = empty ? const Color(0xFFFF3B30) : const Color(0xFFFF9F0A);
+    final color = empty ? const Color(0xFFFF1744) : const Color(0xFFFF9F0A);
     final qty = item.quantity == item.quantity.roundToDouble()
         ? item.quantity.round().toString()
         : item.quantity.toString();

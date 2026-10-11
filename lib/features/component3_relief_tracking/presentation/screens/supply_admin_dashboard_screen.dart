@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../data/services/firestore_service.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Supply Admin Dashboard (opened from Settings).
 ///
@@ -16,12 +17,12 @@ class SupplyAdminDashboardScreen extends StatefulWidget {
 }
 
 class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen> {
-  static const Color _bg = Color(0xFF0B101D);
-  static const Color _card = Color(0xFF131A2A);
-  static const Color _border = Color(0xFF1E283D);
+  static const Color _bg = Color(0xFF131B2B);
+  static const Color _card = Color(0xFF131B2B);
+  static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF30D158);
+  static const Color _green = Color(0xFF00E676);
   static const Color _orange = Color(0xFFFF9F0A);
   static const Color _blue = Color(0xFF448AFF);
 
@@ -106,7 +107,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
     } catch (e) {
       messenger.showSnackBar(SnackBar(
         content: Text('Could not save: $e'),
-        backgroundColor: const Color(0xFFFF3B30),
+        backgroundColor: const Color(0xFFFF1744),
         showCloseIcon: true,
       ));
     }
@@ -127,6 +128,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           'Supply Admin Dashboard',
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
+        actions: const [ThemeToggleButton()],
       ),
       body: SafeArea(child: _buildBody()),
     );
@@ -287,7 +289,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
 
     Color urgencyColor = _green;
     if (urgency == 'urgent') urgencyColor = _orange;
-    if (urgency == 'critical' || (isAuto && urgency.isEmpty)) urgencyColor = const Color(0xFFFF3B30);
+    if (urgency == 'critical' || (isAuto && urgency.isEmpty)) urgencyColor = const Color(0xFFFF1744);
 
     final statusColor = status == 'pending'
         ? _orange
@@ -392,9 +394,9 @@ class _DriverFormDialog extends StatefulWidget {
 }
 
 class _DriverFormDialogState extends State<_DriverFormDialog> {
-  static const Color _card = Color(0xFF131A2A);
-  static const Color _field = Color(0xFF0B101D);
-  static const Color _border = Color(0xFF1E283D);
+  static const Color _card = Color(0xFF131B2B);
+  static const Color _field = Color(0xFF131B2B);
+  static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
 

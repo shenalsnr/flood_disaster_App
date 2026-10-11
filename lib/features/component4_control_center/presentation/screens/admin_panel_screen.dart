@@ -8,6 +8,7 @@ import '../../data/services/admin_user_service.dart';
 import '../controllers/responder_controller.dart';
 import '../../../component1_evacuation/services/safe_zone_service.dart';
 import 'safe_zones_screen.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Administrator panel: create staff accounts with a role, see staff and
 /// citizens in separate lists, enable / disable and delete accounts.
@@ -19,12 +20,12 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
-  static const Color _bg = Color(0xFF0B101D);
-  static const Color _card = Color(0xFF131A2A);
-  static const Color _border = Color(0xFF1E283D);
+  static const Color _bg = Color(0xFF131B2B);
+  static const Color _card = Color(0xFF131B2B);
+  static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF30D158);
+  static const Color _green = Color(0xFF00E676);
   static const Color _orange = Color(0xFFFF9F0A);
 
   final _service = AdminUserService.instance;
@@ -340,6 +341,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         title: const Text('Admin Panel',
             style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
+          const ThemeToggleButton(),
           IconButton(
             tooltip: 'Check database connection',
             icon: const Icon(Icons.wifi_find_outlined),
@@ -469,7 +471,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 90),
       itemCount: users.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (_, i) => _tile(users[i], isStaff),
     );
   }
@@ -619,7 +621,7 @@ class _AddStaffDialog extends StatefulWidget {
 }
 
 class _AddStaffDialogState extends State<_AddStaffDialog> {
-  static const Color _card = Color(0xFF131A2A);
+  static const Color _card = Color(0xFF131B2B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
 
@@ -776,10 +778,10 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                     return ChoiceChip(
                       showCheckmark: false,
                       selected: sel,
-                      backgroundColor: const Color(0xFF0B101D),
+                      backgroundColor: const Color(0xFF070B14),
                       selectedColor: _accent.withValues(alpha: 0.2),
                       side: BorderSide(
-                          color: sel ? _accent : const Color(0xFF1E283D)),
+                          color: sel ? _accent : const Color(0xFF1E293B)),
                       label: Text(e.value,
                           style: TextStyle(
                               color: sel ? _accent : Colors.white,
@@ -891,7 +893,7 @@ class _CampPicker extends StatelessWidget {
     final picked = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF131A2A),
+      backgroundColor: const Color(0xFF070B14),
       builder: (_) => _CampSheet(camps: camps, value: value, newKey: _newKey),
     );
     if (picked == null) return;
@@ -935,9 +937,9 @@ class _CampPicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF0B101D),
+          color: const Color(0xFF131B2B),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF1E283D)),
+          border: Border.all(color: const Color(0xFF1E293B)),
         ),
         child: Row(
           children: [
@@ -988,7 +990,7 @@ class _AddCampDialogState extends State<_AddCampDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF131A2A),
+      backgroundColor: const Color(0xFF070B14),
       title: Text(widget.title,
           style: const TextStyle(color: Colors.white, fontSize: 16)),
       content: TextField(
@@ -1034,7 +1036,7 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF131A2A),
+      backgroundColor: const Color(0xFF070B14),
       title: Text('New password for ${widget.name}',
           style: const TextStyle(color: Colors.white, fontSize: 16)),
       content: TextField(
@@ -1098,7 +1100,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
               ? 'On citizen map - ${z.occupied}/${z.capacity} (${z.stateLabel})'
               : 'Not on the map yet - tap the pin to place it',
           style: TextStyle(
-              color: located ? const Color(0xFF30D158) : const Color(0xFFFF9F0A),
+              color: located ? const Color(0xFF00E676) : const Color(0xFFFF9F0A),
               fontSize: 11),
         ),
       ],
@@ -1109,7 +1111,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF131A2A),
+        backgroundColor: const Color(0xFF070B14),
         title: Text(title,
             style: const TextStyle(color: Colors.white, fontSize: 16)),
         content: Text(body, style: const TextStyle(color: Color(0xFF8E9BAE))),
@@ -1181,7 +1183,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    const card = Color(0xFF131A2A);
+    const card = Color(0xFF131B2B);
     const muted = Color(0xFF8E9BAE);
     const accent = Color(0xFFFF5252);
     return AlertDialog(
@@ -1249,7 +1251,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
                                             : Icons.add_location_alt_outlined,
                                         color: (zones[_id(c)]?.hasLocation ??
                                                 false)
-                                            ? const Color(0xFF30D158)
+                                            ? const Color(0xFF00E676)
                                             : const Color(0xFFFF9F0A),
                                         size: 20,
                                       ),

@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -145,9 +146,8 @@ class ResponderController extends ChangeNotifier {
     isVerified: false,
   );
 
-  List<IncidentReport> get _active => _all
-      .where((i) => !i.archived && i.status != IncidentStatus.resolved)
-      .toList();
+  List<IncidentReport> get _active =>
+      _all.where((i) => !i.archived && i.status != IncidentStatus.resolved).toList();
 
   /// All open incidents, auto-ranked by severity (FR10).
   List<IncidentReport> get incidents {
@@ -163,11 +163,8 @@ class ResponderController extends ChangeNotifier {
     final list = _all
         .where((i) => !i.archived && i.status == IncidentStatus.resolved)
         .toList();
-    list.sort(
-      (a, b) => (b.createdAt ?? DateTime(2000)).compareTo(
-        a.createdAt ?? DateTime(2000),
-      ),
-    );
+    list.sort((a, b) => (b.createdAt ?? DateTime(2000))
+        .compareTo(a.createdAt ?? DateTime(2000)));
     return List.unmodifiable(list);
   }
 
@@ -186,9 +183,7 @@ class ResponderController extends ChangeNotifier {
     final sa = a.status == IncidentStatus.incoming ? 0 : 1;
     final sb = b.status == IncidentStatus.incoming ? 0 : 1;
     if (sa != sb) return sa.compareTo(sb);
-    return (b.createdAt ?? DateTime(2000)).compareTo(
-      a.createdAt ?? DateTime(2000),
-    );
+    return (b.createdAt ?? DateTime(2000)).compareTo(a.createdAt ?? DateTime(2000));
   }
 
   List<IncidentReport> get filteredIncidents {
@@ -241,8 +236,7 @@ class ResponderController extends ChangeNotifier {
         _all.add(fresh);
       } else {
         final old = _all[idx];
-        final sameCore =
-            old.severity == fresh.severity &&
+        final sameCore = old.severity == fresh.severity &&
             old.location == fresh.location &&
             old.description == fresh.description &&
             old.hazardType == fresh.hazardType &&
@@ -592,7 +586,7 @@ class ResponderController extends ChangeNotifier {
     await _units.doc(id).set({
       ...team.toMap(),
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// UPDATE a response unit's details.
@@ -600,7 +594,7 @@ class ResponderController extends ChangeNotifier {
     await _units.doc(team.id).set({
       ...team.toMap(),
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   /// DELETE a response unit. Returns an error message, or null on success.
@@ -621,7 +615,7 @@ class ResponderController extends ChangeNotifier {
       await _units.doc(id).set({
         ...data,
         'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).queued();
     } catch (e) {
       debugPrint('[ResponderController] unit write failed: $e');
     }
@@ -636,16 +630,14 @@ class ResponderController extends ChangeNotifier {
   // Dispatch operations (write to hazard_reports + responseUnits)
   // ---------------------------------------------------------------------------
   Future<void> _writeIncident(
-    IncidentReport incident,
-    Map<String, dynamic> data,
-  ) async {
+      IncidentReport incident, Map<String, dynamic> data) async {
     if (incident.isPlaceholder) return;
     try {
       await _reports.doc(incident.id).set({
         ...data,
         'dispatchUpdatedAt': FieldValue.serverTimestamp(),
         'dispatcherEmail': _currentUser?.email ?? '',
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).queued();
     } catch (e) {
       _onErr(e);
     }
@@ -760,8 +752,8 @@ class ResponderController extends ChangeNotifier {
     if (priority != null) incident.priorityLevel = priority;
     notifyListeners();
     _writeIncident(incident, {
-      'dispatchNotes': ?notes,
-      'priorityLevel': ?priority,
+      if (notes != null) 'dispatchNotes': notes,
+      if (priority != null) 'priorityLevel': priority,
     });
   }
 
@@ -886,7 +878,7 @@ class ResponderController extends ChangeNotifier {
       'bbox': bbox,
       'issuedBy': _currentUser?.email ?? '',
       'source': 'dispatcher',
-    });
+    }).queued();
   }
 
   /// UPDATE a broadcast.
@@ -894,7 +886,7 @@ class ResponderController extends ChangeNotifier {
     await _warnings.doc(id).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// DELETE (withdraw) a broadcast.

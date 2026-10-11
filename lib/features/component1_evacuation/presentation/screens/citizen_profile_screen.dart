@@ -1,9 +1,12 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
+import '../../../../core/theme/appearance.dart';
 
 class CitizenProfileScreen extends StatefulWidget {
   const CitizenProfileScreen({super.key});
@@ -35,7 +38,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
       await _firestore.collection('users').doc(email).set(
         {'photoUrl': base64String},
         SetOptions(merge: true),
-      );
+      ).queued();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -155,7 +158,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                               'city': cityCtrl.text,
                               'district': districtCtrl.text,
                               'floodZone': zoneCtrl.text,
-                            }, SetOptions(merge: true));
+                            }, SetOptions(merge: true)).queued();
                             if (ctx.mounted) Navigator.pop(ctx);
                           },
                           child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -276,18 +279,18 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                       clipBehavior: Clip.hardEdge,
                                       child: data['photoUrl'] != null && data['photoUrl'].toString().isNotEmpty
                                           ? (data['photoUrl'].toString().startsWith('http') 
-                                              ? Image.network(
+                                              ? Unfiltered(child: Image.network(
                                                   data['photoUrl'],
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) =>
                                                       const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
-                                                )
-                                              : Image.memory(
+                                                ))
+                                              : Unfiltered(child: Image.memory(
                                                   base64Decode(data['photoUrl']),
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) =>
                                                       const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
-                                                ))
+                                                )))
                                           : const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
                                     ),
                                   ),

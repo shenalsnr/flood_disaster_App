@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../data/services/auth_firebase_service.dart';
@@ -28,6 +30,9 @@ class _StartupGateState extends State<StartupGate> {
             .timeout(const Duration(seconds: 8));
         ResponderController().setCurrentUser(user);
         return dashboardForRole(user.role);
+      } on TimeoutException {
+        // Slow / no connection: keep the saved login for the next start and
+        // show the login page this time.
       } catch (_) {
         // Account removed or disabled, or no data: fall back to the login page.
         await SessionService.clear();
@@ -43,7 +48,7 @@ class _StartupGateState extends State<StartupGate> {
       builder: (context, snap) {
         if (snap.hasData) return snap.data!;
         return const Scaffold(
-          backgroundColor: Color(0xFF0B101D),
+          backgroundColor: Color(0xFF070B14),
           body: Center(
             child: CircularProgressIndicator(color: Color(0xFFFF5252)),
           ),
