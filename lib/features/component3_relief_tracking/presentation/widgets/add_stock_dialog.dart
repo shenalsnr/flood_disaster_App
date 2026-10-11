@@ -19,7 +19,7 @@ class AddStockDialog extends StatefulWidget {
 
 class _AddStockDialogState extends State<AddStockDialog> {
   static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF131B2B);
+  static const Color _field = Color(0xFF070B14);
   static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
@@ -259,6 +259,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                         backgroundColor: _accent,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

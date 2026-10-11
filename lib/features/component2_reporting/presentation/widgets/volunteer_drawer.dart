@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../component4_control_center/data/services/session_service.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../screens/c2_admin_hazard_dashboard_screen.dart';
 import '../screens/offline_draft_management_screen.dart';
@@ -66,6 +67,9 @@ class VolunteerDrawer extends StatelessWidget {
     );
 
     if (shouldLogout != true) return;
+
+    // Forget the remembered login so the next app start asks for it again.
+    await SessionService.clear();
 
     try {
       await FirebaseAuth.instance.signOut();

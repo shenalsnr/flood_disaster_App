@@ -427,14 +427,34 @@ class ReliefTrackingController extends ChangeNotifier {
     }
   }
 
-  void addInventoryItem(ReliefItemModel item) {
+  /// Adds a supply item to the camp's inventory and saves it to Firestore.
+  /// Returns null when it worked, or a readable message when it could not be
+  /// saved (no camp assigned, or the database refused the write).
+  Future<String?> addInventoryItem(ReliefItemModel item) async {
+    if (!hasCamp) {
+      return 'No camp is assigned to this account yet. Ask the administrator '
+          'to assign you to a camp, then add items.';
+    }
     _orderKeys[item.id] = DateTime.now().millisecondsSinceEpoch;
     inventoryItems.insert(0, item);
-    _pushItem(item);
+    notifyListeners();
+    try {
+      // Without internet the write is queued and completes later, so do not
+      // wait for it forever.
+      await FirestoreService.instance
+          .saveCampSupplyItem(campId, item.id, _itemToMap(item))
+          .timeout(const Duration(seconds: 8));
+    } on TimeoutException {
+      // Saved locally; it will sync when the connection returns.
+    } catch (e) {
+      inventoryItems.removeWhere((i) => i.id == item.id);
+      notifyListeners();
+      return 'Could not save the item: $e';
+    }
     if (item.status == StockStatus.critical) {
       _notifyDmc(item, trigger: 'auto');
     }
-    notifyListeners();
+    return null;
   }
 
   // --------------------------------------------------------

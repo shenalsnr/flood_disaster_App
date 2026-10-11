@@ -68,7 +68,9 @@ class ThemeToggleTile extends StatelessWidget {
       listenable: ThemeController.instance,
       builder: (context, _) {
         final light = ThemeController.instance.isLight;
-        return SwitchListTile(
+        return Material(
+          type: MaterialType.transparency,
+          child: SwitchListTile(
           contentPadding: contentPadding,
           secondary: Icon(
             light ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
@@ -85,6 +87,7 @@ class ThemeToggleTile extends StatelessWidget {
           ),
           value: light,
           onChanged: (v) => ThemeController.instance.setLight(v),
+          ),
         );
       },
     );

@@ -138,6 +138,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                         backgroundColor: Colors.orangeAccent,
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

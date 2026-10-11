@@ -44,12 +44,16 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     showDialog(
       context: context,
       builder: (context) => AddStockDialog(
-        onItemAdded: (item) {
-          _controller.addInventoryItem(item);
-          ScaffoldMessenger.of(context).showSnackBar(
+        onItemAdded: (item) async {
+          final messenger = ScaffoldMessenger.of(this.context);
+          final error = await _controller.addInventoryItem(item);
+          messenger.showSnackBar(
             SnackBar(
-              content: Text('${item.name} added to inventory!'),
-              backgroundColor: const Color(0xFF00E676),
+              content: Text(error ?? '${item.name} added to inventory!'),
+              backgroundColor:
+                  error == null ? const Color(0xFF00E676) : const Color(0xFFFF5252),
+              duration: Duration(seconds: error == null ? 3 : 8),
+              showCloseIcon: error != null,
             ),
           );
         },

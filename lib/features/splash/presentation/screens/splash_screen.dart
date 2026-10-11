@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/responsive/screen_fit.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../component4_control_center/data/services/session_service.dart';
+import '../../../component4_control_center/presentation/screens/startup_gate.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
@@ -58,12 +60,16 @@ class _SplashScreenState extends State<SplashScreen>
     _intro.forward().whenComplete(_goNext);
   }
 
-  void _goNext() {
+  Future<void> _goNext() async {
+    // Someone who logged in earlier (and did not log out) goes straight to
+    // their dashboard; everyone else sees the onboarding / login pages.
+    final signedIn = await SessionService.read();
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, _, _) => const OnboardingScreen(),
+        pageBuilder: (_, _, _) =>
+            signedIn != null ? const StartupGate() : const OnboardingScreen(),
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
