@@ -427,9 +427,9 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text('${e.value}',
+                Flexible(child: Text('${e.value}',
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        color: Colors.white, fontWeight: FontWeight.bold))),
               ],
             ),
           );
@@ -633,11 +633,11 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                               fontWeight: FontWeight.bold,
                               fontSize: 14.5)),
                     ),
-                    Text(active ? 'ACTIVE' : 'DISABLED',
+                    Flexible(child: Text(active ? 'ACTIVE' : 'DISABLED',
                         style: TextStyle(
                             color: active ? _green : _accent,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold)),
+                            fontWeight: FontWeight.bold))),
                   ],
                 ),
                 const SizedBox(height: 3),

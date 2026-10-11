@@ -68,7 +68,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('RATION & MEDICAL LOG', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+                  Flexible(child: Text('RATION & MEDICAL LOG', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1))),
                   TextButton.icon(
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditRationScreen()));

@@ -241,7 +241,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2, color: _accent)),
           SizedBox(width: 16),
-          Text('Checking connection…', style: TextStyle(color: Colors.white)),
+          Flexible(child: Text('Checking connection…', style: TextStyle(color: Colors.white))),
         ]),
       ),
     );
@@ -332,33 +332,88 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             borderSide: const BorderSide(color: _accent)),
       );
 
+  void _openSafeZones() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const SafeZonesScreen()),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bg,
       appBar: AppBar(
         backgroundColor: _bg,
-        title: const Text('Admin Panel',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        titleSpacing: 0,
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text('Admin Panel',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
         actions: [
           const ThemeToggleButton(),
-          IconButton(
-            tooltip: 'Check database connection',
-            icon: const Icon(Icons.wifi_find_outlined),
-            onPressed: _checkConnection,
-          ),
-          IconButton(
-            tooltip: 'Safe zones',
-            icon: const Icon(Icons.add_location_alt_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SafeZonesScreen()),
+          // Wide screens show every action; narrow phones fold them into a
+          // menu so nothing gets cut off.
+          if (MediaQuery.sizeOf(context).width >= 460) ...[
+            IconButton(
+              tooltip: 'Check database connection',
+              icon: const Icon(Icons.wifi_find_outlined),
+              onPressed: _checkConnection,
             ),
-          ),
-          IconButton(
-            tooltip: 'Manage camps',
-            icon: const Icon(Icons.holiday_village_outlined),
-            onPressed: _manageCamps,
-          ),
+            IconButton(
+              tooltip: 'Safe zones',
+              icon: const Icon(Icons.add_location_alt_outlined),
+              onPressed: _openSafeZones,
+            ),
+            IconButton(
+              tooltip: 'Manage camps',
+              icon: const Icon(Icons.holiday_village_outlined),
+              onPressed: _manageCamps,
+            ),
+          ] else
+            PopupMenuButton<String>(
+              tooltip: 'More',
+              color: _card,
+              icon: const Icon(Icons.more_vert),
+              onSelected: (v) {
+                if (v == 'db') _checkConnection();
+                if (v == 'zones') _openSafeZones();
+                if (v == 'camps') _manageCamps();
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'db',
+                  child: ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.wifi_find_outlined, color: Colors.white),
+                    title: Text('Check connection',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'zones',
+                  child: ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.add_location_alt_outlined,
+                        color: Colors.white),
+                    title: Text('Safe zones',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'camps',
+                  child: ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.holiday_village_outlined,
+                        color: Colors.white),
+                    title: Text('Manage camps',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -629,6 +684,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
+  final _nic = TextEditingController();
   String? _camp;
   late List<String> _camps = List.of(widget.camps);
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _campSub;
@@ -663,6 +719,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
     _name.dispose();
     _email.dispose();
     _phone.dispose();
+    _nic.dispose();
     _password.dispose();
     super.dispose();
   }
@@ -683,6 +740,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
             fullName: _name.text,
             email: _email.text,
             phone: _phone.text,
+            nic: _nic.text,
             role: _role,
             area: _role == 'campLeader' ? _camp! : '',
             password: _password.text.trim(),
@@ -762,6 +820,20 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   validator: (v) => (v ?? '').replaceAll(RegExp(r'\D'), '').length < 9
                       ? 'Enter a valid phone number'
                       : null,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _nic,
+                  style: const TextStyle(color: Colors.white),
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: dec('NIC number'),
+                  validator: (v) {
+                    final t = (v ?? '').trim();
+                    // Old NIC: 9 digits + V/X. New NIC: 12 digits.
+                    return RegExp(r'^(\d{9}[VvXx]|\d{12})$').hasMatch(t)
+                        ? null
+                        : 'Enter a valid NIC (e.g. 200012345678 or 901234567V)';
+                  },
                 ),
                 const SizedBox(height: 14),
                 const Text('Role',
@@ -848,7 +920,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                           backgroundColor: _accent,
                           foregroundColor: Colors.white),
                       onPressed: _saving ? null : _save,

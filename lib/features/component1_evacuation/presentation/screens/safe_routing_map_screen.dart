@@ -231,7 +231,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
             child: const Text('Not now'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFF00E676),
               foregroundColor: Colors.black,
             ),

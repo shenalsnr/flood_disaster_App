@@ -72,14 +72,14 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                       child: const Icon(Icons.send_rounded, color: Colors.orangeAccent),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Flexible(child: Text(
                       'Request Relief Stock',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 16),

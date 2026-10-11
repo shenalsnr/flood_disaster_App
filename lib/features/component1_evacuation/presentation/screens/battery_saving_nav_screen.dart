@@ -188,10 +188,10 @@ class _BatterySavingNavScreenState extends State<BatterySavingNavScreen>
                   Icon(Icons.battery_saver_outlined,
                       color: Colors.white24, size: 13),
                   SizedBox(width: 5),
-                  Text(
+                  Flexible(child: Text(
                     'Map hidden — Battery-save mode active',
                     style: TextStyle(color: Colors.white24, fontSize: 12),
-                  ),
+                  )),
                 ],
               ),
             ),
@@ -453,13 +453,13 @@ class _DirectionalArrow extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('W', style: TextStyle(color: Colors.white24, fontSize: 13)),
-              Text('N',
+              Flexible(child: Text('W', style: TextStyle(color: Colors.white24, fontSize: 13))),
+              Flexible(child: Text('N',
                   style: TextStyle(
                       color: Colors.white54,
                       fontSize: 13,
-                      fontWeight: FontWeight.bold)),
-              Text('E', style: TextStyle(color: Colors.white24, fontSize: 13)),
+                      fontWeight: FontWeight.bold))),
+              Flexible(child: Text('E', style: TextStyle(color: Colors.white24, fontSize: 13))),
             ],
           ),
         ),

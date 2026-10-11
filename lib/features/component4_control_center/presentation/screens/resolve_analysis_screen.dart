@@ -116,14 +116,14 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 child: const Icon(Icons.verified, color: Color(0xFF00E676), size: 28),
               ),
               const SizedBox(width: 10),
-              const Text(
+              Flexible(child: Text(
                 'Incident Resolved',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
-              ),
+              )),
             ],
           ),
           content: Column(
@@ -172,7 +172,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
           ),
           actions: [
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                 backgroundColor: const Color(0xFFFF6D00),
                 foregroundColor: Colors.white,
               ),
@@ -339,13 +339,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                         children: [
                           const Icon(Icons.groups_rounded, color: Color(0xFF64748B), size: 14),
                           const SizedBox(width: 4),
-                          Text(
+                          Flexible(child: Text(
                             'Assigned: ${incident.assignedTeam?.name ?? "Colombo Rescue Squad A"}',
                             style: const TextStyle(
                               color: Color(0xFF94A3B8),
                               fontSize: 12,
                             ),
-                          ),
+                          )),
                         ],
                       ),
                     ],

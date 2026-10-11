@@ -50,7 +50,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Flexible(child: Text(
                   'SENT TO DMC',
                   style: TextStyle(
                     color: Color(0xFF7E8B9B),
@@ -58,7 +58,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
                   ),
-                ),
+                )),
                 GestureDetector(
                   onTap: () => _confirmClear(allMine.map((d) => d.id).toList()),
                   child: const Row(
@@ -112,7 +112,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF5252),
               foregroundColor: Colors.white,
             ),

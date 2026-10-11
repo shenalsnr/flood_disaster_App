@@ -181,7 +181,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            Flexible(child: Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(

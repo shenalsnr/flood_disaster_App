@@ -571,8 +571,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     children: [
                       const Icon(Icons.radar, size: 16, color: C4.muted),
                       const SizedBox(width: 6),
-                      Text('Radius ${_radius.toStringAsFixed(1)} km',
-                          style: const TextStyle(color: C4.text, fontSize: 12)),
+                      Flexible(child: Text('Radius ${_radius.toStringAsFixed(1)} km',
+                          style: const TextStyle(color: C4.text, fontSize: 12))),
                       Expanded(
                         child: Slider(
                           value: _radius,

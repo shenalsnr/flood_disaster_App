@@ -82,7 +82,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: _green, foregroundColor: Colors.black),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: _green, foregroundColor: Colors.black),
             child: const Text('YES, ARRIVED'),
           ),
         ],
@@ -507,7 +507,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                         backgroundColor: _accent,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

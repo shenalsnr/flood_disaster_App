@@ -344,7 +344,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                           backgroundColor: _accent,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -377,9 +377,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(
           children: [
-            Text(text,
+            Flexible(child: Text(text,
                 style: const TextStyle(
-                    color: _muted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.6)),
+                    color: _muted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.6))),
             if (help != null) ...[
               const SizedBox(width: 8),
               Text(help, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 10)),

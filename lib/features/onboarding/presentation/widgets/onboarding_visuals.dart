@@ -383,14 +383,14 @@ class _IPhoneMockup extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Flexible(child: Text(
                     '9:41',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 8.5,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  )),
                   Container(
                     width: 38,
                     height: 8.5,
@@ -447,7 +447,7 @@ class _IPhoneMockup extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Flexible(child: Text(
                     'Report a Hazard',
                     style: TextStyle(
                       color: Colors.white,
@@ -455,7 +455,7 @@ class _IPhoneMockup extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.2,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),

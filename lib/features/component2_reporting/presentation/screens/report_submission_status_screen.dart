@@ -43,7 +43,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           '9:41',
                           style: TextStyle(
                             color: Colors.white,

@@ -520,7 +520,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ),
                   ),
                   if (Navigator.of(context).canPop()) const SizedBox(width: 14),
-                  const Text(
+                  Flexible(child: Text(
                     'Secure Portal Login',
                     style: TextStyle(
                       color: Colors.white,
@@ -528,7 +528,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.3,
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -655,7 +655,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'Remember credentials',
                         style: TextStyle(
                           color: Color(0xFFCBD5E1),
@@ -715,14 +715,14 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       : const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            Flexible(child: Text(
                               'AUTHENTICATE & LOGIN',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.8,
                               ),
-                            ),
+                            )),
                             SizedBox(width: 8),
                             Icon(
                               Icons.login_rounded,
@@ -740,10 +740,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Flexible(child: Text(
                     'New officer? ',
                     style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                  ),
+                  )),
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushReplacement(

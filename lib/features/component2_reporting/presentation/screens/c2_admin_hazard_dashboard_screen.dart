@@ -125,14 +125,14 @@ class _C2AdminHazardDashboardScreenState
                     children: [
                       Icon(Icons.add_circle_rounded, color: Color(0xFFFF9F0A), size: 24),
                       SizedBox(width: 10),
-                      Text(
+                      Flexible(child: Text(
                         'Admin: Create Hazard Report',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 18),
@@ -507,14 +507,14 @@ class _C2AdminHazardDashboardScreenState
                   children: [
                     Icon(Icons.edit_note_rounded, color: Color(0xFF40C4FF), size: 26),
                     SizedBox(width: 10),
-                    Text(
+                    Flexible(child: Text(
                       'Update Hazard Report',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -691,7 +691,7 @@ class _C2AdminHazardDashboardScreenState
           children: [
             Icon(Icons.warning_amber_rounded, color: Color(0xFFFF5252), size: 26),
             SizedBox(width: 10),
-            Text('Confirm Deletion', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            Flexible(child: Text('Confirm Deletion', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
           ],
         ),
         content: Text(
@@ -704,7 +704,7 @@ class _C2AdminHazardDashboardScreenState
             child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF5252),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1029,10 +1029,10 @@ class _C2AdminHazardDashboardScreenState
                                                 ),
                                               ),
                                             ),
-                                            Text(
+                                            Flexible(child: Text(
                                               timeStr,
                                               style: const TextStyle(color: Color(0xFF8B9BB4), fontSize: 11),
-                                            ),
+                                            )),
                                           ],
                                         ),
                                         const SizedBox(height: 3),
@@ -1268,14 +1268,14 @@ class _C2AdminHazardDashboardScreenState
                     children: [
                       Row(
                         children: [
-                          const Text(
+                          Flexible(child: Text(
                             'Offline Drafts & Queue (SQLite)',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.5,
                               fontWeight: FontWeight.w800,
                             ),
-                          ),
+                          )),
                           if (pending > 0) ...[
                             const SizedBox(width: 6),
                             Container(

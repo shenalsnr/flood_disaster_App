@@ -362,7 +362,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                 backgroundColor: const Color(0xFFFF5252),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
@@ -650,7 +650,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   const Icon(Icons.explore_rounded,
                       color: Color(0xFF40C4FF), size: 14),
                   const SizedBox(width: 6),
-                  Text(
+                  Flexible(child: Text(
                     'HDG: 042° NE • GPS: ${_squadLocation.latitude.toStringAsFixed(3)}°N, ${_squadLocation.longitude.toStringAsFixed(3)}°E',
                     style: const TextStyle(
                       color: Color(0xFFCBD5E1),
@@ -658,7 +658,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),
@@ -723,14 +723,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                           children: [
                             Row(
                               children: [
-                                Text(
+                                Flexible(child: Text(
                                   team.name,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                ),
+                                )),
                                 const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -821,14 +821,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                           ),
                         ],
                       ),
-                      Text(
+                      Flexible(child: Text(
                         '${(_routeProgress * 100).toInt()}% En Route',
                         style: const TextStyle(
                           color: Color(0xFF40C4FF),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 5),
@@ -917,7 +917,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                   .withValues(alpha: 0.8),
                               size: 14),
                           const SizedBox(width: 6),
-                          Text(
+                          Flexible(child: Text(
                             'CANCEL DISPATCH (STAND DOWN / REASSIGN)',
                             style: TextStyle(
                               color: const Color(0xFFFF5252)
@@ -926,7 +926,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.6,
                             ),
-                          ),
+                          )),
                         ],
                       ),
                     ),
@@ -1124,7 +1124,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                     color: _isTalking ? Colors.black : Colors.white,
                   ),
                   const SizedBox(width: 8),
-                  Text(
+                  Flexible(child: Text(
                     _isTalking ? 'RELEASE TO END TRANSMISSION' : 'PUSH TO TALK (PTT)',
                     style: TextStyle(
                       color: _isTalking ? Colors.black : Colors.white,
@@ -1132,7 +1132,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),
@@ -1304,7 +1304,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                 backgroundColor: const Color(0xFFFF6D00),
                 foregroundColor: Colors.white,
               ),
@@ -1355,7 +1355,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Flexible(child: Text(
                 'UPDATE DISPATCH MISSION',
                 style: TextStyle(
                   color: Colors.white,
@@ -1363,7 +1363,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.6,
                 ),
-              ),
+              )),
               IconButton(
                 icon: const Icon(Icons.close, color: Colors.white54, size: 20),
                 onPressed: () => Navigator.of(context).pop(),
@@ -1614,7 +1614,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                           ),
                         ),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
+                          style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                             backgroundColor: team.isAvailable
                                 ? const Color(0xFFFF6D00)
                                 : Colors.white12,
@@ -1669,14 +1669,14 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                 color: isSelected ? activeColor : const Color(0xFF64748B),
                 size: 16),
             const SizedBox(width: 6),
-            Text(
+            Flexible(child: Text(
               label,
               style: TextStyle(
                 color: isSelected ? activeColor : const Color(0xFF94A3B8),
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )),
           ],
         ),
       ),

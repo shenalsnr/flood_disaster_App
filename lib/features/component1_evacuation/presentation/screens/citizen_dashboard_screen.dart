@@ -339,14 +339,14 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Text(
+                              Flexible(child: Text(
                                 '${allAlerts.length} Active Warnings',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                 ),
-                              ),
+                              )),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -375,7 +375,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                               ),
                             ),
                             const SizedBox(width: 10),
-                            const Text(
+                            Flexible(child: Text(
                               'Emergency Actions',
                               style: TextStyle(
                                 color: Colors.white,
@@ -383,7 +383,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
                               ),
-                            ),
+                            )),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -874,14 +874,14 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                     children: [
                       Icon(Icons.access_time_rounded, color: Colors.white.withValues(alpha: 0.7), size: 16),
                       const SizedBox(width: 6),
-                      Text(
+                      Flexible(child: Text(
                         widget.time,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                 ],
@@ -1259,7 +1259,7 @@ class _PremiumStatusFooter extends StatelessWidget {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Flexible(child: Text(
                 'SYSTEM STATUS',
                 style: TextStyle(
                   color: Colors.white54,
@@ -1267,7 +1267,7 @@ class _PremiumStatusFooter extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                   letterSpacing: 2,
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 16),
@@ -1305,14 +1305,14 @@ class _PremiumStatusFooter extends StatelessWidget {
           child: Icon(icon, color: color, size: 16),
         ),
         const SizedBox(width: 14),
-        Text(
+        Flexible(child: Text(
           label,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
-        ),
+        )),
         const Spacer(),
         Container(
           width: 8,

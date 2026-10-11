@@ -408,15 +408,15 @@ class _ListPane extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Text('PRIORITY QUEUE',
+                    Flexible(child: Text('PRIORITY QUEUE',
                         style: TextStyle(
                             color: C4.muted,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            letterSpacing: 1.2)),
+                            letterSpacing: 1.2))),
                     const SizedBox(width: 8),
-                    const Text('sorted by severity',
-                        style: TextStyle(color: C4.border, fontSize: 11)),
+                    Flexible(child: Text('sorted by severity',
+                        style: TextStyle(color: C4.border, fontSize: 11))),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -533,7 +533,7 @@ class _Banner extends StatelessWidget {
                       children: [
                         PulseDot(color: live ? C4.green : Colors.orange),
                         const SizedBox(width: 8),
-                        Text(
+                        Flexible(child: Text(
                           live ? 'LIVE - synced with field reports' : 'CONNECTING...',
                           style: TextStyle(
                             color: live ? C4.green : Colors.orange,
@@ -541,7 +541,7 @@ class _Banner extends StatelessWidget {
                             fontSize: 11,
                             letterSpacing: 0.8,
                           ),
-                        ),
+                        )),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -697,16 +697,16 @@ class _IncidentCard extends StatelessWidget {
                         children: [
                           const Icon(Icons.schedule, size: 12, color: C4.muted),
                           const SizedBox(width: 3),
-                          Text(incident.timeAgo,
+                          Flexible(child: Text(incident.timeAgo,
                               style: const TextStyle(
-                                  color: C4.muted, fontSize: 11)),
+                                  color: C4.muted, fontSize: 11))),
                           const SizedBox(width: 10),
                           const Icon(Icons.groups_2_outlined,
                               size: 13, color: C4.muted),
                           const SizedBox(width: 3),
-                          Text('${incident.corroboratingCount}',
+                          Flexible(child: Text('${incident.corroboratingCount}',
                               style: const TextStyle(
-                                  color: C4.muted, fontSize: 11)),
+                                  color: C4.muted, fontSize: 11))),
                           if (incident.assignedTeam != null) ...[
                             const SizedBox(width: 10),
                             const Icon(Icons.local_shipping_outlined,

@@ -72,6 +72,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
             child: const Text('Cancel', style: TextStyle(color: ShelterTheme.textMuted)),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
             onPressed: () {
               final beds = int.tryParse(bedsCtrl.text) ?? 0;
               if (existingShelter == null) {
@@ -113,7 +114,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
             child: const Text('Cancel', style: TextStyle(color: ShelterTheme.textMuted)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: ShelterTheme.statusCriticalRed),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: ShelterTheme.statusCriticalRed),
             onPressed: () {
               _service.deleteShelter(shelter.id);
               Navigator.pop(context);

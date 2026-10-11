@@ -31,8 +31,6 @@ class CampCapacityCard extends StatelessWidget {
       progressColor = const Color(0xFF00E676); // Green accent
     }
 
-    final emptyItems = controller.shortageAlertItems;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -130,31 +128,31 @@ class CampCapacityCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text(
+                  Flexible(child: Text(
                     '${controller.evacueeCount}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Text(
+                  )),
+                  Flexible(child: Text(
                     '/${controller.maxCapacity}',
                     style: const TextStyle(
                       color: Color(0xFF63738A),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  )),
                   const SizedBox(width: 10),
-                  Text(
+                  Flexible(child: Text(
                     'Beds Occupied - $occupancyPercentage%',
                     style: const TextStyle(
                       color: Color(0xFF8E9BAE),
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
-                  ),
+                  )),
                 ],
               ),
               const SizedBox(height: 12),
@@ -247,49 +245,6 @@ class CampCapacityCard extends StatelessWidget {
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 22),
-
-        // Shortage Alerts Section: only items that have run out
-        const Text(
-          'SHORTAGE ALERTS',
-          style: TextStyle(
-            color: Color(0xFF7E8B9B),
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Tap an empty item to request supply',
-          style: TextStyle(color: Color(0xFF5E6D82), fontSize: 11),
-        ),
-        const SizedBox(height: 10),
-
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF1E293B)),
-          ),
-          child: emptyItems.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'No empty items to request.',
-                    style: TextStyle(color: Color(0xFF00E676), fontSize: 13),
-                  ),
-                )
-              : Column(
-                  children: [
-                    for (var i = 0; i < emptyItems.length; i++) ...[
-                      if (i > 0) const Divider(color: Color(0xFF1E293B), height: 1),
-                      _buildShortageTile(emptyItems[i]),
-                    ],
-                  ],
-                ),
         ),
       ],
     );

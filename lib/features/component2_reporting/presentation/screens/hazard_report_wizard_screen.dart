@@ -222,9 +222,9 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 children: [
                   const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
-                  Text(source == ImageSource.camera
+                  Flexible(child: Text(source == ImageSource.camera
                       ? 'Photo evidence captured & GPS tagged.'
-                      : 'Gallery photo selected & attached.'),
+                      : 'Gallery photo selected & attached.')),
                 ],
               ),
               backgroundColor: const Color(0xFF00E676),
