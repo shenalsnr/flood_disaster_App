@@ -127,14 +127,14 @@ class ReliefRequestCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
+                Flexible(child: Text(
                   'ETA: ${request.eta}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
-                ),
+                )),
               ],
             ),
           ),

@@ -200,7 +200,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Text(
+                    Flexible(child: Text(
                       'Citizen Registration',
                       style: TextStyle(
                         color: Colors.white,
@@ -208,7 +208,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.3,
                       ),
-                    ),
+                    )),
                   ],
                 ),
 
@@ -521,7 +521,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                             const Icon(Icons.edit_location_alt_outlined,
                                 color: Color(0xFFFF6D00), size: 18),
                             const SizedBox(width: 8),
-                            Text(
+                            Flexible(child: Text(
                               'TYPE YOUR CUSTOM FLOOD ZONE / AREA',
                               style: TextStyle(
                                 color: const Color(0xFFFF6D00)
@@ -530,7 +530,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
                               ),
-                            ),
+                            )),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -708,14 +708,14 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         : const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              Flexible(child: Text(
                                 'COMPLETE REGISTRATION',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.8,
                                 ),
-                              ),
+                              )),
                               SizedBox(width: 8),
                               Icon(Icons.shield, size: 18, color: Colors.white),
                             ],
@@ -729,10 +729,10 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Flexible(child: Text(
                       'Already have an account? ',
                       style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                    ),
+                    )),
                     GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushReplacement(

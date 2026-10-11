@@ -60,6 +60,7 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                   ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
                   onPressed: isSaving
                       ? null
                       : () async {
@@ -273,14 +274,14 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: ShelterTheme.textMuted)),
-        Text(
+        Flexible(child: Text(label, style: const TextStyle(color: ShelterTheme.textMuted))),
+        Flexible(child: Text(
           value,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
-        ),
+        )),
       ],
     );
   }

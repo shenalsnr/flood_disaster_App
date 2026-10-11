@@ -715,14 +715,14 @@ class _PremiumContactTile extends StatelessWidget {
                       Icon(Icons.phone_outlined,
                           color: Colors.white.withValues(alpha: 0.4), size: 14),
                       const SizedBox(width: 4),
-                      Text(
+                      Flexible(child: Text(
                         contact.phone,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 4),

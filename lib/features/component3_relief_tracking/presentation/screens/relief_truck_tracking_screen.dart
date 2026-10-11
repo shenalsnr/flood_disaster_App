@@ -273,14 +273,14 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          Flexible(child: Text(
                             'Truck ${data['vehicleNumber'] ?? ''}',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: ShelterTheme.textHighContrastWhite,
                             ),
-                          ),
+                          )),
                           Icon(Icons.local_shipping, color: statusColor),
                         ],
                       ),
@@ -397,10 +397,10 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        Flexible(child: Text(
           label,
           style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 13),
-        ),
+        )),
         Expanded(
           child: Text(
             value,

@@ -166,7 +166,7 @@ class _OfflineDraftManagementScreenState
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Text(
+                          Text(
                             'Save Offline Draft (SQLite)',
                             style: TextStyle(
                               color: Colors.white,
@@ -461,10 +461,10 @@ class _OfflineDraftManagementScreenState
                                 const Icon(Icons.check_circle_rounded,
                                     color: Color(0xFF00E676), size: 20),
                                 const SizedBox(width: 10),
-                                Text(
+                                Flexible(child: Text(
                                   'Offline draft $reportId saved in SQLite storage!',
                                   style: const TextStyle(color: Colors.white),
-                                ),
+                                )),
                               ],
                             ),
                           ),
@@ -881,14 +881,14 @@ class _OfflineDraftManagementScreenState
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
+            Flexible(child: Text(
               'Delete Draft?',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
                 fontSize: 17,
               ),
-            ),
+            )),
           ],
         ),
         content: Text(
@@ -902,7 +902,7 @@ class _OfflineDraftManagementScreenState
                 style: TextStyle(color: Color(0xFF64748B))),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF3B3B),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
@@ -1035,7 +1035,7 @@ class _OfflineDraftManagementScreenState
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
+                Flexible(child: Text(
                   _isOnline
                       ? 'ONLINE • Ready to Sync'
                       : 'OFFLINE • SQLite Storage Active',
@@ -1047,7 +1047,7 @@ class _OfflineDraftManagementScreenState
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
                   ),
-                ),
+                )),
               ],
             ),
           ],
@@ -1196,14 +1196,14 @@ class _OfflineDraftManagementScreenState
               children: [
                 Icon(icon, color: color, size: 14),
                 const SizedBox(width: 4),
-                Text(
+                Flexible(child: Text(
                   '$count',
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
                   ),
-                ),
+                )),
               ],
             ),
             const SizedBox(height: 3),
@@ -1343,23 +1343,23 @@ class _OfflineDraftManagementScreenState
                       children: [
                         Row(
                           children: [
-                            Text(
+                            Flexible(child: Text(
                               report.hazardType,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15,
                               ),
-                            ),
+                            )),
                             const SizedBox(width: 8),
-                            Text(
+                            Flexible(child: Text(
                               report.id,
                               style: const TextStyle(
                                 color: Color(0xFFFF9F0A),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                               ),
-                            ),
+                            )),
                           ],
                         ),
                         const SizedBox(height: 2),

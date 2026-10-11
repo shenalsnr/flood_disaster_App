@@ -218,14 +218,14 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Flexible(child: Text(
                   'Assign Response Unit',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
-                ),
+                )),
               ],
             ),
             const Text(
@@ -277,7 +277,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'TEAM RADIO LIST',
                           style: TextStyle(
                             color: Color(0xFF94A3B8),
@@ -385,7 +385,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Flexible(child: Text(
                       'DISPATCHER TACTICAL NOTES',
                       style: TextStyle(
                         color: Color(0xFF94A3B8),
@@ -393,15 +393,15 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.0,
                       ),
-                    ),
-                    Text(
+                    )),
+                    Flexible(child: Text(
                       'RADIO BRIEFING',
                       style: TextStyle(
                         color: const Color(0xFFFF6D00).withValues(alpha: 0.8),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -660,14 +660,14 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 ),
                 const Icon(Icons.gps_fixed, color: Color(0xFF64748B), size: 13),
                 const SizedBox(width: 4),
-                Text(
+                Flexible(child: Text(
                   '${incident.coordinates.latitude.toStringAsFixed(3)}°, ${incident.coordinates.longitude.toStringAsFixed(3)}°',
                   style: const TextStyle(
                     color: Color(0xFF94A3B8),
                     fontSize: 10,
                     fontFamily: 'monospace',
                   ),
-                ),
+                )),
               ],
             ),
           ),
@@ -940,7 +940,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 children: [
                   Icon(vehicleIcon, color: const Color(0xFF40C4FF), size: 16),
                   const SizedBox(width: 6),
-                  Text(
+                  Flexible(child: Text(
                     'ETA: ${team.eta}',
                     style: TextStyle(
                       color: isAvailable
@@ -949,21 +949,21 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
                     ),
-                  ),
-                  Text(
+                  )),
+                  Flexible(child: Text(
                     ' (${team.distance})',
                     style: TextStyle(
                       color: isAvailable ? Colors.white70 : Colors.white24,
                       fontSize: 11,
                     ),
-                  ),
+                  )),
                   const Spacer(),
                   Icon(Icons.bolt,
                       color: isAvailable
                           ? const Color(0xFFFFB020)
                           : Colors.white24,
                       size: 14),
-                  Text(
+                  Flexible(child: Text(
                     ' ${team.speedKmh.toInt()} km/h',
                     style: TextStyle(
                       color: isAvailable
@@ -971,7 +971,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           : Colors.white24,
                       fontSize: 10,
                     ),
-                  ),
+                  )),
                   const SizedBox(width: 8),
                   // Fuel level bar
                   SizedBox(
@@ -993,7 +993,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Text(
+                  Flexible(child: Text(
                     '${team.fuelLevel}%',
                     style: TextStyle(
                       color: isAvailable
@@ -1001,7 +1001,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           : Colors.white24,
                       fontSize: 10,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),
@@ -1364,14 +1364,14 @@ class _DispatchConfirmationModalState
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        Flexible(child: Text(
           label,
           style: const TextStyle(
             color: Color(0xFF64748B),
             fontSize: 10,
             fontWeight: FontWeight.w800,
           ),
-        ),
+        )),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

@@ -164,7 +164,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
                                       if (_quantity > 0) setState(() => _quantity--);
                                     },
                                   ),
-                                  Text('$_quantity', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Flexible(child: Text('$_quantity', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
                                   IconButton(
                                     icon: const Icon(Icons.add, color: Colors.white),
                                     onPressed: () => setState(() => _quantity++),
@@ -315,14 +315,14 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
               Icon(Icons.circle, color: color, size: 8),
               const SizedBox(width: 4),
             ],
-            Text(
+            Flexible(child: Text(
               label,
               style: TextStyle(
                 color: isSelected ? color : ShelterTheme.textMuted,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )),
           ],
         ),
       ),

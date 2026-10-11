@@ -159,7 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Flexible(child: Text(
                     'SELECT SYSTEM ROLE TO ENTER',
                     style: TextStyle(
                       color: Colors.white70,
@@ -167,7 +167,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.1,
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -231,7 +231,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    Flexible(child: Text(
                       _selectedRole == UserRole.responder
                           ? 'ENTER RESPONDER PORTAL'
                           : 'LAUNCH ${_selectedRole.displayName.toUpperCase()}',
@@ -240,7 +240,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
                       ),
-                    ),
+                    )),
                     const SizedBox(width: 8),
                     const Icon(Icons.arrow_forward_rounded, size: 20),
                   ],
@@ -298,14 +298,14 @@ class _SignInScreenState extends State<SignInScreen> {
                       size: 16,
                     ),
                     SizedBox(width: 8),
-                    Text(
+                    Flexible(child: Text(
                       'Emergency Hotlines: 117 (DMC) • 119 (Police) • 110 (Fire)',
                       style: TextStyle(
                         color: Color(0xFF94A3B8),
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),

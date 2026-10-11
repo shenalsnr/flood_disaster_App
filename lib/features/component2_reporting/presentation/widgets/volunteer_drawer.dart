@@ -34,14 +34,14 @@ class VolunteerDrawer extends StatelessWidget {
           children: [
             Icon(Icons.logout_rounded, color: Color(0xFFFF5252), size: 24),
             SizedBox(width: 10),
-            Text(
+            Flexible(child: Text(
               'Confirm Log Out',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )),
           ],
         ),
         content: const Text(
@@ -54,7 +54,7 @@ class VolunteerDrawer extends StatelessWidget {
             child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF5252),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -98,10 +98,10 @@ class VolunteerDrawer extends StatelessWidget {
           children: [
             Icon(Icons.support_agent_rounded, color: Color(0xFF00E676), size: 24),
             SizedBox(width: 10),
-            Text(
+            Flexible(child: Text(
               'Emergency Volunteer Help',
               style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            )),
           ],
         ),
         content: Column(
@@ -126,7 +126,7 @@ class VolunteerDrawer extends StatelessWidget {
         ),
         actions: [
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFF00E676),
               foregroundColor: const Color(0xFF070B14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -152,10 +152,10 @@ class VolunteerDrawer extends StatelessWidget {
           children: [
             Icon(Icons.shield_rounded, color: Color(0xFF00E676), size: 24),
             SizedBox(width: 10),
-            Text(
+            Flexible(child: Text(
               'About WeSafe',
               style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            )),
           ],
         ),
         content: Column(
@@ -180,7 +180,7 @@ class VolunteerDrawer extends StatelessWidget {
         ),
         actions: [
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFF00E676),
               foregroundColor: const Color(0xFF070B14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

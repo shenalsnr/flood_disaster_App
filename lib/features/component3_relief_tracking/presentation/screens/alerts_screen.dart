@@ -294,7 +294,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   actions: [
                     ElevatedButton(
                       onPressed: () => _showDispatchForm(data, docId),
-                      style: ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                         backgroundColor: ShelterTheme.statusSafeGreen,
                       ),
                       child: const Text('සැපයුම් එවන්නම් (Accept)'),
@@ -328,7 +328,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       onPressed: _openGoogleMaps,
                       icon: const Icon(Icons.map),
                       label: const Text('Open in Google Maps'),
-                      style: ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                         backgroundColor: ShelterTheme.primaryActionOrange,
                       ),
                     ),
@@ -405,6 +405,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
                   onPressed: isSaving
                       ? null
                       : () async {
@@ -489,13 +490,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   ),
                 ),
               ),
-              Text(
+              Flexible(child: Text(
                 time,
                 style: const TextStyle(
                   color: ShelterTheme.textMuted,
                   fontSize: 10,
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 8),

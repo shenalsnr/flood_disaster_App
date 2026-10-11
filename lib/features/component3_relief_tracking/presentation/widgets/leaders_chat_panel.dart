@@ -131,7 +131,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF5252),
               foregroundColor: Colors.white,
             ),
@@ -168,7 +168,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF1744),
               foregroundColor: Colors.white,
             ),
@@ -226,7 +226,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF5252),
               foregroundColor: Colors.white,
             ),

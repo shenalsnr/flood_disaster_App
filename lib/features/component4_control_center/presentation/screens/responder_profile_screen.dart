@@ -235,7 +235,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                         const Icon(Icons.verified_user_rounded,
                             color: Color(0xFF00E676), size: 18),
                         const SizedBox(width: 8),
-                        const Text(
+                        Flexible(child: Text(
                           'FIREBASE FIRESTORE SYNCED PROFILE',
                           style: TextStyle(
                             color: Color(0xFF00E676),
@@ -243,7 +243,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.8,
                           ),
-                        ),
+                        )),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -616,14 +616,14 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              Flexible(child: Text(
                 value,
                 style: TextStyle(
                   color: color,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
                 ),
-              ),
+              )),
               Icon(icon, color: color, size: 18),
             ],
           ),
@@ -688,14 +688,14 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       children: [
         Icon(icon, size: 15, color: const Color(0xFFFF6D00)),
         const SizedBox(width: 8),
-        Text(
+        Flexible(child: Text(
           '$label: ',
           style: const TextStyle(
             color: Color(0xFF94A3B8),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
-        ),
+        )),
         Expanded(
           child: Text(
             value,
@@ -1171,7 +1171,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF6000),
               foregroundColor: Colors.white,
             ),

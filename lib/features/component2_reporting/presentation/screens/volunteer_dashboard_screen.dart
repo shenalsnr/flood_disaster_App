@@ -495,7 +495,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
+                  Flexible(child: Text(
                     'My Recent Reports',
                     style: TextStyle(
                       color: Colors.white,
@@ -503,7 +503,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.2,
                     ),
-                  ),
+                  )),
                   GestureDetector(
                     onTap: () => setState(() => _selectedTabIndex = 1),
                     child: const Text(
@@ -898,8 +898,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5)),
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5)),
+        Flexible(child: Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5))),
+        Flexible(child: Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5))),
       ],
     );
   }

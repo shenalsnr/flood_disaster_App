@@ -459,12 +459,12 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
           Row(children: [
             const Icon(Icons.task_alt, color: C4.green, size: 18),
             const SizedBox(width: 6),
-            Text(incident.resolutionType ?? 'Resolved',
+            Flexible(child: Text(incident.resolutionType ?? 'Resolved',
                 style: const TextStyle(
-                    color: C4.green, fontWeight: FontWeight.w800)),
+                    color: C4.green, fontWeight: FontWeight.w800))),
             const Spacer(),
-            Text('${incident.evacuatedCount} evacuated',
-                style: const TextStyle(color: C4.muted, fontSize: 12)),
+            Flexible(child: Text('${incident.evacuatedCount} evacuated',
+                style: const TextStyle(color: C4.muted, fontSize: 12))),
           ]),
           if ((incident.resolutionNotes ?? '').isNotEmpty) ...[
             const SizedBox(height: 6),

@@ -47,7 +47,7 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text('CANCEL')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('ARCHIVE'),
           ),

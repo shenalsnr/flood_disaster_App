@@ -284,7 +284,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
+                style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                   backgroundColor: const Color(0xFF00E676),
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
@@ -406,7 +406,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 8),
-        Text(
+        Flexible(child: Text(
           label,
           style: TextStyle(
             color: color,
@@ -414,7 +414,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
           ),
-        ),
+        )),
         if (trailing != null) ...[const Spacer(), trailing],
       ],
     );

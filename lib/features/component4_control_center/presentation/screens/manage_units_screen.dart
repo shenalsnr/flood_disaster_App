@@ -152,6 +152,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                   style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
               onPressed: () {
                 if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
               },
@@ -216,7 +217,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text('CANCEL')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('DELETE'),
           ),

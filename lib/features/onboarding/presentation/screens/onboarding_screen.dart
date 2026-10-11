@@ -335,14 +335,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
+                          Flexible(child: Text(
                             activeItem.buttonText.toUpperCase(),
                             style: const TextStyle(
                               fontSize: 15.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.8,
                             ),
-                          ),
+                          )),
                           const SizedBox(width: 8),
                           const Icon(Icons.arrow_forward_rounded, size: 20),
                         ],

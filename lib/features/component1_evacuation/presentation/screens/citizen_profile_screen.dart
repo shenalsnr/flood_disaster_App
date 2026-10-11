@@ -143,7 +143,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
+                          style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                             backgroundColor: const Color(0xFF00E676),
                             foregroundColor: Colors.black,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -425,14 +425,14 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                 children: [
                                   Icon(Icons.edit_rounded, size: 22),
                                   SizedBox(width: 10),
-                                  Text(
+                                  Flexible(child: Text(
                                     'EDIT PROFILE',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 1.0,
                                     ),
-                                  ),
+                                  )),
                                 ],
                               ),
                             ),

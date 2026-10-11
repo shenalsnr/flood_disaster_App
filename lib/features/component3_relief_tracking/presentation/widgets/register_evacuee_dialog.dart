@@ -77,14 +77,14 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                       child: const Icon(Icons.person_add_alt_1_outlined, color: Colors.greenAccent),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Flexible(child: Text(
                       'Register Evacuee',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 16),

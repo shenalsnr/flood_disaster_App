@@ -15,7 +15,7 @@ class DispatcherSplitView extends StatelessWidget {
         ),
         actions: [
           ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
@@ -197,7 +197,7 @@ class DispatcherSplitView extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
             onPressed: () => Navigator.pop(ctx),
             child: const Text(
               'BROADCAST NOW',

@@ -110,7 +110,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx),
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFFF5252),
               foregroundColor: Colors.white,
             ),
@@ -796,9 +796,22 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                   style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Text(
-                                alert['time'],
-                                style: const TextStyle(color: Color(0xFF63738A), fontSize: 10),
+                              if ((alert['time'] ?? '').toString().isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    alert['time'],
+                                    style: const TextStyle(color: Color(0xFF63738A), fontSize: 10),
+                                  ),
+                                ),
+                              const SizedBox(width: 6),
+                              InkWell(
+                                onTap: () => _controller.dismissAlert(alert['id']),
+                                borderRadius: BorderRadius.circular(12),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(2),
+                                  child: Icon(Icons.close, color: Color(0xFF8E9BAE), size: 18),
+                                ),
                               ),
                             ],
                           ),
@@ -808,62 +821,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                             style: const TextStyle(color: Color(0xFF8E9BAE), fontSize: 11),
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Action Buttons
-                Row(
-                  children: [
-                    if (!isBroadcast) ...[
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isLogs ? const Color(0xFF00E676) : const Color(0xFFFF1744),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        onPressed: () {
-                          // "DISPATCH SUPPLY" really notifies the DMC (M3-08 / FR12);
-                          // the other actions keep their existing behaviour.
-                          if (alert['actionText'] == 'DISPATCH SUPPLY') {
-                            _dispatchToDmc();
-                            return;
-                          }
-                          if (alert['actionText'] == 'REQUEST SUPPLY') {
-                            final matches = _controller.inventoryItems
-                                .where((i) => i.id == alert['itemId'])
-                                .toList();
-                            _showRequestSupplyDialog(
-                                item: matches.isEmpty ? null : matches.first);
-                            return;
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Triggered: ${alert['actionText']}')),
-                          );
-                        },
-                        child: Text(
-                          alert['actionText'],
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ],
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(0, 40),
-                          backgroundColor: const Color(0xFF1E293B),
-                          foregroundColor: const Color(0xFF8E9BAE),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        onPressed: () => _controller.dismissAlert(alert['id']),
-                        child: const Text('Dismiss', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                       ),
                     ),
                   ],
