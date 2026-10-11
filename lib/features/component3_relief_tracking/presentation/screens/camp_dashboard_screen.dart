@@ -674,9 +674,30 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
-          'Alerts',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Alerts',
+                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (_controller.allAlerts.isNotEmpty)
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFFF5252),
+                  minimumSize: const Size(0, 36),
+                ),
+                onPressed: () {
+                  _controller.clearAllAlerts();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('All alerts cleared.')),
+                  );
+                },
+                icon: const Icon(Icons.clear_all, size: 20),
+                label: const Text('Clear all', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+          ],
         ),
         const SizedBox(height: 14),
 

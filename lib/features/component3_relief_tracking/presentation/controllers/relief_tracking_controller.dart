@@ -23,6 +23,7 @@ class ReliefTrackingController extends ChangeNotifier {
     _auth.addListener(_onAuthChanged);
     _startSync();
     _watchAssignment();
+    _loadDismissed();
   }
 
   /// The logged-in user (set by the login screen). The leader's name, role
@@ -667,14 +668,61 @@ class ReliefTrackingController extends ChangeNotifier {
     notifyListeners();
   }
 
+  static const _dismissedKey = 'c3_dismissed_alerts';
+
+  /// Dismissed broadcasts / incidents stay hidden after the app restarts.
+  Future<void> _loadDismissed() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      for (final v in prefs.getStringList(_dismissedKey) ?? const <String>[]) {
+        if (v.startsWith('w:')) _dismissedWarnings.add(v.substring(2));
+        if (v.startsWith('i:')) _dismissedIncidents.add(v.substring(2));
+      }
+      _rebuildWarningAlerts();
+      _rebuildIncidentAlerts();
+    } catch (e) {
+      debugPrint('Load dismissed failed: $e');
+    }
+  }
+
+  Future<void> _saveDismissed() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_dismissedKey, [
+        for (final w in _dismissedWarnings) 'w:$w',
+        for (final i in _dismissedIncidents) 'i:$i',
+      ].take(300).toList());
+    } catch (_) {}
+  }
+
+  /// Removes every alert from the Alerts tab ("Clear all").
+  void clearAllAlerts() {
+    for (final a in List<Map<String, dynamic>>.from(allAlerts)) {
+      final id = a['id'].toString();
+      if (id.startsWith('warn_')) {
+        _dismissedWarnings.add(id.substring(5));
+      } else if (id.startsWith('inc_')) {
+        _dismissedIncidents.add(id.substring(4));
+      } else if (id.startsWith('stock_')) {
+        _dismissedStock.add(id);
+      }
+    }
+    alertList.clear();
+    _saveDismissed();
+    _rebuildWarningAlerts();
+    _rebuildIncidentAlerts();
+  }
+
   void dismissAlert(String id) {
     if (id.startsWith('warn_')) {
       _dismissedWarnings.add(id.substring(5));
+      _saveDismissed();
       _rebuildWarningAlerts();
       return;
     }
     if (id.startsWith('inc_')) {
       _dismissedIncidents.add(id.substring(4));
+      _saveDismissed();
       _rebuildIncidentAlerts();
       return;
     }
