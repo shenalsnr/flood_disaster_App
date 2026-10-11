@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -585,7 +586,7 @@ class ResponderController extends ChangeNotifier {
     await _units.doc(id).set({
       ...team.toMap(),
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// UPDATE a response unit's details.
@@ -593,7 +594,7 @@ class ResponderController extends ChangeNotifier {
     await _units.doc(team.id).set({
       ...team.toMap(),
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   /// DELETE a response unit. Returns an error message, or null on success.
@@ -614,7 +615,7 @@ class ResponderController extends ChangeNotifier {
       await _units.doc(id).set({
         ...data,
         'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).queued();
     } catch (e) {
       debugPrint('[ResponderController] unit write failed: $e');
     }
@@ -636,7 +637,7 @@ class ResponderController extends ChangeNotifier {
         ...data,
         'dispatchUpdatedAt': FieldValue.serverTimestamp(),
         'dispatcherEmail': _currentUser?.email ?? '',
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).queued();
     } catch (e) {
       _onErr(e);
     }
@@ -877,7 +878,7 @@ class ResponderController extends ChangeNotifier {
       'bbox': bbox,
       'issuedBy': _currentUser?.email ?? '',
       'source': 'dispatcher',
-    });
+    }).queued();
   }
 
   /// UPDATE a broadcast.
@@ -885,7 +886,7 @@ class ResponderController extends ChangeNotifier {
     await _warnings.doc(id).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// DELETE (withdraw) a broadcast.

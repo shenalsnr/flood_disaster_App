@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -22,7 +23,7 @@ class CitizenFirestoreService {
       'name': name,
       'evacuationStatus': 'Pending',
       'createdAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   /// Read: Fetch the citizen's profile details
@@ -35,7 +36,7 @@ class CitizenFirestoreService {
     await _db.collection('users').doc(currentUserId).update({
       'evacuationStatus': 'Safe',
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   /// Delete: Delete the user's profile document
@@ -102,7 +103,7 @@ class CitizenFirestoreService {
         'phoneNumber': phoneNumber,
         'addedAt': FieldValue.serverTimestamp(),
       },
-    );
+    ).queued();
   }
 
   /// Read: Fetch the contacts in real-time

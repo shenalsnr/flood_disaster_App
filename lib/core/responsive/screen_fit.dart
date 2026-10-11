@@ -1,3 +1,4 @@
+import '../services/offline_sync.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class ScreenFit {
     );
     return MediaQuery(
       data: mq.copyWith(textScaler: scaler),
-      child: AppearanceScope(child: child ?? const SizedBox.shrink()),
+      child: AppearanceScope(child: OfflineBanner(child: child ?? const SizedBox.shrink())),
     );
   }
 

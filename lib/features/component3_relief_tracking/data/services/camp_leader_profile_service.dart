@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Saves the logged-in camp leader's editable details to the shared `users`
@@ -17,6 +18,6 @@ class CampLeaderProfileService {
       'phoneNumber': phoneNumber,
       'floodZone': floodZone,
       'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -159,11 +160,11 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     try {
       if (_editingId != null) {
         // UPDATE existing document
-        await _warningsCol.doc(_editingId).update(alert.toMap());
+        await _warningsCol.doc(_editingId).update(alert.toMap()).queued();
         _showSnack('✅ Warning updated successfully.', const Color(0xFF00E676));
       } else {
         // CREATE new document
-        await _warningsCol.add(alert.toMap());
+        await _warningsCol.add(alert.toMap()).queued();
         _showSnack(
           '📡 Warning broadcast to all citizens!',
           const Color(0xFF00E676),

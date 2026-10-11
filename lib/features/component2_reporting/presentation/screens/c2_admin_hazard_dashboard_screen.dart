@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -250,7 +251,7 @@ class _C2AdminHazardDashboardScreenState
                           'latitude': lat,
                           'longitude': lng,
                           'timestamp': FieldValue.serverTimestamp(),
-                        });
+                        }).queued();
 
                         if (!ctx.mounted) return;
                         Navigator.pop(ctx);
@@ -651,7 +652,7 @@ class _C2AdminHazardDashboardScreenState
                         'location': locationCtrl.text.trim(),
                         'description': descCtrl.text.trim(),
                         'updatedAt': FieldValue.serverTimestamp(),
-                      });
+                      }).queued();
 
                       if (!ctx.mounted) return;
                       Navigator.pop(ctx);

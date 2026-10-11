@@ -102,12 +102,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   _sectionTitle('Quick actions'),
                   _actions(context),
                   const SizedBox(height: 20),
-                  _sectionTitle('Shelter status'),
-                  if (zones.isEmpty)
-                    _empty('No safe zones yet. Add one from Quick actions.')
-                  else
-                    ...zones.map((z) => _zoneTile(context, z)),
-                  const SizedBox(height: 20),
                   _sectionTitle('Accounts by role'),
                   _roleBreakdown(users),
                 ],

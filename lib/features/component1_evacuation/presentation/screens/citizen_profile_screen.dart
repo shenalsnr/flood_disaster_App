@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,7 +38,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
       await _firestore.collection('users').doc(email).set(
         {'photoUrl': base64String},
         SetOptions(merge: true),
-      );
+      ).queued();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +158,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                               'city': cityCtrl.text,
                               'district': districtCtrl.text,
                               'floodZone': zoneCtrl.text,
-                            }, SetOptions(merge: true));
+                            }, SetOptions(merge: true)).queued();
                             if (ctx.mounted) Navigator.pop(ctx);
                           },
                           child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),

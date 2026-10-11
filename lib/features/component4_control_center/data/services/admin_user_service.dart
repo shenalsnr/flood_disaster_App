@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -84,7 +85,7 @@ class AdminUserService {
     await _camps.doc(campIdFromName(clean)).set({
       'name': clean,
       'createdAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   /// Removes a camp. Leaders listed in [unassignEmails] are left without a
@@ -192,7 +193,7 @@ class AdminUserService {
       'createdBy': createdBy,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).queued();
   }
 
   Future<void> setActive(String email, bool active) => _users

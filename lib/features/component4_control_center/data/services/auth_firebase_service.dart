@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/responder_models.dart';
@@ -232,7 +233,7 @@ class AuthFirebaseService {
       await _firestore.collection('users').doc(cleanEmail).update({
         'password': newPassword,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+      }).queued();
       debugPrint('✅ Cloud Firestore: Password for "$cleanEmail" updated in database');
     } catch (e) {
       debugPrint('⚠️ Firestore password update warning: $e');
@@ -254,7 +255,7 @@ class AuthFirebaseService {
       await _firestore.collection('users').doc(cleanEmail).set({
         'photoUrl': photoUrl,
         'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).queued();
       debugPrint('✅ Cloud Firestore: Profile photo updated for "$cleanEmail"');
     } catch (e) {
       debugPrint('⚠️ Firestore update photo warning: $e');
