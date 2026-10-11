@@ -6,10 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.VIBRATE" />
     <application
-        android:label="flood_disaster"
+        android:label="WeSafe"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

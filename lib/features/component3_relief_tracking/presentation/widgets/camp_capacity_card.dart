@@ -17,7 +17,9 @@ class CampCapacityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double capacityRatio = (controller.evacueeCount / controller.maxCapacity).clamp(0.0, 1.0);
+    final double capacityRatio = controller.maxCapacity <= 0
+        ? 0.0
+        : (controller.evacueeCount / controller.maxCapacity).clamp(0.0, 1.0).toDouble();
     final int occupancyPercentage = (capacityRatio * 100).toInt();
 
     Color progressColor;
@@ -26,7 +28,7 @@ class CampCapacityCard extends StatelessWidget {
     } else if (capacityRatio > 0.70) {
       progressColor = const Color(0xFFFF9F0A); // Orange accent
     } else {
-      progressColor = const Color(0xFF30D158); // Green accent
+      progressColor = const Color(0xFF00E676); // Green accent
     }
 
     final emptyItems = controller.shortageAlertItems;
@@ -74,7 +76,7 @@ class CampCapacityCard extends StatelessWidget {
             Builder(builder: (context) {
               // Shows the real sync state instead of a fixed "OK".
               final synced = controller.isSynced;
-              final pillColor = synced ? const Color(0xFF30D158) : const Color(0xFFFF9F0A);
+              final pillColor = synced ? const Color(0xFF00E676) : const Color(0xFFFF9F0A);
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
@@ -107,9 +109,9 @@ class CampCapacityCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFF131A2A),
+            color: const Color(0xFF131B2B),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E283D)),
+            border: Border.all(color: const Color(0xFF1E293B)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +173,7 @@ class CampCapacityCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF3B30),
+                  color: const Color(0xFFFF1744),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -226,19 +228,19 @@ class CampCapacityCard extends StatelessWidget {
           child: OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               backgroundColor: const Color(0xFF23161A),
-              side: const BorderSide(color: Color(0xFFFF3B30), width: 1.5),
+              side: const BorderSide(color: Color(0xFFFF1744), width: 1.5),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => controller.toggleShelterStatus(),
             icon: Icon(
               Icons.warning_amber_rounded,
-              color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF3B30),
+              color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF1744),
               size: 18,
             ),
             label: Text(
               controller.isShelterClosed ? 'RE-OPEN SHELTER' : 'CLOSE SHELTER',
               style: TextStyle(
-                color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF3B30),
+                color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF1744),
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
                 letterSpacing: 0.8,
@@ -268,22 +270,22 @@ class CampCapacityCard extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF131A2A),
+            color: const Color(0xFF131B2B),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF1E283D)),
+            border: Border.all(color: const Color(0xFF1E293B)),
           ),
           child: emptyItems.isEmpty
               ? const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
                     'No empty items to request.',
-                    style: TextStyle(color: Color(0xFF30D158), fontSize: 13),
+                    style: TextStyle(color: Color(0xFF00E676), fontSize: 13),
                   ),
                 )
               : Column(
                   children: [
                     for (var i = 0; i < emptyItems.length; i++) ...[
-                      if (i > 0) const Divider(color: Color(0xFF1E283D), height: 1),
+                      if (i > 0) const Divider(color: Color(0xFF1E293B), height: 1),
                       _buildShortageTile(emptyItems[i]),
                     ],
                   ],
@@ -344,7 +346,7 @@ class CampCapacityCard extends StatelessWidget {
               child: Text(
                 item.quantity <= 0 ? 'EMPTY' : 'DEPLETED',
                 style: const TextStyle(
-                  color: Color(0xFFFF3B30),
+                  color: Color(0xFFFF1744),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,

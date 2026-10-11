@@ -13,6 +13,7 @@ import 'incident_history_screen.dart';
 import 'live_tracking_screen.dart';
 import 'manage_units_screen.dart';
 import 'responder_profile_screen.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Dispatcher home. Fully responsive:
 ///  - phone:   single column + bottom NavigationBar
@@ -87,11 +88,11 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
     Navigator.of(context).push(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 320),
-        pageBuilder: (_, _, _) => IncidentDetailsScreen(
+        pageBuilder: (_, __, ___) => IncidentDetailsScreen(
           incident: incident,
           heroTag: 'inc-photo-${incident.id}',
         ),
-        transitionsBuilder: (_, a, _, child) => FadeTransition(
+        transitionsBuilder: (_, a, __, child) => FadeTransition(
           opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
           child: child,
         ),
@@ -113,7 +114,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
           incidents: list,
           selectedId: size == ScreenSize.expanded
               ? (_c.activeIncident?.id ??
-                    (list.isNotEmpty ? list.first.id : null))
+                  (list.isNotEmpty ? list.first.id : null))
               : null,
           search: _search,
           onSearch: (v) => setState(() => _q = v),
@@ -162,36 +163,30 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
                       selectedIndex: 0,
                       indicatorColor: C4.accent.withValues(alpha: 0.2),
                       selectedIconTheme: const IconThemeData(color: C4.accent),
-                      unselectedIconTheme: const IconThemeData(color: C4.muted),
+                      unselectedIconTheme:
+                          const IconThemeData(color: C4.muted),
                       selectedLabelTextStyle: const TextStyle(
-                        color: C4.accent,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      unselectedLabelTextStyle: const TextStyle(
-                        color: C4.muted,
-                      ),
+                          color: C4.accent, fontWeight: FontWeight.bold),
+                      unselectedLabelTextStyle:
+                          const TextStyle(color: C4.muted),
                       onDestinationSelected: _go,
                       destinations: const [
                         NavigationRailDestination(
-                          icon: Icon(Icons.crisis_alert_outlined),
-                          selectedIcon: Icon(Icons.crisis_alert),
-                          label: Text('Incidents'),
-                        ),
+                            icon: Icon(Icons.crisis_alert_outlined),
+                            selectedIcon: Icon(Icons.crisis_alert),
+                            label: Text('Incidents')),
                         NavigationRailDestination(
-                          icon: Icon(Icons.map_outlined),
-                          selectedIcon: Icon(Icons.map),
-                          label: Text('Live map'),
-                        ),
+                            icon: Icon(Icons.map_outlined),
+                            selectedIcon: Icon(Icons.map),
+                            label: Text('Live map')),
                         NavigationRailDestination(
-                          icon: Icon(Icons.local_shipping_outlined),
-                          selectedIcon: Icon(Icons.local_shipping),
-                          label: Text('Dispatch'),
-                        ),
+                            icon: Icon(Icons.local_shipping_outlined),
+                            selectedIcon: Icon(Icons.local_shipping),
+                            label: Text('Dispatch')),
                         NavigationRailDestination(
-                          icon: Icon(Icons.person_outline),
-                          selectedIcon: Icon(Icons.person),
-                          label: Text('Profile'),
-                        ),
+                            icon: Icon(Icons.person_outline),
+                            selectedIcon: Icon(Icons.person),
+                            label: Text('Profile')),
                       ],
                     ),
                     const VerticalDivider(width: 1, color: C4.border),
@@ -221,25 +216,21 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
                     onDestinationSelected: _go,
                     destinations: const [
                       NavigationDestination(
-                        icon: Icon(Icons.crisis_alert_outlined),
-                        selectedIcon: Icon(Icons.crisis_alert),
-                        label: 'Incidents',
-                      ),
+                          icon: Icon(Icons.crisis_alert_outlined),
+                          selectedIcon: Icon(Icons.crisis_alert),
+                          label: 'Incidents'),
                       NavigationDestination(
-                        icon: Icon(Icons.map_outlined),
-                        selectedIcon: Icon(Icons.map),
-                        label: 'Live map',
-                      ),
+                          icon: Icon(Icons.map_outlined),
+                          selectedIcon: Icon(Icons.map),
+                          label: 'Live map'),
                       NavigationDestination(
-                        icon: Icon(Icons.local_shipping_outlined),
-                        selectedIcon: Icon(Icons.local_shipping),
-                        label: 'Dispatch',
-                      ),
+                          icon: Icon(Icons.local_shipping_outlined),
+                          selectedIcon: Icon(Icons.local_shipping),
+                          label: 'Dispatch'),
                       NavigationDestination(
-                        icon: Icon(Icons.person_outline),
-                        selectedIcon: Icon(Icons.person),
-                        label: 'Profile',
-                      ),
+                          icon: Icon(Icons.person_outline),
+                          selectedIcon: Icon(Icons.person),
+                          label: 'Profile'),
                     ],
                   ),
                 )
@@ -261,28 +252,25 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
           Text(
             _c.currentUser?.fullName ?? 'Dispatcher',
             style: const TextStyle(
-              color: C4.text,
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
-            ),
+                color: C4.text, fontWeight: FontWeight.w800, fontSize: 16),
             overflow: TextOverflow.ellipsis,
           ),
           const Text(
             'DISPATCH CONTROL CENTER',
             style: TextStyle(
-              color: C4.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.1,
-            ),
+                color: C4.blue,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1),
           ),
         ],
       ),
       actions: [
+        const ThemeToggleButton(),
         if (compact)
           IconButton(
             tooltip: 'Broadcast zone alert',
-            icon: const Icon(Icons.cell_tower, color: Color(0xFFEF4444)),
+            icon: const Icon(Icons.cell_tower, color: Color(0xFFFF5252)),
             onPressed: () => showBroadcastDialog(context),
           )
         else
@@ -290,8 +278,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFDC2626),
-              ),
+                  backgroundColor: const Color(0xFFDC2626)),
               icon: const Icon(Icons.cell_tower, size: 18),
               label: const Text('BROADCAST'),
               onPressed: () => showBroadcastDialog(context),
@@ -301,8 +288,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
           icon: const Icon(Icons.more_vert, color: C4.muted),
           color: C4.card,
           onSelected: (v) {
-            if (v == 'units')
-              pushPage(context, const ManageUnitsScreen(), frame: false);
+            if (v == 'units') pushPage(context, const ManageUnitsScreen(), frame: false);
             if (v == 'broadcasts') {
               pushPage(context, const BroadcastHistoryScreen(), frame: false);
             }
@@ -312,32 +298,23 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
           },
           itemBuilder: (_) => const [
             PopupMenuItem(
-              value: 'units',
-              child: ListTile(
-                leading: Icon(Icons.local_shipping_outlined, color: C4.blue),
-                title: Text('Response units', style: TextStyle(color: C4.text)),
-              ),
-            ),
+                value: 'units',
+                child: ListTile(
+                    leading: Icon(Icons.local_shipping_outlined, color: C4.blue),
+                    title: Text('Response units',
+                        style: TextStyle(color: C4.text)))),
             PopupMenuItem(
-              value: 'broadcasts',
-              child: ListTile(
-                leading: Icon(Icons.cell_tower, color: C4.accent),
-                title: Text(
-                  'Broadcast history',
-                  style: TextStyle(color: C4.text),
-                ),
-              ),
-            ),
+                value: 'broadcasts',
+                child: ListTile(
+                    leading: Icon(Icons.cell_tower, color: C4.accent),
+                    title: Text('Broadcast history',
+                        style: TextStyle(color: C4.text)))),
             PopupMenuItem(
-              value: 'history',
-              child: ListTile(
-                leading: Icon(Icons.task_alt, color: C4.green),
-                title: Text(
-                  'Resolved incidents',
-                  style: TextStyle(color: C4.text),
-                ),
-              ),
-            ),
+                value: 'history',
+                child: ListTile(
+                    leading: Icon(Icons.task_alt, color: C4.green),
+                    title: Text('Resolved incidents',
+                        style: TextStyle(color: C4.text)))),
           ],
         ),
         const SizedBox(width: 4),
@@ -389,11 +366,8 @@ class _ListPane extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'Search location, hazard or ID',
                     hintStyle: const TextStyle(color: C4.muted, fontSize: 13),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: C4.muted,
-                      size: 20,
-                    ),
+                    prefixIcon:
+                        const Icon(Icons.search, color: C4.muted, size: 20),
                     filled: true,
                     fillColor: C4.card,
                     isDense: true,
@@ -414,11 +388,7 @@ class _ListPane extends StatelessWidget {
                   child: Row(
                     children: [
                       _filter(c, 'ALL', C4.muted),
-                      _filter(
-                        c,
-                        'CRITICAL',
-                        C4.severity(IncidentSeverity.critical),
-                      ),
+                      _filter(c, 'CRITICAL', C4.severity(IncidentSeverity.critical)),
                       _filter(c, 'HIGH', C4.severity(IncidentSeverity.high)),
                       _filter(c, 'MED', C4.severity(IncidentSeverity.medium)),
                       _filter(c, 'LOW', C4.severity(IncidentSeverity.low)),
@@ -431,30 +401,22 @@ class _ListPane extends StatelessWidget {
                     borderColor: Colors.orange,
                     child: Text(
                       'Sync problem: ${c.syncError}',
-                      style: const TextStyle(
-                        color: Colors.orange,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.orange, fontSize: 12),
                     ),
                   ),
                 ],
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Text(
-                      'PRIORITY QUEUE',
-                      style: TextStyle(
-                        color: C4.muted,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    const Text('PRIORITY QUEUE',
+                        style: TextStyle(
+                            color: C4.muted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2)),
                     const SizedBox(width: 8),
-                    const Text(
-                      'sorted by severity',
-                      style: TextStyle(color: C4.border, fontSize: 11),
-                    ),
+                    const Text('sorted by severity',
+                        style: TextStyle(color: C4.border, fontSize: 11)),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -463,7 +425,10 @@ class _ListPane extends StatelessWidget {
           ),
         ),
         if (incidents.isEmpty)
-          const SliverFillRemaining(hasScrollBody: false, child: _EmptyState())
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: _EmptyState(),
+          )
         else
           SliverPadding(
             padding: EdgeInsets.fromLTRB(pad, 0, pad, 24),
@@ -474,19 +439,22 @@ class _ListPane extends StatelessWidget {
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
               ),
-              delegate: SliverChildBuilderDelegate((context, i) {
-                final inc = incidents[i];
-                return FadeSlideIn(
-                  key: ValueKey(inc.id),
-                  index: i,
-                  child: _IncidentCard(
-                    incident: inc,
-                    selected: inc.id == selectedId,
-                    heroEnabled: size != ScreenSize.expanded,
-                    onTap: () => onOpen(inc),
-                  ),
-                );
-              }, childCount: incidents.length),
+              delegate: SliverChildBuilderDelegate(
+                (context, i) {
+                  final inc = incidents[i];
+                  return FadeSlideIn(
+                    key: ValueKey(inc.id),
+                    index: i,
+                    child: _IncidentCard(
+                      incident: inc,
+                      selected: inc.id == selectedId,
+                      heroEnabled: size != ScreenSize.expanded,
+                      onTap: () => onOpen(inc),
+                    ),
+                  );
+                },
+                childCount: incidents.length,
+              ),
             ),
           ),
       ],
@@ -536,11 +504,11 @@ class _Banner extends StatelessWidget {
           child: Stack(
             children: [
               Positioned.fill(
-                child: Image.asset(
+                child: Unfiltered(child: Image.asset(
                   'assets/images/onboard_early_warning.jpg',
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(color: C4.card),
-                ),
+                  errorBuilder: (_, __, ___) => Container(color: C4.card),
+                )),
               ),
               Positioned.fill(
                 child: DecoratedBox(
@@ -566,9 +534,7 @@ class _Banner extends StatelessWidget {
                         PulseDot(color: live ? C4.green : Colors.orange),
                         const SizedBox(width: 8),
                         Text(
-                          live
-                              ? 'LIVE - synced with field reports'
-                              : 'CONNECTING...',
+                          live ? 'LIVE - synced with field reports' : 'CONNECTING...',
                           style: TextStyle(
                             color: live ? C4.green : Colors.orange,
                             fontWeight: FontWeight.w800,
@@ -582,25 +548,18 @@ class _Banner extends StatelessWidget {
                     const Text(
                       'Flood response overview',
                       style: TextStyle(
-                        color: C4.text,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
+                          color: C4.text,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 14),
                     Row(
                       children: [
                         _stat('ACTIVE', c.countFor('ALL'), C4.blue),
-                        _stat(
-                          'CRITICAL',
-                          c.countFor('CRITICAL'),
-                          C4.severity(IncidentSeverity.critical),
-                        ),
-                        _stat(
-                          'UNITS FREE',
-                          c.teams.where((t) => t.isAvailable).length,
-                          C4.green,
-                        ),
+                        _stat('CRITICAL', c.countFor('CRITICAL'),
+                            C4.severity(IncidentSeverity.critical)),
+                        _stat('UNITS FREE',
+                            c.teams.where((t) => t.isAvailable).length, C4.green),
                         _stat('RESOLVED', c.resolvedIncidents.length, C4.muted),
                       ],
                     ),
@@ -622,20 +581,16 @@ class _Banner extends StatelessWidget {
           AnimatedCount(
             value: value,
             style: TextStyle(
-              color: color,
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-            ),
+                color: color, fontSize: 26, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 2),
           Text(
             label,
             style: const TextStyle(
-              color: C4.muted,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
+                color: C4.muted,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8),
           ),
         ],
       ),
@@ -663,8 +618,7 @@ class _IncidentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final sev = C4.severity(incident.severity);
     final st = C4.status(incident.status);
-    final urgent =
-        incident.severity == IncidentSeverity.critical &&
+    final urgent = incident.severity == IncidentSeverity.critical &&
         incident.status == IncidentStatus.incoming;
 
     Widget photo = HazardPhoto(incident: incident, radius: 0);
@@ -710,10 +664,7 @@ class _IncidentCard extends StatelessWidget {
                           C4Chip(label: incident.severityLabel, color: sev),
                           const SizedBox(width: 6),
                           Flexible(
-                            child: C4Chip(
-                              label: incident.statusLabel,
-                              color: st,
-                            ),
+                            child: C4Chip(label: incident.statusLabel, color: st),
                           ),
                         ],
                       ),
@@ -722,18 +673,14 @@ class _IncidentCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: C4.text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ),
+                            color: C4.text,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800),
                       ),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.place_outlined,
-                            size: 13,
-                            color: C4.muted,
-                          ),
+                          const Icon(Icons.place_outlined,
+                              size: 13, color: C4.muted),
                           const SizedBox(width: 3),
                           Expanded(
                             child: Text(
@@ -741,9 +688,7 @@ class _IncidentCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: C4.muted,
-                                fontSize: 12,
-                              ),
+                                  color: C4.muted, fontSize: 12),
                             ),
                           ),
                         ],
@@ -752,43 +697,27 @@ class _IncidentCard extends StatelessWidget {
                         children: [
                           const Icon(Icons.schedule, size: 12, color: C4.muted),
                           const SizedBox(width: 3),
-                          Text(
-                            incident.timeAgo,
-                            style: const TextStyle(
-                              color: C4.muted,
-                              fontSize: 11,
-                            ),
-                          ),
+                          Text(incident.timeAgo,
+                              style: const TextStyle(
+                                  color: C4.muted, fontSize: 11)),
                           const SizedBox(width: 10),
-                          const Icon(
-                            Icons.groups_2_outlined,
-                            size: 13,
-                            color: C4.muted,
-                          ),
+                          const Icon(Icons.groups_2_outlined,
+                              size: 13, color: C4.muted),
                           const SizedBox(width: 3),
-                          Text(
-                            '${incident.corroboratingCount}',
-                            style: const TextStyle(
-                              color: C4.muted,
-                              fontSize: 11,
-                            ),
-                          ),
+                          Text('${incident.corroboratingCount}',
+                              style: const TextStyle(
+                                  color: C4.muted, fontSize: 11)),
                           if (incident.assignedTeam != null) ...[
                             const SizedBox(width: 10),
-                            const Icon(
-                              Icons.local_shipping_outlined,
-                              size: 13,
-                              color: C4.blue,
-                            ),
+                            const Icon(Icons.local_shipping_outlined,
+                                size: 13, color: C4.blue),
                             const SizedBox(width: 3),
                             Flexible(
                               child: Text(
                                 incident.assignedTeam!.callSign,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  color: C4.blue,
-                                  fontSize: 11,
-                                ),
+                                    color: C4.blue, fontSize: 11),
                               ),
                             ),
                           ],
@@ -823,27 +752,23 @@ class _EmptyState extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(60),
-                child: Image.asset(
+                child: Unfiltered(child: Image.asset(
                   'assets/images/onboard_safe_shelter.jpg',
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const Icon(
-                    Icons.verified_outlined,
-                    size: 64,
-                    color: C4.green,
-                  ),
-                ),
+                  errorBuilder: (_, __, ___) => const Icon(
+                      Icons.verified_outlined,
+                      size: 64,
+                      color: C4.green),
+                )),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'All clear',
-                style: TextStyle(
-                  color: C4.text,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              const Text('All clear',
+                  style: TextStyle(
+                      color: C4.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
               const Text(
                 'No open incidents match this view.\nNew volunteer reports appear here automatically.',

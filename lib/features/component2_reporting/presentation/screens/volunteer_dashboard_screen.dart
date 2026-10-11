@@ -8,6 +8,7 @@ import '../widgets/volunteer_drawer.dart';
 import '../widgets/hazard_report_details_sheet.dart';
 import 'hazard_report_wizard_screen.dart';
 import 'offline_draft_management_screen.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Main Dashboard Screen for District Volunteer (Component 2: Ground Hazard Reporting).
 /// Features the Top App Bar from Screenshot 2, the Drawer from Screenshot 3,
@@ -18,6 +19,20 @@ class VolunteerDashboardScreen extends StatefulWidget {
   @override
   State<VolunteerDashboardScreen> createState() =>
       _VolunteerDashboardScreenState();
+}
+
+/// Shows the control-center dispatch progress (written by Component 4) when
+/// available, otherwise the normal report status.
+String _displayStatus(Map<String, dynamic> data) {
+  switch (data['dispatchStatus']) {
+    case 'dispatched':
+      return 'DISPATCHED';
+    case 'onScene':
+      return 'ON SCENE';
+    case 'resolved':
+      return 'RESOLVED';
+  }
+  return data['status'] as String? ?? 'VERIFIED';
 }
 
 class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
@@ -119,7 +134,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     } else if (lower.contains('building')) {
       return const Color(0xFFCBD5E1); // Slate / White
     } else if (lower.contains('bridge')) {
-      return const Color(0xFFFF9800); // Orange
+      return const Color(0xFFFF9F0A); // Orange
     }
     return const Color(0xFFFFB300);
   }
@@ -177,10 +192,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
           ],
         ),
         actions: [
+          const ThemeToggleButton(),
           IconButton(
             tooltip: 'Offline Drafts & Queue (SQLite)',
             icon: const Icon(Icons.storage_rounded,
-                color: Color(0xFFFF9800), size: 21),
+                color: Color(0xFFFF9F0A), size: 21),
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -314,7 +330,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     return SafeArea(
       child: RefreshIndicator(
         color: const Color(0xFFFF6D00),
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFF070B14),
         onRefresh: () async {
           setState(() {});
         },
@@ -367,19 +383,19 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFF9800),
+                          color: const Color(0xFFFF9F0A),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF9800).withValues(alpha: 0.3),
+                            color: const Color(0xFFFF9F0A).withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 3),
                           ),
                         ],
                       ),
                       child: ClipOval(
-                        child: Image.asset(
+                        child: Unfiltered(child: Image.asset(
                           'assets/images/volunteer_avatar.png',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
@@ -394,7 +410,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                               ),
                             );
                           },
-                        ),
+                        )),
                       ),
                     ),
                   ),
@@ -526,7 +542,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                               : hazard,
                           location: data['location'] as String? ?? 'Field Sector',
                           timeAgo: 'Just now',
-                          status: data['status'] as String? ?? 'VERIFIED',
+                          status: _displayStatus(data),
                           hazardType: hazard,
                           description: data['description'] as String? ??
                               'Ground hazard verified by district volunteer.',
@@ -609,7 +625,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                               : hazard,
                           location: data['location'] as String? ?? 'Field Sector',
                           timeAgo: 'Just now',
-                          status: data['status'] as String? ?? 'VERIFIED',
+                          status: _displayStatus(data),
                           hazardType: hazard,
                           description: data['description'] as String? ??
                               'Ground hazard verified by district volunteer.',
@@ -649,7 +665,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
   Widget _buildLiveMapTab() {
     return Stack(
       children: [
-        FlutterMap(
+        Unfiltered(child: FlutterMap(
           options: const MapOptions(
             initialCenter: LatLng(6.9271, 79.8612),
             initialZoom: 13.0,
@@ -704,14 +720,14 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
               ],
             ),
           ],
-        ),
+        )),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A).withValues(alpha: 0.92),
+                color: const Color(0xFF131B2B).withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: const Color(0xFF334155)),
               ),
@@ -753,16 +769,16 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                 height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFFF9800), width: 3),
+                  border: Border.all(color: const Color(0xFFFF9F0A), width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF9800).withValues(alpha: 0.4),
+                      color: const Color(0xFFFF9F0A).withValues(alpha: 0.4),
                       blurRadius: 18,
                     ),
                   ],
                 ),
                 child: ClipOval(
-                  child: Image.asset(
+                  child: Unfiltered(child: Image.asset(
                     'assets/images/volunteer_avatar.png',
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, err, stack) => const Icon(
@@ -770,7 +786,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                       size: 54,
                       color: Colors.white,
                     ),
-                  ),
+                  )),
                 ),
               ),
             ),
@@ -817,7 +833,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                 const SizedBox(width: 12),
                 _buildStatTile('19', 'Verified', const Color(0xFF00E676)),
                 const SizedBox(width: 12),
-                _buildStatTile('100%', 'Sync Rate', const Color(0xFF38BDF8)),
+                _buildStatTile('100%', 'Sync Rate', const Color(0xFF40C4FF)),
               ],
             ),
 
@@ -826,7 +842,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color: const Color(0xFF131B2B),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: const Color(0xFF1E293B)),
               ),
@@ -853,7 +869,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: const Color(0xFF131B2B),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFF1E293B)),
         ),
@@ -1068,7 +1084,8 @@ class _RecentReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVerified = report.status.toUpperCase() == 'VERIFIED';
+    final isVerified = report.status.toUpperCase() == 'VERIFIED' ||
+        report.status.toUpperCase() == 'RESOLVED';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

@@ -10,6 +10,7 @@ import '../controllers/responder_controller.dart';
 import 'admin_panel_screen.dart';
 import 'responder_login_screen.dart';
 import 'safe_zones_screen.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Landing page for administrators: a live, read-only overview of accounts
 /// and shelters, with shortcuts to the existing admin tools. It never writes
@@ -17,12 +18,12 @@ import 'safe_zones_screen.dart';
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
-  static const Color _bg = Color(0xFF0B101D);
-  static const Color _card = Color(0xFF131A2A);
-  static const Color _border = Color(0xFF1E283D);
+  static const Color _bg = Color(0xFF131B2B);
+  static const Color _card = Color(0xFF131B2B);
+  static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF30D158);
+  static const Color _green = Color(0xFF00E676);
   static const Color _orange = Color(0xFFFF9F0A);
 
   Future<void> _signOut(BuildContext context) async {
@@ -49,6 +50,7 @@ class AdminDashboardScreen extends StatelessWidget {
         title: const Text('Admin Dashboard',
             style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
+          const ThemeToggleButton(),
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout),
@@ -479,12 +481,12 @@ class _CitizensScreen extends StatefulWidget {
 }
 
 class _CitizensScreenState extends State<_CitizensScreen> {
-  static const Color _bg = Color(0xFF0B101D);
-  static const Color _card = Color(0xFF131A2A);
-  static const Color _border = Color(0xFF1E283D);
+  static const Color _bg = Color(0xFF131B2B);
+  static const Color _card = Color(0xFF131B2B);
+  static const Color _border = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF8E9BAE);
   static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF30D158);
+  static const Color _green = Color(0xFF00E676);
 
   String _query = '';
 

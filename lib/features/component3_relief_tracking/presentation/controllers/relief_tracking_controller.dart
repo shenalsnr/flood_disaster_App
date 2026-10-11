@@ -16,9 +16,6 @@ class ReliefTrackingController extends ChangeNotifier {
       campName = zone;
     }
     campId = campIdFromName(campName);
-    // Only the built-in demo camp starts with a demo headcount; camps the
-    // administrator adds start empty.
-    if (campId != 'camp_neraya') evacueeCount = 0;
     _auth.addListener(_onAuthChanged);
     _startSync();
   }
@@ -40,10 +37,14 @@ class ReliefTrackingController extends ChangeNotifier {
 
   String? get leaderPhotoUrl => _auth.currentUser?.photoUrl;
 
-  String campName = "Camp Nēraya";
-  int evacueeCount = 275;
-  int maxCapacity = 300;
+  /// Name of the camp assigned to the logged-in leader (set by the admin).
+  String campName = 'No camp assigned';
+  int evacueeCount = 0;
+  int maxCapacity = 0;
   bool isShelterClosed = false;
+
+  /// False until an administrator has assigned a camp to this account.
+  bool get hasCamp => campName != 'No camp assigned';
 
   // --------------------------------------------------------
   // Leaders chat identity: the logged-in account tells "my" messages apart
@@ -91,7 +92,7 @@ class ReliefTrackingController extends ChangeNotifier {
         .toString()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
         .replaceAll(RegExp(r'^_+|_+$'), '');
-    return slug.isEmpty ? 'camp_neraya' : slug;
+    return slug.isEmpty ? 'unassigned' : slug;
   }
 
   /// True once the latest data came from the server (not only the local cache).
@@ -111,7 +112,7 @@ class ReliefTrackingController extends ChangeNotifier {
   /// Whether the truck card is shown on the Supplies page. It disappears
   /// once the leader confirms the restock, and comes back as PENDING when
   /// a new supply request is made.
-  bool showTruckCard = true;
+  bool showTruckCard = false;
 
   /// Requests whose restock was already confirmed (never shown again).
   final Set<String> _finishedRequestIds = {};
@@ -147,8 +148,8 @@ class ReliefTrackingController extends ChangeNotifier {
 
       _statusSub = fs.streamCampStatus(campId).listen((snap) {
         if (!snap.exists) {
-          // First run: publish the starting values once.
-          if (!snap.metadata.isFromCache) _pushStatus();
+          // First run of an assigned camp: publish the starting values once.
+          if (hasCamp && !snap.metadata.isFromCache) _pushStatus();
           return;
         }
         // Our own not-yet-confirmed write is already applied locally.
@@ -238,6 +239,7 @@ class ReliefTrackingController extends ChangeNotifier {
   }
 
   void _pushStatus() {
+    if (!hasCamp) return;
     try {
       FirestoreService.instance
           .saveCampStatus(
@@ -253,6 +255,7 @@ class ReliefTrackingController extends ChangeNotifier {
   }
 
   void _pushItem(ReliefItemModel item) {
+    if (!hasCamp) return;
     try {
       FirestoreService.instance
           .saveCampSupplyItem(campId, item.id, _itemToMap(item))
@@ -311,54 +314,18 @@ class ReliefTrackingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Inventory Items State (Matching Image 2 frame2)
-  List<ReliefItemModel> inventoryItems = [
-    const ReliefItemModel(
-      id: 'inv_1',
-      name: 'Infant Formula Milk Powder',
-      category: SupplyCategory.food,
-      quantity: 0,
-      unit: 'Cans',
-      minThreshold: 30,
-      lastUpdated: 'Just now',
-    ),
-    const ReliefItemModel(
-      id: 'inv_2',
-      name: 'Drinking Water Jerry Cans (20L)',
-      category: SupplyCategory.water,
-      quantity: 15,
-      unit: 'Cans',
-      minThreshold: 50,
-      lastUpdated: '10 mins ago',
-    ),
-    const ReliefItemModel(
-      id: 'inv_3',
-      name: 'Trauma & Suture Packs',
-      category: SupplyCategory.medical,
-      quantity: 45,
-      unit: 'Packs',
-      minThreshold: 15,
-      lastUpdated: '25 mins ago',
-    ),
-    const ReliefItemModel(
-      id: 'inv_4',
-      name: 'Thermal Sleeping Blankets',
-      category: SupplyCategory.shelter,
-      quantity: 90,
-      unit: 'Pieces',
-      minThreshold: 40,
-      lastUpdated: '3 hours ago',
-    ),
-  ];
+  // Inventory items of the assigned camp (loaded from Firestore).
+  List<ReliefItemModel> inventoryItems = [];
 
-  // Incoming Shipment Log (Matching Image 2 frame2)
+  // Placeholder used by the Supplies tab while no real supply request is open
+  // (the truck card itself is hidden in that case).
   Map<String, dynamic> incomingShipment = {
     'title': 'Relief Supply Truck',
-    'subtitle': 'Convoy B',
-    'eta': 'ETA: 18 MINS',
-    'progress': 0.65,
-    'driverPhone': '+94 77 123 4567',
-    'isRestocked': false,
+    'subtitle': '',
+    'eta': '',
+    'progress': 0.0,
+    'driverPhone': '',
+    'isRestocked': true,
   };
 
   void confirmRestock() {
@@ -367,11 +334,7 @@ class ReliefTrackingController extends ChangeNotifier {
       _restockFromRequest(req);
       return;
     }
-    showTruckCard = false; // demo convoy delivered: hide the card
-    incomingShipment['isRestocked'] = true;
-    // Boost stock values
-    updateStockQuantity('inv_1', 40);
-    updateStockQuantity('inv_2', 50);
+    showTruckCard = false;
     notifyListeners();
   }
 
@@ -406,84 +369,16 @@ class ReliefTrackingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Alerts List (Matching Image 3 alert d.)
-  List<Map<String, dynamic>> alertList = [
-    {
-      'id': 'alt_1',
-      'title': 'Infant Formula Milk Powder — Depleted',
-      'subtitle': 'Camp Nēraya stock reached zero. Immediate resupply required.',
-      'time': '2m ago',
-      'type': 'critical',
-      'actionText': 'DISPATCH SUPPLY',
-      'isDismissed': false,
-    },
-    {
-      'id': 'alt_2',
-      'title': 'Shelter Capacity — Critical',
-      'subtitle': 'Camp Dawn Ridge at 96% occupancy (288/300 beds).',
-      'time': '18m ago',
-      'type': 'critical',
-      'actionText': 'VIEW SHELTER',
-      'isDismissed': false,
-    },
-    {
-      'id': 'alt_3',
-      'title': 'Drinking Water Jerry Cans — Low Stock',
-      'subtitle': 'Below 20L threshold at Camp Nēraya. Restock recommended.',
-      'time': '41m ago',
-      'type': 'low',
-      'actionText': 'REQUEST SUPPLY',
-      'isDismissed': false,
-    },
-    {
-      'id': 'alt_4',
-      'title': 'Resupply Dispatched — EMER-042',
-      'subtitle': 'Transferred to DMC, medical crew notified. ETA 15 min.',
-      'time': '1h ago',
-      'type': 'logs',
-      'actionText': 'VIEW LOG',
-      'isDismissed': false,
-    },
-  ];
+  // Alerts shown on the Alerts tab (filled from real events only).
+  List<Map<String, dynamic>> alertList = [];
 
   void dismissAlert(String id) {
     alertList.removeWhere((a) => a['id'] == id);
     notifyListeners();
   }
 
-  // Evacuee State
-  List<EvacueeModel> evacuees = [
-    const EvacueeModel(
-      id: 'evac_1',
-      fullName: 'Kamal Perera',
-      age: 62,
-      gender: 'Male',
-      triage: TriagePriority.red,
-      specialNeeds: 'Insulin dependent & High Blood Pressure',
-      checkInTime: '08:30 AM Today',
-      assignedZone: 'Zone A - Medical Tent 2',
-    ),
-    const EvacueeModel(
-      id: 'evac_2',
-      fullName: 'Nimali Fernando',
-      age: 28,
-      gender: 'Female',
-      triage: TriagePriority.yellow,
-      specialNeeds: 'Infant care (3 months old baby)',
-      checkInTime: '09:15 AM Today',
-      assignedZone: 'Zone B - Family Hall 1',
-    ),
-    const EvacueeModel(
-      id: 'evac_3',
-      fullName: 'Sunil Jayasinghe',
-      age: 45,
-      gender: 'Male',
-      triage: TriagePriority.green,
-      specialNeeds: 'None',
-      checkInTime: '10:00 AM Today',
-      assignedZone: 'Zone C - Main Hall',
-    ),
-  ];
+  // Evacuees registered at this camp.
+  List<EvacueeModel> evacuees = [];
 
   // Filtering State
   String selectedSupplyFilter = 'All'; // 'All' | 'Depleted' | 'Low' | 'Adequate'
@@ -583,18 +478,6 @@ class ReliefTrackingController extends ChangeNotifier {
   /// the critical (depleted) band (FR12).
   void _setItem(int index, ReliefItemModel updated) {
     final before = inventoryItems[index];
-
-    // The item was available again (restocked) and has now run short once
-    // more: any earlier request for it is finished business, so close it and
-    // let this new shortage appear in the alerts and be requested again.
-    if (before.status == StockStatus.adequate &&
-        updated.status != StockStatus.adequate &&
-        hasOpenRequest(updated)) {
-      _openRequestItemIds.remove(updated.id);
-      _openRequestItemNames.remove(_nameKey(updated.name));
-      _resolveDmc(updated);
-    }
-
     inventoryItems[index] = updated;
     _pushItem(updated);
 

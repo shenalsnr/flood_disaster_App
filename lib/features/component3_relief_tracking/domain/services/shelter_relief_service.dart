@@ -36,89 +36,17 @@ class ShelterReliefService extends ChangeNotifier {
   // State: Ration & Supply
   // ----------------------------------------
   
-  final List<RationItemModel> _rationItems = [
-    // Initial mock items as requested
-    const RationItemModel(
-      id: 'r1',
-      shelterId: 's1', // Assumes 's1' is a valid shelter ID added later
-      name: 'Baby Milk Formula',
-      category: 'Baby Care',
-      quantity: 50,
-      unit: 'packets',
-      thresholdLow: 20,
-    ),
-    const RationItemModel(
-      id: 'r2',
-      shelterId: 's1',
-      name: 'Trauma Kit',
-      category: 'Medical',
-      quantity: 5,
-      unit: 'kits',
-      thresholdLow: 10,
-    ),
-    const RationItemModel(
-      id: 'r3',
-      shelterId: 's1',
-      name: 'Drinking Water',
-      category: 'Water',
-      quantity: 500,
-      unit: 'liters',
-      thresholdLow: 100,
-    ),
-    const RationItemModel(
-      id: 'r4',
-      shelterId: 's1',
-      name: 'Rice Packs',
-      category: 'Food',
-      quantity: 200,
-      unit: 'kg',
-      thresholdLow: 50,
-    ),
-  ];
+  final List<RationItemModel> _rationItems = [];
   
   /// Unmodifiable view of the overall inventory.
   List<RationItemModel> get rationItems => List.unmodifiable(_rationItems);
 
   // State: Equipment
-  final List<EquipmentModel> _equipments = [
-    EquipmentModel(
-      id: 'eq1',
-      name: 'Water Pump 500W',
-      status: EquipmentStatus.available,
-      condition: EquipmentCondition.good,
-      currentCampId: 's1',
-      historyLogs: [],
-      maintenanceRecords: [],
-    ),
-    EquipmentModel(
-      id: 'eq2',
-      name: 'Heavy Duty Generator',
-      status: EquipmentStatus.assigned,
-      condition: EquipmentCondition.excellent,
-      currentCampId: 's2',
-      historyLogs: [],
-      maintenanceRecords: [],
-    ),
-  ];
+  final List<EquipmentModel> _equipments = [];
   List<EquipmentModel> get equipments => List.unmodifiable(_equipments);
 
   // State: Trucks
-  final List<TruckModel> _trucks = [
-    TruckModel(
-      id: 'tr1',
-      vehicleNumber: 'WP-LL-4598',
-      truckType: '4x4 Heavy Truck',
-      currentLat: 6.9271,
-      currentLng: 79.8612,
-      destinationCampId: 's1',
-      status: TruckStatus.enRoute,
-      assignedOperation: 'Relief Convoy #1',
-      cargoPayloadDetails: '500L Water, Medical Kits',
-      departureTime: '12:00 PM',
-      estimatedEta: '18 Mins',
-      routeHistory: [],
-    )
-  ];
+  final List<TruckModel> _trucks = [];
   List<TruckModel> get trucks => List.unmodifiable(_trucks);
 
   // State: Alerts
@@ -126,14 +54,7 @@ class ShelterReliefService extends ChangeNotifier {
   List<InterCampAlertModel> get interCampAlerts => List.unmodifiable(_interCampAlerts);
 
   // State: Chat
-  final List<ChatMessageModel> _chatMessages = [
-    const ChatMessageModel(
-      id: 'c1', senderName: 'Nadeesha1', senderCampId: 'camp2', text: 'Water levels rising near Gate B. We need sandbags urgently.', timestamp: '12:41', isSelf: false, avatarInitials: 'N', status: MessageStatus.delivered
-    ),
-    const ChatMessageModel(
-      id: 'c2', senderName: 'Priyala', senderCampId: 'camp3', text: 'Convoy 3 is 10 mins out with water + formula. Hang tight.', timestamp: '12:42', isSelf: false, avatarInitials: 'P', status: MessageStatus.delivered
-    ),
-  ];
+  final List<ChatMessageModel> _chatMessages = [];
   List<ChatMessageModel> get chatMessages => List.unmodifiable(_chatMessages);
 
   // ========================================

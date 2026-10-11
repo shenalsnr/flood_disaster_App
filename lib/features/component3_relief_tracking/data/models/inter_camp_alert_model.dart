@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 
 enum AlertType { request, dispatch, notification }
 

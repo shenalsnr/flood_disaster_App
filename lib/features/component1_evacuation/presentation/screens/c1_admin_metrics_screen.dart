@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/warning_alert.dart';
+import '../../../../core/theme/appearance.dart';
 
 // ---------------------------------------------------------------------------
 // C1AdminMetricsScreen — Admin CRUD: Live Warning Data Entry
@@ -342,6 +343,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       backgroundColor: const Color(0xFF070B14),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+      actions: const [ThemeToggleButton()],
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,

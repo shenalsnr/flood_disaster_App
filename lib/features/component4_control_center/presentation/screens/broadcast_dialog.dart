@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
+import '../../../../core/theme/appearance.dart';
 
 /// Opens the map-based zone broadcast screen (FR11).
 /// (Name kept so every existing caller keeps working.)
@@ -15,7 +16,8 @@ Future<void> showBroadcastDialog(
   BuildContext context, {
   String zone = '',
   String title = 'IMMEDIATE EVACUATION ORDER',
-  String message = 'Water level critical. Flash flood imminent. Evacuate to the nearest relief camp immediately.',
+  String message =
+      'Water level critical. Flash flood imminent. Evacuate to the nearest relief camp immediately.',
   LatLng? center,
   double radiusKm = 2,
 }) {
@@ -33,31 +35,11 @@ Future<void> showBroadcastDialog(
 }
 
 const List<String> _districts = [
-  'Ampara',
-  'Anuradhapura',
-  'Badulla',
-  'Batticaloa',
-  'Colombo',
-  'Galle',
-  'Gampaha',
-  'Hambantota',
-  'Jaffna',
-  'Kalutara',
-  'Kandy',
-  'Kegalle',
-  'Kilinochchi',
-  'Kurunegala',
-  'Mannar',
-  'Matale',
-  'Matara',
-  'Monaragala',
-  'Mullaitivu',
-  'Nuwara Eliya',
-  'Polonnaruwa',
-  'Puttalam',
-  'Ratnapura',
-  'Trincomalee',
-  'Vavuniya',
+  'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle',
+  'Gampaha', 'Hambantota', 'Jaffna', 'Kalutara', 'Kandy', 'Kegalle',
+  'Kilinochchi', 'Kurunegala', 'Mannar', 'Matale', 'Matara', 'Monaragala',
+  'Mullaitivu', 'Nuwara Eliya', 'Polonnaruwa', 'Puttalam', 'Ratnapura',
+  'Trincomalee', 'Vavuniya',
 ];
 
 class _Poly {
@@ -108,15 +90,12 @@ class BroadcastScreen extends StatefulWidget {
 class _BroadcastScreenState extends State<BroadcastScreen> {
   final MapController _map = MapController();
   final TextEditingController _search = TextEditingController();
-  late final TextEditingController _zone = TextEditingController(
-    text: widget.zone,
-  );
-  late final TextEditingController _title = TextEditingController(
-    text: widget.title,
-  );
-  late final TextEditingController _msg = TextEditingController(
-    text: widget.message,
-  );
+  late final TextEditingController _zone =
+      TextEditingController(text: widget.zone);
+  late final TextEditingController _title =
+      TextEditingController(text: widget.title);
+  late final TextEditingController _msg =
+      TextEditingController(text: widget.message);
   final TextEditingController _city = TextEditingController(text: 'All');
 
   late LatLng _point = widget.center ?? const LatLng(6.9271, 79.8612);
@@ -153,13 +132,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       final type = g['type'];
       final c = g['coordinates'];
       List<LatLng> ring(dynamic r) => (r as List)
-          .map(
-            (p) => LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble()),
-          )
+          .map((p) => LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble()))
           .toList();
-      _Poly poly(dynamic p) => _Poly(ring(p[0]), [
-        for (var i = 1; i < (p as List).length; i++) ring(p[i]),
-      ]);
+      _Poly poly(dynamic p) => _Poly(
+            ring(p[0]),
+            [for (var i = 1; i < (p as List).length; i++) ring(p[i])],
+          );
       if (type == 'Polygon') return [poly(c)];
       if (type == 'MultiPolygon') return [for (final p in c as List) poly(p)];
     } catch (_) {}
@@ -218,33 +196,28 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
 
         final addr = (e['address'] is Map) ? e['address'] as Map : const {};
         String? district = _matchDistrict(
-          (addr['state_district'] ?? addr['county'] ?? '').toString(),
-        );
+            (addr['state_district'] ?? addr['county'] ?? '').toString());
         district ??= _matchDistrict(name);
-        final cityRaw =
-            (addr['city'] ??
-                    addr['town'] ??
-                    addr['suburb'] ??
-                    addr['village'] ??
-                    addr['municipality'] ??
-                    '')
-                .toString()
-                .trim();
+        final cityRaw = (addr['city'] ??
+                addr['town'] ??
+                addr['suburb'] ??
+                addr['village'] ??
+                addr['municipality'] ??
+                '')
+            .toString()
+            .trim();
         // A hit that IS a district has no separate city.
-        final isDistrictHit =
-            _matchDistrict(name) != null &&
+        final isDistrictHit = _matchDistrict(name) != null &&
             name.toLowerCase().contains('district');
-        out.add(
-          _Hit(
-            name: name,
-            label: label,
-            point: LatLng(lat, lon),
-            bounds: bounds,
-            polys: _parseGeo(e['geojson']),
-            district: district,
-            city: (cityRaw.isEmpty || isDistrictHit) ? null : cityRaw,
-          ),
-        );
+        out.add(_Hit(
+          name: name,
+          label: label,
+          point: LatLng(lat, lon),
+          bounds: bounds,
+          polys: _parseGeo(e['geojson']),
+          district: district,
+          city: (cityRaw.isEmpty || isDistrictHit) ? null : cityRaw,
+        ));
       }
       return out;
     } finally {
@@ -292,12 +265,10 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     });
     try {
       if (h.bounds != null) {
-        _map.fitCamera(
-          CameraFit.bounds(
-            bounds: h.bounds!,
-            padding: const EdgeInsets.all(36),
-          ),
-        );
+        _map.fitCamera(CameraFit.bounds(
+          bounds: h.bounds!,
+          padding: const EdgeInsets.all(36),
+        ));
       } else {
         _map.move(h.point, 13);
       }
@@ -343,50 +314,52 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         center: _point,
         radiusKm: _effectiveRadiusKm,
         areaName: _areaName,
-        bbox: b == null ? null : [b.south, b.west, b.north, b.east],
+        bbox: b == null
+            ? null
+            : [
+                b.south,
+                b.west,
+                b.north,
+                b.east,
+              ],
       );
       nav.pop();
       messenger.showSnackBar(
         const SnackBar(
-          content: Text(
-            'Zone alert sent. Citizens in the target area see it now.',
-          ),
+          content: Text('Zone alert sent. Citizens in the target area see it now.'),
           backgroundColor: Colors.redAccent,
         ),
       );
     } catch (e) {
       if (mounted) setState(() => _sending = false);
       messenger.showSnackBar(
-        SnackBar(
-          content: Text('Broadcast failed: $e'),
-          backgroundColor: Colors.orange,
-        ),
+        SnackBar(content: Text('Broadcast failed: $e'), backgroundColor: Colors.orange),
       );
     }
   }
 
   // ---------------------------------------------------------------------------
   InputDecoration _deco(String label, {IconData? icon}) => InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(color: C4.muted, fontSize: 12),
-    prefixIcon: icon == null ? null : Icon(icon, size: 18, color: C4.muted),
-    filled: true,
-    fillColor: C4.card,
-    isDense: true,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: C4.border),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: C4.border),
-    ),
-  );
+        labelText: label,
+        labelStyle: const TextStyle(color: C4.muted, fontSize: 12),
+        prefixIcon: icon == null ? null : Icon(icon, size: 18, color: C4.muted),
+        filled: true,
+        fillColor: C4.card,
+        isDense: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: C4.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: C4.border),
+        ),
+      );
 
   Widget _mapStack() {
     return Stack(
       children: [
-        FlutterMap(
+        Unfiltered(child: FlutterMap(
           mapController: _map,
           options: MapOptions(
             initialCenter: _point,
@@ -436,16 +409,13 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   point: _point,
                   width: 40,
                   height: 40,
-                  child: const Icon(
-                    Icons.location_on,
-                    color: Colors.redAccent,
-                    size: 38,
-                  ),
+                  child: const Icon(Icons.location_on,
+                      color: Colors.redAccent, size: 38),
                 ),
               ],
             ),
           ],
-        ),
+        )),
         // search + results
         Positioned(
           top: 10,
@@ -466,11 +436,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search district, city or town',
                     hintStyle: const TextStyle(color: C4.muted, fontSize: 13),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: C4.muted,
-                      size: 20,
-                    ),
+                    prefixIcon:
+                        const Icon(Icons.search, color: C4.muted, size: 20),
                     suffixIcon: _searching
                         ? const Padding(
                             padding: EdgeInsets.all(12),
@@ -481,10 +448,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                             ),
                           )
                         : IconButton(
-                            icon: const Icon(
-                              Icons.arrow_forward,
-                              color: C4.accent,
-                            ),
+                            icon: const Icon(Icons.arrow_forward,
+                                color: C4.accent),
                             onPressed: _runSearch,
                           ),
                     border: InputBorder.none,
@@ -500,13 +465,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     borderRadius: BorderRadius.circular(10),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
-                      child: Text(
-                        _searchError!,
-                        style: const TextStyle(
-                          color: Colors.orange,
-                          fontSize: 12,
-                        ),
-                      ),
+                      child: Text(_searchError!,
+                          style: const TextStyle(
+                              color: Colors.orange, fontSize: 12)),
                     ),
                   ),
                 ),
@@ -524,7 +485,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
                         itemCount: _results.length,
-                        separatorBuilder: (_, _) =>
+                        separatorBuilder: (_, __) =>
                             const Divider(height: 1, color: C4.border),
                         itemBuilder: (_, i) {
                           final h = _results[i];
@@ -536,22 +497,15 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                                   : Icons.place_outlined,
                               color: C4.accent,
                             ),
-                            title: Text(
-                              h.name,
-                              style: const TextStyle(
-                                color: C4.text,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            subtitle: Text(
-                              h.label,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: C4.muted,
-                                fontSize: 11,
-                              ),
-                            ),
+                            title: Text(h.name,
+                                style: const TextStyle(
+                                    color: C4.text,
+                                    fontWeight: FontWeight.w700)),
+                            subtitle: Text(h.label,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: C4.muted, fontSize: 11)),
                             onTap: () => _pick(h),
                           );
                         },
@@ -576,21 +530,15 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   children: [
                     const Icon(Icons.crop_free, color: Colors.white, size: 15),
                     const SizedBox(width: 6),
-                    Text(
-                      _areaName!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
+                    Text(_areaName!,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12)),
                     IconButton(
                       visualDensity: VisualDensity.compact,
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 16),
                       onPressed: _clearArea,
                     ),
                   ],
@@ -623,10 +571,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     children: [
                       const Icon(Icons.radar, size: 16, color: C4.muted),
                       const SizedBox(width: 6),
-                      Text(
-                        'Radius ${_radius.toStringAsFixed(1)} km',
-                        style: const TextStyle(color: C4.text, fontSize: 12),
-                      ),
+                      Text('Radius ${_radius.toStringAsFixed(1)} km',
+                          style: const TextStyle(color: C4.text, fontSize: 12)),
                       Expanded(
                         child: Slider(
                           value: _radius,
@@ -644,25 +590,21 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                 TextField(
                   controller: _zone,
                   style: const TextStyle(color: C4.text, fontSize: 14),
-                  decoration: _deco(
-                    'Target zone name',
-                    icon: Icons.place_outlined,
-                  ),
+                  decoration: _deco('Target zone name', icon: Icons.place_outlined),
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        initialValue: _district,
+                        value: _district,
                         isExpanded: true,
                         dropdownColor: C4.card,
                         style: const TextStyle(color: C4.text, fontSize: 14),
                         decoration: _deco('District'),
                         items: ['All', ..._districts]
-                            .map(
-                              (d) => DropdownMenuItem(value: d, child: Text(d)),
-                            )
+                            .map((d) =>
+                                DropdownMenuItem(value: d, child: Text(d)))
                             .toList(),
                         onChanged: (v) =>
                             setState(() => _district = v ?? _district),
@@ -679,15 +621,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'SEVERITY',
-                  style: TextStyle(
-                    color: C4.muted,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1,
-                  ),
-                ),
+                const Text('SEVERITY',
+                    style: TextStyle(
+                        color: C4.muted,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1)),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 8,
@@ -697,18 +636,16 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         showCheckmark: false,
                         label: Text(s),
                         selected: _severity == s,
-                        selectedColor:
-                            (s == 'Critical'
-                                    ? const Color(0xFFEF4444)
-                                    : s == 'Warning'
+                        selectedColor: (s == 'Critical'
+                                ? const Color(0xFFFF5252)
+                                : s == 'Warning'
                                     ? const Color(0xFFF59E0B)
                                     : C4.blue)
-                                .withValues(alpha: 0.3),
+                            .withValues(alpha: 0.3),
                         backgroundColor: C4.card,
                         labelStyle: TextStyle(
-                          color: _severity == s ? C4.text : C4.muted,
-                          fontWeight: FontWeight.w700,
-                        ),
+                            color: _severity == s ? C4.text : C4.muted,
+                            fontWeight: FontWeight.w700),
                         onSelected: (_) => setState(() => _severity = s),
                       ),
                   ],
@@ -743,17 +680,14 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
               height: 48,
               child: FilledButton.icon(
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFDC2626),
-                ),
+                    backgroundColor: const Color(0xFFDC2626)),
                 onPressed: _sending ? null : _send,
                 icon: _sending
                     ? const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                            strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.cell_tower),
                 label: Text(_sending ? 'SENDING...' : 'TRANSMIT ALERT'),
@@ -773,10 +707,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         backgroundColor: C4.surface,
         surfaceTintColor: Colors.transparent,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Broadcast zone alert',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
-        ),
+        title: const Text('Broadcast zone alert',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
       ),
       body: LayoutBuilder(
         builder: (context, cons) {
@@ -791,7 +723,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
               ],
             );
           }
-          final double mapH = (cons.maxHeight * 0.4)
+          final mapH = (cons.maxHeight * 0.4)
               .clamp(150.0, math.max(150.0, cons.maxHeight - 260))
               .toDouble();
           return Column(
@@ -805,3 +737,4 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     );
   }
 }
+
