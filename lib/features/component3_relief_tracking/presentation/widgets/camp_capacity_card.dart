@@ -74,29 +74,6 @@ class CampCapacityCard extends StatelessWidget {
                 ),
               ],
             ),
-<<<<<<< HEAD
-            Builder(builder: (context) {
-              // Shows the real sync state instead of a fixed "OK".
-              final synced = controller.isSynced;
-              final pillColor = synced ? const Color(0xFF34D399) : const Color(0xFFFB923C);
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: synced ? const Color(0xFF063327) : const Color(0xFF3A2A06),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: pillColor.withValues(alpha: 0.4)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.circle, color: pillColor, size: 8),
-                    const SizedBox(width: 6),
-                    Text(
-                      synced ? 'WS SYNC: OK' : 'SYNC: OFFLINE',
-                      style: TextStyle(
-                        color: pillColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-=======
             Builder(
               builder: (context) {
                 // Shows the real sync state instead of a fixed "OK".
@@ -127,7 +104,6 @@ class CampCapacityCard extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                       ),
                     ],
                   ),
@@ -173,15 +149,6 @@ class CampCapacityCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-<<<<<<< HEAD
-                  )),
-                  Flexible(child: Text(
-                    '/${controller.maxCapacity}',
-                    style: const TextStyle(
-                      color: Color(0xFF8A98B0),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-=======
                   ),
                   Flexible(
                     child: Text(
@@ -191,18 +158,9 @@ class CampCapacityCard extends StatelessWidget {
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                     ),
                   ),
                   const SizedBox(width: 10),
-<<<<<<< HEAD
-                  Flexible(child: Text(
-                    'Beds Occupied - $occupancyPercentage%',
-                    style: const TextStyle(
-                      color: Color(0xFFB6C2D6),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-=======
                   Flexible(
                     child: Text(
                       'Beds Occupied - $occupancyPercentage%',
@@ -211,7 +169,6 @@ class CampCapacityCard extends StatelessWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                     ),
                   ),
                 ],
@@ -312,38 +269,21 @@ class CampCapacityCard extends StatelessWidget {
           child: OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               backgroundColor: const Color(0xFF23161A),
-<<<<<<< HEAD
-              side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-=======
               side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             ),
             onPressed: () => controller.toggleShelterStatus(),
             icon: Icon(
               Icons.warning_amber_rounded,
-<<<<<<< HEAD
               color: controller.isShelterClosed ? Colors.grey : const Color(0xFFF87171),
-=======
-              color: controller.isShelterClosed
-                  ? Colors.grey
-                  : const Color(0xFFF87171),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               size: 18,
             ),
             label: Text(
               controller.isShelterClosed ? 'RE-OPEN SHELTER' : 'CLOSE SHELTER',
               style: TextStyle(
-<<<<<<< HEAD
                 color: controller.isShelterClosed ? Colors.grey : const Color(0xFFF87171),
-=======
-                color: controller.isShelterClosed
-                    ? Colors.grey
-                    : const Color(0xFFF87171),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
                 letterSpacing: 0.8,
@@ -384,49 +324,4 @@ class CampCapacityCard extends StatelessWidget {
       ),
     );
   }
-<<<<<<< HEAD
-
-  Widget _buildShortageTile(ReliefItemModel item) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onRequestSupply == null ? null : () => onRequestSupply!(item),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                item.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF3B1E22),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                item.quantity <= 0 ? 'EMPTY' : 'DEPLETED',
-                style: const TextStyle(
-                  color: Color(0xFFF87171),
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.8,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Color(0xFF8A98B0), size: 18),
-          ],
-        ),
-      ),
-    );
-  }
-=======
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 }

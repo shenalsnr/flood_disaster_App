@@ -52,15 +52,6 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-<<<<<<< HEAD
-                Flexible(child: Text(
-                  'SENT TO DMC',
-                  style: TextStyle(
-                    color: Color(0xFF8A98B0),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.8,
-=======
                 Flexible(
                   child: Text(
                     'SENT TO DMC',
@@ -70,7 +61,6 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
                     ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                   ),
                 ),
                 GestureDetector(
@@ -78,15 +68,11 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-<<<<<<< HEAD
-                      Icon(Icons.delete_sweep_outlined, color: Color(0xFFF87171), size: 16),
-=======
                       Icon(
                         Icons.delete_sweep_outlined,
                         color: Color(0xFFF87171),
                         size: 16,
                       ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                       SizedBox(width: 4),
                       Text(
                         'CLEAR',
@@ -134,14 +120,6 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-<<<<<<< HEAD
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFFB6C2D6))),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFFDC2626),
-=======
             child: const Text(
               'Cancel',
               style: TextStyle(color: Color(0xFFB6C2D6)),
@@ -152,7 +130,6 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(0, 44),
               backgroundColor: const Color(0xFFDC2626),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               foregroundColor: Colors.white,
             ),
             child: const Text('Clear'),
@@ -192,13 +169,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       detail = 'Urgent dispatch: stock ran out';
     }
 
-<<<<<<< HEAD
     final statusColor = resolved ? const Color(0xFF34D399) : const Color(0xFFFB923C);
-=======
-    final statusColor = resolved
-        ? const Color(0xFF34D399)
-        : const Color(0xFFFB923C);
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -223,9 +194,6 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                   ),
                 ),
                 const SizedBox(height: 3),
-<<<<<<< HEAD
-                Text(detail, style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11)),
-=======
                 Text(
                   detail,
                   style: const TextStyle(
@@ -233,7 +201,6 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                     fontSize: 11,
                   ),
                 ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               ],
             ),
           ),

@@ -52,14 +52,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           messenger.showSnackBar(
             SnackBar(
               content: Text(error ?? '${item.name} added to inventory!'),
-<<<<<<< HEAD
               backgroundColor:
                   error == null ? const Color(0xFF34D399) : const Color(0xFFF87171),
-=======
-              backgroundColor: error == null
-                  ? const Color(0xFF34D399)
-                  : const Color(0xFFF87171),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               duration: Duration(seconds: error == null ? 3 : 8),
               showCloseIcon: error != null,
             ),
@@ -84,15 +78,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
   Future<void> _showRequestSentPopup(Map<String, dynamic> r) {
     final queued = r['status'] == 'queued';
     final qty = r['quantity'] as double;
-<<<<<<< HEAD
     final qtyText = qty == qty.roundToDouble() ? qty.round().toString() : qty.toString();
     final color = queued ? const Color(0xFFFB923C) : const Color(0xFF34D399);
-=======
-    final qtyText = qty == qty.roundToDouble()
-        ? qty.round().toString()
-        : qty.toString();
-    final color = queued ? const Color(0xFFFB923C) : const Color(0xFF34D399);
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
     return showDialog<void>(
       context: context,
@@ -123,25 +110,14 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               ? '${r['item']} ($qtyText ${r['unit']}) is saved on this phone. '
                     'It will be sent to the DMC automatically when you are back online.'
               : 'Your request for ${r['item']} ($qtyText ${r['unit']}) was sent to the DMC. '
-<<<<<<< HEAD
                   'It is now PENDING - the truck card on the Supplies page shows its status.',
           style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
-=======
-                    'It is now PENDING - the truck card on the Supplies page shows its status.',
-          style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
         ),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx),
-<<<<<<< HEAD
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFDC2626),
-=======
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(0, 44),
-              backgroundColor: const Color(0xFFDC2626),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               foregroundColor: Colors.white,
             ),
             child: const Text('OK'),
@@ -154,13 +130,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-      backgroundColor: const Color(0xFF0B1220), // Dark Navy Background matching Figma
-=======
       backgroundColor: const Color(
         0xFF0B1220,
       ), // Dark Navy Background matching Figma
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
       body: SafeArea(
         child: Column(
           children: [
@@ -200,15 +172,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             });
           },
           backgroundColor: const Color(0xFF0D1424),
-<<<<<<< HEAD
-          selectedItemColor: const Color(0xFFF87171), // Active top accent highlight
-          unselectedItemColor: const Color(0xFF8A98B0),
-=======
           selectedItemColor: const Color(
             0xFFF87171,
           ), // Active top accent highlight
           unselectedItemColor: const Color(0xFF8A98B0),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
           selectedFontSize: 11,
           unselectedFontSize: 11,
           type: BottomNavigationBarType.fixed,
@@ -354,30 +321,21 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             Expanded(
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-<<<<<<< HEAD
-                  side: const BorderSide(color: Color(0xFFF87171)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-=======
                   side: const BorderSide(color: Color(0xFFF87171)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: _showAddStockDialog,
                 icon: const Icon(Icons.add, color: Color(0xFFF87171), size: 18),
                 label: const Text(
                   'ADD ITEM',
-<<<<<<< HEAD
-                  style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.bold, fontSize: 12),
-=======
                   style: TextStyle(
                     color: Color(0xFFF87171),
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                 ),
               ),
             ),
@@ -431,12 +389,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-<<<<<<< HEAD
-              _buildSupplyFilterChip('All', 'All (${_controller.inventoryItems.length})', _controller.selectedSupplyFilter == 'All'),
-              _buildSupplyFilterChip('Depleted', 'Depleted (${_controller.inventoryItems.where((i) => i.status == StockStatus.critical).length})', _controller.selectedSupplyFilter == 'Depleted', outlineColor: const Color(0xFFF87171)),
-              _buildSupplyFilterChip('Low', 'Low (${_controller.inventoryItems.where((i) => i.status == StockStatus.low).length})', _controller.selectedSupplyFilter == 'Low', outlineColor: const Color(0xFFFB923C)),
-              _buildSupplyFilterChip('Adequate', 'Adequate (${_controller.inventoryItems.where((i) => i.status == StockStatus.adequate).length})', _controller.selectedSupplyFilter == 'Adequate', outlineColor: const Color(0xFF1C2740)),
-=======
               _buildSupplyFilterChip(
                 'All',
                 'All (${_controller.inventoryItems.length})',
@@ -460,7 +412,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 _controller.selectedSupplyFilter == 'Adequate',
                 outlineColor: const Color(0xFF1C2740),
               ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             ],
           ),
         ),
@@ -538,110 +489,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 
         // Incoming Shipment Tracking Tile (Matching Image 2 frame2).
         // Hidden after the restock is confirmed; a new request brings it back.
-<<<<<<< HEAD
-        if (_controller.showTruckCard) Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF131C2E),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1C2740)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: accentBg,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(cardIcon, color: accent, size: 20),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            cardTitle,
-                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(
-                            width: 170,
-                            child: Text(
-                              cardSubtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 11),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: accentBg,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      cardBadge,
-                      style: TextStyle(color: accent, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: cardProgress,
-                  minHeight: 6,
-                  backgroundColor: const Color(0xFF1C2740),
-                  valueColor: AlwaysStoppedAnimation<Color>(accent),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Action Buttons: Call Driver & Confirm Restock
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        side: const BorderSide(color: Color(0xFF2C3954)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: canCall ? () => _callDriver(driverPhone) : null,
-                      icon: const Icon(Icons.phone_outlined, color: Colors.white, size: 16),
-                      label: const Text('Call Driver', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: canRestock ? Colors.white : Colors.grey,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: canRestock
-                          ? () {
-                              _controller.confirmRestock();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Restock confirmed. Stock updated.'),
-                                  backgroundColor: Color(0xFF34D399),
-                                  showCloseIcon: true,
-=======
         if (_controller.showTruckCard)
           Container(
             padding: const EdgeInsets.all(16),
@@ -687,7 +534,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                 style: const TextStyle(
                                   color: Color(0xFF8A98B0),
                                   fontSize: 11,
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                                 ),
                               ),
                             ),
@@ -857,41 +703,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     }
   }
 
-<<<<<<< HEAD
-  /// Sends depleted items to the DMC as an urgent resupply request (M3-08).
-  Future<void> _dispatchToDmc() async {
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      final count = await _controller.sendUrgentDispatch();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            count == 0
-                ? 'No depleted items to dispatch right now.'
-                : 'Urgent resupply request for $count item(s) sent to the DMC.',
-          ),
-          backgroundColor: count == 0 ? null : const Color(0xFF34D399),
-        ),
-      );
-    } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Dispatch failed: $e'),
-          backgroundColor: const Color(0xFFDC2626),
-        ),
-      );
-    }
-  }
-
-  Widget _buildSupplyFilterChip(String value, String label, bool isSelected, {Color? outlineColor}) {
-=======
   Widget _buildSupplyFilterChip(
     String value,
     String label,
     bool isSelected, {
     Color? outlineColor,
   }) {
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(
@@ -902,13 +719,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             color: isSelected ? Colors.white : const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-<<<<<<< HEAD
               color: isSelected ? Colors.white : (outlineColor ?? const Color(0xFF1C2740)),
-=======
-              color: isSelected
-                  ? Colors.white
-                  : (outlineColor ?? const Color(0xFF1C2740)),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               width: 1.5,
             ),
           ),
@@ -971,14 +782,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-<<<<<<< HEAD
-              _buildAlertFilterChip('All', 'All ${_controller.allAlerts.length}', _controller.selectedAlertFilter == 'All', activeColor: const Color(0xFFF87171)),
-              _buildAlertFilterChip('Warnings', 'Warnings ${_controller.alertCount('broadcast')}', _controller.selectedAlertFilter == 'Warnings', activeColor: const Color(0xFFFB923C)),
-              _buildAlertFilterChip('Incidents', 'Incidents ${_controller.alertCount('incident')}', _controller.selectedAlertFilter == 'Incidents', activeColor: const Color(0xFF38BDF8)),
-              _buildAlertFilterChip('Critical', 'Critical ${_controller.alertCount('critical')}', _controller.selectedAlertFilter == 'Critical'),
-              _buildAlertFilterChip('Low Stock', 'Low Stock ${_controller.alertCount('low')}', _controller.selectedAlertFilter == 'Low Stock'),
-              _buildAlertFilterChip('Logs', 'Logs ${_controller.alertCount('logs')}', _controller.selectedAlertFilter == 'Logs'),
-=======
               _buildAlertFilterChip(
                 'All',
                 'All ${_controller.allAlerts.length}',
@@ -1012,7 +815,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 'Logs ${_controller.alertCount('logs')}',
                 _controller.selectedAlertFilter == 'Logs',
               ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             ],
           ),
         ),
@@ -1020,16 +822,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 
         const Text(
           'TODAY',
-<<<<<<< HEAD
-          style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
-=======
           style: TextStyle(
             color: Color(0xFF8A98B0),
             fontSize: 11,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
           ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
         ),
         const SizedBox(height: 10),
 
@@ -1055,13 +853,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               : isCritical
               ? const Color(0xFFF87171)
               : isLow
-<<<<<<< HEAD
                   ? const Color(0xFFFB923C)
                   : const Color(0xFF34D399);
-=======
-              ? const Color(0xFFFB923C)
-              : const Color(0xFF34D399);
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -1123,14 +916,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                   padding: const EdgeInsets.only(top: 2),
                                   child: Text(
                                     alert['time'],
-<<<<<<< HEAD
-                                    style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 10),
-=======
                                     style: const TextStyle(
                                       color: Color(0xFF8A98B0),
                                       fontSize: 10,
                                     ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                                   ),
                                 ),
                               const SizedBox(width: 6),
@@ -1140,15 +929,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: const Padding(
                                   padding: EdgeInsets.all(2),
-<<<<<<< HEAD
-                                  child: Icon(Icons.close, color: Color(0xFFB6C2D6), size: 18),
-=======
                                   child: Icon(
                                     Icons.close,
                                     color: Color(0xFFB6C2D6),
                                     size: 18,
                                   ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                                 ),
                               ),
                             ],
@@ -1156,14 +941,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                           const SizedBox(height: 4),
                           Text(
                             alert['subtitle'],
-<<<<<<< HEAD
-                            style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
-=======
                             style: const TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 11,
                             ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                           ),
                         ],
                       ),
@@ -1191,13 +972,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-<<<<<<< HEAD
             color: isSelected ? (activeColor ?? const Color(0xFF1C2740)) : const Color(0xFF131C2E),
-=======
-            color: isSelected
-                ? (activeColor ?? const Color(0xFF1C2740))
-                : const Color(0xFF131C2E),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFF1C2740)),
           ),
@@ -1276,15 +1051,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                     SizedBox(width: 6),
                     Text(
                       'ON DUTY',
-<<<<<<< HEAD
-                      style: TextStyle(color: Color(0xFF34D399), fontSize: 10, fontWeight: FontWeight.bold),
-=======
                       style: TextStyle(
                         color: Color(0xFF34D399),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                     ),
                   ],
                 ),
@@ -1336,16 +1107,12 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             children: [
               const Text(
                 'ACCOUNT',
-<<<<<<< HEAD
-                style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
-=======
                 style: TextStyle(
                   color: Color(0xFF8A98B0),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                 ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               ),
               const SizedBox(height: 12),
               GestureDetector(
@@ -1363,11 +1130,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   'Name, photo, contact details',
                 ),
               ),
-<<<<<<< HEAD
-              const Divider(color: Color(0xFF1C2740), height: 16),
-              _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', _controller.campName, showArrow: false),
-              const Divider(color: Color(0xFF1C2740), height: 16),
-=======
               const Divider(color: Color(0xFF1C2740), height: 16),
               _buildAccountRow(
                 Icons.night_shelter_outlined,
@@ -1376,7 +1138,6 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 showArrow: false,
               ),
               const Divider(color: Color(0xFF1C2740), height: 16),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               _buildAccountRow(
                 Icons.key_outlined,
                 'Role & Permissions',
@@ -1440,15 +1201,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             const SizedBox(height: 2),
             Text(
               label,
-<<<<<<< HEAD
-              style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 9, fontWeight: FontWeight.bold),
-=======
               style: const TextStyle(
                 color: Color(0xFF8A98B0),
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             ),
           ],
         ),
@@ -1502,15 +1259,11 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             ),
             child: Text(
               badgeText,
-<<<<<<< HEAD
-              style: const TextStyle(color: Color(0xFF34D399), fontSize: 9, fontWeight: FontWeight.bold),
-=======
               style: const TextStyle(
                 color: Color(0xFF34D399),
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
->>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             ),
           )
         else if (showArrow)
