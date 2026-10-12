@@ -379,16 +379,7 @@ class VolunteerDrawer extends StatelessWidget {
                   );
                 },
               ),
-              _DrawerItem(
-                icon: Icons.assignment_outlined,
-                title: 'Hazard Reports',
-                onTap: () {
-                  Navigator.pop(context);
-                  if (onReportsTap != null) {
-                    onReportsTap!();
-                  }
-                },
-              ),
+
               _DrawerItem(
                 icon: Icons.map_outlined,
                 title: 'Live Incident Map',
