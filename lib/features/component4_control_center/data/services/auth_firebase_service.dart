@@ -12,48 +12,8 @@ class AuthFirebaseService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Local fallback cache pre-seeded with demo roles and syncing live with Firestore
+  // Local cache (bootstrap administrators only); real accounts come from Firestore
   final Map<String, Map<String, dynamic>> _offlineFallbackCache = {
-    'n.perera@dispatched.gov.lk': {
-      'uid': 'n.perera@dispatched.gov.lk',
-      'fullName': 'Nadeeka Perera',
-      'email': 'n.perera@dispatched.gov.lk',
-      'phoneNumber': '+94 77 482 1029',
-      'nic': '982341092V',
-      'floodZone': 'Colombo Sector 4 (Low-Lying Area)',
-      'role': 'responder',
-      'password': 'Disaster@2026',
-    },
-    'chamara.d@gmail.com': {
-      'uid': 'chamara.d@gmail.com',
-      'fullName': 'Chamara Dissanayake',
-      'email': 'chamara.d@gmail.com',
-      'phoneNumber': '+94 71 234 5678',
-      'nic': '982341092V',
-      'floodZone': 'Colombo Low-Lying Area (Kelani Bank Zone)',
-      'role': 'citizen',
-      'password': 'Secure@1234',
-    },
-    'volunteer.kapila@dmc.org': {
-      'uid': 'volunteer.kapila@dmc.org',
-      'fullName': 'Kapila Wijesinghe',
-      'email': 'volunteer.kapila@dmc.org',
-      'phoneNumber': '+94 70 331 4455',
-      'nic': '891234567V',
-      'floodZone': 'Colombo Sector 2 (Outer Ring)',
-      'role': 'volunteer',
-      'password': 'Report@2026',
-    },
-    'leader.rohan@relief.gov.lk': {
-      'uid': 'leader.rohan@relief.gov.lk',
-      'fullName': 'Rohan Gunasekara',
-      'email': 'leader.rohan@relief.gov.lk',
-      'phoneNumber': '+94 77 901 2345',
-      'nic': '751234567V',
-      'floodZone': 'Kelani Basin Camp 01',
-      'role': 'campLeader',
-      'password': 'Camp@2026',
-    },
     // Bootstrap administrator: always able to sign in so the first staff
     // accounts can be created. Change this password before real use.
     'admin@wesafe.gov.lk': {

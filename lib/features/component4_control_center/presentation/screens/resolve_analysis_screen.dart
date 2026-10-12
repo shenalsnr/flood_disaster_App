@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
+import '../widgets/c4_ui.dart';
 import 'alert_dashboard_screen.dart';
 
 class ResolveAnalysisScreen extends StatefulWidget {
@@ -17,16 +18,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
   final ResponderController _controller = ResponderController();
 
   String _resolutionType = 'Evacuated / Rescued';
-  final TextEditingController _notesController = TextEditingController(
-    text:
-        'Colombo Rescue Squad A deployed 2 zodiac inflatable crafts. 14 stranded residents (including 3 children and 2 elderly citizens) safely extracted and transported to Rathnapura / Sector 4 Relief Camp. Water level receding to safe baseline. No casualties reported.',
-  );
+  final TextEditingController _notesController = TextEditingController();
 
-  int _evacuatedCount = 14;
-  bool _checklistNotified = true;
-  bool _checklistAreaSecured = true;
-  bool _checklistStructuralEvaluated = true;
-  bool _checklistCampNotified = true;
+  int _evacuatedCount = 0;
+  bool _checklistNotified = false;
+  bool _checklistAreaSecured = false;
+  bool _checklistStructuralEvaluated = false;
+  bool _checklistCampNotified = false;
   bool _isSubmitting = false;
 
   final List<String> _resolutionOptions = [
@@ -161,7 +159,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Lead Squad: ${widget.incident.assignedTeam?.name ?? "Rescue Squad A"}',
+                      'Lead Squad: ${widget.incident.assignedTeam?.name ?? "No unit assigned"}',
                       style: const TextStyle(
                           color: Color(0xFF94A3B8), fontSize: 11),
                     ),
@@ -223,7 +221,9 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: SingleChildScrollView(
+          child: ResponsiveBody(
+            maxWidth: 640,
+            child: SingleChildScrollView(
             padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -340,7 +340,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                           const Icon(Icons.groups_rounded, color: Color(0xFF64748B), size: 14),
                           const SizedBox(width: 4),
                           Flexible(child: Text(
-                            'Assigned: ${incident.assignedTeam?.name ?? "Colombo Rescue Squad A"}',
+                            'Assigned: ${incident.assignedTeam?.name ?? "No unit assigned"}',
                             style: const TextStyle(
                               color: Color(0xFF94A3B8),
                               fontSize: 12,
@@ -653,7 +653,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 const SizedBox(height: 16),
               ],
             ),
-          ),
+          )),
         ),
       ),
     );

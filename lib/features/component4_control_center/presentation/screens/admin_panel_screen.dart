@@ -1314,7 +1314,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
       title: const Text('Manage camps',
           style: TextStyle(color: Colors.white, fontSize: 16)),
       content: SizedBox(
-        width: 360,
+        width: (MediaQuery.sizeOf(context).width - 96).clamp(240.0, 360.0).toDouble(),
         child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: widget.service.watchCamps(),
           builder: (context, snap) {

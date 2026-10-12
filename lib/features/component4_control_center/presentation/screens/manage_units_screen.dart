@@ -109,7 +109,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
           title: Text(isEdit ? 'Edit response unit' : 'Add response unit',
               style: const TextStyle(color: Colors.white, fontSize: 16)),
           content: SizedBox(
-            width: 400,
+            width: (MediaQuery.sizeOf(ctx).width - 96).clamp(240.0, 400.0).toDouble(),
             child: Form(
               key: formKey,
               child: SingleChildScrollView(

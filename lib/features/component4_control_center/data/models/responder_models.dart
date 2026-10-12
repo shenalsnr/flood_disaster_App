@@ -70,10 +70,10 @@ class EmergencyTeam {
     required this.radioChannel,
     required this.location,
     this.speedKmh = 24.0,
-    this.vehicleType = 'Zodiac Rescue Boat',
-    this.callSign = 'ALPHA-1',
-    this.phoneNumber = '+94 77 482 1029',
-    this.fuelLevel = 94,
+    this.vehicleType = 'Rescue Vehicle',
+    this.callSign = '-',
+    this.phoneNumber = '',
+    this.fuelLevel = 100,
   });
 
   Map<String, dynamic> toMap() => {
