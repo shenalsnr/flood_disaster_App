@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/localization/translation_service.dart';
 import '../../data/models/responder_models.dart';
 
 /// Component 4 controller.
@@ -28,15 +29,7 @@ class ResponderController extends ChangeNotifier {
   // ---------------------------------------------------------------------------
   // Logged-in user
   // ---------------------------------------------------------------------------
-  UserProfile? _currentUser = const UserProfile(
-    uid: 'n.perera@dispatched.gov.lk',
-    fullName: 'Nadeeka Perera',
-    email: 'n.perera@dispatched.gov.lk',
-    phoneNumber: '+94 77 482 1029',
-    nic: '982341092V',
-    floodZone: 'Colombo Sector 4 (Low-Lying Area)',
-    role: 'responder',
-  );
+  UserProfile? _currentUser; // set at sign-in from Firestore
 
   UserProfile? get currentUser => _currentUser;
 
@@ -431,102 +424,8 @@ class ResponderController extends ChangeNotifier {
   // ---------------------------------------------------------------------------
   // Response units (CRUD)
   // ---------------------------------------------------------------------------
-  static const List<EmergencyTeam> _defaultTeams = [
-    EmergencyTeam(
-      id: 'TEAM-01',
-      name: 'Colombo Rescue Squad A',
-      status: 'AVAILABLE',
-      distance: '1.2 km Away',
-      eta: '4 Mins',
-      etaMinutes: 4,
-      equipment: '2x Zodiac Inflatable Boats & Water Rescue Gear',
-      crewCount: 4,
-      leader: 'Capt. Kasun Fernando',
-      radioChannel: 'VHF CH-04',
-      location: LatLng(6.9200, 79.8550),
-      speedKmh: 28.0,
-      vehicleType: 'Zodiac Rescue Boat',
-      callSign: 'ALPHA-01',
-      phoneNumber: '+94 77 482 1029',
-      fuelLevel: 96,
-    ),
-    EmergencyTeam(
-      id: 'TEAM-02',
-      name: 'Disaster Response Unit 02',
-      status: 'AVAILABLE',
-      distance: '3.5 km Away',
-      eta: '9 Mins',
-      etaMinutes: 9,
-      equipment: '4x4 High-Clearance Troop Carrier & Chainsaws',
-      crewCount: 6,
-      leader: 'Lieut. M. Perera',
-      radioChannel: 'VHF CH-06',
-      location: LatLng(6.9350, 79.8700),
-      speedKmh: 32.0,
-      vehicleType: '4x4 Troop Carrier Truck',
-      callSign: 'BRAVO-02',
-      phoneNumber: '+94 71 892 3344',
-      fuelLevel: 88,
-    ),
-    EmergencyTeam(
-      id: 'TEAM-03',
-      name: 'Red Cross Auxiliary EMT Group',
-      status: 'AVAILABLE',
-      distance: '4.8 km Away',
-      eta: '12 Mins',
-      etaMinutes: 12,
-      equipment: 'Mobile Clinic, Stretcher Kit & 4 Medics',
-      crewCount: 4,
-      leader: 'Dr. S. Alwis (EMT Lead)',
-      radioChannel: 'VHF CH-09',
-      location: LatLng(6.9100, 79.8650),
-      speedKmh: 30.0,
-      vehicleType: 'Ambulance EMT Clinic',
-      callSign: 'MEDIC-03',
-      phoneNumber: '+94 76 345 6789',
-      fuelLevel: 92,
-    ),
-    EmergencyTeam(
-      id: 'TEAM-04',
-      name: 'Kelani Basin Water Patrol',
-      status: 'AVAILABLE',
-      distance: '6.1 km Away',
-      eta: '16 Mins',
-      etaMinutes: 16,
-      equipment: 'Rigid Hull Inflatable & Sonar Depth Finder',
-      crewCount: 5,
-      leader: 'Chief Diver Samantha',
-      radioChannel: 'VHF CH-07',
-      location: LatLng(6.9450, 79.8820),
-      speedKmh: 26.0,
-      vehicleType: 'Rigid Hull Watercraft',
-      callSign: 'DELTA-04',
-      phoneNumber: '+94 70 987 6543',
-      fuelLevel: 85,
-    ),
-    EmergencyTeam(
-      id: 'TEAM-05',
-      name: 'Colombo Fire Service Unit B',
-      status: 'AVAILABLE',
-      distance: '0.8 km Away',
-      eta: '6 Mins',
-      etaMinutes: 6,
-      equipment: 'High-Volume Drainage Pump Truck',
-      crewCount: 5,
-      leader: 'Station Officer Wickrama',
-      radioChannel: 'VHF CH-02',
-      location: LatLng(6.9290, 79.8580),
-      speedKmh: 30.0,
-      vehicleType: 'Heavy Drainage Pump Truck',
-      callSign: 'SIERRA-05',
-      phoneNumber: '+94 11 242 2222',
-      fuelLevel: 74,
-    ),
-  ];
-
-  // Shown until the first Firestore snapshot arrives.
-  final List<EmergencyTeam> _teams = List.of(_defaultTeams);
-  bool _seeding = false;
+  // Filled from Firestore (`responseUnits`); no built-in sample units.
+  final List<EmergencyTeam> _teams = [];
 
   List<EmergencyTeam> get teams {
     _ensureStarted();
@@ -545,10 +444,6 @@ class ResponderController extends ChangeNotifier {
   }
 
   void _onUnits(QuerySnapshot<Map<String, dynamic>> snap) {
-    if (snap.docs.isEmpty) {
-      _seedDefaultUnits();
-      return;
-    }
     _teams
       ..clear()
       ..addAll(snap.docs.map((d) => EmergencyTeam.fromMap(d.id, d.data())));
@@ -560,22 +455,6 @@ class ResponderController extends ChangeNotifier {
       if (idx != -1) i.assignedTeam = _teams[idx];
     }
     notifyListeners();
-  }
-
-  Future<void> _seedDefaultUnits() async {
-    if (_seeding) return;
-    _seeding = true;
-    try {
-      final batch = FirebaseFirestore.instance.batch();
-      for (final t in _defaultTeams) {
-        batch.set(_units.doc(t.id), t.toMap());
-      }
-      await batch.commit();
-    } catch (e) {
-      debugPrint('[ResponderController] seed units failed: $e');
-    } finally {
-      _seeding = false;
-    }
   }
 
   /// CREATE a response unit.
@@ -602,9 +481,6 @@ class ResponderController extends ChangeNotifier {
     final idx = _teams.indexWhere((t) => t.id == id);
     if (idx != -1 && !_teams[idx].isAvailable) {
       return 'This unit is on a mission. Resolve or cancel its dispatch first.';
-    }
-    if (_teams.length <= 1) {
-      return 'At least one response unit must remain.';
     }
     await _units.doc(id).delete();
     return null;
@@ -859,7 +735,23 @@ class ResponderController extends ChangeNotifier {
     String? areaName,
     List<double>? bbox,
   }) async {
+    // Official warnings are translated ONCE here (English / Sinhala / Tamil)
+    // so every citizen reads them in their own language, even offline.
+    final fullText = title.trim().isEmpty ? message : '$title - $message';
+    Map<String, String> tl = const {};
+    try {
+      tl = await TranslationService.instance
+          .translateAll(fullText)
+          .timeout(const Duration(seconds: 8));
+    } catch (_) {
+      // No key / no internet: citizens see the original text.
+    }
     await _warnings.add({
+      if (TranslationService.instance.isConfigured && tl.isNotEmpty) ...{
+        'description_en': tl['en'],
+        'description_si': tl['si'],
+        'description_ta': tl['ta'],
+      },
       'district': district.trim().isEmpty ? 'All' : district.trim(),
       'city': city.trim().isEmpty ? 'All' : city.trim(),
       'locationZone': zone,
@@ -868,7 +760,7 @@ class ResponderController extends ChangeNotifier {
       'rainfallMm': 0.0,
       'windSpeedKmh': 0.0,
       'severity': severity,
-      'description': title.trim().isEmpty ? message : '$title - $message',
+      'description': fullText,
       'issuedTimestamp': FieldValue.serverTimestamp(),
       // extra fields for the map-based broadcast (ignored by Component 1)
       'centerLat': center?.latitude,
@@ -883,6 +775,21 @@ class ResponderController extends ChangeNotifier {
 
   /// UPDATE a broadcast.
   Future<void> updateBroadcast(String id, Map<String, dynamic> data) async {
+    // Text was edited -> refresh the stored translations too.
+    final newDesc = data['description'];
+    if (newDesc is String && TranslationService.instance.isConfigured) {
+      try {
+        final tl = await TranslationService.instance
+            .translateAll(newDesc)
+            .timeout(const Duration(seconds: 8));
+        data = {
+          ...data,
+          'description_en': tl['en'],
+          'description_si': tl['si'],
+          'description_ta': tl['ta'],
+        };
+      } catch (_) {}
+    }
     await _warnings.doc(id).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),

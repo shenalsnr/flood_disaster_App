@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ============================================================================
 // Visual Card 1: Get Early Warning Alerts
 // ============================================================================
@@ -183,8 +184,8 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Emergency',
+                            Text(
+                              tr('Emergency'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -448,7 +449,7 @@ class _IPhoneMockup extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Flexible(child: Text(
-                    'Report a Hazard',
+                    tr('Report a Hazard'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10.5,
@@ -552,9 +553,9 @@ class _IPhoneMockup extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'Report',
+                    tr('Report'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10.5,
@@ -699,8 +700,8 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
                   top: 35 + floatOffset,
                   child: _ShelterBadge(
                     icon: Icons.shield_outlined,
-                    title: 'Evacuation',
-                    subtitle: 'Check-Ins',
+                    title: tr('Evacuation'),
+                    subtitle: tr('Check-Ins'),
                     trailing: const Icon(
                       Icons.check_circle_rounded,
                       color: Color(0xFF34D399),
@@ -715,8 +716,8 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
                   bottom: 35 - floatOffset,
                   child: _ShelterBadge(
                     icon: Icons.roofing_rounded,
-                    title: 'Shelter Ins',
-                    subtitle: 'Check-ins',
+                    title: tr('Shelter Ins'),
+                    subtitle: tr('Check-ins'),
                   ),
                 ),
               ],
@@ -802,7 +803,7 @@ class _ShelterBadge extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                title,
+                tr(title),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -812,7 +813,7 @@ class _ShelterBadge extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                subtitle,
+                tr(subtitle),
                 style: TextStyle(
                   color: const Color(0xFF34D399).withValues(alpha: 0.9),
                   fontSize: 10.5,

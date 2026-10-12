@@ -15,6 +15,7 @@ import 'citizen_drawer.dart';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ---------------------------------------------------------------------------
 // Citizen Dashboard Screen — Component 1: Early Warning & Evacuation
 // ---------------------------------------------------------------------------
@@ -130,7 +131,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                 leading: Builder(
                   builder: (ctx) => IconButton(
                     icon: const Icon(Icons.menu_rounded, color: Colors.white),
-                    tooltip: 'Open Menu',
+                    tooltip: tr('Open Menu'),
                     onPressed: () => Scaffold.of(ctx).openDrawer(),
                   ),
                 ),
@@ -146,7 +147,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                     ),
                     const SizedBox(width: 8),
                     RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
@@ -154,11 +155,11 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                         ),
                         children: [
                           TextSpan(
-                            text: 'We',
+                            text: tr('We'),
                             style: TextStyle(color: Colors.white),
                           ),
                           TextSpan(
-                            text: 'Safe',
+                            text: tr('Safe'),
                             style: TextStyle(color: Color(0xFF34D399)),
                           ),
                         ],
@@ -263,7 +264,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            citizenName,
+                                            tr(citizenName),
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
@@ -272,7 +273,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            'Sector: $citizenZone',
+                                            tr('Sector: {p0}', {'p0': (citizenZone).toString()}),
                                             style: const TextStyle(
                                               color: Color(0xFF38BDF8),
                                               fontSize: 11,
@@ -292,8 +293,8 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                             .withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'ACTIVE',
+                                      child: Text(
+                                        tr('ACTIVE'),
                                         style: TextStyle(
                                           color: Color(0xFF34D399),
                                           fontSize: 9,
@@ -340,7 +341,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                               ),
                               const SizedBox(width: 10),
                               Flexible(child: Text(
-                                '${allAlerts.length} Active Warnings',
+                                tr('{p0} Active Warnings', {'p0': (allAlerts.length).toString()}),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
@@ -376,7 +377,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                             ),
                             const SizedBox(width: 10),
                             Flexible(child: Text(
-                              'Emergency Actions',
+                              tr('Emergency Actions'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -392,8 +393,8 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                         _PremiumActionCard(
                           onTap: () => _push(const SafeRoutingMapScreen()),
                           icon: Icons.alt_route_rounded,
-                          title: 'Safe Route',
-                          subtitle: 'Fastest path to high ground',
+                          title: tr('Safe Route'),
+                          subtitle: tr('Fastest path to high ground'),
                           color: const Color(0xFFFBBF24),
                           isPrimary: true,
                         ),
@@ -408,7 +409,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 onTap: () =>
                                     _push(const EvacuationChecklistScreen()),
                                 icon: Icons.checklist_rounded,
-                                label: 'Go Bag\nChecklist',
+                                label: tr('Go Bag\nChecklist'),
                                 color: const Color(0xFF34D399),
                               ),
                             ),
@@ -418,7 +419,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 onTap: () =>
                                     _push(const EmergencyContactsScreen()),
                                 icon: Icons.contact_phone_rounded,
-                                label: 'Emergency\nContacts',
+                                label: tr('Emergency\nContacts'),
                                 color: const Color(0xFF38BDF8),
                               ),
                             ),
@@ -431,8 +432,8 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                         _PremiumActionCard(
                           onTap: () => _push(const SafeArrivalCheckInScreen()),
                           icon: Icons.verified_user_rounded,
-                          title: 'Safe Arrival Check-In',
-                          subtitle: 'Mark yourself and family as safe',
+                          title: tr('Safe Arrival Check-In'),
+                          subtitle: tr('Mark yourself and family as safe'),
                           color: const Color(0xFF38BDF8),
                           isPrimary: false,
                         ),
@@ -558,7 +559,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.title,
+                      tr(widget.title),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -569,7 +570,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
                     if (widget.subtitle != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        widget.subtitle!,
+                        tr(widget.subtitle!),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 13,
@@ -680,7 +681,7 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
               ),
               const SizedBox(height: 16),
               Text(
-                widget.label,
+                tr(widget.label),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
@@ -812,9 +813,9 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                         child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'EMERGENCY ALERT',
+                          tr('EMERGENCY ALERT'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 13,
@@ -828,7 +829,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    widget.title,
+                    tr(widget.title),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -838,7 +839,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    widget.body,
+                    tr(widget.body),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 15,
@@ -853,19 +854,19 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                       _MetricPill(
                         icon: Icons.water_rounded,
                         label: '${widget.waterLevel.toStringAsFixed(2)} m',
-                        hint: 'Water Level',
+                        hint: tr('Water Level'),
                       ),
                       const SizedBox(width: 6),
                       _MetricPill(
                         icon: Icons.grain_rounded,
-                        label: '${widget.rainfall.toStringAsFixed(1)} mm',
-                        hint: 'Rainfall',
+                        label: tr('{p0} mm', {'p0': (widget.rainfall.toStringAsFixed(1)).toString()}),
+                        hint: tr('Rainfall'),
                       ),
                       const SizedBox(width: 6),
                       _MetricPill(
                         icon: Icons.air_rounded,
-                        label: '${widget.windSpeed.toStringAsFixed(1)} kph',
-                        hint: 'Wind Speed',
+                        label: tr('{p0} kph', {'p0': (widget.windSpeed.toStringAsFixed(1)).toString()}),
+                        hint: tr('Wind Speed'),
                       ),
                     ],
                   ),
@@ -875,7 +876,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                       Icon(Icons.access_time_rounded, color: Colors.white.withValues(alpha: 0.7), size: 16),
                       const SizedBox(width: 6),
                       Flexible(child: Text(
-                        widget.time,
+                        tr(widget.time),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 13,
@@ -987,7 +988,7 @@ class _MetricPill extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                hint,
+                tr(hint),
                 style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 9,
@@ -995,7 +996,7 @@ class _MetricPill extends StatelessWidget {
                 ),
               ),
               Text(
-                label,
+                tr(label),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -1057,8 +1058,8 @@ class _AllClearCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'All Clear',
+                Text(
+                  tr('All Clear'),
                   style: TextStyle(
                     color: Color(0xFF34D399),
                     fontSize: 20,
@@ -1067,7 +1068,7 @@ class _AllClearCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'No active warnings in $district.',
+                  tr('No active warnings in {p0}.', {'p0': (district).toString()}),
                   style: const TextStyle(
                     color: Colors.white60,
                     fontSize: 13,
@@ -1129,7 +1130,7 @@ class _MiniAlertTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${alert.waterLevelMeters.toStringAsFixed(2)} m  •  ${alert.rainfallMm.toStringAsFixed(1)} mm  •  ${alert.windSpeedKmh.toStringAsFixed(1)} kph',
+                  tr('{p0} m  •  {p1} mm  •  {p2} kph', {'p0': (alert.waterLevelMeters.toStringAsFixed(2)).toString(), 'p1': (alert.rainfallMm.toStringAsFixed(1)).toString(), 'p2': (alert.windSpeedKmh.toStringAsFixed(1)).toString()}),
                   style: const TextStyle(color: Colors.white54, fontSize: 11),
                 ),
               ],
@@ -1142,7 +1143,7 @@ class _MiniAlertTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              alert.severity,
+              tr(alert.severity),
               style: TextStyle(
                 color: color,
                 fontSize: 10,
@@ -1224,7 +1225,7 @@ class _AlertLevelBadge extends StatelessWidget {
         boxShadow: [BoxShadow(color: shadowColor, blurRadius: 8)],
       ),
       child: Text(
-        level,
+        tr(level),
         style: TextStyle(
           color: isSafe ? const Color(0xFF34D399) : Colors.white,
           fontSize: 11,
@@ -1260,7 +1261,7 @@ class _PremiumStatusFooter extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Flexible(child: Text(
-                'SYSTEM STATUS',
+                tr('SYSTEM STATUS'),
                 style: TextStyle(
                   color: Colors.white54,
                   fontSize: 11,
@@ -1306,7 +1307,7 @@ class _PremiumStatusFooter extends StatelessWidget {
         ),
         const SizedBox(width: 14),
         Flexible(child: Text(
-          label,
+          tr(label),
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 14,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/relief_request_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class NewRequestDialog extends StatefulWidget {
   final Function(ReliefRequestModel request) onRequestSubmitted;
 
@@ -73,7 +74,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                     ),
                     const SizedBox(width: 12),
                     Flexible(child: Text(
-                      'Request Relief Stock',
+                      tr('Request Relief Stock'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -89,7 +90,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                   controller: _itemController,
                   style: const TextStyle(color: Colors.white),
                   decoration: _inputDecoration('Supply / Item Needed', Icons.inventory_2_outlined),
-                  validator: (val) => val == null || val.isEmpty ? 'Please specify item' : null,
+                  validator: (val) => val == null || val.isEmpty ? tr('Please specify item') : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -98,13 +99,13 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                   controller: _qtyController,
                   style: const TextStyle(color: Colors.white),
                   decoration: _inputDecoration('Quantity & Unit (e.g., 500 Liters / 20 Packs)', Icons.format_list_numbered),
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  validator: (val) => val == null || val.isEmpty ? tr('Required') : null,
                 ),
                 const SizedBox(height: 12),
 
                 // Urgency Priority
-                const Text(
-                  'Urgency Priority Level:',
+                Text(
+                  tr('Urgency Priority Level:'),
                   style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
@@ -133,7 +134,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                      child: Text(tr('Cancel'), style: TextStyle(color: Colors.white54)),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
@@ -145,7 +146,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                       ),
                       onPressed: _submit,
                       icon: const Icon(Icons.send_rounded, size: 18),
-                      label: const Text('SUBMIT REQUISITION', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(tr('SUBMIT REQUISITION'), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -174,7 +175,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
           ),
           child: Center(
             child: Text(
-              label,
+              tr(label),
               style: TextStyle(
                 color: isSelected ? color : Colors.white70,
                 fontSize: 10,

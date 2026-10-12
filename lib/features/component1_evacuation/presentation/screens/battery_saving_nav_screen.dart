@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'safe_arrival_checkin_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ---------------------------------------------------------------------------
 // BatterySavingNavScreen — Component 1: Early Warning & Evacuation
 // ---------------------------------------------------------------------------
@@ -180,7 +181,7 @@ class _BatterySavingNavScreenState extends State<BatterySavingNavScreen>
             const SizedBox(height: 16),
 
             // ── Battery save notice ────────────────────────────────────────
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(bottom: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -189,7 +190,7 @@ class _BatterySavingNavScreenState extends State<BatterySavingNavScreen>
                       color: Colors.white24, size: 13),
                   SizedBox(width: 5),
                   Flexible(child: Text(
-                    'Map hidden — Battery-save mode active',
+                    tr('Map hidden — Battery-save mode active'),
                     style: TextStyle(color: Colors.white24, fontSize: 12),
                   )),
                 ],
@@ -236,12 +237,12 @@ class _TopBar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Navigating to',
+                Text(
+                  tr('Navigating to'),
                   style: TextStyle(color: Colors.white38, fontSize: 12),
                 ),
                 Text(
-                  safeZoneName,
+                  tr(safeZoneName),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,
@@ -276,11 +277,11 @@ class _TopBar extends StatelessWidget {
               border:
                   Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.4)),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 _PulsingDot(),
                 SizedBox(width: 5),
-                Text('LIVE',
+                Text(tr('LIVE'),
                     style: TextStyle(
                         color: Color(0xFF34D399),
                         fontSize: 11,
@@ -358,7 +359,7 @@ class _DistanceDisplay extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  distanceText,
+                  tr(distanceText),
                   style: const TextStyle(
                     color: Color(0xFF34D399),
                     fontSize: 40,
@@ -367,8 +368,8 @@ class _DistanceDisplay extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'to Safe Zone',
+                Text(
+                  tr('to Safe Zone'),
                   style: TextStyle(color: Colors.white54, fontSize: 13),
                 ),
               ],
@@ -382,7 +383,7 @@ class _DistanceDisplay extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  etaText,
+                  tr(etaText),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
@@ -391,8 +392,8 @@ class _DistanceDisplay extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'estimated',
+                Text(
+                  tr('estimated'),
                   style: TextStyle(color: Colors.white54, fontSize: 13),
                 ),
               ],
@@ -417,8 +418,8 @@ class _DirectionalArrow extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'HEAD THIS WAY',
+        Text(
+          tr('HEAD THIS WAY'),
           style: TextStyle(
             color: Colors.white38,
             fontSize: 13,
@@ -471,8 +472,8 @@ class _DirectionalArrow extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white12),
           ),
-          child: const Text(
-            '↑ Proceed to higher ground',
+          child: Text(
+            tr('↑ Proceed to higher ground'),
             style: TextStyle(color: Colors.white54, fontSize: 13),
           ),
         ),
@@ -497,11 +498,11 @@ class _WaypointRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          _WaypointDot(label: 'Main St', done: step1Done),
+          _WaypointDot(label: tr('Main St'), done: step1Done),
           _WaypointLine(done: step1Done),
-          _WaypointDot(label: 'Bridge', done: step2Done),
+          _WaypointDot(label: tr('Bridge'), done: step2Done),
           _WaypointLine(done: step2Done),
-          _WaypointDot(label: 'Shelter', done: step3Done, isLast: true),
+          _WaypointDot(label: tr('Shelter'), done: step3Done, isLast: true),
         ],
       ),
     );
@@ -543,7 +544,7 @@ class _WaypointDot extends StatelessWidget {
                   : null,
         ),
         const SizedBox(height: 4),
-        Text(label,
+        Text(tr(label),
             style: TextStyle(
                 color: done ? const Color(0xFF34D399) : Colors.white38,
                 fontSize: 10,
@@ -597,8 +598,8 @@ class _ArrivedButton extends StatelessWidget {
           ),
           onPressed: onPressed,
           icon: const Icon(Icons.verified_user_rounded, size: 30),
-          label: const Text(
-            "I'VE ARRIVED",
+          label: Text(
+            tr('I\'VE ARRIVED'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,

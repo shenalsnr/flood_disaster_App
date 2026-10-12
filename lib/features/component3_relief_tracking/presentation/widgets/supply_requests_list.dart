@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/services/firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Shows the latest requests and alerts this camp has sent to the DMC,
 /// with their status, so the Camp Leader can see that a request went through.
 class SupplyRequestsList extends StatefulWidget {
@@ -54,7 +55,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
               children: [
                 Flexible(
                   child: Text(
-                    'SENT TO DMC',
+                    tr('SENT TO DMC'),
                     style: TextStyle(
                       color: Color(0xFF8A98B0),
                       fontSize: 12,
@@ -65,7 +66,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                 ),
                 GestureDetector(
                   onTap: () => _confirmClear(allMine.map((d) => d.id).toList()),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
@@ -75,7 +76,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        'CLEAR',
+                        tr('CLEAR'),
                         style: TextStyle(
                           color: Color(0xFFF87171),
                           fontSize: 12,
@@ -104,24 +105,23 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: Color(0xFF1C2740)),
         ),
-        title: const Text(
-          'Clear this list?',
+        title: Text(
+          tr('Clear this list?'),
           style: TextStyle(
             color: Colors.white,
             fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: const Text(
-          'The requests are removed from this list only. The DMC keeps its '
-          'own records, and any truck on the way will still be shown.',
+        content: Text(
+          tr('The requests are removed from this list only. The DMC keeps its own records, and any truck on the way will still be shown.'),
           style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              tr('Cancel'),
               style: TextStyle(color: Color(0xFFB6C2D6)),
             ),
           ),
@@ -132,7 +132,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Clear'),
+            child: Text(tr('Clear')),
           ),
         ],
       ),
@@ -186,7 +186,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  itemName,
+                  tr(itemName),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -195,7 +195,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  detail,
+                  tr(detail),
                   style: const TextStyle(
                     color: Color(0xFFB6C2D6),
                     fontSize: 11,
@@ -211,7 +211,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              resolved ? 'DONE' : 'PENDING',
+              resolved ? tr('DONE') : tr('PENDING'),
               style: TextStyle(
                 color: statusColor,
                 fontSize: 10,

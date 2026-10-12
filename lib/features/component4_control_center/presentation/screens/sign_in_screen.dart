@@ -4,6 +4,7 @@ import '../../data/models/responder_models.dart';
 import 'responder_login_screen.dart';
 import 'responder_register_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -72,8 +73,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'NATIONAL DISASTER MANAGEMENT PLATFORM',
+                      Text(
+                        tr('NATIONAL DISASTER MANAGEMENT PLATFORM'),
                         style: TextStyle(
                           color: Color(0xFFB6C2D6),
                           fontSize: 10,
@@ -122,8 +123,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               const SizedBox(height: 16),
 
-              const Text(
-                'FloodGuard',
+              Text(
+                tr('FloodGuard'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -135,8 +136,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               const SizedBox(height: 6),
 
-              const Text(
-                'Stay safe with one-tap alerts and verified routes.',
+              Text(
+                tr('Stay safe with one-tap alerts and verified routes.'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFFB6C2D6),
@@ -160,7 +161,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(width: 8),
                   Flexible(child: Text(
-                    'SELECT SYSTEM ROLE TO ENTER',
+                    tr('SELECT SYSTEM ROLE TO ENTER'),
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
@@ -176,8 +177,8 @@ class _SignInScreenState extends State<SignInScreen> {
               // Role Option Cards
               _buildRoleCard(
                 role: UserRole.responder,
-                title: 'Emergency Dispatcher / Responder',
-                subtitle: 'Component 4 • Triage incident queue, dispatch units & live tracking',
+                title: tr('Emergency Dispatcher / Responder'),
+                subtitle: tr('Component 4 • Triage incident queue, dispatch units & live tracking'),
                 icon: Icons.cell_tower,
                 color: const Color(0xFF38BDF8),
                 isHighlight: true,
@@ -187,8 +188,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               _buildRoleCard(
                 role: UserRole.citizen,
-                title: 'Affected Citizen',
-                subtitle: 'Component 1 • Evacuation route, weather alerts & battery save mode',
+                title: tr('Affected Citizen'),
+                subtitle: tr('Component 1 • Evacuation route, weather alerts & battery save mode'),
                 icon: Icons.person_pin_circle_outlined,
                 color: const Color(0xFF34D399),
               ),
@@ -197,8 +198,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               _buildRoleCard(
                 role: UserRole.volunteer,
-                title: 'Community Volunteer Reporter',
-                subtitle: 'Component 2 • Icon-driven hazard reporting with auto-tagged GPS',
+                title: tr('Community Volunteer Reporter'),
+                subtitle: tr('Component 2 • Icon-driven hazard reporting with auto-tagged GPS'),
                 icon: Icons.add_location_alt_outlined,
                 color: const Color(0xFF38BDF8),
               ),
@@ -207,8 +208,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               _buildRoleCard(
                 role: UserRole.campLeader,
-                title: 'Relief Camp Triage Leader',
-                subtitle: 'Component 3 • Manage shelter beds, supplies & food logistics',
+                title: tr('Relief Camp Triage Leader'),
+                subtitle: tr('Component 3 • Manage shelter beds, supplies & food logistics'),
                 icon: Icons.night_shelter_outlined,
                 color: const Color(0xFFA855F7),
               ),
@@ -233,8 +234,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   children: [
                     Flexible(child: Text(
                       _selectedRole == UserRole.responder
-                          ? 'ENTER RESPONDER PORTAL'
-                          : 'LAUNCH ${_selectedRole.displayName.toUpperCase()}',
+                          ? tr('ENTER RESPONDER PORTAL')
+                          : tr('LAUNCH {p0}', {'p0': (_selectedRole.displayName.toUpperCase()).toString()}),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -266,8 +267,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   );
                 },
-                child: const Text(
-                  'CREATE NEW RESPONDER ACCOUNT',
+                child: Text(
+                  tr('CREATE NEW RESPONDER ACCOUNT'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -289,7 +290,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: const Color(0xFF1C2740)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
@@ -299,7 +300,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                     SizedBox(width: 8),
                     Flexible(child: Text(
-                      'Emergency Hotlines: 117 (DMC) • 119 (Police) • 110 (Fire)',
+                      tr('Emergency Hotlines: 117 (DMC) • 119 (Police) • 110 (Fire)'),
                       style: TextStyle(
                         color: Color(0xFFB6C2D6),
                         fontSize: 11,
@@ -373,7 +374,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          title,
+                          tr(title),
                           style: TextStyle(
                             color: isSelected ? Colors.white : Colors.white70,
                             fontWeight: FontWeight.w800,
@@ -394,8 +395,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                 .withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'PART 4',
+                          child: Text(
+                            tr('PART 4'),
                             style: TextStyle(
                               color: Color(0xFF38BDF8),
                               fontSize: 9,
@@ -408,7 +409,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    subtitle,
+                    tr(subtitle),
                     style: TextStyle(
                       color: isSelected
                           ? const Color(0xFFB6C2D6)

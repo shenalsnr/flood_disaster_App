@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/relief_item_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class SupplyItemTile extends StatelessWidget {
   final ReliefItemModel item;
   final Function(double delta) onQuantityChanged;
@@ -21,17 +22,17 @@ class SupplyItemTile extends StatelessWidget {
       case StockStatus.critical:
         statusColor = const Color(0xFFF87171);
         borderColor = const Color(0xFFF87171);
-        badgeText = 'CRITICAL DEPLETED';
+        badgeText = tr('CRITICAL DEPLETED');
         break;
       case StockStatus.low:
         statusColor = const Color(0xFFFB923C);
         borderColor = const Color(0xFFFB923C);
-        badgeText = 'LOW STOCK';
+        badgeText = tr('LOW STOCK');
         break;
       case StockStatus.adequate:
         statusColor = const Color(0xFF34D399);
         borderColor = const Color(0xFF34D399);
-        badgeText = 'ADEQUATE';
+        badgeText = tr('ADEQUATE');
         break;
     }
 
@@ -48,7 +49,7 @@ class SupplyItemTile extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              item.name,
+              tr(item.name),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -63,7 +64,7 @@ class SupplyItemTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              badgeText,
+              tr(badgeText),
               style: TextStyle(
                 color: statusColor,
                 fontSize: 10,

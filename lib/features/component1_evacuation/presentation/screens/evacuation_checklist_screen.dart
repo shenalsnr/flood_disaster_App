@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:ui';
 import '../../services/citizen_firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // Model — mapped from Firestore DocumentSnapshot
 class ChecklistItem {
   final String id;
@@ -81,8 +82,8 @@ class _EvacuationChecklistScreenState
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Go Bag Checklist',
+        title: Text(
+          tr('Go Bag Checklist'),
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -107,8 +108,8 @@ class _EvacuationChecklistScreenState
             stream: _firestoreService.getChecklistItems(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Center(
-                  child: Text('Error loading checklist',
+                return Center(
+                  child: Text(tr('Error loading checklist'),
                       style: TextStyle(color: Colors.red)),
                 );
               }
@@ -146,10 +147,10 @@ class _EvacuationChecklistScreenState
                   // ── Checklist ────────────────────────────────────────────────────
                   Expanded(
                     child: items.isEmpty
-                        ? const _EmptyState(
+                        ? _EmptyState(
                             icon: Icons.backpack_rounded,
                             message:
-                                'Your Go Bag is empty.\nAdd essential items above.',
+                                tr('Your Go Bag is empty.\nAdd essential items above.'),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
@@ -228,7 +229,7 @@ class _PremiumProgressHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isComplete ? 'Ready for Evacuation' : 'Packing Progress',
+                    isComplete ? tr('Ready for Evacuation') : tr('Packing Progress'),
                     style: TextStyle(
                       color: isComplete ? const Color(0xFF34D399) : Colors.white,
                       fontSize: 18,
@@ -237,7 +238,7 @@ class _PremiumProgressHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$packedCount of $total items packed',
+                    tr('{p0} of {p1} items packed', {'p0': (packedCount).toString(), 'p1': (total).toString()}),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 13,
@@ -317,7 +318,7 @@ class _PremiumAddItemField extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
-                  hintText: 'Add new item (e.g. Flashlight)...',
+                  hintText: tr('Add new item (e.g. Flashlight)...'),
                   hintStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.3),
                     fontSize: 15,
@@ -460,7 +461,7 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                       decorationColor: Colors.white.withValues(alpha: 0.4),
                       decorationThickness: 2,
                     ),
-                    child: Text(item.name),
+                    child: Text(tr(item.name)),
                   ),
                 ),
                 
@@ -479,7 +480,7 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                       color: Color(0xFFF87171),
                       size: 20,
                     ),
-                    tooltip: 'Delete Item',
+                    tooltip: tr('Delete Item'),
                     onPressed: () {
                       // Haptic feedback or confirmation dialog can be added here
                       onDelete();
@@ -517,7 +518,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            message,
+            tr(message),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),

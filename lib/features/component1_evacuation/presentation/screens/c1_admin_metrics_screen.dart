@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../models/warning_alert.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ---------------------------------------------------------------------------
 // C1AdminMetricsScreen — Admin CRUD: Live Warning Data Entry
 // ---------------------------------------------------------------------------
@@ -161,18 +162,18 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       if (_editingId != null) {
         // UPDATE existing document
         await _warningsCol.doc(_editingId).update(alert.toMap()).queued();
-        _showSnack('✅ Warning updated successfully.', const Color(0xFF34D399));
+        _showSnack(tr('✅ Warning updated successfully.'), const Color(0xFF34D399));
       } else {
         // CREATE new document
         await _warningsCol.add(alert.toMap()).queued();
         _showSnack(
-          '📡 Warning broadcast to all citizens!',
+          tr('📡 Warning broadcast to all citizens!'),
           const Color(0xFF34D399),
         );
       }
       _resetForm();
     } catch (e) {
-      _showSnack('❌ Error: $e', const Color(0xFFF87171));
+      _showSnack(tr('❌ Error: {p0}', {'p0': (e).toString()}), const Color(0xFFF87171));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -183,10 +184,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     if (!confirmed) return;
     try {
       await _warningsCol.doc(docId).delete();
-      _showSnack('✅ Warning resolved and removed.', const Color(0xFF34D399));
+      _showSnack(tr('✅ Warning resolved and removed.'), const Color(0xFF34D399));
       if (_editingId == docId) _resetForm();
     } catch (e) {
-      _showSnack('❌ Error: $e', const Color(0xFFF87171));
+      _showSnack(tr('❌ Error: {p0}', {'p0': (e).toString()}), const Color(0xFFF87171));
     }
   }
 
@@ -242,7 +243,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          msg,
+          tr(msg),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -264,22 +265,22 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
-              'Resolve Warning?',
+            title: Text(
+              tr('Resolve Warning?'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            content: const Text(
-              'This will permanently remove the alert and clear it from all citizen dashboards.',
+            content: Text(
+              tr('This will permanently remove the alert and clear it from all citizen dashboards.'),
               style: TextStyle(color: Colors.white70),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text(
-                  'Cancel',
+                child: Text(
+                  tr('Cancel'),
                   style: TextStyle(color: Colors.white54),
                 ),
               ),
@@ -292,8 +293,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                   ),
                 ),
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text(
-                  'Resolve',
+                child: Text(
+                  tr('Resolve'),
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
@@ -318,8 +319,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             _buildSectionHeader(
               icon: Icons.broadcast_on_personal_rounded,
               label: _editingId == null
-                  ? 'Broadcast New Warning'
-                  : 'Edit Warning',
+                  ? tr('Broadcast New Warning')
+                  : tr('Edit Warning'),
               color: const Color(0xFF34D399),
             ),
             const SizedBox(height: 14),
@@ -327,7 +328,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             const SizedBox(height: 32),
             _buildSectionHeader(
               icon: Icons.crisis_alert_rounded,
-              label: 'Active Warnings',
+              label: tr('Active Warnings'),
               color: const Color(0xFFF87171),
               trailing: _buildLiveBadge(),
             ),
@@ -369,7 +370,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           ),
           const SizedBox(width: 10),
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -377,11 +378,11 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               ),
               children: [
                 TextSpan(
-                  text: 'Admin ',
+                  text: tr('Admin '),
                   style: TextStyle(color: Colors.white),
                 ),
                 TextSpan(
-                  text: 'Metrics',
+                  text: tr('Metrics'),
                   style: TextStyle(color: Color(0xFF34D399)),
                 ),
               ],
@@ -407,7 +408,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 8),
         Flexible(child: Text(
-          label,
+          tr(label),
           style: TextStyle(
             color: color,
             fontSize: 15,
@@ -444,8 +445,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               ),
             ),
             const SizedBox(width: 5),
-            const Text(
-              'LIVE',
+            Text(
+              tr('LIVE'),
               style: TextStyle(
                 color: Color(0xFFF87171),
                 fontSize: 11,
@@ -514,7 +515,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Editing warning — changes will propagate instantly.',
+                        tr('Editing warning — changes will propagate instantly.'),
                         style: TextStyle(
                           color: const Color(0xFFFBBF24).withValues(alpha: 0.9),
                           fontSize: 12,
@@ -540,7 +541,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               children: [
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Target District',
+                    label: tr('Target District'),
                     icon: Icons.map_rounded,
                     value: _selectedDistrict,
                     items: _districts,
@@ -551,9 +552,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 Expanded(
                   child: _buildTextField(
                     controller: _cityController,
-                    label: 'City (Target)',
+                    label: tr('City (Target)'),
                     icon: Icons.location_city_rounded,
-                    hint: 'e.g. Ambalangoda',
+                    hint: tr('e.g. Ambalangoda'),
                   ),
                 ),
               ],
@@ -565,7 +566,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               children: [
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Location Zone',
+                    label: tr('Location Zone'),
                     icon: Icons.location_on_rounded,
                     value: _selectedZone,
                     items: _zones,
@@ -575,7 +576,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Hazard Type',
+                    label: tr('Hazard Type'),
                     icon: Icons.flood_rounded,
                     value: _selectedHazard,
                     items: _hazards,
@@ -592,7 +593,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 Expanded(
                   child: _buildNumericField(
                     controller: _waterController,
-                    label: 'Water (m)',
+                    label: tr('Water (m)'),
                     icon: Icons.water_rounded,
                     hint: '3.8',
                   ),
@@ -601,7 +602,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 Expanded(
                   child: _buildNumericField(
                     controller: _rainfallController,
-                    label: 'Rain (mm)',
+                    label: tr('Rain (mm)'),
                     icon: Icons.grain_rounded,
                     hint: '120.5',
                   ),
@@ -610,7 +611,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 Expanded(
                   child: _buildNumericField(
                     controller: _windController,
-                    label: 'Wind (km/h)',
+                    label: tr('Wind (km/h)'),
                     icon: Icons.air_rounded,
                     hint: '65.0',
                   ),
@@ -635,11 +636,11 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               maxLines: 3,
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: _inputDecoration(
-                hint: 'Describe the situation and evacuation instructions...',
+                hint: tr('Describe the situation and evacuation instructions...'),
                 icon: Icons.description_rounded,
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? tr('Required') : null,
             ),
             const SizedBox(height: 20),
 
@@ -677,10 +678,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       ),
                 label: Text(
                   _isSaving
-                      ? 'Saving...'
+                      ? tr('Saving...')
                       : _editingId != null
-                      ? 'Save Changes'
-                      : 'Broadcast Warning',
+                      ? tr('Save Changes')
+                      : tr('Broadcast Warning'),
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -714,7 +715,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           iconEnabledColor: Colors.white38,
           decoration: _inputDecoration(icon: icon),
           items: items
-              .map((z) => DropdownMenuItem(value: z, child: Text(z)))
+              .map((z) => DropdownMenuItem(value: z, child: Text(tr(z))))
               .toList(),
           onChanged: onChanged,
         ),
@@ -742,8 +743,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: _inputDecoration(hint: hint, icon: icon),
           validator: (v) {
-            if (v == null || v.isEmpty) return 'Required';
-            if (double.tryParse(v) == null) return 'Invalid number';
+            if (v == null || v.isEmpty) return tr('Required');
+            if (double.tryParse(v) == null) return tr('Invalid number');
             return null;
           },
         ),
@@ -767,7 +768,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: _inputDecoration(hint: hint, icon: icon),
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Required';
+            if (v == null || v.trim().isEmpty) return tr('Required');
             return null;
           },
         ),
@@ -805,7 +806,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  severity,
+                  tr(severity),
                   style: TextStyle(
                     color: isSelected ? color : Colors.white38,
                     fontSize: 11,
@@ -823,7 +824,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   Widget _buildLabel(String text) {
     return Text(
-      text,
+      tr(text),
       style: const TextStyle(
         color: Colors.white60,
         fontSize: 12,
@@ -890,7 +891,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         if (snapshot.hasError) {
           return _buildEmptyState(
             icon: Icons.error_outline_rounded,
-            message: 'Error loading warnings.\n${snapshot.error}',
+            message: tr('Error loading warnings.\n{p0}', {'p0': (snapshot.error).toString()}),
             color: const Color(0xFFF87171),
           );
         }
@@ -900,7 +901,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         if (docs.isEmpty) {
           return _buildEmptyState(
             icon: Icons.shield_rounded,
-            message: 'No active warnings.\nAll zones are currently safe.',
+            message: tr('No active warnings.\nAll zones are currently safe.'),
             color: const Color(0xFF34D399),
           );
         }
@@ -989,7 +990,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        alert.hazardType,
+                        tr(alert.hazardType),
                         style: const TextStyle(
                           color: Colors.white60,
                           fontSize: 12,
@@ -998,7 +999,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Issued: $timeStr',
+                        tr('Issued: {p0}', {'p0': (timeStr).toString()}),
                         style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 11,
@@ -1024,21 +1025,21 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               children: [
                 _buildMetricChip(
                   icon: Icons.water_rounded,
-                  label: 'Water',
+                  label: tr('Water'),
                   value: '${alert.waterLevelMeters.toStringAsFixed(2)}m',
                   color: const Color(0xFF42A5F5),
                 ),
                 const SizedBox(width: 6),
                 _buildMetricChip(
                   icon: Icons.grain_rounded,
-                  label: 'Rain',
+                  label: tr('Rain'),
                   value: '${alert.rainfallMm.toStringAsFixed(1)}mm',
                   color: const Color(0xFF26C6DA),
                 ),
                 const SizedBox(width: 6),
                 _buildMetricChip(
                   icon: Icons.air_rounded,
-                  label: 'Wind',
+                  label: tr('Wind'),
                   value: '${alert.windSpeedKmh.toStringAsFixed(1)}kph',
                   color: const Color(0xFFB39DDB),
                 ),
@@ -1047,7 +1048,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 _buildCardIconBtn(
                   icon: Icons.edit_rounded,
                   color: const Color(0xFFFBBF24),
-                  tooltip: 'Edit',
+                  tooltip: tr('Edit'),
                   onTap: () => _populateFormForEdit(alert),
                 ),
                 const SizedBox(width: 6),
@@ -1055,7 +1056,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 _buildCardIconBtn(
                   icon: Icons.check_circle_outline_rounded,
                   color: const Color(0xFF34D399),
-                  tooltip: 'Resolve',
+                  tooltip: tr('Resolve'),
                   onTap: () => _resolveWarning(alert.id),
                 ),
               ],
@@ -1108,7 +1109,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
+                tr(label),
                 style: TextStyle(
                   color: color.withValues(alpha: 0.7),
                   fontSize: 9,
@@ -1116,7 +1117,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
               ),
               Text(
-                value,
+                tr(value),
                 style: TextStyle(
                   color: color,
                   fontSize: 12,
@@ -1172,7 +1173,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           Icon(icon, color: color.withValues(alpha: 0.5), size: 40),
           const SizedBox(height: 12),
           Text(
-            message,
+            tr(message),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),

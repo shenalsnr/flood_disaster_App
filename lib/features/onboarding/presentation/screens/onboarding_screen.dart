@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// Ultra-Premium Tactical Onboarding Screen for WeSafe Disaster Response.
@@ -19,42 +21,39 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   int _currentPage = 0;
   late final AnimationController _pulseController;
 
-  final List<_OnboardingItem> _items = const [
+  List<_OnboardingItem> get _items => [
     _OnboardingItem(
-      tag: 'RADAR SURVEILLANCE',
-      title: 'Early Warning & Flood Alerts',
-      description:
-          'Receive instant satellite alerts and predictive water level forecasts before floodwaters reach your residential sector.',
-      buttonText: 'Next',
+      tag: tr('ob1_tag'),
+      title: tr('ob1_title'),
+      description: tr('ob1_desc'),
+      buttonText: tr('next'),
       accentColor: Color(0xFF38BDF8),
       imagePath: 'assets/images/onboard_early_warning.jpg',
-      badgeTopLeft: 'RADAR LIVE • SECTOR 04',
-      badgeTopRight: 'HIGH RISK ALERT',
-      telemetryBottom: 'SATELLITE SURGE: 65mm/hr • RIVER MONITOR ACTIVE',
+      badgeTopLeft: tr('ob1_tl'),
+      badgeTopRight: tr('ob1_tr'),
+      telemetryBottom: tr('ob1_tele'),
     ),
     _OnboardingItem(
-      tag: 'GROUND INTELLIGENCE',
-      title: 'Rapid Community Reporting',
-      description:
-          'Capture geotagged hazard photos and transmit instant alerts to the Disaster Operations Room—even with zero internet connection.',
-      buttonText: 'Next',
+      tag: tr('ob2_tag'),
+      title: tr('ob2_title'),
+      description: tr('ob2_desc'),
+      buttonText: tr('next'),
       accentColor: Color(0xFFFB923C),
       imagePath: 'assets/images/onboard_hazard_report.jpg',
-      badgeTopLeft: 'INCIDENT CAM • DMC VERIFIED',
-      badgeTopRight: 'OFFLINE QUEUE ACTIVE',
-      telemetryBottom: 'GPS: 6.9271° N, 79.8612° E • VERIFICATION LOCKED',
+      badgeTopLeft: tr('ob2_tl'),
+      badgeTopRight: tr('ob2_tr'),
+      telemetryBottom: tr('ob2_tele'),
     ),
     _OnboardingItem(
-      tag: 'LIFE-SAVING NAVIGATION',
-      title: 'Safe Routes & Relief Shelters',
-      description:
-          'Navigate through real-time safe elevation corridors avoiding flood zones directly to active emergency camps and relief centers.',
-      buttonText: 'Get Started',
+      tag: tr('ob3_tag'),
+      title: tr('ob3_title'),
+      description: tr('ob3_desc'),
+      buttonText: tr('get_started'),
       accentColor: Color(0xFF34D399),
       imagePath: 'assets/images/onboard_safe_shelter.jpg',
-      badgeTopLeft: 'EVAC ROUTE ACTIVE • 3.2 KM',
-      badgeTopRight: 'SHELTER ZONE A',
-      telemetryBottom: 'RELIEF STATUS: FOOD, WATER & MEDICAL STOCKED',
+      badgeTopLeft: tr('ob3_tl'),
+      badgeTopRight: tr('ob3_tr'),
+      telemetryBottom: tr('ob3_tele'),
     ),
   ];
 
@@ -143,12 +142,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             letterSpacing: 0.5,
                           ),
                           children: [
-                            const TextSpan(
-                              text: 'We',
+                            TextSpan(
+                              text: tr('We'),
                               style: TextStyle(color: Colors.white),
                             ),
                             TextSpan(
-                              text: 'Safe',
+                              text: tr('Safe'),
                               style: TextStyle(color: accentColor),
                             ),
                           ],
@@ -157,7 +156,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ],
                   ),
 
-                  // Skip Button
+                  // Language + Skip
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                  const LanguageButton(),
+                  const SizedBox(width: 4),
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 250),
                     opacity: _currentPage == _items.length - 1 ? 0.0 : 1.0,
@@ -172,15 +176,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           vertical: 6,
                         ),
                       ),
-                      child: const Text(
-                        'Skip',
-                        style: TextStyle(
+                      child: Text(
+                        tr('skip'),
+                        style: const TextStyle(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
                         ),
                       ),
                     ),
+                  ),
+                    ],
                   ),
                 ],
               ),
@@ -225,7 +231,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             ),
                           ),
                           child: Text(
-                            item.tag,
+                            tr(item.tag),
                             style: TextStyle(
                               color: item.accentColor,
                               fontSize: 10.5,
@@ -239,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
                         // ── Title ────────────────────────────────────────────
                         Text(
-                          item.title,
+                          tr(item.title),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white,
@@ -256,7 +262,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
-                            item.description,
+                            tr(item.description),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Color(0xFFB6C2D6),
@@ -453,7 +459,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      item.badgeTopLeft,
+                      tr(item.badgeTopLeft),
                       style: TextStyle(
                         color: item.accentColor,
                         fontSize: 10,
@@ -482,7 +488,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   ),
                 ),
                 child: Text(
-                  item.badgeTopRight,
+                  tr(item.badgeTopRight),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 9.5,
@@ -519,7 +525,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        item.telemetryBottom,
+                        tr(item.telemetryBottom),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

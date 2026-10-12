@@ -10,6 +10,7 @@ import '../../../component4_control_center/presentation/controllers/responder_co
 import '../../data/services/camp_leader_profile_service.dart';
 import '../widgets/leader_avatar.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Personal Information (opened from Settings): shows the logged-in
 /// camp leader's details and lets them add / change / remove their photo and
 /// edit their name, phone number and assigned area.
@@ -91,18 +92,18 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined, color: Colors.white),
-              title: const Text('Take a photo', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Take a photo'), style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(ctx, 'camera'),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined, color: Colors.white),
-              title: const Text('Choose from gallery', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Choose from gallery'), style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(ctx, 'gallery'),
             ),
             if (hasPhoto)
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: _danger),
-                title: const Text('Remove photo', style: TextStyle(color: _danger)),
+                title: Text(tr('Remove photo'), style: TextStyle(color: _danger)),
                 onTap: () => Navigator.pop(ctx, 'remove'),
               ),
           ],
@@ -129,7 +130,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       final bytes = await picked.readAsBytes();
       await _savePhoto('data:image/jpeg;base64,${base64Encode(bytes)}');
     } catch (e) {
-      _showMessage('Could not get the photo: $e', error: true);
+      _showMessage(tr('Could not get the photo: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -145,7 +146,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
           .timeout(const Duration(seconds: 8), onTimeout: () {});
       _showMessage(photoUrl.isEmpty ? 'Photo removed.' : 'Photo saved.');
     } catch (e) {
-      _showMessage('Could not save the photo: $e', error: true);
+      _showMessage(tr('Could not save the photo: {p0}', {'p0': (e).toString()}), error: true);
     } finally {
       if (mounted) setState(() => _photoBusy = false);
     }
@@ -175,9 +176,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       ).timeout(const Duration(seconds: 8), onTimeout: () {});
       if (!mounted) return;
       setState(() => _editing = false);
-      _showMessage('Details saved.');
+      _showMessage(tr('Details saved.'));
     } catch (e) {
-      _showMessage('Could not save: $e', error: true);
+      _showMessage(tr('Could not save: {p0}', {'p0': (e).toString()}), error: true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -192,7 +193,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(text),
+        content: Text(tr(text)),
         backgroundColor: error ? const Color(0xFFDC2626) : _card,
         showCloseIcon: true,
       ),
@@ -211,8 +212,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Personal Information',
+        title: Text(
+          tr('Personal Information'),
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
         ),
         actions: [
@@ -220,7 +221,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             TextButton.icon(
               onPressed: () => setState(() => _editing = true),
               icon: const Icon(Icons.edit_outlined, color: _accent, size: 18),
-              label: const Text('Edit',
+              label: Text(tr('Edit'),
                   style: TextStyle(color: _accent, fontWeight: FontWeight.bold)),
             ),
         ],
@@ -237,8 +238,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         ),
         child: SafeArea(
           child: user == null
-              ? const Center(
-                  child: Text('No user is logged in.', style: TextStyle(color: _muted)),
+              ? Center(
+                  child: Text(tr('No user is logged in.'), style: TextStyle(color: _muted)),
                 )
               : _buildBody(user),
         ),
@@ -305,7 +306,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
           child: TextButton(
             onPressed: _photoBusy ? null : _choosePhotoSource,
             child: Text(
-              (user.photoUrl ?? '').isEmpty ? 'Add photo' : 'Change photo',
+              (user.photoUrl ?? '').isEmpty ? tr('Add photo') : tr('Change photo'),
               style: const TextStyle(color: _accent, fontWeight: FontWeight.bold),
             ),
           ),
@@ -320,7 +321,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
               border: Border.all(color: _accent.withValues(alpha: 0.3)),
             ),
             child: Text(
-              user.roleTitle,
+              tr(user.roleTitle),
               style: const TextStyle(
                   color: _accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
             ),
@@ -353,11 +354,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         textCapitalization: TextCapitalization.words,
                         decoration: _decoration('Your name'),
                         validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'Enter your name' : null,
+                            v == null || v.trim().isEmpty ? tr('Enter your name') : null,
                       )
                     : _value(user.fullName),
                 const SizedBox(height: 16),
-                _label('Email', help: _editing ? 'Cannot be changed' : null),
+                _label('Email', help: _editing ? tr('Cannot be changed') : null),
                 _value(user.email),
                 const SizedBox(height: 16),
                 _label('Phone number'),
@@ -369,16 +370,16 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         decoration: _decoration('e.g. 077 123 4567'),
                         validator: (v) {
                           final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
-                          return digits.length < 9 ? 'Enter a valid phone number' : null;
+                          return digits.length < 9 ? tr('Enter a valid phone number') : null;
                         },
                       )
                     : _value(user.phoneNumber),
                 const SizedBox(height: 16),
-                _label('NIC', help: _editing ? 'Cannot be changed' : null),
+                _label('NIC', help: _editing ? tr('Cannot be changed') : null),
                 _value(user.nic),
                 const SizedBox(height: 16),
                 _label('Assigned camp / area',
-                    help: _editing ? 'Set by the administrator' : null),
+                    help: _editing ? tr('Set by the administrator') : null),
                 _value(user.floodZone),
                 if (_editing) ...[
                   const SizedBox(height: 22),
@@ -387,7 +388,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                     children: [
                       TextButton(
                         onPressed: _saving ? null : _cancelEdit,
-                        child: const Text('Cancel', style: TextStyle(color: _muted)),
+                        child: Text(tr('Cancel'), style: TextStyle(color: _muted)),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
@@ -406,7 +407,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                                     strokeWidth: 2, color: Color(0xFF06121F)),
                               )
                             : const Icon(Icons.check, size: 16),
-                        label: Text(_saving ? 'SAVING...' : 'SAVE',
+                        label: Text(_saving ? tr('SAVING...') : tr('SAVE'),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                     ],
@@ -431,7 +432,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                     color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0))),
             if (help != null) ...[
               const SizedBox(width: 8),
-              Text(help, style: const TextStyle(color: _muted, fontSize: 10)),
+              Text(tr(help), style: const TextStyle(color: _muted, fontSize: 10)),
             ],
           ],
         ),

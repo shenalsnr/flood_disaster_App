@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/evacuee_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class EvacueeTile extends StatelessWidget {
   final EvacueeModel evacuee;
   final Function(TriagePriority newTriage) onTriageChanged;
@@ -65,7 +66,7 @@ class EvacueeTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        evacuee.fullName,
+                        tr(evacuee.fullName),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -73,7 +74,7 @@ class EvacueeTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${evacuee.gender}, ${evacuee.age} yrs • Check-in: ${evacuee.checkInTime}',
+                        tr('{p0}, {p1} yrs • Check-in: {p2}', {'p0': (evacuee.gender).toString(), 'p1': (evacuee.age).toString(), 'p2': (evacuee.checkInTime).toString()}),
                         style: const TextStyle(color: Colors.white54, fontSize: 11),
                       ),
                     ],
@@ -85,33 +86,33 @@ class EvacueeTile extends StatelessWidget {
                 color: const Color(0xFF2C2C2C),
                 onSelected: onTriageChanged,
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: TriagePriority.red,
                     child: Row(
                       children: [
                         Icon(Icons.circle, color: Color(0xFFF87171), size: 12),
                         SizedBox(width: 8),
-                        Text('Set Red (Critical Care)', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Text(tr('Set Red (Critical Care)'), style: TextStyle(color: Colors.white, fontSize: 13)),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: TriagePriority.yellow,
                     child: Row(
                       children: [
                         Icon(Icons.circle, color: Color(0xFFFFAB40), size: 12),
                         SizedBox(width: 8),
-                        Text('Set Yellow (Needs Care)', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Text(tr('Set Yellow (Needs Care)'), style: TextStyle(color: Colors.white, fontSize: 13)),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: TriagePriority.green,
                     child: Row(
                       children: [
                         Icon(Icons.circle, color: Color(0xFF6EE7B7), size: 12),
                         SizedBox(width: 8),
-                        Text('Set Green (Stable)', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Text(tr('Set Green (Stable)'), style: TextStyle(color: Colors.white, fontSize: 13)),
                       ],
                     ),
                   ),
@@ -131,7 +132,7 @@ class EvacueeTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  badgeLabel,
+                  tr(badgeLabel),
                   style: TextStyle(
                     color: badgeColor,
                     fontSize: 10,
@@ -152,7 +153,7 @@ class EvacueeTile extends StatelessWidget {
                     const Icon(Icons.location_on_outlined, color: Colors.blueAccent, size: 12),
                     const SizedBox(width: 4),
                     Text(
-                      evacuee.assignedZone,
+                      tr(evacuee.assignedZone),
                       style: const TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.w500),
                     ),
                   ],
@@ -175,7 +176,7 @@ class EvacueeTile extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Medical / Special Note: ${evacuee.specialNeeds}',
+                      tr('Medical / Special Note: {p0}', {'p0': (evacuee.specialNeeds).toString()}),
                       style: const TextStyle(color: Colors.white70, fontSize: 11),
                     ),
                   ),

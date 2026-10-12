@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Shared design system for Component 4 (colours, responsive helpers,
 /// animations, photo widgets). Everything here uses only built-in Flutter
 /// widgets (LayoutBuilder, MediaQuery, NavigationBar/Rail, Hero, ...).
@@ -388,7 +389,7 @@ class C4Chip extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Text(
-            label,
+            tr(label),
             style: TextStyle(
               color: color,
               fontSize: 10,

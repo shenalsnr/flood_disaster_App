@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/hazard_report_wizard_screen.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/offline_draft_management_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Screen displayed after submitting a hazard report.
 /// Matches the two user screenshots:
 /// - Online state: "Report Submitted!" with green check badge & Report ID (#FLD-2847).
@@ -70,7 +71,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            isOnline ? 'ONLINE' : 'OFFLINE QUEUE',
+                            isOnline ? tr('ONLINE') : tr('OFFLINE QUEUE'),
                             style: TextStyle(
                               color: isOnline
                                   ? const Color(0xFF34D399)
@@ -115,7 +116,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
 
                       // Screen Title
                       Text(
-                        isOnline ? 'Report Submitted!' : 'Report Saved.',
+                        isOnline ? tr('Report Submitted!') : tr('Report Saved.'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 27,
@@ -141,7 +142,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                               width: 1.2,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
@@ -151,7 +152,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                               ),
                               SizedBox(width: 7),
                               Text(
-                                'NO SIGNAL DETECTED',
+                                tr('NO SIGNAL DETECTED'),
                                 style: TextStyle(
                                   color: Color(0xFFFB923C),
                                   fontSize: 11.5,
@@ -171,8 +172,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(
                           isOnline
-                              ? 'Your ${hazard.toLowerCase()} report has been sent to Sri Lanka Disaster Management Centre (DMC) for verification.'
-                              : 'Your report is safely stored offline. It will upload automatically as soon as your device reconnects to a signal.',
+                              ? tr('Your {p0} report has been sent to Sri Lanka Disaster Management Centre (DMC) for verification.', {'p0': (hazard.toLowerCase()).toString()})
+                              : tr('Your report is safely stored offline. It will upload automatically as soon as your device reconnects to a signal.'),
                           style: const TextStyle(
                             color: Color(0xFFB6C2D6),
                             fontSize: 14.5,
@@ -195,8 +196,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           isOnline
-                              ? 'Responders and emergency services have been notified of this critical hazard.'
-                              : 'Do not worry. Your hazard details are locked in with the precise GPS timestamp.',
+                              ? tr('Responders and emergency services have been notified of this critical hazard.')
+                              : tr('Do not worry. Your hazard details are locked in with the precise GPS timestamp.'),
                           style: const TextStyle(
                             color: Color(0xFF8A98B0),
                             fontSize: 13,
@@ -242,8 +243,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                             (route) => route.isFirst,
                           );
                         },
-                        child: const Text(
-                          'SUBMIT ANOTHER REPORT',
+                        child: Text(
+                          tr('SUBMIT ANOTHER REPORT'),
                           style: TextStyle(
                             fontSize: 15.5,
                             fontWeight: FontWeight.w900,
@@ -265,8 +266,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         // Pop all the way back to the volunteer dashboard
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
-                      child: const Text(
-                        'Back to Home',
+                      child: Text(
+                        tr('Back to Home'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -373,8 +374,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text(
-            'REPORT ID',
+          Text(
+            tr('REPORT ID'),
             style: TextStyle(
               color: Color(0xFFB6C2D6),
               fontSize: 11.5,
@@ -384,7 +385,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            reportId,
+            tr(reportId),
             style: const TextStyle(
               color: Color(0xFFFB923C),
               fontSize: 21,
@@ -451,7 +452,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '$pendingCount Report${pendingCount > 1 ? 's' : ''} Saved (SQLite)',
+                        tr('{p0} Report{p1} Saved (SQLite)', {'p0': (pendingCount).toString(), 'p1': (pendingCount > 1 ? 's' : '').toString()}),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -459,8 +460,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      const Text(
-                        'Saved permanently • Tap to manage drafts',
+                      Text(
+                        tr('Saved permanently • Tap to manage drafts'),
                         style: TextStyle(
                           color: Color(0xFFB6C2D6),
                           fontSize: 12,

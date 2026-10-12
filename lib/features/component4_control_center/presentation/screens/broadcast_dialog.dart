@@ -10,6 +10,7 @@ import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Opens the map-based zone broadcast screen (FR11).
 /// (Name kept so every existing caller keeps working.)
 Future<void> showBroadcastDialog(
@@ -295,7 +296,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   Future<void> _send() async {
     if (_zone.text.trim().isEmpty || _title.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Zone name and title are required.')),
+        SnackBar(content: Text(tr('Zone name and title are required.'))),
       );
       return;
     }
@@ -325,15 +326,15 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       );
       nav.pop();
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Zone alert sent. Citizens in the target area see it now.'),
+        SnackBar(
+          content: Text(tr('Zone alert sent. Citizens in the target area see it now.')),
           backgroundColor: Color(0xFFDC2626),
         ),
       );
     } catch (e) {
       if (mounted) setState(() => _sending = false);
       messenger.showSnackBar(
-        SnackBar(content: Text('Broadcast failed: $e'), backgroundColor: Colors.orange),
+        SnackBar(content: Text(tr('Broadcast failed: {p0}', {'p0': (e).toString()})), backgroundColor: Colors.orange),
       );
     }
   }
@@ -434,7 +435,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   onSubmitted: (_) => _runSearch(),
                   style: const TextStyle(color: C4.text, fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Search district, city or town',
+                    hintText: tr('Search district, city or town'),
                     hintStyle: const TextStyle(color: C4.muted, fontSize: 13),
                     prefixIcon:
                         const Icon(Icons.search, color: C4.muted, size: 20),
@@ -465,7 +466,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     borderRadius: BorderRadius.circular(10),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
-                      child: Text(_searchError!,
+                      child: Text(tr(_searchError!),
                           style: const TextStyle(
                               color: Colors.orange, fontSize: 12)),
                     ),
@@ -497,11 +498,11 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                                   : Icons.place_outlined,
                               color: C4.accent,
                             ),
-                            title: Text(h.name,
+                            title: Text(tr(h.name),
                                 style: const TextStyle(
                                     color: C4.text,
                                     fontWeight: FontWeight.w700)),
-                            subtitle: Text(h.label,
+                            subtitle: Text(tr(h.label),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -530,7 +531,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   children: [
                     const Icon(Icons.crop_free, color: Colors.white, size: 15),
                     const SizedBox(width: 6),
-                    Text(_areaName!,
+                    Text(tr(_areaName!),
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -561,8 +562,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
               children: [
                 Text(
                   _polys.isNotEmpty
-                      ? 'The selected area boundary will receive this warning.'
-                      : 'Search an area, or tap the map and set a radius.',
+                      ? tr('The selected area boundary will receive this warning.')
+                      : tr('Search an area, or tap the map and set a radius.'),
                   style: const TextStyle(color: C4.muted, fontSize: 12),
                 ),
                 if (_polys.isEmpty) ...[
@@ -571,7 +572,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     children: [
                       const Icon(Icons.radar, size: 16, color: C4.muted),
                       const SizedBox(width: 6),
-                      Flexible(child: Text('Radius ${_radius.toStringAsFixed(1)} km',
+                      Flexible(child: Text(tr('Radius {p0} km', {'p0': (_radius.toStringAsFixed(1)).toString()}),
                           style: const TextStyle(color: C4.text, fontSize: 12))),
                       Expanded(
                         child: Slider(
@@ -604,7 +605,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         decoration: _deco('District'),
                         items: ['All', ..._districts]
                             .map((d) =>
-                                DropdownMenuItem(value: d, child: Text(d)))
+                                DropdownMenuItem(value: d, child: Text(tr(d))))
                             .toList(),
                         onChanged: (v) =>
                             setState(() => _district = v ?? _district),
@@ -621,7 +622,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text('SEVERITY',
+                Text(tr('SEVERITY'),
                     style: TextStyle(
                         color: C4.muted,
                         fontSize: 10,
@@ -634,7 +635,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     for (final s in const ['Watch', 'Warning', 'Critical'])
                       ChoiceChip(
                         showCheckmark: false,
-                        label: Text(s),
+                        label: Text(tr(s)),
                         selected: _severity == s,
                         selectedColor: (s == 'Critical'
                                 ? const Color(0xFFF87171)
@@ -690,7 +691,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                             strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.cell_tower),
-                label: Text(_sending ? 'SENDING...' : 'TRANSMIT ALERT'),
+                label: Text(_sending ? tr('SENDING...') : tr('TRANSMIT ALERT')),
               ),
             ),
           ),
@@ -707,7 +708,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         backgroundColor: C4.surface,
         surfaceTintColor: Colors.transparent,
         foregroundColor: Colors.white,
-        title: const Text('Broadcast zone alert',
+        title: Text(tr('Broadcast zone alert'),
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
       ),
       body: LayoutBuilder(

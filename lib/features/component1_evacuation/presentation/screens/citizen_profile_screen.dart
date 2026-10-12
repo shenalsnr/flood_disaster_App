@@ -8,6 +8,7 @@ import 'dart:ui';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class CitizenProfileScreen extends StatefulWidget {
   const CitizenProfileScreen({super.key});
 
@@ -42,7 +43,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload image: $e')),
+          SnackBar(content: Text(tr('Failed to upload image: {p0}', {'p0': (e).toString()}))),
         );
       }
     } finally {
@@ -63,7 +64,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_rounded, color: Colors.white),
-              title: const Text('Take Photo', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Take Photo'), style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickAndUploadImage(email, ImageSource.camera);
@@ -71,7 +72,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_rounded, color: Colors.white),
-              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Choose from Gallery'), style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickAndUploadImage(email, ImageSource.gallery);
@@ -112,8 +113,8 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Edit Profile',
+                    Text(
+                      tr('Edit Profile'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -139,7 +140,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+                          child: Text(tr('Cancel'), style: TextStyle(color: Colors.white70)),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
@@ -161,7 +162,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                             }, SetOptions(merge: true)).queued();
                             if (ctx.mounted) Navigator.pop(ctx);
                           },
-                          child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(tr('Save Changes'), style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -206,7 +207,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('My Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+        title: Text(tr('My Profile'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
@@ -220,7 +221,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
           ),
         ),
         child: userEmail == null
-            ? const Center(child: Text('Not logged in.', style: TextStyle(color: Colors.white)))
+            ? Center(child: Text(tr('Not logged in.'), style: TextStyle(color: Colors.white)))
             : SafeArea(
                 child: StreamBuilder<DocumentSnapshot>(
                   stream: _firestore.collection('users').doc(userEmail).snapshots(),
@@ -326,7 +327,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            displayName,
+                            tr(displayName),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -342,8 +343,8 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.3)),
                             ),
-                            child: const Text(
-                              'AFFECTED CITIZEN',
+                            child: Text(
+                              tr('AFFECTED CITIZEN'),
                               style: TextStyle(
                                 color: Color(0xFF34D399),
                                 fontSize: 11,
@@ -368,37 +369,37 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                 ),
                                 child: Column(
                                   children: [
-                                    _ProfileRow(icon: Icons.badge_outlined, label: 'Full Name', value: displayName),
+                                    _ProfileRow(icon: Icons.badge_outlined, label: tr('Full Name'), value: displayName),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.email_outlined, label: 'Email Address', value: emailStr),
+                                    _ProfileRow(icon: Icons.email_outlined, label: tr('Email Address'), value: emailStr),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.phone_outlined, label: 'Phone Number', value: phone),
+                                    _ProfileRow(icon: Icons.phone_outlined, label: tr('Phone Number'), value: phone),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.credit_card_outlined, label: 'NIC Number', value: nic),
+                                    _ProfileRow(icon: Icons.credit_card_outlined, label: tr('NIC Number'), value: nic),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.location_city_outlined, label: 'City', value: city),
+                                    _ProfileRow(icon: Icons.location_city_outlined, label: tr('City'), value: city),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.map_outlined, label: 'District', value: district),
+                                    _ProfileRow(icon: Icons.map_outlined, label: tr('District'), value: district),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.location_on_outlined, label: 'Sector / Zone', value: zone),
+                                    _ProfileRow(icon: Icons.location_on_outlined, label: tr('Sector / Zone'), value: zone),
                                   ],
                                 ),
                               ),
@@ -420,13 +421,13 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                 shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.edit_rounded, size: 22),
                                   SizedBox(width: 10),
                                   Flexible(child: Text(
-                                    'EDIT PROFILE',
+                                    tr('EDIT PROFILE'),
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
@@ -484,7 +485,7 @@ class _ProfileRow extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                value,
+                tr(value),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,

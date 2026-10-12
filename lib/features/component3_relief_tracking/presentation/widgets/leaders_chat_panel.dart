@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/services/firestore_service.dart';
 import '../controllers/relief_tracking_controller.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Live "Community Chat" shared by all camp leaders (Team tab).
 ///
 /// Messages are stored in the Firestore collection `leaderChat`, so a message
@@ -54,7 +55,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
       _textController.text = text; // give the text back so nothing is lost
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Message not sent: $e'),
+          content: Text(tr('Message not sent: {p0}', {'p0': (e).toString()})),
           backgroundColor: const Color(0xFFDC2626),
         ),
       );
@@ -76,14 +77,14 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
             const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.edit_outlined, color: Colors.white),
-              title: const Text('Edit message', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Edit message'), style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(ctx, 'edit'),
             ),
             ListTile(
               leading: const Icon(Icons.delete_outline, color: Color(0xFFF87171)),
-              title: const Text('Delete for everyone',
+              title: Text(tr('Delete for everyone'),
                   style: TextStyle(color: Color(0xFFF87171))),
-              subtitle: const Text('Removed from every leader\'s chat',
+              subtitle: Text(tr('Removed from every leader\'s chat'),
                   style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11)),
               onTap: () => Navigator.pop(ctx, 'delete'),
             ),
@@ -105,8 +106,8 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0B1220),
-        title: const Text(
-          'Edit message',
+        title: Text(
+          tr('Edit message'),
           style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         content: TextField(
@@ -127,7 +128,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFFB6C2D6))),
+            child: Text(tr('Cancel'), style: TextStyle(color: Color(0xFFB6C2D6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
@@ -135,7 +136,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Save'),
+            child: Text(tr('Save')),
           ),
         ],
       ),
@@ -144,7 +145,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
     try {
       await FirestoreService.instance.editLeaderChatMessage(messageId, newText);
     } catch (e) {
-      _showError('Message not edited: $e');
+      _showError(tr('Message not edited: {p0}', {'p0': (e).toString()}));
     }
   }
 
@@ -153,18 +154,18 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0B1220),
-        title: const Text(
-          'Delete for everyone?',
+        title: Text(
+          tr('Delete for everyone?'),
           style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        content: const Text(
-          'This message will be removed for all camp leaders.',
+        content: Text(
+          tr('This message will be removed for all camp leaders.'),
           style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFFB6C2D6))),
+            child: Text(tr('Cancel'), style: TextStyle(color: Color(0xFFB6C2D6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -172,7 +173,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: Text(tr('Delete')),
           ),
         ],
       ),
@@ -181,14 +182,14 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
     try {
       await FirestoreService.instance.deleteLeaderChatMessage(messageId);
     } catch (e) {
-      _showError('Message not deleted: $e');
+      _showError(tr('Message not deleted: {p0}', {'p0': (e).toString()}));
     }
   }
 
   void _showError(String text) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text), backgroundColor: const Color(0xFFDC2626)),
+      SnackBar(content: Text(tr(text)), backgroundColor: const Color(0xFFDC2626)),
     );
   }
 
@@ -202,16 +203,16 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0B1220),
-        title: const Text(
-          'Your chat name',
+        title: Text(
+          tr('Your chat name'),
           style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Other camp leaders will see this name next to your messages.',
+            Text(
+              tr('Other camp leaders will see this name next to your messages.'),
               style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 12),
             ),
             const SizedBox(height: 14),
@@ -223,7 +224,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFFB6C2D6))),
+            child: Text(tr('Cancel'), style: TextStyle(color: Color(0xFFB6C2D6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -231,7 +232,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Save'),
+            child: Text(tr('Save')),
           ),
         ],
       ),
@@ -290,16 +291,16 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
                 child: Icon(Icons.people, color: Colors.white, size: 16),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Community Chat',
+                      tr('Community Chat'),
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     Text(
-                      '● Live • All camp leaders',
+                      tr('● Live • All camp leaders'),
                       style: TextStyle(color: Color(0xFF34D399), fontSize: 10),
                     ),
                   ],
@@ -307,7 +308,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
               ),
               Flexible(
                 child: Text(
-                  c.chatName,
+                  tr(c.chatName),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
@@ -320,10 +321,10 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
         // Messages
         Expanded(child: _buildMessages()),
 
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(vertical: 4),
           child: Text(
-            'Tap your own message to edit or delete it',
+            tr('Tap your own message to edit or delete it'),
             style: TextStyle(color: Color(0xFF8A98B0), fontSize: 10),
           ),
         ),
@@ -340,8 +341,8 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => _send(),
-                  decoration: const InputDecoration(
-                    hintText: 'Message the team...',
+                  decoration: InputDecoration(
+                    hintText: tr('Message the team...'),
                     hintStyle: TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
                     border: InputBorder.none,
                   ),
@@ -423,7 +424,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          text,
+          tr(text),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 12),
         ),
@@ -457,7 +458,7 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              sender,
+              tr(sender),
               style: TextStyle(
                 color: isSelf ? const Color(0xFF448AFF) : const Color(0xFF34D399),
                 fontWeight: FontWeight.bold,
@@ -466,8 +467,8 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
             ),
             const SizedBox(height: 4),
             if (deleted)
-              const Text(
-                'This message was deleted',
+              Text(
+                tr('This message was deleted'),
                 style: TextStyle(
                   color: Color(0xFF8A98B0),
                   fontSize: 12,
@@ -475,12 +476,12 @@ class _LeadersChatPanelState extends State<LeadersChatPanel> {
                 ),
               )
             else
-              Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
+              Text(tr(text), style: const TextStyle(color: Colors.white, fontSize: 12)),
             const SizedBox(height: 4),
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                (edited && !deleted) ? 'edited • $time' : time,
+                (edited && !deleted) ? tr('edited • {p0}', {'p0': (time).toString()}) : time,
                 style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 9),
               ),
             ),

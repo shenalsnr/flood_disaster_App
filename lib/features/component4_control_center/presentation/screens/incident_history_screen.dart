@@ -4,6 +4,7 @@ import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Resolved incidents. Dispatcher can reopen (UPDATE) or archive (DELETE from
 /// the dispatcher's lists; the volunteer's report itself is kept).
 class IncidentHistoryScreen extends StatefulWidget {
@@ -37,19 +38,19 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1C2740),
-        title: const Text('Archive incident?',
+        title: Text(tr('Archive incident?'),
             style: TextStyle(color: Colors.white)),
-        content: const Text(
-            'It will be removed from the control center lists. The volunteer\'s original report is kept.',
+        content: Text(
+            tr('It will be removed from the control center lists. The volunteer\'s original report is kept.'),
             style: TextStyle(color: Color(0xFFCBD5E1))),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCEL')),
+              child: Text(tr('CANCEL'))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('ARCHIVE'),
+            child: Text(tr('ARCHIVE')),
           ),
         ],
       ),
@@ -65,14 +66,14 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B1220),
         foregroundColor: Colors.white,
-        title: const Text('Resolved Incidents',
+        title: Text(tr('Resolved Incidents'),
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
       ),
       body: ResponsiveBody(
         maxWidth: 760,
         child: list.isEmpty
-          ? const Center(
-              child: Text('No resolved incidents yet.',
+          ? Center(
+              child: Text(tr('No resolved incidents yet.'),
                   style: TextStyle(color: Colors.white54)))
           : ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -97,19 +98,18 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
                               color: Colors.white,
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(i.location,
+                      Text(tr(i.location),
                           style: const TextStyle(
                               color: Color(0xFFB6C2D6), fontSize: 12)),
                       const SizedBox(height: 6),
                       Text(
-                        '${i.resolutionType ?? "Resolved"} • ${i.evacuatedCount} evacuated'
-                        '${i.assignedTeam != null ? " • ${i.assignedTeam!.callSign}" : ""}',
+                        tr('{p0} • {p1} evacuated{p2}', {'p0': (i.resolutionType ?? "Resolved").toString(), 'p1': (i.evacuatedCount).toString(), 'p2': (i.assignedTeam != null ? " • ${i.assignedTeam!.callSign}" : "").toString()}),
                         style: const TextStyle(
                             color: Color(0xFF10B981), fontSize: 12),
                       ),
                       if ((i.resolutionNotes ?? '').isNotEmpty) ...[
                         const SizedBox(height: 4),
-                        Text(i.resolutionNotes!,
+                        Text(tr(i.resolutionNotes!),
                             style: const TextStyle(
                                 color: Color(0xFFCBD5E1), fontSize: 12)),
                       ],
@@ -120,13 +120,13 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
                           TextButton.icon(
                             onPressed: () => _c.reopenIncident(i),
                             icon: const Icon(Icons.replay, size: 16),
-                            label: const Text('REOPEN'),
+                            label: Text(tr('REOPEN')),
                           ),
                           TextButton.icon(
                             onPressed: () => _archive(i),
                             icon: const Icon(Icons.archive_outlined,
                                 size: 16, color: Color(0xFFF87171)),
-                            label: const Text('ARCHIVE',
+                            label: Text(tr('ARCHIVE'),
                                 style: TextStyle(color: Color(0xFFF87171))),
                           ),
                         ],

@@ -4,6 +4,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/ration_item_model.dart';
 import 'add_edit_ration_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 enum InventoryFilter { all, depleted, low, adequate }
 
 /// Supplies Log Screen
@@ -68,13 +69,13 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(child: Text('RATION & MEDICAL LOG', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1))),
+                  Flexible(child: Text(tr('RATION & MEDICAL LOG'), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1))),
                   TextButton.icon(
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditRationScreen()));
                     },
                     icon: const Icon(Icons.add, color: ShelterTheme.primaryActionOrange, size: 16),
-                    label: const Text('Add Item', style: TextStyle(color: ShelterTheme.primaryActionOrange)),
+                    label: Text(tr('Add Item'), style: TextStyle(color: ShelterTheme.primaryActionOrange)),
                   ),
                 ],
               ),
@@ -126,12 +127,12 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
                     children: [
                       const Icon(Icons.local_shipping, color: ShelterTheme.statusSafeGreen),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Relief Supply Truck', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            Text('Convoy #1', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
+                            Text(tr('Relief Supply Truck'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            Text(tr('Convoy #1'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -141,7 +142,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
                           color: ShelterTheme.statusSafeGreen.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text('ETA: 15 MINS', style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: Text(tr('ETA: 15 MINS'), style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -152,7 +153,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {},
                           icon: const Icon(Icons.call, color: Colors.white, size: 16),
-                          label: const Text('Call Driver', style: TextStyle(color: Colors.white)),
+                          label: Text(tr('Call Driver'), style: TextStyle(color: Colors.white)),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: ShelterTheme.surfaceLightNavy),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -168,7 +169,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
                             foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: const Text('Confirm Restock', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(tr('Confirm Restock'), style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -187,12 +188,12 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
         showUnselectedLabels: true,
         selectedFontSize: 10,
         unselectedFontSize: 10,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.inventory_2), label: 'Supplies'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: 'Alerts'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: 'Team'),
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: tr('Dashboard')),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory_2), label: tr('Supplies')),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: tr('Alerts')),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: tr('Settings')),
+          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: tr('Team')),
         ],
         currentIndex: 1, // Supplies tab is active
         onTap: (index) {
@@ -217,7 +218,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
-          label,
+          tr(label),
           style: TextStyle(
             color: isSelected ? (isOutlined ? color : textColor) : ShelterTheme.textMuted,
             fontWeight: FontWeight.bold,
@@ -233,13 +234,13 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
     final isLow = item.status == SupplyStatus.low;
     
     Color badgeColor = ShelterTheme.statusSafeGreen;
-    String badgeText = 'ADEQUATE';
+    String badgeText = tr('ADEQUATE');
     if (isDepleted) {
       badgeColor = ShelterTheme.statusCriticalRed;
-      badgeText = 'CRITICAL DEPLETED';
+      badgeText = tr('CRITICAL DEPLETED');
     } else if (isLow) {
       badgeColor = ShelterTheme.statusWarningYellow;
-      badgeText = 'LOW STOCK';
+      badgeText = tr('LOW STOCK');
     }
 
     return Container(
@@ -254,7 +255,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+            child: Text(tr(item.name), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -264,7 +265,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              badgeText,
+              tr(badgeText),
               style: TextStyle(color: badgeColor, fontSize: 10, fontWeight: FontWeight.bold),
             ),
           ),

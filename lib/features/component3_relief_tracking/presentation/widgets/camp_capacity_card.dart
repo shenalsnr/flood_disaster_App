@@ -4,6 +4,7 @@ import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
 import 'leader_avatar.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class CampCapacityCard extends StatelessWidget {
   final ReliefTrackingController controller;
 
@@ -53,7 +54,7 @@ class CampCapacityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      controller.leaderName,
+                      tr(controller.leaderName),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
@@ -62,7 +63,7 @@ class CampCapacityCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      controller.leaderTitle,
+                      tr(controller.leaderTitle),
                       style: const TextStyle(
                         color: Color(0xFFB6C2D6),
                         fontSize: 10,
@@ -98,7 +99,7 @@ class CampCapacityCard extends StatelessWidget {
                       Icon(Icons.circle, color: pillColor, size: 8),
                       const SizedBox(width: 6),
                       Text(
-                        synced ? 'WS SYNC: OK' : 'SYNC: OFFLINE',
+                        synced ? tr('WS SYNC: OK') : tr('SYNC: OFFLINE'),
                         style: TextStyle(
                           color: pillColor,
                           fontSize: 10,
@@ -126,8 +127,8 @@ class CampCapacityCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'SHELTER CAPACITY OVERVIEW',
+              Text(
+                tr('SHELTER CAPACITY OVERVIEW'),
                 style: TextStyle(
                   color: Color(0xFF8A98B0),
                   fontSize: 11,
@@ -163,7 +164,7 @@ class CampCapacityCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Flexible(
                     child: Text(
-                      'Beds Occupied - $occupancyPercentage%',
+                      tr('Beds Occupied - {p0}%', {'p0': (occupancyPercentage).toString()}),
                       style: const TextStyle(
                         color: Color(0xFFB6C2D6),
                         fontSize: 13,
@@ -206,8 +207,8 @@ class CampCapacityCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       capacityRatio > 0.85
-                          ? 'CRITICAL CAPACITY'
-                          : 'STABLE CAPACITY',
+                          ? tr('CRITICAL CAPACITY')
+                          : tr('STABLE CAPACITY'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
@@ -223,8 +224,8 @@ class CampCapacityCard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // Rapid Headcount Section (Matching Image 1 Iframe)
-        const Text(
-          'RAPID HEADCOUNT',
+        Text(
+          tr('RAPID HEADCOUNT'),
           style: TextStyle(
             color: Color(0xFF8A98B0),
             fontSize: 11,
@@ -281,7 +282,7 @@ class CampCapacityCard extends StatelessWidget {
               size: 18,
             ),
             label: Text(
-              controller.isShelterClosed ? 'RE-OPEN SHELTER' : 'CLOSE SHELTER',
+              controller.isShelterClosed ? tr('RE-OPEN SHELTER') : tr('CLOSE SHELTER'),
               style: TextStyle(
                 color: controller.isShelterClosed ? Colors.grey : const Color(0xFFF87171),
                 fontWeight: FontWeight.bold,
@@ -313,7 +314,7 @@ class CampCapacityCard extends StatelessWidget {
           ),
           onPressed: onPressed,
           child: Text(
-            label,
+            tr(label),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

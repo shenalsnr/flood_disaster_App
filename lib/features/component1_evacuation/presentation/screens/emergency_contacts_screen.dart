@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import '../../services/citizen_firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // Model — mapped from Firestore DocumentSnapshot
 class EmergencyContact {
   final String id;
@@ -134,8 +135,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Delete Contact?',
+              Text(
+                tr('Delete Contact?'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -144,7 +145,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Are you sure you want to remove\n"${contact.name}"\nfrom your emergency contacts?',
+                tr('Are you sure you want to remove\n"{p0}"\nfrom your emergency contacts?', {'p0': (contact.name).toString()}),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
@@ -165,7 +166,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                         ),
                       ),
                       child: Text(
-                        'Cancel',
+                        tr('Cancel'),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 16,
@@ -187,8 +188,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Delete',
+                      child: Text(
+                        tr('Delete'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -226,8 +227,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Emergency Contacts',
+        title: Text(
+          tr('Emergency Contacts'),
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -301,9 +302,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                           color: Color(0xFF38BDF8), size: 18),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'These contacts will be notified automatically in an emergency situation.',
+                        tr('These contacts will be notified automatically in an emergency situation.'),
                         style: TextStyle(
                           color: Color(0xFF38BDF8),
                           fontSize: 13,
@@ -322,8 +323,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                   stream: _contactsStream,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return const Center(
-                        child: Text('Error loading contacts',
+                      return Center(
+                        child: Text(tr('Error loading contacts'),
                             style: TextStyle(color: Colors.red)),
                       );
                     }
@@ -387,13 +388,13 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               ),
             ],
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.add_rounded, color: Colors.black, size: 24),
               SizedBox(width: 8),
               Text(
-                'Add Contact',
+                tr('Add Contact'),
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,
@@ -488,7 +489,7 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        widget.contact == null ? 'New Contact' : 'Edit Contact',
+                        widget.contact == null ? tr('New Contact') : tr('Edit Contact'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -503,37 +504,37 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
                 _PremiumDialogField(
                   key: const Key('contact_name_field'),
                   controller: nameCtrl,
-                  label: 'Full Name',
-                  hint: 'e.g. Kamal Perera',
+                  label: tr('Full Name'),
+                  hint: tr('e.g. Kamal Perera'),
                   icon: Icons.person_outline_rounded,
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.trim().isEmpty) ? tr('Required') : null,
                 ),
                 const SizedBox(height: 16),
 
                 _PremiumDialogField(
                   key: const Key('contact_phone_field'),
                   controller: phoneCtrl,
-                  label: 'Phone Number',
-                  hint: 'e.g. 071-234-5678',
+                  label: tr('Phone Number'),
+                  hint: tr('e.g. 071-234-5678'),
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[\d\-\+\s\(\)]')),
                   ],
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.trim().isEmpty) ? tr('Required') : null,
                 ),
                 const SizedBox(height: 16),
 
                 _PremiumDialogField(
                   key: const Key('contact_relation_field'),
                   controller: relationCtrl,
-                  label: 'Relationship',
-                  hint: 'e.g. Father, Doctor',
+                  label: tr('Relationship'),
+                  hint: tr('e.g. Father, Doctor'),
                   icon: Icons.group_outlined,
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.trim().isEmpty) ? tr('Required') : null,
                 ),
                 const SizedBox(height: 32),
 
@@ -549,7 +550,7 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
                           ),
                         ),
                         child: Text(
-                          'Cancel',
+                          tr('Cancel'),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 16,
@@ -597,7 +598,7 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
                             }
                           },
                           child: Text(
-                            widget.contact == null ? 'Save' : 'Update',
+                            widget.contact == null ? tr('Save') : tr('Update'),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -684,7 +685,7 @@ class _PremiumContactTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  initials,
+                  tr(initials),
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.w800,
@@ -701,7 +702,7 @@ class _PremiumContactTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    contact.name,
+                    tr(contact.name),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -716,7 +717,7 @@ class _PremiumContactTile extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.4), size: 14),
                       const SizedBox(width: 4),
                       Flexible(child: Text(
-                        contact.phone,
+                        tr(contact.phone),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 14,
@@ -733,7 +734,7 @@ class _PremiumContactTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      contact.relationship,
+                      tr(contact.relationship),
                       style: TextStyle(
                         color: color,
                         fontSize: 11,
@@ -828,7 +829,7 @@ class _PremiumDialogField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          tr(label),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.6),
             fontSize: 13,
@@ -906,8 +907,8 @@ class _PremiumEmptyContactState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'No Emergency Contacts',
+          Text(
+            tr('No Emergency Contacts'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -916,7 +917,7 @@ class _PremiumEmptyContactState extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Add your lifeline contacts.\nThey will be notified in an emergency.',
+            tr('Add your lifeline contacts.\nThey will be notified in an emergency.'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),

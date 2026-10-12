@@ -9,6 +9,7 @@ import '../../data/services/geocoding_service.dart';
 import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// 3-Step Wizard for Reporting Ground Hazards.
 /// - Step 1: 4 hazard tiles (Flash Flood, Landslide, Fallen Tree, Road Blocked).
 ///   Tapping ANY of the 4 tiles immediately advances to "Choose Severity" (NO Next button!).
@@ -82,8 +83,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enable GPS / Location Services.'),
+            SnackBar(
+              content: Text(tr('Please enable GPS / Location Services.')),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 2),
             ),
@@ -100,8 +101,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Location permission denied. Using fallback GPS.'),
+              SnackBar(
+                content: Text(tr('Location permission denied. Using fallback GPS.')),
                 backgroundColor: Colors.orange,
                 duration: Duration(seconds: 2),
               ),
@@ -257,8 +258,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
                   Flexible(child: Text(source == ImageSource.camera
-                      ? 'Photo evidence captured & GPS tagged.'
-                      : 'Gallery photo selected & attached.')),
+                      ? tr('Photo evidence captured & GPS tagged.')
+                      : tr('Gallery photo selected & attached.'))),
                 ],
               ),
               backgroundColor: const Color(0xFF34D399),
@@ -274,7 +275,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to access image: $e'),
+            content: Text(tr('Failed to access image: {p0}', {'p0': (e).toString()})),
             backgroundColor: Color(0xFFDC2626),
             behavior: SnackBarBehavior.floating,
           ),
@@ -307,8 +308,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Attach Photo Evidence',
+            Text(
+              tr('Attach Photo Evidence'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -326,8 +327,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
                 child: const Icon(Icons.camera_alt_rounded, color: Color(0xFFFB923C)),
               ),
-              title: const Text('Capture with Camera', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Auto-tags timestamp & GPS coordinates', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              title: Text(tr('Capture with Camera'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              subtitle: Text(tr('Auto-tags timestamp & GPS coordinates'), style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.camera);
@@ -343,8 +344,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
                 child: const Icon(Icons.photo_library_rounded, color: Color(0xFF38BDF8)),
               ),
-              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Upload field image from device', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              title: Text(tr('Choose from Gallery'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              subtitle: Text(tr('Upload field image from device'), style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.gallery);
@@ -362,8 +363,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   ),
                   child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171)),
                 ),
-                title: const Text('Remove Attached Photo', style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.w600)),
-                subtitle: const Text('Clear the currently attached image', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                title: Text(tr('Remove Attached Photo'), style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.w600)),
+                subtitle: Text(tr('Clear the currently attached image'), style: TextStyle(color: Colors.white54, fontSize: 12)),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() {
@@ -411,8 +412,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Select Pre-defined Rapid Note',
+            Text(
+              tr('Select Pre-defined Rapid Note'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -433,7 +434,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   ),
                   child: ListTile(
                     title: Text(
-                      note,
+                      tr(note),
                       style: const TextStyle(color: Colors.white, fontSize: 13.5),
                     ),
                     trailing: _selectedNote == note
@@ -477,8 +478,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            'Report Ground Hazard',
+          title: Text(
+            tr('Report Ground Hazard'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -539,7 +540,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'STEP ${_currentStep + 1} OF 3',
+                tr('STEP {p0} OF 3', {'p0': (_currentStep + 1).toString()}),
                 style: const TextStyle(
                   color: Color(0xFFB6C2D6),
                   fontSize: 11.5,
@@ -549,7 +550,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               ),
               const SizedBox(height: 1),
               Text(
-                _currentStep == 1 ? 'Choose Severity' : 'Confirm Details',
+                _currentStep == 1 ? tr('Choose Severity') : tr('Confirm Details'),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -599,9 +600,9 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
-                'Step 1 of 3',
+                tr('Step 1 of 3'),
                 style: TextStyle(
                   color: Color(0xFF38BDF8),
                   fontSize: 14,
@@ -609,7 +610,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
               ),
               Text(
-                'Select Hazard',
+                tr('Select Hazard'),
                 style: TextStyle(
                   color: Color(0xFFB6C2D6),
                   fontSize: 13,
@@ -619,8 +620,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'What hazard are you reporting?',
+          Text(
+            tr('What hazard are you reporting?'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -629,8 +630,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Tap the hazard category that best reflects the current ground reality.',
+          Text(
+            tr('Tap the hazard category that best reflects the current ground reality.'),
             style: TextStyle(
               color: Color(0xFFB6C2D6),
               fontSize: 14,
@@ -716,8 +717,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Selected Hazard',
+                      Text(
+                        tr('Selected Hazard'),
                         style: TextStyle(
                           color: Color(0xFFB6C2D6),
                           fontSize: 11.5,
@@ -726,7 +727,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _selectedHazard,
+                        tr(_selectedHazard),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -738,8 +739,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => _currentStep = 0),
-                  child: const Text(
-                    'Change',
+                  child: Text(
+                    tr('Change'),
                     style: TextStyle(color: Color(0xFF7DD3FC), fontSize: 13),
                   ),
                 ),
@@ -885,7 +886,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                             const SizedBox(width: 6),
                             Text(
                               _isLoadingLocation
-                                  ? 'LOCATING...'
+                                  ? tr('LOCATING...')
                                   : (_hasGpsLock ? 'GPS LOCKED' : 'LOCK GPS'),
                               style: TextStyle(
                                 color: _hasGpsLock
@@ -964,8 +965,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       size: 18,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'DETECTED LOCATION / ADDRESS',
+                    Text(
+                      tr('DETECTED LOCATION / ADDRESS'),
                       style: TextStyle(
                         color: Color(0xFFB6C2D6),
                         fontSize: 11,
@@ -999,11 +1000,11 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                     border: InputBorder.none,
-                    hintText: 'Enter location name or landmark...',
+                    hintText: tr('Enter location name or landmark...'),
                     hintStyle: TextStyle(
                       color: Color(0xFF5A6E85),
                       fontSize: 14,
@@ -1015,7 +1016,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Coordinates: ${_hazardCoords.latitude.toStringAsFixed(4)}° N, ${_hazardCoords.longitude.toStringAsFixed(4)}° E',
+                        tr('Coordinates: {p0}° N, {p1}° E', {'p0': (_hazardCoords.latitude.toStringAsFixed(4)).toString(), 'p1': (_hazardCoords.longitude.toStringAsFixed(4)).toString()}),
                         style: const TextStyle(
                           color: Color(0xFFB6C2D6),
                           fontSize: 12,
@@ -1023,8 +1024,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                         ),
                       ),
                     ),
-                    const Text(
-                      '● Tap map to change pin',
+                    Text(
+                      tr('● Tap map to change pin'),
                       style: TextStyle(
                         color: Color(0xFF34D399),
                         fontSize: 11,
@@ -1092,10 +1093,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     ),
                   ),
             title: (_imageFile != null || _photoAttached)
-                ? 'PHOTO EVIDENCE ATTACHED'
-                : 'ADD PHOTO (RECOMMENDED)',
+                ? tr('PHOTO EVIDENCE ATTACHED')
+                : tr('ADD PHOTO (RECOMMENDED)'),
             subtitle: _imageFile != null
-                ? 'Tap to change or remove photo'
+                ? tr('Tap to change or remove photo')
                 : (_photoAttached
                     ? 'GPS & timestamp locked with photo'
                     : 'Tap to open camera & secure evidence'),
@@ -1125,8 +1126,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
               ),
             ),
-            title: 'Record Voice Memo / Add Pre-defined Note',
-            subtitle: '(Optional) Tap to choose rapid ground note',
+            title: tr('Record Voice Memo / Add Pre-defined Note'),
+            subtitle: tr('(Optional) Tap to choose rapid ground note'),
           ),
 
           const SizedBox(height: 28),
@@ -1163,8 +1164,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   Navigator.pop(context, true);
                 }
               },
-              child: const Text(
-                'REVIEW REPORT',
+              child: Text(
+                tr('REVIEW REPORT'),
                 style: TextStyle(
                   fontSize: 16.5,
                   fontWeight: FontWeight.w900,
@@ -1234,7 +1235,7 @@ class _Step1HazardCard extends StatelessWidget {
             Icon(icon, size: 48, color: color),
             const SizedBox(height: 14),
             Text(
-              title,
+              tr(title),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
@@ -1322,7 +1323,7 @@ class _SeverityCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        tr(title),
                         style: TextStyle(
                           color: color,
                           fontSize: 14,
@@ -1332,7 +1333,7 @@ class _SeverityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        description,
+                        tr(description),
                         style: const TextStyle(
                           color: Color(0xFFC9D3E2),
                           fontSize: 13,
@@ -1395,7 +1396,7 @@ class _ConfirmActionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        tr(title),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14.5,
@@ -1404,7 +1405,7 @@ class _ConfirmActionCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        subtitle,
+                        tr(subtitle),
                         style: const TextStyle(
                           color: Color(0xFFB6C2D6),
                           fontSize: 12.5,

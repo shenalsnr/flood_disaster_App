@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/localization/translated_text.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
@@ -9,6 +10,7 @@ import 'broadcast_dialog.dart';
 import 'live_tracking_screen.dart';
 import 'resolve_analysis_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Incident detail. Used as a full page on phones / tablets and as an
 /// embedded right-hand pane (embedded: true) on large screens.
 class IncidentDetailsScreen extends StatefulWidget {
@@ -49,16 +51,16 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
   }
 
   void _snack(String m) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr(m))));
 
   Future<void> _call() async {
     final phone = incident.reporterPhone.replaceAll(' ', '');
     if (phone.isEmpty) {
-      _snack('No phone number was given by the reporter.');
+      _snack(tr('No phone number was given by the reporter.'));
       return;
     }
     final ok = await launchUrl(Uri.parse('tel:$phone'));
-    if (!ok && mounted) _snack('Could not open the phone app.');
+    if (!ok && mounted) _snack(tr('Could not open the phone app.'));
   }
 
   Future<void> _cancelDispatch() async {
@@ -73,20 +75,20 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
       context: context,
       builder: (ctx) => SimpleDialog(
         backgroundColor: C4.card,
-        title: const Text('Cancel dispatch - reason',
+        title: Text(tr('Cancel dispatch - reason'),
             style: TextStyle(color: C4.text, fontSize: 16)),
         children: [
           for (final r in reasons)
             SimpleDialogOption(
               onPressed: () => Navigator.pop(ctx, r),
-              child: Text(r, style: const TextStyle(color: C4.text)),
+              child: Text(tr(r), style: const TextStyle(color: C4.text)),
             ),
         ],
       ),
     );
     if (reason == null) return;
     _c.cancelDispatch(incident: incident, cancellationReason: reason);
-    _snack('Dispatch cancelled. Unit released.');
+    _snack(tr('Dispatch cancelled. Unit released.'));
   }
 
   // ---------------------------------------------------------------------------
@@ -215,12 +217,12 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
                 label: incident.statusLabel,
                 color: C4.status(incident.status)),
             if (incident.isVerified)
-              const C4Chip(
-                  label: 'VERIFIED', color: C4.green, icon: Icons.verified),
+              C4Chip(
+                  label: tr('VERIFIED'), color: C4.green, icon: Icons.verified),
           ],
         ),
         const SizedBox(height: 10),
-        Text(incident.title,
+        Text(tr(incident.title),
             style: const TextStyle(
                 color: C4.text, fontSize: 24, fontWeight: FontWeight.w900)),
         const SizedBox(height: 6),
@@ -229,13 +231,13 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
             const Icon(Icons.place, size: 16, color: C4.accent),
             const SizedBox(width: 4),
             Expanded(
-              child: Text(incident.location,
+              child: Text(tr(incident.location),
                   style: const TextStyle(color: C4.muted, fontSize: 13)),
             ),
           ],
         ),
         const SizedBox(height: 4),
-        Text('Reported ${incident.timeAgo}',
+        Text(tr('Reported {p0}', {'p0': (incident.timeAgo).toString()}),
             style: const TextStyle(color: C4.muted, fontSize: 12)),
       ],
     );
@@ -342,14 +344,14 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
+                Text(tr(label),
                     style: const TextStyle(
                         color: C4.muted,
                         fontSize: 9.5,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8)),
                 const SizedBox(height: 2),
-                Text(value,
+                Text(tr(value),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -369,20 +371,20 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('FIELD REPORT',
+          Text(tr('FIELD REPORT'),
               style: TextStyle(
                   color: C4.muted,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1)),
           const SizedBox(height: 8),
-          Text(incident.description,
+          TranslatedText(incident.description,
               style: const TextStyle(color: C4.text, fontSize: 14, height: 1.5)),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: _call,
             icon: const Icon(Icons.call, size: 16),
-            label: const Text('Call reporter'),
+            label: Text(tr('Call reporter')),
           ),
         ],
       ),
@@ -408,19 +410,19 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ASSIGNED UNIT',
+                Text(tr('ASSIGNED UNIT'),
                     style: TextStyle(
                         color: C4.muted,
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1)),
                 const SizedBox(height: 2),
-                Text(t.name,
+                Text(tr(t.name),
                     style: const TextStyle(
                         color: C4.text,
                         fontSize: 15,
                         fontWeight: FontWeight.w800)),
-                Text('${t.callSign} • ${t.vehicleType} • crew ${t.crewCount}',
+                Text(tr('{p0} • {p1} • crew {p2}', {'p0': (t.callSign).toString(), 'p1': (t.vehicleType).toString(), 'p2': (t.crewCount).toString()}),
                     style: const TextStyle(color: C4.muted, fontSize: 12)),
               ],
             ),
@@ -436,14 +438,14 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('DISPATCH NOTES',
+          Text(tr('DISPATCH NOTES'),
               style: TextStyle(
                   color: C4.muted,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1)),
           const SizedBox(height: 6),
-          Text(incident.dispatchNotes!,
+          Text(tr(incident.dispatchNotes!),
               style: const TextStyle(color: C4.text, fontSize: 13, height: 1.4)),
         ],
       ),
@@ -459,16 +461,16 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
           Row(children: [
             const Icon(Icons.task_alt, color: C4.green, size: 18),
             const SizedBox(width: 6),
-            Flexible(child: Text(incident.resolutionType ?? 'Resolved',
+            Flexible(child: Text(incident.resolutionType ?? tr('Resolved'),
                 style: const TextStyle(
                     color: C4.green, fontWeight: FontWeight.w800))),
             const Spacer(),
-            Flexible(child: Text('${incident.evacuatedCount} evacuated',
+            Flexible(child: Text(tr('{p0} evacuated', {'p0': (incident.evacuatedCount).toString()}),
                 style: const TextStyle(color: C4.muted, fontSize: 12))),
           ]),
           if ((incident.resolutionNotes ?? '').isNotEmpty) ...[
             const SizedBox(height: 6),
-            Text(incident.resolutionNotes!,
+            Text(tr(incident.resolutionNotes!),
                 style: const TextStyle(color: C4.text, fontSize: 13)),
           ],
         ],
@@ -495,7 +497,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
         center: inc.coordinates,
       ),
       icon: const Icon(Icons.cell_tower, size: 18, color: Color(0xFFF87171)),
-      label: const Text('Broadcast'),
+      label: Text(tr('Broadcast')),
     );
 
     switch (inc.status) {
@@ -507,7 +509,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
               child: FilledButton.icon(
                 style: primaryStyle,
                 icon: const Icon(Icons.local_shipping),
-                label: const Text('ASSIGN & DISPATCH'),
+                label: Text(tr('ASSIGN & DISPATCH')),
                 onPressed: () =>
                     pushPage(context, AssignResponderScreen(incident: inc)),
               ),
@@ -528,7 +530,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
                   child: FilledButton.icon(
                     style: primaryStyle,
                     icon: const Icon(Icons.map),
-                    label: const Text('LIVE TRACKING'),
+                    label: Text(tr('LIVE TRACKING')),
                     onPressed: () =>
                         pushPage(context, LiveTrackingScreen(incident: inc)),
                   ),
@@ -543,7 +545,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
                       minimumSize: const Size.fromHeight(48),
                     ),
                     icon: const Icon(Icons.task_alt),
-                    label: const Text('RESOLVE'),
+                    label: Text(tr('RESOLVE')),
                     onPressed: () => pushPage(
                         context, ResolveAnalysisScreen(incident: inc)),
                   ),
@@ -558,7 +560,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
                     onPressed: () =>
                         pushPage(context, AssignResponderScreen(incident: inc)),
                     icon: const Icon(Icons.swap_horiz, size: 18),
-                    label: const Text('Reassign'),
+                    label: Text(tr('Reassign')),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -570,7 +572,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
                         foregroundColor: Color(0xFFF87171)),
                     onPressed: _cancelDispatch,
                     icon: const Icon(Icons.close, size: 18),
-                    label: const Text('Cancel'),
+                    label: Text(tr('Cancel')),
                   ),
                 ),
               ],
@@ -581,7 +583,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
         return FilledButton.icon(
           style: primaryStyle,
           icon: const Icon(Icons.replay),
-          label: const Text('REOPEN INCIDENT'),
+          label: Text(tr('REOPEN INCIDENT')),
           onPressed: () => _c.reopenIncident(inc),
         );
     }

@@ -12,6 +12,7 @@ import 'package:flood_disaster/features/component2_reporting/data/models/offline
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/report_submission_status_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Review Your Report Screen.
 /// Exactly matches the user's Figma/Mobile specification:
 /// - Dark tactical theme with status bar indicators
@@ -263,8 +264,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
             ),
           ),
           titleSpacing: 10,
-          title: const Text(
-            'Review Your Report',
+          title: Text(
+            tr('Review Your Report'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 21,
@@ -298,8 +299,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'HAZARD',
+                          Text(
+                            tr('HAZARD'),
                             style: TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -351,8 +352,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'SEVERITY',
+                          Text(
+                            tr('SEVERITY'),
                             style: TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -467,8 +468,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'LOCATION & GPS',
+                          Text(
+                            tr('LOCATION & GPS'),
                             style: TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -478,7 +479,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _displayLocation,
+                            tr(_displayLocation),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14.5,
@@ -487,7 +488,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            'GPS: ${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E',
+                            tr('GPS: {p0}° N, {p1}° E', {'p0': (widget.coordinates.latitude.toStringAsFixed(4)).toString(), 'p1': (widget.coordinates.longitude.toStringAsFixed(4)).toString()}),
                             style: const TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -540,8 +541,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'RECORDED AT',
+                          Text(
+                            tr('RECORDED AT'),
                             style: TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -551,7 +552,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Today, $timeStr (Local Time)',
+                            tr('Today, {p0} (Local Time)', {'p0': (timeStr).toString()}),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14.5,
@@ -611,8 +612,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'ATTACHED MEDIA',
+                          Text(
+                            tr('ATTACHED MEDIA'),
                             style: TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -622,7 +623,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            fileName,
+                            tr(fileName),
                             style: const TextStyle(
                               color: Color(0xFF34D399),
                               fontSize: 14,
@@ -663,8 +664,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          'SUBMIT REPORT',
+                      : Text(
+                          tr('SUBMIT REPORT'),
                           style: TextStyle(
                             fontSize: 16.5,
                             fontWeight: FontWeight.w900,
@@ -690,8 +691,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                     ),
                   ),
                   icon: const Icon(Icons.storage_rounded, size: 18),
-                  label: const Text(
-                    'SAVE AS LOCAL DRAFT (SQLITE)',
+                  label: Text(
+                    tr('SAVE AS LOCAL DRAFT (SQLITE)'),
                     style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w800,
@@ -715,8 +716,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       vertical: 10,
                     ),
                   ),
-                  child: const Text(
-                    'Edit Details',
+                  child: Text(
+                    tr('Edit Details'),
                     style: TextStyle(
                       color: Color(0xFFFB923C),
                       fontSize: 15.5,

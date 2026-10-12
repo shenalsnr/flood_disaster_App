@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/evacuee_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class RegisterEvacueeDialog extends StatefulWidget {
   final Function(EvacueeModel evacuee) onEvacueeRegistered;
 
@@ -78,7 +79,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                     ),
                     const SizedBox(width: 12),
                     Flexible(child: Text(
-                      'Register Evacuee',
+                      tr('Register Evacuee'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -94,7 +95,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
                   decoration: _inputDecoration('Full Name', Icons.person_outline),
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter full name' : null,
+                  validator: (val) => val == null || val.isEmpty ? tr('Please enter full name') : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -107,7 +108,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
                         decoration: _inputDecoration('Age', Icons.cake_outlined),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        validator: (val) => val == null || val.isEmpty ? tr('Required') : null,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -118,7 +119,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                         style: const TextStyle(color: Colors.white),
                         decoration: _inputDecoration('Gender', Icons.wc),
                         items: ['Female', 'Male', 'Other'].map((g) {
-                          return DropdownMenuItem(value: g, child: Text(g));
+                          return DropdownMenuItem(value: g, child: Text(tr(g)));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _selectedGender = val);
@@ -130,8 +131,8 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                 const SizedBox(height: 12),
 
                 // Triage Tag Selector
-                const Text(
-                  'Triage Priority Tag:',
+                Text(
+                  tr('Triage Priority Tag:'),
                   style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
@@ -169,7 +170,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                      child: Text(tr('Cancel'), style: TextStyle(color: Colors.white54)),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
@@ -181,7 +182,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                       ),
                       onPressed: _submit,
                       icon: const Icon(Icons.check),
-                      label: const Text('CHECK-IN EVACUEE', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(tr('CHECK-IN EVACUEE'), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -210,7 +211,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
           ),
           child: Center(
             child: Text(
-              label,
+              tr(label),
               style: TextStyle(
                 color: isSelected ? color : Colors.white70,
                 fontSize: 10,

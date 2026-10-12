@@ -15,6 +15,7 @@ import 'manage_units_screen.dart';
 import 'responder_profile_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Dispatcher home. Fully responsive:
 ///  - phone:   single column + bottom NavigationBar
 ///  - tablet:  card grid + NavigationRail
@@ -64,7 +65,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
   }
 
   void _snack(String m) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr(m))));
   }
 
   void _go(int i) {
@@ -75,7 +76,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
     }
     final focus = _c.focusIncident;
     if (focus.isPlaceholder) {
-      _snack('No active incident yet.');
+      _snack(tr('No active incident yet.'));
       return;
     }
     if (i == 1) pushPage(context, LiveTrackingScreen(incident: focus));
@@ -170,23 +171,23 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
                       unselectedLabelTextStyle:
                           const TextStyle(color: C4.muted),
                       onDestinationSelected: _go,
-                      destinations: const [
+                      destinations: [
                         NavigationRailDestination(
                             icon: Icon(Icons.crisis_alert_outlined),
                             selectedIcon: Icon(Icons.crisis_alert),
-                            label: Text('Incidents')),
+                            label: Text(tr('Incidents'))),
                         NavigationRailDestination(
                             icon: Icon(Icons.map_outlined),
                             selectedIcon: Icon(Icons.map),
-                            label: Text('Live map')),
+                            label: Text(tr('Live map'))),
                         NavigationRailDestination(
                             icon: Icon(Icons.local_shipping_outlined),
                             selectedIcon: Icon(Icons.local_shipping),
-                            label: Text('Dispatch')),
+                            label: Text(tr('Dispatch'))),
                         NavigationRailDestination(
                             icon: Icon(Icons.person_outline),
                             selectedIcon: Icon(Icons.person),
-                            label: Text('Profile')),
+                            label: Text(tr('Profile'))),
                       ],
                     ),
                     const VerticalDivider(width: 1, color: C4.border),
@@ -214,23 +215,23 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
                   child: NavigationBar(
                     selectedIndex: 0,
                     onDestinationSelected: _go,
-                    destinations: const [
+                    destinations: [
                       NavigationDestination(
                           icon: Icon(Icons.crisis_alert_outlined),
                           selectedIcon: Icon(Icons.crisis_alert),
-                          label: 'Incidents'),
+                          label: tr('Incidents')),
                       NavigationDestination(
                           icon: Icon(Icons.map_outlined),
                           selectedIcon: Icon(Icons.map),
-                          label: 'Live map'),
+                          label: tr('Live map')),
                       NavigationDestination(
                           icon: Icon(Icons.local_shipping_outlined),
                           selectedIcon: Icon(Icons.local_shipping),
-                          label: 'Dispatch'),
+                          label: tr('Dispatch')),
                       NavigationDestination(
                           icon: Icon(Icons.person_outline),
                           selectedIcon: Icon(Icons.person),
-                          label: 'Profile'),
+                          label: tr('Profile')),
                     ],
                   ),
                 )
@@ -250,13 +251,13 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _c.currentUser?.fullName ?? 'Dispatcher',
+            _c.currentUser?.fullName ?? tr('Dispatcher'),
             style: const TextStyle(
                 color: C4.text, fontWeight: FontWeight.w800, fontSize: 16),
             overflow: TextOverflow.ellipsis,
           ),
-          const Text(
-            'DISPATCH CONTROL CENTER',
+          Text(
+            tr('DISPATCH CONTROL CENTER'),
             style: TextStyle(
                 color: C4.blue,
                 fontSize: 10,
@@ -269,7 +270,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
         const ThemeToggleButton(),
         if (compact)
           IconButton(
-            tooltip: 'Broadcast zone alert',
+            tooltip: tr('Broadcast zone alert'),
             icon: const Icon(Icons.cell_tower, color: Color(0xFFF87171)),
             onPressed: () => showBroadcastDialog(context),
           )
@@ -280,7 +281,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
               style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFFDC2626)),
               icon: const Icon(Icons.cell_tower, size: 18),
-              label: const Text('BROADCAST'),
+              label: Text(tr('BROADCAST')),
               onPressed: () => showBroadcastDialog(context),
             ),
           ),
@@ -296,24 +297,24 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
               pushPage(context, const IncidentHistoryScreen(), frame: false);
             }
           },
-          itemBuilder: (_) => const [
+          itemBuilder: (_) => [
             PopupMenuItem(
                 value: 'units',
                 child: ListTile(
                     leading: Icon(Icons.local_shipping_outlined, color: C4.blue),
-                    title: Text('Response units',
+                    title: Text(tr('Response units'),
                         style: TextStyle(color: C4.text)))),
             PopupMenuItem(
                 value: 'broadcasts',
                 child: ListTile(
                     leading: Icon(Icons.cell_tower, color: C4.accent),
-                    title: Text('Broadcast history',
+                    title: Text(tr('Broadcast history'),
                         style: TextStyle(color: C4.text)))),
             PopupMenuItem(
                 value: 'history',
                 child: ListTile(
                     leading: Icon(Icons.task_alt, color: C4.green),
-                    title: Text('Resolved incidents',
+                    title: Text(tr('Resolved incidents'),
                         style: TextStyle(color: C4.text)))),
           ],
         ),
@@ -364,7 +365,7 @@ class _ListPane extends StatelessWidget {
                   onChanged: onSearch,
                   style: const TextStyle(color: C4.text, fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Search location, hazard or ID',
+                    hintText: tr('Search location, hazard or ID'),
                     hintStyle: const TextStyle(color: C4.muted, fontSize: 13),
                     prefixIcon:
                         const Icon(Icons.search, color: C4.muted, size: 20),
@@ -400,7 +401,7 @@ class _ListPane extends StatelessWidget {
                   C4Card(
                     borderColor: Colors.orange,
                     child: Text(
-                      'Sync problem: ${c.syncError}',
+                      tr('Sync problem: {p0}', {'p0': (c.syncError).toString()}),
                       style: const TextStyle(color: Colors.orange, fontSize: 12),
                     ),
                   ),
@@ -408,14 +409,14 @@ class _ListPane extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Flexible(child: Text('PRIORITY QUEUE',
+                    Flexible(child: Text(tr('PRIORITY QUEUE'),
                         style: TextStyle(
                             color: C4.muted,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.2))),
                     const SizedBox(width: 8),
-                    Flexible(child: Text('sorted by severity',
+                    Flexible(child: Text(tr('sorted by severity'),
                         style: TextStyle(color: C4.border, fontSize: 11))),
                   ],
                 ),
@@ -534,7 +535,7 @@ class _Banner extends StatelessWidget {
                         PulseDot(color: live ? C4.green : Colors.orange),
                         const SizedBox(width: 8),
                         Flexible(child: Text(
-                          live ? 'LIVE - synced with field reports' : 'CONNECTING...',
+                          live ? tr('LIVE - synced with field reports') : tr('CONNECTING...'),
                           style: TextStyle(
                             color: live ? C4.green : Colors.orange,
                             fontWeight: FontWeight.w800,
@@ -545,8 +546,8 @@ class _Banner extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Flood response overview',
+                    Text(
+                      tr('Flood response overview'),
                       style: TextStyle(
                           color: C4.text,
                           fontSize: 20,
@@ -585,7 +586,7 @@ class _Banner extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            label,
+            tr(label),
             style: const TextStyle(
                 color: C4.muted,
                 fontSize: 9.5,
@@ -669,7 +670,7 @@ class _IncidentCard extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        incident.title,
+                        tr(incident.title),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -684,7 +685,7 @@ class _IncidentCard extends StatelessWidget {
                           const SizedBox(width: 3),
                           Expanded(
                             child: Text(
-                              incident.location,
+                              tr(incident.location),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -697,7 +698,7 @@ class _IncidentCard extends StatelessWidget {
                         children: [
                           const Icon(Icons.schedule, size: 12, color: C4.muted),
                           const SizedBox(width: 3),
-                          Flexible(child: Text(incident.timeAgo,
+                          Flexible(child: Text(tr(incident.timeAgo),
                               style: const TextStyle(
                                   color: C4.muted, fontSize: 11))),
                           const SizedBox(width: 10),
@@ -764,14 +765,14 @@ class _EmptyState extends StatelessWidget {
                 )),
               ),
               const SizedBox(height: 16),
-              const Text('All clear',
+              Text(tr('All clear'),
                   style: TextStyle(
                       color: C4.text,
                       fontSize: 18,
                       fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
-              const Text(
-                'No open incidents match this view.\nNew volunteer reports appear here automatically.',
+              Text(
+                tr('No open incidents match this view.\nNew volunteer reports appear here automatically.'),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: C4.muted, fontSize: 13, height: 1.4),
               ),

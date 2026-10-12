@@ -3,6 +3,7 @@ import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import 'alert_dashboard_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class ResolveAnalysisScreen extends StatefulWidget {
   final IncidentReport incident;
 
@@ -117,7 +118,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
               ),
               const SizedBox(width: 10),
               Flexible(child: Text(
-                'Incident Resolved',
+                tr('Incident Resolved'),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -131,7 +132,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Incident #${widget.incident.shortId} has been formally closed and marked resolved in National DMC database.',
+                tr('Incident #{p0} has been formally closed and marked resolved in National DMC database.', {'p0': (widget.incident.shortId).toString()}),
                 style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
               ),
               const SizedBox(height: 12),
@@ -146,7 +147,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'RESOLUTION OUTCOME: $_resolutionType',
+                      tr('RESOLUTION OUTCOME: {p0}', {'p0': (_resolutionType).toString()}),
                       style: const TextStyle(
                         color: Color(0xFF34D399),
                         fontSize: 11,
@@ -155,13 +156,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Evacuated to Shelter: $_evacuatedCount Citizens',
+                      tr('Evacuated to Shelter: {p0} Citizens', {'p0': (_evacuatedCount).toString()}),
                       style:
                           const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Lead Squad: ${widget.incident.assignedTeam?.name ?? "Rescue Squad A"}',
+                      tr('Lead Squad: {p0}', {'p0': (widget.incident.assignedTeam?.name ?? "Rescue Squad A").toString()}),
                       style: const TextStyle(
                           color: Color(0xFFB6C2D6), fontSize: 11),
                     ),
@@ -185,7 +186,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   (route) => false,
                 );
               },
-              child: const Text('RETURN TO TRIAGE DASHBOARD'),
+              child: Text(tr('RETURN TO TRIAGE DASHBOARD')),
             ),
           ],
         ),
@@ -206,15 +207,15 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Close & Resolve Incident',
+              tr('Close & Resolve Incident'),
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(
-              'CRUD: Delete • Formal Incident Closure',
+              tr('CRUD: Delete • Formal Incident Closure'),
               style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
@@ -291,13 +292,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 color: const Color(0xFF10B981).withValues(alpha: 0.5),
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.check_circle, color: Color(0xFF10B981), size: 12),
                                 SizedBox(width: 4),
                                 Text(
-                                  'READY TO RESOLVE',
+                                  tr('READY TO RESOLVE'),
                                   style: TextStyle(
                                     color: Color(0xFF10B981),
                                     fontSize: 10,
@@ -311,7 +312,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        incident.title,
+                        tr(incident.title),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -325,7 +326,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              incident.location,
+                              tr(incident.location),
                               style: const TextStyle(
                                 color: Color(0xFFB6C2D6),
                                 fontSize: 12,
@@ -340,7 +341,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                           const Icon(Icons.groups_rounded, color: Color(0xFF8A98B0), size: 14),
                           const SizedBox(width: 4),
                           Flexible(child: Text(
-                            'Assigned: ${incident.assignedTeam?.name ?? "Colombo Rescue Squad A"}',
+                            tr('Assigned: {p0}', {'p0': (incident.assignedTeam?.name ?? "Colombo Rescue Squad A").toString()}),
                             style: const TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -398,7 +399,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                             children: [
                               Icon(icon, color: const Color(0xFF38BDF8), size: 16),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(opt)),
+                              Expanded(child: Text(tr(opt))),
                             ],
                           ),
                         );
@@ -435,11 +436,11 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                             child: const Icon(Icons.people_alt_rounded, color: Color(0xFF34D399), size: 20),
                           ),
                           const SizedBox(width: 12),
-                          const Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Evacuated Citizens',
+                                tr('Evacuated Citizens'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 13,
@@ -447,7 +448,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 ),
                               ),
                               Text(
-                                'Transferred to safe zone shelter',
+                                tr('Transferred to safe zone shelter'),
                                 style: TextStyle(
                                   color: Color(0xFF8A98B0),
                                   fontSize: 11,
@@ -512,7 +513,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF131C2E),
-                    hintText: 'Enter formal dispatch resolution notes...',
+                    hintText: tr('Enter formal dispatch resolution notes...'),
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -543,7 +544,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   child: Column(
                     children: [
                       _buildChecklistTile(
-                        title: 'All affected citizens in sector accounted for',
+                        title: tr('All affected citizens in sector accounted for'),
                         icon: Icons.people_outline,
                         value: _checklistNotified,
                         onChanged: (v) =>
@@ -551,7 +552,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       ),
                       const Divider(color: Color(0xFF1C2740), height: 1),
                       _buildChecklistTile(
-                        title: 'Area secured by local municipal / DMC teams',
+                        title: tr('Area secured by local municipal / DMC teams'),
                         icon: Icons.security,
                         value: _checklistAreaSecured,
                         onChanged: (v) =>
@@ -559,7 +560,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       ),
                       const Divider(color: Color(0xFF1C2740), height: 1),
                       _buildChecklistTile(
-                        title: 'Structural integrity of drain / road evaluated',
+                        title: tr('Structural integrity of drain / road evaluated'),
                         icon: Icons.engineering,
                         value: _checklistStructuralEvaluated,
                         onChanged: (v) => setState(
@@ -567,7 +568,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       ),
                       const Divider(color: Color(0xFF1C2740), height: 1),
                       _buildChecklistTile(
-                        title: 'Relief camp notified of arriving evacuees',
+                        title: tr('Relief camp notified of arriving evacuees'),
                         icon: Icons.night_shelter,
                         value: _checklistCampNotified,
                         onChanged: (v) =>
@@ -593,13 +594,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                               color: const Color(0xFF34D399).withValues(alpha: 0.3),
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.check_circle, color: Color(0xFF34D399), size: 14),
                               SizedBox(width: 6),
                               Text(
-                                'All protocol checks complete',
+                                tr('All protocol checks complete'),
                                 style: TextStyle(
                                   color: Color(0xFF34D399),
                                   fontSize: 11,
@@ -639,8 +640,8 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       : const Icon(Icons.check_circle_rounded, size: 22),
                   label: Text(
                     _isSubmitting
-                        ? 'SUBMITTING RESOLUTION...'
-                        : 'MARK INCIDENT AS RESOLVED',
+                        ? tr('SUBMITTING RESOLUTION...')
+                        : tr('MARK INCIDENT AS RESOLVED'),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
@@ -663,7 +664,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
-        title,
+        tr(title),
         style: const TextStyle(
           color: Color(0xFFB6C2D6),
           fontSize: 11,
@@ -702,7 +703,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                title,
+                tr(title),
                 style: TextStyle(
                   color: value ? Colors.white : const Color(0xFF8A98B0),
                   fontSize: 12,

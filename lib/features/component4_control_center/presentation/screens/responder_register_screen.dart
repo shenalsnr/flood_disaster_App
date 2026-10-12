@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
+import '../widgets/c4_ui.dart';
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
@@ -74,9 +77,9 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!_agreedToAlerts) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-              'Please accept the flood early warning agreement to proceed.'),
+              tr('reg_accept')),
           backgroundColor: Color(0xFFDC2626),
         ),
       );
@@ -120,7 +123,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Saved to Firebase Firestore! Log in as ${_nameController.text}.',
+                  tr('reg_saved', {'name': _nameController.text}),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -145,7 +148,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Firebase Registration Error: $e'),
+          content: Text(tr('reg_error', {'err': e.toString()})),
           backgroundColor: Color(0xFFDC2626),
         ),
       );
@@ -159,7 +162,9 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0B1220),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ResponsiveBody(
+          maxWidth: 560,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Form(
             key: _formKey,
@@ -201,7 +206,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                     ),
                     const SizedBox(width: 14),
                     Flexible(child: Text(
-                      'Citizen Registration',
+                      tr('citizen_reg'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -209,6 +214,8 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         letterSpacing: 0.3,
                       ),
                     )),
+                    const SizedBox(width: 10),
+                    const LanguageButton(),
                   ],
                 ),
 
@@ -254,7 +261,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 14),
-                                  const Expanded(
+                                  Expanded(
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -262,7 +269,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Early Warning Civilian Account',
+                                          tr('civilian_acct'),
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 14,
@@ -271,7 +278,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                         ),
                                         SizedBox(height: 3),
                                         Text(
-                                          'Flood & Disaster Preparedness Network',
+                                          tr('network'),
                                           style: TextStyle(
                                             color: Color(0xFFB6C2D6),
                                             fontSize: 11,
@@ -299,32 +306,32 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 const SizedBox(height: 22),
 
                 // Field 1: FULL NAME
-                _buildFieldLabel('FULL NAME'),
+                _buildFieldLabel(tr('full_name')),
                 TextFormField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   decoration: _buildInputDecoration(
-                    hint: 'Enter your full name',
+                    hint: tr('enter_full_name'),
                     icon: Icons.person,
                   ),
                   validator: (v) =>
-                      v == null || v.isEmpty ? 'Please enter your name' : null,
+                      v == null || v.isEmpty ? tr('enter_name_err') : null,
                 ),
 
                 const SizedBox(height: 16),
 
                 // Field 2: EMAIL ADDRESS
-                _buildFieldLabel('EMAIL ADDRESS'),
+                _buildFieldLabel(tr('email_address')),
                 TextFormField(
                   controller: _emailController,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   keyboardType: TextInputType.emailAddress,
                   decoration: _buildInputDecoration(
-                    hint: 'name@example.com',
+                    hint: tr('name@example.com'),
                     icon: Icons.email,
                   ),
                   validator: (v) => v == null || !v.contains('@')
-                      ? 'Please enter a valid email address'
+                      ? tr('valid_email_err')
                       : null,
                 ),
 
@@ -339,18 +346,18 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('PHONE NUMBER'),
+                          _buildFieldLabel(tr('phone')),
                           TextFormField(
                             controller: _phoneController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             keyboardType: TextInputType.phone,
                             decoration: _buildInputDecoration(
-                              hint: '+94 7X XXX XXXX',
+                              hint: tr('+94 7X XXX XXXX'),
                               icon: Icons.phone,
                             ),
                             validator: (v) => v == null || v.isEmpty
-                                ? 'Enter phone number'
+                                ? tr('enter_phone')
                                 : null,
                           ),
                         ],
@@ -362,17 +369,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('NATIONAL ID (NIC)'),
+                          _buildFieldLabel(tr('nic')),
                           TextFormField(
                             controller: _nicController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             decoration: _buildInputDecoration(
-                              hint: 'e.g. 982341092V',
+                              hint: tr('e.g. 982341092V'),
                               icon: Icons.badge_outlined,
                             ),
                             validator: (v) =>
-                                v == null || v.isEmpty ? 'Enter NIC' : null,
+                                v == null || v.isEmpty ? tr('enter_nic') : null,
                           ),
                         ],
                       ),
@@ -390,17 +397,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('DISTRICT'),
+                          _buildFieldLabel(tr('district')),
                           TextFormField(
                             controller: _districtController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             decoration: _buildInputDecoration(
-                              hint: 'Enter district',
+                              hint: tr('enter_district'),
                               icon: Icons.map_outlined,
                             ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Enter district'
+                                ? tr('enter_district')
                                 : null,
                           ),
                         ],
@@ -411,17 +418,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('CITY'),
+                          _buildFieldLabel(tr('city')),
                           TextFormField(
                             controller: _cityController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             decoration: _buildInputDecoration(
-                              hint: 'Enter city',
+                              hint: tr('enter_city'),
                               icon: Icons.location_city_outlined,
                             ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Enter city'
+                                ? tr('enter_city')
                                 : null,
                           ),
                         ],
@@ -433,7 +440,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 const SizedBox(height: 16),
 
                 // Field 5: RESIDENTIAL FLOOD ZONE / SECTOR Dropdown
-                _buildFieldLabel('RESIDENTIAL FLOOD ZONE / SECTOR'),
+                _buildFieldLabel(tr('flood_zone_label')),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
@@ -472,7 +479,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                 ),
                               Expanded(
                                 child: Text(
-                                  sector,
+                                  tr(sector),
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: isOther
@@ -522,7 +529,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                 color: Color(0xFF38BDF8), size: 18),
                             const SizedBox(width: 8),
                             Flexible(child: Text(
-                              'TYPE YOUR CUSTOM FLOOD ZONE / AREA',
+                              tr('custom_zone_label'),
                               style: TextStyle(
                                 color: const Color(0xFF38BDF8)
                                     .withValues(alpha: 0.9),
@@ -542,7 +549,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                             filled: true,
                             fillColor: const Color(0xFF131C2E),
                             hintText:
-                                'e.g. Wellampitiya GN Div 5 / Sedawatta Lowland',
+                                tr('custom_zone_hint'),
                             hintStyle: const TextStyle(
                                 color: Color(0xFF8A98B0), fontSize: 12),
                             contentPadding: const EdgeInsets.symmetric(
@@ -565,7 +572,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           ),
                           validator: (v) {
                             if (isCustomSector && (v == null || v.isEmpty)) {
-                              return 'Please specify your custom flood zone';
+                              return tr('custom_zone_err');
                             }
                             return null;
                           },
@@ -578,7 +585,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 const SizedBox(height: 16),
 
                 // Field 6: PASSWORD
-                _buildFieldLabel('PASSWORD'),
+                _buildFieldLabel(tr('password')),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -600,13 +607,13 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                     ),
                   ),
                   validator: (v) =>
-                      v == null || v.length < 6 ? 'Password too short' : null,
+                      v == null || v.length < 6 ? tr('pw_short') : null,
                 ),
 
                 const SizedBox(height: 16),
 
                 // Field 7: CONFIRM PASSWORD
-                _buildFieldLabel('CONFIRM PASSWORD'),
+                _buildFieldLabel(tr('confirm_pw')),
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
@@ -630,7 +637,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                   ),
                   validator: (v) {
                     if (v != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return tr('pw_mismatch');
                     }
                     return null;
                   },
@@ -658,9 +665,9 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'I agree to receive SMS & push emergency flood alerts for my residential sector and consent to location-based early warning broadcasts.',
+                        tr('agree_sms'),
                         style: TextStyle(
                           color: Color(0xFFB6C2D6),
                           fontSize: 12,
@@ -705,11 +712,11 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Flexible(child: Text(
-                                'COMPLETE REGISTRATION',
+                                tr('complete_reg'),
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w900,
@@ -730,7 +737,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Flexible(child: Text(
-                      'Already have an account? ',
+                      tr('have_acct'),
                       style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
                     )),
                     GestureDetector(
@@ -741,8 +748,8 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           ),
                         );
                       },
-                      child: const Text(
-                        'Log In here',
+                      child: Text(
+                        tr('login_here'),
                         style: TextStyle(
                           color: Color(0xFF38BDF8),
                           fontSize: 13,
@@ -757,7 +764,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
               ],
             ),
           ),
-        ),
+        )),
       ),
     );
   }
@@ -766,7 +773,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
-        label,
+        tr(label),
         style: const TextStyle(
           color: Color(0xFFB6C2D6),
           fontSize: 11,

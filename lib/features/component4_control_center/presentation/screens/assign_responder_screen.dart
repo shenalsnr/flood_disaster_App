@@ -4,6 +4,7 @@ import '../controllers/responder_controller.dart';
 import 'live_tracking_screen.dart';
 import '../widgets/c4_ui.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class AssignResponderScreen extends StatefulWidget {
   final IncidentReport incident;
 
@@ -151,8 +152,8 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'DISPATCH ORDER TRANSMITTED',
+                  Text(
+                    tr('DISPATCH ORDER TRANSMITTED'),
                     style: TextStyle(
                       color: Color(0xFF34D399),
                       fontSize: 11,
@@ -161,7 +162,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     ),
                   ),
                   Text(
-                    '${_selectedTeam.name} is EN ROUTE to Incident #${widget.incident.shortId}',
+                    tr('{p0} is EN ROUTE to Incident #{p1}', {'p0': (_selectedTeam.name).toString(), 'p1': (widget.incident.shortId).toString()}),
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
@@ -208,8 +209,8 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(color: const Color(0xFF38BDF8), width: 0.8),
                   ),
-                  child: const Text(
-                    'CREATE',
+                  child: Text(
+                    tr('CREATE'),
                     style: TextStyle(
                       color: Color(0xFF38BDF8),
                       fontSize: 10,
@@ -219,7 +220,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 ),
                 const SizedBox(width: 8),
                 Flexible(child: Text(
-                  'Assign Response Unit',
+                  tr('Assign Response Unit'),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -228,8 +229,8 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 )),
               ],
             ),
-            const Text(
-              'CRUD: Create • Emergency Dispatch & Unit Allocation',
+            Text(
+              tr('CRUD: Create • Emergency Dispatch & Unit Allocation'),
               style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
@@ -278,7 +279,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'TEAM RADIO LIST',
+                          tr('TEAM RADIO LIST'),
                           style: TextStyle(
                             color: Color(0xFFB6C2D6),
                             fontSize: 11,
@@ -298,13 +299,13 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(Icons.sort_rounded,
                               size: 12, color: Color(0xFF38BDF8)),
                           SizedBox(width: 4),
                           Text(
-                            'SORTED BY ETA (FASTEST)',
+                            tr('SORTED BY ETA (FASTEST)'),
                             style: TextStyle(
                               color: Color(0xFF38BDF8),
                               fontSize: 10,
@@ -330,8 +331,8 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 const SizedBox(height: 16),
 
                 // Priority Level
-                const Text(
-                  'DISPATCH MISSION PRIORITY',
+                Text(
+                  tr('DISPATCH MISSION PRIORITY'),
                   style: TextStyle(
                     color: Color(0xFFB6C2D6),
                     fontSize: 11,
@@ -358,18 +359,18 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         fontWeight: FontWeight.bold,
                       ),
                       icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF8A98B0)),
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: 'CODE RED (CRITICAL EVACUATION)',
-                          child: Text('🔴 CODE RED (CRITICAL EVACUATION)'),
+                          child: Text(tr('🔴 CODE RED (CRITICAL EVACUATION)')),
                         ),
                         DropdownMenuItem(
                           value: 'CODE AMBER (HAZARD MITIGATION)',
-                          child: Text('🟠 CODE AMBER (HAZARD MITIGATION)'),
+                          child: Text(tr('🟠 CODE AMBER (HAZARD MITIGATION)')),
                         ),
                         DropdownMenuItem(
                           value: 'CODE YELLOW (AREA RECONNAISSANCE)',
-                          child: Text('🟡 CODE YELLOW (AREA RECONNAISSANCE)'),
+                          child: Text(tr('🟡 CODE YELLOW (AREA RECONNAISSANCE)')),
                         ),
                       ],
                       onChanged: (val) {
@@ -386,7 +387,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(child: Text(
-                      'DISPATCHER TACTICAL NOTES',
+                      tr('DISPATCHER TACTICAL NOTES'),
                       style: TextStyle(
                         color: Color(0xFFB6C2D6),
                         fontSize: 11,
@@ -395,7 +396,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       ),
                     )),
                     Flexible(child: Text(
-                      'RADIO BRIEFING',
+                      tr('RADIO BRIEFING'),
                       style: TextStyle(
                         color: const Color(0xFF38BDF8).withValues(alpha: 0.8),
                         fontSize: 10,
@@ -412,7 +413,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF131C2E),
-                    hintText: 'Enter mission briefing notes for squad...',
+                    hintText: tr('Enter mission briefing notes for squad...'),
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -462,7 +463,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   ),
                   icon: const Icon(Icons.send_rounded, size: 20),
                   label: Text(
-                    'CONFIRM ASSIGNMENT & DISPATCH (${_selectedTeam.name})',
+                    tr('CONFIRM ASSIGNMENT & DISPATCH ({p0})', {'p0': (_selectedTeam.name).toString()}),
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w900,
@@ -519,7 +520,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
             ),
             const SizedBox(width: 4),
             Text(
-              label,
+              tr(label),
               style: TextStyle(
                 color: isAdded ? const Color(0xFF34D399) : const Color(0xFFB6C2D6),
                 fontSize: 10,
@@ -588,9 +589,9 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     color: Color(0xFF38BDF8), size: 16),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'TARGET INCIDENT FOR FIELD DEPLOYMENT:',
+                  tr('TARGET INCIDENT FOR FIELD DEPLOYMENT:'),
                   style: TextStyle(
                     color: Color(0xFF38BDF8),
                     fontSize: 10,
@@ -610,7 +611,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   ),
                 ),
                 child: Text(
-                  incident.severityLabel,
+                  tr(incident.severityLabel),
                   style: TextStyle(
                     color: severityColor,
                     fontSize: 10,
@@ -622,7 +623,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            incident.title,
+            tr(incident.title),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
@@ -631,7 +632,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           ),
           const SizedBox(height: 4),
           Text(
-            incident.location,
+            tr(incident.location),
             style: const TextStyle(
               color: Color(0xFF38BDF8),
               fontSize: 12,
@@ -651,7 +652,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Water Level: ${incident.waterDepth}',
+                    tr('Water Level: {p0}', {'p0': (incident.waterDepth).toString()}),
                     style: const TextStyle(
                       color: Color(0xFFCBD5E1),
                       fontSize: 11,
@@ -836,7 +837,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         children: [
                           Expanded(
                             child: Text(
-                              team.name,
+                              tr(team.name),
                               style: TextStyle(
                                 color:
                                     isAvailable ? Colors.white : Colors.white38,
@@ -858,7 +859,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                               ),
                             ),
                             child: Text(
-                              team.callSign,
+                              tr(team.callSign),
                               style: const TextStyle(
                                 color: Color(0xFF38BDF8),
                                 fontSize: 9,
@@ -871,7 +872,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        '${team.leader} • Crew of ${team.crewCount} • ${team.radioChannel}',
+                        tr('{p0} • Crew of {p1} • {p2}', {'p0': (team.leader).toString(), 'p1': (team.crewCount).toString(), 'p2': (team.radioChannel).toString()}),
                         style: TextStyle(
                           color: isAvailable
                               ? const Color(0xFFB6C2D6)
@@ -914,7 +915,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         const SizedBox(width: 4),
                       ],
                       Text(
-                        team.status,
+                        tr(team.status),
                         style: TextStyle(
                           color: isAvailable
                               ? const Color(0xFF34D399)
@@ -941,7 +942,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   Icon(vehicleIcon, color: const Color(0xFF38BDF8), size: 16),
                   const SizedBox(width: 6),
                   Flexible(child: Text(
-                    'ETA: ${team.eta}',
+                    tr('ETA: {p0}', {'p0': (team.eta).toString()}),
                     style: TextStyle(
                       color: isAvailable
                           ? const Color(0xFF34D399)
@@ -964,7 +965,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           : Colors.white24,
                       size: 14),
                   Flexible(child: Text(
-                    ' ${team.speedKmh.toInt()} km/h',
+                    tr(' {p0} km/h', {'p0': (team.speedKmh.toInt()).toString()}),
                     style: TextStyle(
                       color: isAvailable
                           ? const Color(0xFFB6C2D6)
@@ -1009,7 +1010,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'Gear: ${team.equipment}',
+                tr('Gear: {p0}', {'p0': (team.equipment).toString()}),
                 style: TextStyle(
                   color: isAvailable ? const Color(0xFF8A98B0) : Colors.white24,
                   fontSize: 10,
@@ -1162,8 +1163,8 @@ class _DispatchConfirmationModalState
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: const Color(0xFF34D399)),
                 ),
-                child: const Text(
-                  'CONFIRM',
+                child: Text(
+                  tr('CONFIRM'),
                   style: TextStyle(
                     color: Color(0xFF34D399),
                     fontSize: 10,
@@ -1172,9 +1173,9 @@ class _DispatchConfirmationModalState
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Dispatch Mission Confirmation',
+                  tr('Dispatch Mission Confirmation'),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -1243,8 +1244,8 @@ class _DispatchConfirmationModalState
           const SizedBox(height: 14),
 
           // Pre-Deployment Verification Protocol
-          const Text(
-            'PRE-DEPLOYMENT PROTOCOL VERIFICATION:',
+          Text(
+            tr('PRE-DEPLOYMENT PROTOCOL VERIFICATION:'),
             style: TextStyle(
               color: Color(0xFFB6C2D6),
               fontSize: 10,
@@ -1308,8 +1309,8 @@ class _DispatchConfirmationModalState
                 : const Icon(Icons.flash_on_rounded, size: 20),
             label: Text(
               _isTransmitting
-                  ? 'TRANSMITTING DISPATCH ORDER...'
-                  : 'CONFIRM & TRANSMIT DISPATCH ORDER',
+                  ? tr('TRANSMITTING DISPATCH ORDER...')
+                  : tr('CONFIRM & TRANSMIT DISPATCH ORDER'),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
@@ -1347,7 +1348,7 @@ class _DispatchConfirmationModalState
             const SizedBox(width: 4),
             Expanded(
               child: Text(
-                label,
+                tr(label),
                 style: TextStyle(
                   color: value ? const Color(0xFFCBD5E1) : const Color(0xFF8A98B0),
                   fontSize: 11,
@@ -1365,7 +1366,7 @@ class _DispatchConfirmationModalState
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(child: Text(
-          label,
+          tr(label),
           style: const TextStyle(
             color: Color(0xFF8A98B0),
             fontSize: 10,
@@ -1375,7 +1376,7 @@ class _DispatchConfirmationModalState
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            value,
+            tr(value),
             textAlign: TextAlign.end,
             style: TextStyle(
               color: color,

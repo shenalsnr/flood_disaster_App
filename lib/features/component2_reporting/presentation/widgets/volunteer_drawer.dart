@@ -6,6 +6,7 @@ import '../../../component4_control_center/presentation/screens/responder_login_
 import '../screens/c2_admin_hazard_dashboard_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Navigation Drawer for District Volunteer (Component 2: Hazard Reporting).
 /// Matches the design in Screenshot 3, customized for the Volunteer workflow.
 class VolunteerDrawer extends StatelessWidget {
@@ -29,12 +30,12 @@ class VolunteerDrawer extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.logout_rounded, color: Color(0xFFF87171), size: 24),
             SizedBox(width: 10),
             Flexible(child: Text(
-              'Confirm Log Out',
+              tr('Confirm Log Out'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -43,14 +44,14 @@ class VolunteerDrawer extends StatelessWidget {
             )),
           ],
         ),
-        content: const Text(
-          'Are you sure you want to log out from the Volunteer Reporting console?',
+        content: Text(
+          tr('Are you sure you want to log out from the Volunteer Reporting console?'),
           style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text(tr('Cancel'), style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
@@ -59,7 +60,7 @@ class VolunteerDrawer extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Log Out'),
+            child: Text(tr('Log Out')),
           ),
         ],
       ),
@@ -93,12 +94,12 @@ class VolunteerDrawer extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.support_agent_rounded, color: Color(0xFF34D399), size: 24),
             SizedBox(width: 10),
             Flexible(child: Text(
-              'Emergency Volunteer Help',
+              tr('Emergency Volunteer Help'),
               style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
             )),
           ],
@@ -107,18 +108,18 @@ class VolunteerDrawer extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Emergency Dispatch Hotline: 117 (DMC)',
+            Text(
+              tr('Emergency Dispatch Hotline: 117 (DMC)'),
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Medical / Ambulance: 1990 (Suwa Seriya)',
+            Text(
+              tr('Medical / Ambulance: 1990 (Suwa Seriya)'),
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 12),
             Text(
-              'For technical reporting support or offline synchronization issues, contact the District Disaster Management Operations Unit.',
+              tr('For technical reporting support or offline synchronization issues, contact the District Disaster Management Operations Unit.'),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
             ),
           ],
@@ -131,7 +132,7 @@ class VolunteerDrawer extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(tr('OK'), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -147,12 +148,12 @@ class VolunteerDrawer extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.shield_rounded, color: Color(0xFF34D399), size: 24),
             SizedBox(width: 10),
             Flexible(child: Text(
-              'About WeSafe',
+              tr('About WeSafe'),
               style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
             )),
           ],
@@ -161,18 +162,18 @@ class VolunteerDrawer extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'WeSafe — Flood Relief & Early Warning System',
+            Text(
+              tr('WeSafe — Flood Relief & Early Warning System'),
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 8),
             Text(
-              'Component 2: Ground Hazard Reporting & Volunteer Dispatch Console.\n\nEnables real-time ground truth verification, geo-tagged hazard alerts, water-level surveillance, and automated community protection.',
+              tr('Component 2: Ground Hazard Reporting & Volunteer Dispatch Console.\n\nEnables real-time ground truth verification, geo-tagged hazard alerts, water-level surveillance, and automated community protection.'),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Version 1.0.0 (Release Build)',
+            Text(
+              tr('Version 1.0.0 (Release Build)'),
               style: TextStyle(color: Color(0xFF34D399), fontWeight: FontWeight.bold, fontSize: 12),
             ),
           ],
@@ -185,7 +186,7 @@ class VolunteerDrawer extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(tr('Close'), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -264,7 +265,7 @@ class VolunteerDrawer extends StatelessWidget {
                           errorBuilder: (context, error, stackTrace) {
                             return Center(
                               child: Text(
-                                initials,
+                                tr(initials),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
@@ -292,8 +293,8 @@ class VolunteerDrawer extends StatelessWidget {
                                 color: const Color(0xFF34D399).withValues(alpha: 0.3),
                               ),
                             ),
-                            child: const Text(
-                              'VOLUNTEER',
+                            child: Text(
+                              tr('VOLUNTEER'),
                               style: TextStyle(
                                 color: Color(0xFF34D399),
                                 fontSize: 9,
@@ -304,7 +305,7 @@ class VolunteerDrawer extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            displayName,
+                            tr(displayName),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -315,7 +316,7 @@ class VolunteerDrawer extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            email,
+                            tr(email),
                             style: const TextStyle(
                               color: Colors.white54,
                               fontSize: 12.5,
@@ -336,7 +337,7 @@ class VolunteerDrawer extends StatelessWidget {
               // ── Menu Items matching Screenshot 3 ─────────────────────────
               _DrawerItem(
                 icon: Icons.person_outline_rounded,
-                title: 'My Profile',
+                title: tr('My Profile'),
                 onTap: () {
                   Navigator.pop(context);
                   if (onProfileTap != null) {
@@ -346,7 +347,7 @@ class VolunteerDrawer extends StatelessWidget {
               ),
               _DrawerItem(
                 icon: Icons.settings_outlined,
-                title: 'Settings',
+                title: tr('Settings'),
                 onTap: () {
                   Navigator.pop(context);
                   _showSettingsBottomSheet(context);
@@ -354,7 +355,7 @@ class VolunteerDrawer extends StatelessWidget {
               ),
               _DrawerItem(
                 icon: Icons.admin_panel_settings_rounded,
-                title: 'Admin Dashboard',
+                title: tr('Admin Dashboard'),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
@@ -369,7 +370,7 @@ class VolunteerDrawer extends StatelessWidget {
 
               _DrawerItem(
                 icon: Icons.map_outlined,
-                title: 'Live Incident Map',
+                title: tr('Live Incident Map'),
                 onTap: () {
                   Navigator.pop(context);
                   if (onMapTap != null) {
@@ -385,7 +386,7 @@ class VolunteerDrawer extends StatelessWidget {
 
               _DrawerItem(
                 icon: Icons.help_outline_rounded,
-                title: 'Help & Support',
+                title: tr('Help & Support'),
                 onTap: () {
                   Navigator.pop(context);
                   _showHelpDialog(context);
@@ -393,7 +394,7 @@ class VolunteerDrawer extends StatelessWidget {
               ),
               _DrawerItem(
                 icon: Icons.info_outline_rounded,
-                title: 'About WeSafe',
+                title: tr('About WeSafe'),
                 onTap: () {
                   Navigator.pop(context);
                   _showAboutDialog(context);
@@ -424,8 +425,8 @@ class VolunteerDrawer extends StatelessWidget {
                         ),
                         onPressed: () => _signOut(context),
                         icon: const Icon(Icons.logout_rounded, size: 20),
-                        label: const Text(
-                          'Log Out',
+                        label: Text(
+                          tr('Log Out'),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -434,8 +435,8 @@ class VolunteerDrawer extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'WeSafe v1.0.0',
+                    Text(
+                      tr('WeSafe v1.0.0'),
                       style: TextStyle(
                         color: Colors.white24,
                         fontSize: 11,
@@ -479,8 +480,8 @@ class VolunteerDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 18),
-                const Text(
-                  'Volunteer Preferences',
+                Text(
+                  tr('Volunteer Preferences'),
                   style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
@@ -488,24 +489,24 @@ class VolunteerDrawer extends StatelessWidget {
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   activeTrackColor: const Color(0xFF34D399),
-                  title: const Text('High Accuracy GPS Tracking', style: TextStyle(color: Colors.white, fontSize: 15)),
-                  subtitle: const Text('Auto-capture exact hazard coordinates', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  title: Text(tr('High Accuracy GPS Tracking'), style: TextStyle(color: Colors.white, fontSize: 15)),
+                  subtitle: Text(tr('Auto-capture exact hazard coordinates'), style: TextStyle(color: Colors.white54, fontSize: 12)),
                   value: true,
                   onChanged: (v) {},
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   activeTrackColor: const Color(0xFF34D399),
-                  title: const Text('Offline Local Caching', style: TextStyle(color: Colors.white, fontSize: 15)),
-                  subtitle: const Text('Queue hazard reports when signal is lost', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  title: Text(tr('Offline Local Caching'), style: TextStyle(color: Colors.white, fontSize: 15)),
+                  subtitle: Text(tr('Queue hazard reports when signal is lost'), style: TextStyle(color: Colors.white54, fontSize: 12)),
                   value: true,
                   onChanged: (v) {},
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   activeTrackColor: const Color(0xFF34D399),
-                  title: const Text('Urgent Emergency Sirens', style: TextStyle(color: Colors.white, fontSize: 15)),
-                  subtitle: const Text('Audible warning when river level breaches red zone', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  title: Text(tr('Urgent Emergency Sirens'), style: TextStyle(color: Colors.white, fontSize: 15)),
+                  subtitle: Text(tr('Audible warning when river level breaches red zone'), style: TextStyle(color: Colors.white54, fontSize: 12)),
                   value: true,
                   onChanged: (v) {},
                 ),
@@ -544,7 +545,7 @@ class _DrawerItem extends StatelessWidget {
         child: Icon(icon, color: Colors.white70, size: 20),
       ),
       title: Text(
-        title,
+        tr(title),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 15,

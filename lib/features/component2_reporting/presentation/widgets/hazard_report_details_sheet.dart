@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class HazardReportItem {
   final String id;
   final String title;
@@ -95,7 +96,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      report.title,
+                      tr(report.title),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -127,7 +128,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  report.status,
+                  tr(report.status),
                   style: TextStyle(
                     color: isVerified
                         ? const Color(0xFF34D399)
@@ -146,8 +147,8 @@ class HazardReportDetailsSheet extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Ground details
-          const Text(
-            'Ground Hazard Assessment',
+          Text(
+            tr('Ground Hazard Assessment'),
             style: TextStyle(
               color: Colors.white70,
               fontSize: 13,
@@ -157,7 +158,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            report.description,
+            tr(report.description),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14.5,
@@ -174,16 +175,16 @@ class HazardReportDetailsSheet extends StatelessWidget {
             children: [
               _DetailChip(
                 icon: Icons.person_pin_circle_rounded,
-                label: 'Reporter: ${report.reporter}',
+                label: tr('Reporter: {p0}', {'p0': (report.reporter).toString()}),
               ),
               if (report.waterLevel != null)
                 _DetailChip(
                   icon: Icons.water_drop_rounded,
-                  label: 'Depth: ${report.waterLevel}m',
+                  label: tr('Depth: {p0}m', {'p0': (report.waterLevel).toString()}),
                 ),
-              const _DetailChip(
+              _DetailChip(
                 icon: Icons.satellite_alt_rounded,
-                label: 'GPS Tag: High Precision',
+                label: tr('GPS Tag: High Precision'),
               ),
             ],
           ),
@@ -204,8 +205,8 @@ class HazardReportDetailsSheet extends StatelessWidget {
               ),
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.check_circle_outline_rounded, size: 20),
-              label: const Text(
-                'Close Assessment',
+              label: Text(
+                tr('Close Assessment'),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
@@ -238,7 +239,7 @@ class _DetailChip extends StatelessWidget {
           Icon(icon, size: 16, color: const Color(0xFF38BDF8)),
           const SizedBox(width: 6),
           Text(
-            label,
+            tr(label),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 12.5,

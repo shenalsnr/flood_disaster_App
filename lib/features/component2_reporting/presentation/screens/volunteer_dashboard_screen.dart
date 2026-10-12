@@ -11,6 +11,7 @@ import 'hazard_report_wizard_screen.dart';
 import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Main Dashboard Screen for District Volunteer (Component 2: Ground Hazard Reporting).
 /// Features the Top App Bar from Screenshot 2, the Drawer from Screenshot 3,
 /// and the complete Main Dashboard from Screenshot 1 with full interactivity.
@@ -77,8 +78,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
           permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permission is needed to find your location.'),
+            SnackBar(
+              content: Text(tr('Location permission is needed to find your location.')),
               backgroundColor: Color(0xFFEF4444),
             ),
           );
@@ -98,8 +99,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
       _liveMapController.move(newLoc, 15.0);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Centered to your GPS location'),
+          SnackBar(
+            content: Text(tr('Centered to your GPS location')),
             duration: Duration(seconds: 2),
             backgroundColor: Color(0xFF10B981),
           ),
@@ -109,7 +110,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('GPS Location error: $e'),
+            content: Text(tr('GPS Location error: {p0}', {'p0': (e).toString()})),
             backgroundColor: const Color(0xFFEF4444),
           ),
         );
@@ -217,7 +218,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         ),
         const SizedBox(width: 4),
         Text(
-          label,
+          tr(label),
           style: const TextStyle(
             color: Color(0xFFE2E8F0),
             fontSize: 11,
@@ -229,10 +230,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   }
 
   // Default initial reports matching Screenshot 1 exactly
-  final List<HazardReportItem> _defaultReports = const [
+  final List<HazardReportItem> _defaultReports = [
     HazardReportItem(
       id: 'rep-001',
-      title: 'Flood (Severe)',
+      title: tr('Flood (Severe)'),
       location: 'Kolonnawa Road',
       timeAgo: '10 mins ago',
       status: 'VERIFIED',
@@ -246,7 +247,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
     ),
     HazardReportItem(
       id: 'rep-002',
-      title: 'Landslide Warning',
+      title: tr('Landslide Warning'),
       location: 'Kandy Slope',
       timeAgo: '1 hour ago',
       status: 'PENDING',
@@ -324,7 +325,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 26),
-            tooltip: 'Open Menu',
+            tooltip: tr('Open Menu'),
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
@@ -342,7 +343,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(width: 8),
             RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -350,11 +351,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 ),
                 children: [
                   TextSpan(
-                    text: 'We',
+                    text: tr('We'),
                     style: TextStyle(color: Colors.white),
                   ),
                   TextSpan(
-                    text: 'Safe',
+                    text: tr('Safe'),
                     style: TextStyle(color: Color(0xFF34D399)),
                   ),
                 ],
@@ -409,25 +410,25 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
-          items: const [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),
-              label: 'Home',
+              label: tr('Home'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment_outlined),
               activeIcon: Icon(Icons.assignment_rounded),
-              label: 'Reports',
+              label: tr('Reports'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.map_outlined),
               activeIcon: Icon(Icons.map_rounded),
-              label: 'Live Map',
+              label: tr('Live Map'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
               activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              label: tr('Profile'),
             ),
           ],
         ),
@@ -464,8 +465,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'District Volunteer',
+                        Text(
+                          tr('District Volunteer'),
                           style: TextStyle(
                             color: Color(0xFFB6C2D6),
                             fontSize: 14,
@@ -475,7 +476,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Hello, $userName',
+                          tr('Hello, {p0}', {'p0': (userName).toString()}),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -514,10 +515,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                           'assets/images/volunteer_avatar.png',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return const CircleAvatar(
+                            return CircleAvatar(
                               backgroundColor: Color(0xFF38BDF8),
                               child: Text(
-                                'KP',
+                                tr('KP'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -569,12 +570,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Kelani River Level: WARNING',
+                            tr('Kelani River Level: WARNING'),
                             style: TextStyle(
                               color: Color(0xFFF87171),
                               fontSize: 14.5,
@@ -584,7 +585,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Minor flooding reported upstream in Hanwella.',
+                            tr('Minor flooding reported upstream in Hanwella.'),
                             style: TextStyle(
                               color: Color(0xFFE2E8F0),
                               fontSize: 13,
@@ -611,7 +612,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Flexible(child: Text(
-                    'My Recent Reports',
+                    tr('My Recent Reports'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -621,8 +622,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                   )),
                   GestureDetector(
                     onTap: () => setState(() => _selectedTabIndex = 1),
-                    child: const Text(
-                      'View All',
+                    child: Text(
+                      tr('View All'),
                       style: TextStyle(
                         color: Color(0xFF7DD3FC),
                         fontSize: 14,
@@ -706,8 +707,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'All Incident Reports',
+            Text(
+              tr('All Incident Reports'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -715,8 +716,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Live reports submitted by you and the District Operations Unit.',
+            Text(
+              tr('Live reports submitted by you and the District Operations Unit.'),
               style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
             ),
             const SizedBox(height: 16),
@@ -863,7 +864,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
               height: 50,
               alignment: Alignment.center,
               child: Tooltip(
-                message: 'Your Current GPS Position',
+                message: tr('Your Current GPS Position'),
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF2563EB).withValues(alpha: 0.25),
@@ -965,15 +966,15 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Active Hazards: ${docs.isNotEmpty ? docs.length : markers.length}',
+                                    tr('Active Hazards: {p0}', {'p0': (docs.isNotEmpty ? docs.length : markers.length).toString()}),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                     ),
                                   ),
-                                  const Text(
-                                    'Tap any pin for incident details',
+                                  Text(
+                                    tr('Tap any pin for incident details'),
                                     style: TextStyle(
                                       color: Color(0xFFB6C2D6),
                                       fontSize: 11,
@@ -1006,7 +1007,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       child: IconButton(
                         icon: const Icon(Icons.center_focus_strong_rounded,
                             color: Color(0xFF38BDF8), size: 20),
-                        tooltip: 'Focus Hazards',
+                        tooltip: tr('Focus Hazards'),
                         onPressed: () => _fitAllHazards(hazardPoints),
                       ),
                     ),
@@ -1030,7 +1031,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       child: IconButton(
                         icon: const Icon(Icons.my_location_rounded,
                             color: Color(0xFF34D399), size: 20),
-                        tooltip: 'My Location',
+                        tooltip: tr('My Location'),
                         onPressed: _recenterLiveMapToUserLocation,
                       ),
                     ),
@@ -1127,7 +1128,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              userName,
+              tr(userName),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -1136,7 +1137,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              userEmail,
+              tr(userEmail),
               style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 14),
             ),
             const SizedBox(height: 12),
@@ -1149,8 +1150,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                   color: const Color(0xFF34D399).withValues(alpha: 0.4),
                 ),
               ),
-              child: const Text(
-                'OFFICIAL DISTRICT VOLUNTEER',
+              child: Text(
+                tr('OFFICIAL DISTRICT VOLUNTEER'),
                 style: TextStyle(
                   color: Color(0xFF34D399),
                   fontSize: 11,
@@ -1211,7 +1212,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         child: Column(
           children: [
             Text(
-              count,
+              tr(count),
               style: TextStyle(
                 color: color,
                 fontSize: 22,
@@ -1220,7 +1221,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              label,
+              tr(label),
               style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11.5),
             ),
           ],
@@ -1233,8 +1234,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(child: Text(label, style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13.5))),
-        Flexible(child: Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5))),
+        Flexible(child: Text(tr(label), style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13.5))),
+        Flexible(child: Text(tr(value), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5))),
       ],
     );
   }
@@ -1375,8 +1376,8 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
               const SizedBox(height: 20),
 
               // Title: "REPORT HAZARD"
-              const Text(
-                'REPORT HAZARD',
+              Text(
+                tr('REPORT HAZARD'),
                 style: TextStyle(
                   color: Color(0xFF140D07), // Deep dark bold text
                   fontSize: 24,
@@ -1388,8 +1389,8 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
               const SizedBox(height: 6),
 
               // Subtitle: "Tap to report in 3 simple steps"
-              const Text(
-                'Tap to report in 3 simple steps',
+              Text(
+                tr('Tap to report in 3 simple steps'),
                 style: TextStyle(
                   color: Color(0xFF3E230B),
                   fontSize: 14.5,
@@ -1475,7 +1476,7 @@ class _RecentReportCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        report.title,
+                        tr(report.title),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,

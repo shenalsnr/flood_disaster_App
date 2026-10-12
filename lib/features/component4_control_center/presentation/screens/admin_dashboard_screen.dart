@@ -13,6 +13,7 @@ import 'responder_login_screen.dart';
 import 'safe_zones_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Landing page for administrators: a live overview of accounts and
 /// shelters, with shortcuts to the existing admin tools. Only the registered
 /// citizens page edits / deletes accounts.
@@ -48,12 +49,12 @@ class AdminDashboardScreen extends StatelessWidget {
       backgroundColor: _bg,
       appBar: AppBar(
         backgroundColor: _bg,
-        title: const Text('Admin Dashboard',
+        title: Text(tr('Admin Dashboard'),
             style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           const ThemeToggleButton(),
           IconButton(
-            tooltip: 'Sign out',
+            tooltip: tr('Sign out'),
             icon: const Icon(Icons.logout),
             onPressed: () => _signOut(context),
           ),
@@ -79,14 +80,14 @@ class AdminDashboardScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                 children: [
                   Text(
-                    name.isEmpty ? 'Welcome' : 'Welcome, $name',
+                    name.isEmpty ? tr('Welcome') : tr('Welcome, {p0}', {'p0': (name).toString()}),
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 2),
-                  const Text('Live overview of accounts and shelters',
+                  Text(tr('Live overview of accounts and shelters'),
                       style: TextStyle(color: _muted, fontSize: 13)),
                   if (error) ...[
                     const SizedBox(height: 12),
@@ -166,12 +167,12 @@ class AdminDashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(value,
+                  Text(tr(value),
                       style: TextStyle(
                           color: color,
                           fontSize: 22,
                           fontWeight: FontWeight.bold)),
-                  Text(label,
+                  Text(tr(label),
                       style: const TextStyle(color: _muted, fontSize: 11.5)),
                 ],
               ),
@@ -224,13 +225,13 @@ class AdminDashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
+                  Text(tr(title),
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 13.5)),
                   const SizedBox(height: 2),
-                  Text(sub,
+                  Text(tr(sub),
                       style: const TextStyle(color: _muted, fontSize: 12)),
                 ],
               ),
@@ -282,7 +283,7 @@ class AdminDashboardScreen extends StatelessWidget {
               elevation: 0,
             ),
             icon: const Icon(Icons.campaign_outlined),
-            label: const Text('BROADCAST WARNING',
+            label: Text(tr('BROADCAST WARNING'),
                 style: TextStyle(
                     fontWeight: FontWeight.bold, letterSpacing: 0.8)),
             onPressed: () => _open(context, const C1AdminMetricsScreen()),
@@ -308,7 +309,7 @@ class AdminDashboardScreen extends StatelessWidget {
               children: [
                 Icon(icon, color: _accent, size: 28),
                 const SizedBox(height: 8),
-                Text(label,
+                Text(tr(label),
                     style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -341,7 +342,7 @@ class AdminDashboardScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(z.name,
+                child: Text(tr(z.name),
                     style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -374,7 +375,7 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text('${z.occupied} / ${z.capacity} people  ·  ${z.fillPercent}% full',
+          Text(tr('{p0} / {p1} people  ·  {p2}% full', {'p0': (z.occupied).toString(), 'p1': (z.capacity).toString(), 'p2': (z.fillPercent).toString()}),
               style: const TextStyle(color: _muted, fontSize: 12)),
         ],
       ),
@@ -459,7 +460,7 @@ class AdminDashboardScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: _border),
         ),
-        child: Text(t, style: const TextStyle(color: _muted, fontSize: 13)),
+        child: Text(tr(t), style: const TextStyle(color: _muted, fontSize: 13)),
       );
 
   Widget _notice(String t) => _alertTile(
@@ -488,7 +489,7 @@ class _CitizensScreenState extends State<_CitizensScreen> {
   void _toast(String msg, {bool error = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
+      content: Text(tr(msg)),
       backgroundColor: error ? Color(0xFFDC2626) : const Color(0xFF1C2740),
     ));
   }
@@ -498,7 +499,7 @@ class _CitizensScreenState extends State<_CitizensScreen> {
       await action().timeout(const Duration(seconds: 10));
       _toast(okMsg);
     } catch (e) {
-      _toast('Could not complete: $e', error: true);
+      _toast(tr('Could not complete: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -542,20 +543,19 @@ class _CitizensScreenState extends State<_CitizensScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _card,
-        title: const Text('Delete account?',
+        title: Text(tr('Delete account?'),
             style: TextStyle(color: Colors.white)),
         content: Text(
-          '${name.isEmpty ? email : name} ($email) will be removed '
-          'permanently and can no longer sign in.',
+          tr('{p0} ({p1}) will be removed permanently and can no longer sign in.', {'p0': (name.isEmpty ? email : name).toString(), 'p1': (email).toString()}),
           style: const TextStyle(color: _muted),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel', style: TextStyle(color: _muted))),
+              child: Text(tr('Cancel'), style: TextStyle(color: _muted))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('DELETE', style: TextStyle(color: _accent))),
+              child: Text(tr('DELETE'), style: TextStyle(color: _accent))),
         ],
       ),
     );
@@ -571,18 +571,17 @@ class _CitizensScreenState extends State<_CitizensScreen> {
       backgroundColor: _bg,
       appBar: AppBar(
         backgroundColor: _bg,
-        title: const Text('Registered Citizens',
+        title: Text(tr('Registered Citizens'),
             style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: AdminUserService.instance.watchUsers(),
         builder: (context, snap) {
           if (snap.hasError) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('Could not load citizens. Check the internet '
-                    'connection and Firestore rules.',
+                child: Text(tr('Could not load citizens. Check the internet connection and Firestore rules.'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: _muted)),
               ),
@@ -626,7 +625,7 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                   style: const TextStyle(color: Colors.white),
                   onChanged: (v) => setState(() => _query = v),
                   decoration: InputDecoration(
-                    hintText: 'Search name, email, district...',
+                    hintText: tr('Search name, email, district...'),
                     hintStyle: const TextStyle(color: Color(0xFF8A98B0)),
                     prefixIcon: const Icon(Icons.search, color: _muted),
                     filled: true,
@@ -648,14 +647,14 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('${shown.length} of ${all.length} citizens',
+                  child: Text(tr('{p0} of {p1} citizens', {'p0': (shown.length).toString(), 'p1': (all.length).toString()}),
                       style: const TextStyle(color: _muted, fontSize: 12)),
                 ),
               ),
               Expanded(
                 child: shown.isEmpty
-                    ? const Center(
-                        child: Text('No citizens found.',
+                    ? Center(
+                        child: Text(tr('No citizens found.'),
                             style: TextStyle(color: _muted)))
                     : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -714,7 +713,7 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                               fontWeight: FontWeight.bold,
                               fontSize: 14.5)),
                     ),
-                    Flexible(child: Text(active ? 'ACTIVE' : 'DISABLED',
+                    Flexible(child: Text(active ? tr('ACTIVE') : tr('DISABLED'),
                         style: TextStyle(
                             color: active ? _green : _accent,
                             fontSize: 10,
@@ -722,16 +721,16 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                   ],
                 ),
                 const SizedBox(height: 3),
-                Text(email,
+                Text(tr(email),
                     style: const TextStyle(color: _muted, fontSize: 12)),
                 if (phone.isNotEmpty)
-                  Text(phone,
+                  Text(tr(phone),
                       style: const TextStyle(color: _muted, fontSize: 12)),
                 if (place.isNotEmpty)
-                  Text(place,
+                  Text(tr(place),
                       style: const TextStyle(color: _muted, fontSize: 12)),
                 if (zone.isNotEmpty)
-                  Text(zone,
+                  Text(tr(zone),
                       style: const TextStyle(
                           color: Color(0xFF8A98B0), fontSize: 11.5)),
               ],
@@ -745,14 +744,14 @@ class _CitizensScreenState extends State<_CitizensScreen> {
               if (v == 'edit') _edit(d);
               if (v == 'del') _delete(d);
             },
-            itemBuilder: (_) => const [
+            itemBuilder: (_) => [
               PopupMenuItem(
                   value: 'edit',
-                  child: Text('Edit details',
+                  child: Text(tr('Edit details'),
                       style: TextStyle(color: Colors.white))),
               PopupMenuItem(
                   value: 'del',
-                  child: Text('Delete account',
+                  child: Text(tr('Delete account'),
                       style: TextStyle(color: _accent))),
             ],
           ),

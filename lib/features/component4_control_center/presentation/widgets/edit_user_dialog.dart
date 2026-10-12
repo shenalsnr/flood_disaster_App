@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Edit an account's details (admin tools). Returns a map with the keys
 /// name, email, phone, nic and (when [showLocation]) city, district, zone,
 /// or null when cancelled.
@@ -86,7 +87,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: const Color(0xFF0B1220),
-      title: const Text('Edit details',
+      title: Text(tr('Edit details'),
           style: TextStyle(color: Colors.white, fontSize: 16)),
       content: SizedBox(
         width:
@@ -113,7 +114,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
                     type: TextInputType.phone,
                     validator: (v) {
                       final d = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
-                      return d.length < 9 ? 'Enter a valid phone number' : null;
+                      return d.length < 9 ? tr('Enter a valid phone number') : null;
                     }),
                 _field('NIC', _nic),
                 if (widget.showLocation) ...[
@@ -129,7 +130,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
       actions: [
         TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel',
+            child: Text(tr('Cancel'),
                 style: TextStyle(color: Color(0xFFB6C2D6)))),
         TextButton(
             onPressed: () {
@@ -144,7 +145,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
                 'zone': _zone.text.trim(),
               });
             },
-            child: const Text('SAVE',
+            child: Text(tr('SAVE'),
                 style: TextStyle(color: Color(0xFFF87171)))),
       ],
     );
