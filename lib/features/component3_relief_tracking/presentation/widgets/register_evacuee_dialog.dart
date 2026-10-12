@@ -113,13 +113,13 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: DropdownButtonFormField<String>(
+                      child: DropdownButtonFormField<String>(isExpanded: true, 
                         initialValue: _selectedGender,
                         dropdownColor: const Color(0xFF2C2C2C),
                         style: const TextStyle(color: Colors.white),
                         decoration: _inputDecoration('Gender', Icons.wc),
                         items: ['Female', 'Male', 'Other'].map((g) {
-                          return DropdownMenuItem(value: g, child: Text(tr(g)));
+                          return DropdownMenuItem(value: g, child: Text(tr(g), maxLines: 1, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _selectedGender = val);

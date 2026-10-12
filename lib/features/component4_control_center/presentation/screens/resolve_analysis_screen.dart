@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
+import '../widgets/c4_ui.dart';
 import 'alert_dashboard_screen.dart';
 
 import '../../../../core/localization/app_strings.dart';
@@ -18,16 +19,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
   final ResponderController _controller = ResponderController();
 
   String _resolutionType = 'Evacuated / Rescued';
-  final TextEditingController _notesController = TextEditingController(
-    text:
-        'Colombo Rescue Squad A deployed 2 zodiac inflatable crafts. 14 stranded residents (including 3 children and 2 elderly citizens) safely extracted and transported to Rathnapura / Sector 4 Relief Camp. Water level receding to safe baseline. No casualties reported.',
-  );
+  final TextEditingController _notesController = TextEditingController();
 
-  int _evacuatedCount = 14;
-  bool _checklistNotified = true;
-  bool _checklistAreaSecured = true;
-  bool _checklistStructuralEvaluated = true;
-  bool _checklistCampNotified = true;
+  int _evacuatedCount = 0;
+  bool _checklistNotified = false;
+  bool _checklistAreaSecured = false;
+  bool _checklistStructuralEvaluated = false;
+  bool _checklistCampNotified = false;
   bool _isSubmitting = false;
 
   final List<String> _resolutionOptions = [
@@ -162,7 +160,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      tr('Lead Squad: {p0}', {'p0': (widget.incident.assignedTeam?.name ?? "Rescue Squad A").toString()}),
+                      tr('Lead Squad: {p0}', {'p0': (widget.incident.assignedTeam?.name ?? "No unit assigned").toString()}),
                       style: const TextStyle(
                           color: Color(0xFFB6C2D6), fontSize: 11),
                     ),
@@ -224,7 +222,9 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: SingleChildScrollView(
+          child: ResponsiveBody(
+            maxWidth: 640,
+            child: SingleChildScrollView(
             padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -259,7 +259,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
+                          Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(6),
@@ -270,7 +270,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 child: const Icon(Icons.assignment, color: Color(0xFF38BDF8), size: 16),
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                              Flexible(child: Text(
                                 '#${incident.shortId}',
                                 style: const TextStyle(
                                   color: Color(0xFF38BDF8),
@@ -279,10 +279,10 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                   letterSpacing: 1.0,
                                   fontFamily: 'monospace',
                                 ),
-                              ),
+                              )),
                             ],
-                          ),
-                          Container(
+                          )),
+                          Flexible(child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
@@ -307,7 +307,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 ),
                               ],
                             ),
-                          ),
+                          )),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -341,7 +341,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                           const Icon(Icons.groups_rounded, color: Color(0xFF8A98B0), size: 14),
                           const SizedBox(width: 4),
                           Flexible(child: Text(
-                            tr('Assigned: {p0}', {'p0': (incident.assignedTeam?.name ?? "Colombo Rescue Squad A").toString()}),
+                            tr('Assigned: {p0}', {'p0': (incident.assignedTeam?.name ?? "No unit assigned").toString()}),
                             style: const TextStyle(
                               color: Color(0xFFB6C2D6),
                               fontSize: 12,
@@ -425,7 +425,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
@@ -457,13 +457,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                             ],
                           ),
                         ],
-                      ),
-                      Container(
+                      )),
+                      Flexible(child: Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFF1C2740),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Row(
+                        child: Row(mainAxisSize: MainAxisSize.min, 
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove_circle_outline,
@@ -497,7 +497,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                             ),
                           ],
                         ),
-                      ),
+                      )),
                     ],
                   ),
                 ),
@@ -654,7 +654,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 const SizedBox(height: 16),
               ],
             ),
-          ),
+          )),
         ),
       ),
     );

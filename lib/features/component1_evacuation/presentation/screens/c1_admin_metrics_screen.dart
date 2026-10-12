@@ -708,14 +708,23 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       children: [
         _buildLabel(label),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<String>(isExpanded: true, 
           initialValue: value,
+          selectedItemBuilder: (ctx) => items
+              .map((z) => Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(tr(z),
+                      maxLines: 1, overflow: TextOverflow.ellipsis)))
+              .toList(),
           dropdownColor: const Color(0xFF112240),
           style: const TextStyle(color: Colors.white, fontSize: 13),
           iconEnabledColor: Colors.white38,
           decoration: _inputDecoration(icon: icon),
           items: items
-              .map((z) => DropdownMenuItem(value: z, child: Text(tr(z))))
+              .map((z) => DropdownMenuItem(
+                  value: z,
+                  child: Text(tr(z),
+                      maxLines: 1, overflow: TextOverflow.ellipsis)))
               .toList(),
           onChanged: onChanged,
         ),
@@ -786,7 +795,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           onTap: () => setState(() => _selectedSeverity = severity),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             decoration: BoxDecoration(
               color: isSelected
                   ? color.withValues(alpha: 0.2)
@@ -807,6 +816,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 const SizedBox(height: 4),
                 Text(
                   tr(severity),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: isSelected ? color : Colors.white38,
                     fontSize: 11,
@@ -825,6 +837,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
   Widget _buildLabel(String text) {
     return Text(
       tr(text),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: const TextStyle(
         color: Colors.white60,
         fontSize: 12,
@@ -836,17 +850,20 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   InputDecoration _inputDecoration({String? hint, IconData? icon}) {
     return InputDecoration(
+      isDense: true,
+      prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      hintMaxLines: 1,
       hintText: hint,
       hintStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.25),
         fontSize: 13,
       ),
       prefixIcon: icon != null
-          ? Icon(icon, color: Colors.white30, size: 18)
+          ? Icon(icon, color: Colors.white30, size: 16)
           : null,
       filled: true,
       fillColor: Colors.white.withValues(alpha: 0.05),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: Colors.white12),

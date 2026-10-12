@@ -28,7 +28,7 @@ class LanguageButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       onTap: () => showLanguageSheet(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
           color: const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(20),
@@ -38,13 +38,13 @@ class LanguageButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.language_rounded,
-                size: 16, color: Color(0xFF38BDF8)),
-            const SizedBox(width: 5),
+                size: 15, color: Color(0xFF38BDF8)),
+            const SizedBox(width: 4),
             Text(
               _short(LanguageController.instance.lang),
               style: const TextStyle(
                 color: Color(0xFFF1F5F9),
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
             ),

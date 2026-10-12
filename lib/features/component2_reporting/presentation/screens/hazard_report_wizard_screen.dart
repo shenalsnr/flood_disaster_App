@@ -5,8 +5,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/review_report_screen.dart';
-import '../../data/services/geocoding_service.dart';
-import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
 import '../../../../core/localization/app_strings.dart';
@@ -16,7 +14,7 @@ import '../../../../core/localization/app_strings.dart';
 /// - Step 2: "Choose Severity" matching Screenshot 2 (Low, Medium, High / Critical).
 ///   Tapping any severity immediately advances to Step 3.
 /// - Step 3: "Confirm Details" matching Screenshot 3:
-///   Map with GPS LOCKED, auto-detected address, "ADD PHOTO (RECOMMENDED)",
+///   Map with GPS LOCKED, Kolonnawa Basin coords, "ADD PHOTO (RECOMMENDED)",
 ///   "Record Voice Memo / Add Pre-defined Note", and "REVIEW REPORT" button.
 class HazardReportWizardScreen extends StatefulWidget {
   const HazardReportWizardScreen({super.key});
@@ -39,41 +37,11 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   bool _isLoadingLocation = false;
   bool _hasGpsLock = false;
   final MapController _mapController = MapController();
-  final TextEditingController _locationController =
-      TextEditingController(text: 'Locating current address...');
-  bool _isLoadingAddress = false;
 
   @override
   void initState() {
     super.initState();
     _fetchCurrentLocation();
-  }
-
-  @override
-  void dispose() {
-    _locationController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _updateLocationWithCoords(LatLng coords, {required bool isGps}) async {
-    if (!mounted) return;
-    setState(() {
-      _hazardCoords = coords;
-      _hasGpsLock = isGps;
-      _isLoadingAddress = true;
-    });
-
-    final address = await GeocodingService.reverseGeocode(
-      coords.latitude,
-      coords.longitude,
-    );
-
-    if (mounted) {
-      setState(() {
-        _locationController.text = address;
-        _isLoadingAddress = false;
-      });
-    }
   }
 
   Future<void> _fetchCurrentLocation() async {
@@ -91,7 +59,6 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           );
         }
         setState(() => _isLoadingLocation = false);
-        await _updateLocationWithCoords(_hazardCoords, isGps: false);
         return;
       }
 
@@ -109,14 +76,12 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             );
           }
           setState(() => _isLoadingLocation = false);
-          await _updateLocationWithCoords(_hazardCoords, isGps: false);
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
         setState(() => _isLoadingLocation = false);
-        await _updateLocationWithCoords(_hazardCoords, isGps: false);
         return;
       }
 
@@ -127,17 +92,18 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         ),
       );
 
-      final newCoords = LatLng(position.latitude, position.longitude);
       if (mounted) {
-        setState(() => _isLoadingLocation = false);
-        _mapController.move(newCoords, 14.0);
-        await _updateLocationWithCoords(newCoords, isGps: true);
+        setState(() {
+          _hazardCoords = LatLng(position.latitude, position.longitude);
+          _hasGpsLock = true;
+          _isLoadingLocation = false;
+        });
+        _mapController.move(_hazardCoords, 14.0);
       }
     } catch (e) {
       debugPrint('Error getting location: $e');
       if (mounted) {
         setState(() => _isLoadingLocation = false);
-        await _updateLocationWithCoords(_hazardCoords, isGps: false);
       }
     }
   }
@@ -563,10 +529,34 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: OnlineStatusBadge(
-                fontSize: 10,
-                dotSize: 6,
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFF34D399).withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, color: Color(0xFF34D399), size: 7),
+                      SizedBox(width: 5),
+                      Text(
+                        tr('ONLINE'),
+                        style: TextStyle(
+                          color: Color(0xFF34D399),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -601,22 +591,22 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              Flexible(child: Text(
                 tr('Step 1 of 3'),
                 style: TextStyle(
                   color: Color(0xFF38BDF8),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
-              ),
-              Text(
+              )),
+              Flexible(child: Text(
                 tr('Select Hazard'),
                 style: TextStyle(
                   color: Color(0xFFB6C2D6),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 16),
@@ -802,8 +792,11 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     options: MapOptions(
                       initialCenter: _hazardCoords,
                       initialZoom: 14.0,
-                      onTap: (tapPosition, point) =>
-                          _updateLocationWithCoords(point, isGps: false),
+                      onTap: (tapPosition, point) {
+                        setState(() {
+                          _hazardCoords = point;
+                        });
+                      },
                     ),
                     children: [
                       TileLayer(
@@ -943,98 +936,23 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
 
           const SizedBox(height: 14),
 
-          // Location Title & Editable Address Field
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D2E),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFF1E2D4A),
-                width: 1.2,
-              ),
+          // Location Title & Coordinates
+          Text(
+            tr('Kolonnawa Basin, Kelani River Area'),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_rounded,
-                      color: Color(0xFFFB923C),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      tr('DETECTED LOCATION / ADDRESS'),
-                      style: TextStyle(
-                        color: Color(0xFFB6C2D6),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (_isLoadingAddress)
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFFFB923C),
-                        ),
-                      )
-                    else
-                      const Icon(
-                        Icons.edit_rounded,
-                        color: Color(0xFFB6C2D6),
-                        size: 15,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _locationController,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                    border: InputBorder.none,
-                    hintText: tr('Enter location name or landmark...'),
-                    hintStyle: TextStyle(
-                      color: Color(0xFF5A6E85),
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        tr('Coordinates: {p0}° N, {p1}° E', {'p0': (_hazardCoords.latitude.toStringAsFixed(4)).toString(), 'p1': (_hazardCoords.longitude.toStringAsFixed(4)).toString()}),
-                        style: const TextStyle(
-                          color: Color(0xFFB6C2D6),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      tr('● Tap map to change pin'),
-                      style: TextStyle(
-                        color: Color(0xFF34D399),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            tr('Coordinates: {p0}° N, {p1}° E (±4 meters)', {'p0': (_hazardCoords.latitude.toStringAsFixed(4)).toString(), 'p1': (_hazardCoords.longitude.toStringAsFixed(4)).toString()}),
+            style: const TextStyle(
+              color: Color(0xFFB6C2D6),
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
             ),
           ),
 
@@ -1156,7 +1074,6 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       imageFile: _imageFile,
                       note: _selectedNote,
                       coordinates: _hazardCoords,
-                      locationName: _locationController.text.trim(),
                     ),
                   ),
                 );

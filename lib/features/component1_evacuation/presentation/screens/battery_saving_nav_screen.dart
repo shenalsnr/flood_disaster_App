@@ -269,7 +269,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           // Live indicator
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFF34D399).withValues(alpha: 0.12),
@@ -277,19 +277,19 @@ class _TopBar extends StatelessWidget {
               border:
                   Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.4)),
             ),
-            child: Row(
+            child: Row(mainAxisSize: MainAxisSize.min, 
               children: [
                 _PulsingDot(),
                 SizedBox(width: 5),
-                Text(tr('LIVE'),
+                Flexible(child: Text(tr('LIVE'),
                     style: TextStyle(
                         color: Color(0xFF34D399),
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2)),
+                        letterSpacing: 1.2))),
               ],
             ),
-          ),
+          )),
         ],
       ),
     );

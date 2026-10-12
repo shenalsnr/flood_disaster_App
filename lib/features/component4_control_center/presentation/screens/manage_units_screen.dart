@@ -138,7 +138,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                       decoration: deco('Status'),
                       style: const TextStyle(color: Colors.white, fontSize: 13),
                       items: const ['AVAILABLE', 'EN ROUTE', 'ON SCENE', 'OFF DUTY']
-                          .map((s) => DropdownMenuItem(value: s, child: Text(tr(s))))
+                          .map((s) => DropdownMenuItem(value: s, child: Text(tr(s), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (v) => setS(() => status = v ?? status),
                     ),

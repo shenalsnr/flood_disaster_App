@@ -605,7 +605,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         decoration: _deco('District'),
                         items: ['All', ..._districts]
                             .map((d) =>
-                                DropdownMenuItem(value: d, child: Text(tr(d))))
+                                DropdownMenuItem(value: d, child: Text(tr(d), maxLines: 1, overflow: TextOverflow.ellipsis)))
                             .toList(),
                         onChanged: (v) =>
                             setState(() => _district = v ?? _district),

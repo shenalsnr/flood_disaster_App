@@ -127,11 +127,25 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
   }
 
   EmergencyTeam get _assignedTeam {
-    return widget.incident.assignedTeam ??
-        _controller.teams.firstWhere(
-          (t) => t.id == 'TEAM-01',
-          orElse: () => _controller.teams.first,
-        );
+    final assigned = widget.incident.assignedTeam;
+    if (assigned != null) return assigned;
+    // Nothing assigned yet: neutral placeholder, no sample unit.
+    return const EmergencyTeam(
+      id: '',
+      name: 'No unit assigned',
+      status: 'AVAILABLE',
+      distance: '-',
+      eta: '-',
+      equipment: '-',
+      crewCount: 0,
+      leader: '-',
+      radioChannel: '-',
+      location: LatLng(7.8731, 80.7718),
+      vehicleType: '-',
+      callSign: '-',
+      phoneNumber: '',
+      fuelLevel: 0,
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -507,7 +521,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
+                Flexible(child: Text(
                   tr(_dispatchStatus),
                   style: TextStyle(
                     color: isOnScene
@@ -517,7 +531,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.6,
                   ),
-                ),
+                )),
               ],
             ),
           ),
@@ -810,18 +824,18 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           const Icon(Icons.water,
                               color: Color(0xFF38BDF8), size: 12),
                           const SizedBox(width: 4),
-                          Text(
+                          Flexible(child: Text(
                             tr('Water Level on Route: {p0}', {'p0': (widget.incident.waterDepth).toString()}),
                             style: const TextStyle(
                                 color: Color(0xFFB6C2D6), fontSize: 10),
-                          ),
+                          )),
                         ],
-                      ),
+                      )),
                       Flexible(child: Text(
                         tr('{p0}% En Route', {'p0': ((_routeProgress * 100).toInt()).toString()}),
                         style: const TextStyle(
@@ -1289,7 +1303,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     isExpanded: true,
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                     items: reasons.map((r) {
-                      return DropdownMenuItem(value: r, child: Text(tr(r)));
+                      return DropdownMenuItem(value: r, child: Text(tr(r), maxLines: 1, overflow: TextOverflow.ellipsis));
                     }).toList(),
                     onChanged: (v) {
                       if (v != null) setDlgState(() => reassignReason = v);

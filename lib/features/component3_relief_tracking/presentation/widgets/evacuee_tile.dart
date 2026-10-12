@@ -51,7 +51,7 @@ class EvacueeTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                 children: [
                   CircleAvatar(
                     radius: 18,
@@ -80,7 +80,7 @@ class EvacueeTile extends StatelessWidget {
                     ],
                   ),
                 ],
-              ),
+              )),
               PopupMenuButton<TriagePriority>(
                 icon: const Icon(Icons.more_vert, color: Colors.white60),
                 color: const Color(0xFF2C2C2C),
@@ -89,30 +89,33 @@ class EvacueeTile extends StatelessWidget {
                   PopupMenuItem(
                     value: TriagePriority.red,
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.circle, color: Color(0xFFF87171), size: 12),
                         SizedBox(width: 8),
-                        Text(tr('Set Red (Critical Care)'), style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Flexible(child: Text(tr('Set Red (Critical Care)'), style: TextStyle(color: Colors.white, fontSize: 13))),
                       ],
                     ),
                   ),
                   PopupMenuItem(
                     value: TriagePriority.yellow,
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.circle, color: Color(0xFFFFAB40), size: 12),
                         SizedBox(width: 8),
-                        Text(tr('Set Yellow (Needs Care)'), style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Flexible(child: Text(tr('Set Yellow (Needs Care)'), style: TextStyle(color: Colors.white, fontSize: 13))),
                       ],
                     ),
                   ),
                   PopupMenuItem(
                     value: TriagePriority.green,
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.circle, color: Color(0xFF6EE7B7), size: 12),
                         SizedBox(width: 8),
-                        Text(tr('Set Green (Stable)'), style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Flexible(child: Text(tr('Set Green (Stable)'), style: TextStyle(color: Colors.white, fontSize: 13))),
                       ],
                     ),
                   ),
@@ -141,7 +144,7 @@ class EvacueeTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.blueAccent.withValues(alpha: 0.1),
@@ -158,7 +161,7 @@ class EvacueeTile extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              )),
             ],
           ),
 

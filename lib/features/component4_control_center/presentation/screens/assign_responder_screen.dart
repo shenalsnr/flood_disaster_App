@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import 'live_tracking_screen.dart';
@@ -36,10 +37,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     super.initState();
     _controller.addListener(_onStateChange);
     // Default to first available team sorted by ETA
-    _selectedTeam = _controller.sortedTeamsByEta.firstWhere(
-      (t) => t.isAvailable,
-      orElse: () => _controller.sortedTeamsByEta.first,
-    );
+    _selectedTeam = _pickDefaultTeam();
 
     _fadeController = AnimationController(
       vsync: this,
@@ -60,8 +58,37 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     );
   }
 
+  static const EmergencyTeam _noTeam = EmergencyTeam(
+    id: '',
+    name: 'No unit selected',
+    status: 'NONE',
+    distance: '-',
+    eta: '-',
+    equipment: '-',
+    crewCount: 0,
+    leader: '-',
+    radioChannel: '-',
+    location: LatLng(7.8731, 80.7718),
+    vehicleType: '-',
+    callSign: '-',
+    phoneNumber: '',
+    fuelLevel: 0,
+  );
+
+  EmergencyTeam _pickDefaultTeam() {
+    final list = _controller.sortedTeamsByEta;
+    for (final t in list) {
+      if (t.isAvailable) return t;
+    }
+    return list.isEmpty ? _noTeam : list.first;
+  }
+
   void _onStateChange() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {
+      // Units arrive live from Firestore: pick one once they load.
+      if (_selectedTeam.id.isEmpty) _selectedTeam = _pickDefaultTeam();
+    });
   }
 
   @override
@@ -258,7 +285,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                       children: [
                         AnimatedBuilder(
                           animation: _pulseAnimation,
@@ -278,7 +305,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        Flexible(child: Text(
                           tr('TEAM RADIO LIST'),
                           style: TextStyle(
                             color: Color(0xFFB6C2D6),
@@ -286,10 +313,10 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                             fontWeight: FontWeight.w900,
                             letterSpacing: 1.0,
                           ),
-                        ),
+                        )),
                       ],
-                    ),
-                    Container(
+                    )),
+                    Flexible(child: Container(
                       padding:
                           const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
@@ -299,26 +326,38 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
                         ),
                       ),
-                      child: Row(
+                      child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Icon(Icons.sort_rounded,
                               size: 12, color: Color(0xFF38BDF8)),
                           SizedBox(width: 4),
-                          Text(
+                          Flexible(child: Text(
                             tr('SORTED BY ETA (FASTEST)'),
                             style: TextStyle(
                               color: Color(0xFF38BDF8),
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
                             ),
-                          ),
+                          )),
                         ],
                       ),
-                    ),
+                    )),
                   ],
                 ),
 
                 const SizedBox(height: 10),
+
+                if (_filteredTeams.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: Text(
+                        tr('No response units found.\nAdd units in Manage Units.'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFFB6C2D6)),
+                      ),
+                    ),
+                  ),
 
                 // Team Cards with staggered animation
                 ...List.generate(_filteredTeams.length, (index) {
@@ -885,7 +924,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 ),
                 const SizedBox(width: 8),
                 // Status Pill
-                Container(
+                Flexible(child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -926,7 +965,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       ),
                     ],
                   ),
-                ),
+                )),
               ],
             ),
             const SizedBox(height: 10),

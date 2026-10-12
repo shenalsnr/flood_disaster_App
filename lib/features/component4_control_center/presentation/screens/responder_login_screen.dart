@@ -644,7 +644,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       SizedBox(
                         width: 22,
@@ -662,15 +662,15 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      Flexible(child: Text(
                         tr('remember'),
                         style: TextStyle(
                           color: Color(0xFFCBD5E1),
                           fontSize: 13,
                         ),
-                      ),
+                      )),
                     ],
-                  ),
+                  )),
                   GestureDetector(
                     onTap: _openResetPinDialog,
                     child: Text(

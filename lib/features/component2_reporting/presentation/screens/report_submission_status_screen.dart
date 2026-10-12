@@ -42,16 +42,16 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                       children: [
-                        Text(
+                        Flexible(child: Text(
                           '9:41',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
-                        ),
+                        )),
                         const SizedBox(width: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -83,8 +83,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
-                    const Row(
+                    )),
+                    Flexible(child: const Row(mainAxisSize: MainAxisSize.min, 
                       children: [
                         Icon(Icons.signal_cellular_alt_rounded,
                             color: Colors.white, size: 16),
@@ -94,7 +94,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         Icon(Icons.battery_full_rounded,
                             color: Colors.white, size: 17),
                       ],
-                    ),
+                    )),
                   ],
                 ),
               ),

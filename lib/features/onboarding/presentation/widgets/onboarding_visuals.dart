@@ -400,7 +400,7 @@ class _IPhoneMockup extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  Row(
+                  Flexible(child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
@@ -424,7 +424,7 @@ class _IPhoneMockup extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ),

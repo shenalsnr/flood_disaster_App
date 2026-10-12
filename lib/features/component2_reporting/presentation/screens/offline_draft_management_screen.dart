@@ -152,7 +152,7 @@ class _OfflineDraftManagementScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
@@ -167,16 +167,16 @@ class _OfflineDraftManagementScreenState
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Text(
+                          Flexible(child: Text(
                             tr('Save Offline Draft (SQLite)'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                             ),
-                          ),
+                          )),
                         ],
-                      ),
+                      )),
                       IconButton(
                         icon: const Icon(Icons.close_rounded,
                             color: Color(0xFF8A98B0)),
@@ -222,7 +222,7 @@ class _OfflineDraftManagementScreenState
                           'Fallen Tree Obstruction',
                           'Road Inundation',
                         ].map((h) {
-                          return DropdownMenuItem(value: h, child: Text(tr(h)));
+                          return DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -518,7 +518,7 @@ class _OfflineDraftManagementScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
@@ -555,7 +555,7 @@ class _OfflineDraftManagementScreenState
                             ],
                           ),
                         ],
-                      ),
+                      )),
                       IconButton(
                         icon: const Icon(Icons.close_rounded,
                             color: Color(0xFF8A98B0)),
@@ -603,7 +603,7 @@ class _OfflineDraftManagementScreenState
                           'Fallen Tree Obstruction',
                           'Road Inundation',
                         ].map((h) {
-                          return DropdownMenuItem(value: h, child: Text(tr(h)));
+                          return DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -1432,7 +1432,7 @@ class _OfflineDraftManagementScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -1451,16 +1451,16 @@ class _OfflineDraftManagementScreenState
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      Flexible(child: Text(
                         tr(timeStr),
                         style: const TextStyle(
                           color: Color(0xFF8A98B0),
                           fontSize: 11,
                         ),
-                      ),
+                      )),
                     ],
-                  ),
-                  Row(
+                  )),
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       if (report.status != 'SYNCED')
                         IconButton(
@@ -1482,7 +1482,7 @@ class _OfflineDraftManagementScreenState
                         onPressed: () => _confirmDeleteDraft(report),
                       ),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ],

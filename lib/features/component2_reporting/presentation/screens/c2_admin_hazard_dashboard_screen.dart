@@ -156,7 +156,7 @@ class _C2AdminHazardDashboardScreenState
                         isExpanded: true,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         items: ['Flash Flood', 'Landslide', 'Fallen Tree', 'Road Blocked']
-                            .map((h) => DropdownMenuItem(value: h, child: Text(tr(h))))
+                            .map((h) => DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis)))
                             .toList(),
                         onChanged: (val) {
                           if (val != null) setModalState(() => hazardType = val);
@@ -184,7 +184,7 @@ class _C2AdminHazardDashboardScreenState
                         isExpanded: true,
                         style: TextStyle(color: _colorForSeverity(severity), fontWeight: FontWeight.bold),
                         items: ['LOW SEVERITY', 'MEDIUM SEVERITY', 'HIGH / CRITICAL']
-                            .map((s) => DropdownMenuItem(value: s, child: Text(tr(s))))
+                            .map((s) => DropdownMenuItem(value: s, child: Text(tr(s), maxLines: 1, overflow: TextOverflow.ellipsis)))
                             .toList(),
                         onChanged: (val) {
                           if (val != null) setModalState(() => severity = val);
@@ -538,7 +538,7 @@ class _C2AdminHazardDashboardScreenState
                       isExpanded: true,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       items: ['Flash Flood', 'Landslide', 'Fallen Tree', 'Road Blocked']
-                          .map((h) => DropdownMenuItem(value: h, child: Text(tr(h))))
+                          .map((h) => DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setModalState(() => hazardType = val);
@@ -566,7 +566,7 @@ class _C2AdminHazardDashboardScreenState
                       isExpanded: true,
                       style: TextStyle(color: _colorForSeverity(severity), fontWeight: FontWeight.bold),
                       items: ['LOW SEVERITY', 'MEDIUM SEVERITY', 'HIGH / CRITICAL']
-                          .map((s) => DropdownMenuItem(value: s, child: Text(tr(s))))
+                          .map((s) => DropdownMenuItem(value: s, child: Text(tr(s), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setModalState(() => severity = val);
@@ -594,7 +594,7 @@ class _C2AdminHazardDashboardScreenState
                       isExpanded: true,
                       style: const TextStyle(color: Color(0xFF34D399), fontWeight: FontWeight.bold),
                       items: ['VERIFIED', 'PENDING REVIEW', 'RESOLVED', 'REJECTED']
-                          .map((st) => DropdownMenuItem(value: st, child: Text(tr(st))))
+                          .map((st) => DropdownMenuItem(value: st, child: Text(tr(st), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setModalState(() => status = val);
@@ -1109,30 +1109,33 @@ class _C2AdminHazardDashboardScreenState
                                       PopupMenuItem(
                                         value: 'view',
                                         child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(Icons.visibility_rounded, color: Colors.white70, size: 18),
                                             SizedBox(width: 8),
-                                            Text(tr('Inspect (Read)'), style: TextStyle(color: Colors.white)),
+                                            Flexible(child: Text(tr('Inspect (Read)'), style: TextStyle(color: Colors.white))),
                                           ],
                                         ),
                                       ),
                                       PopupMenuItem(
                                         value: 'edit',
                                         child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(Icons.edit_rounded, color: Color(0xFF38BDF8), size: 18),
                                             SizedBox(width: 8),
-                                            Text(tr('Edit (Update)'), style: TextStyle(color: Colors.white)),
+                                            Flexible(child: Text(tr('Edit (Update)'), style: TextStyle(color: Colors.white))),
                                           ],
                                         ),
                                       ),
                                       PopupMenuItem(
                                         value: 'delete',
                                         child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171), size: 18),
                                             SizedBox(width: 8),
-                                            Text(tr('Delete'), style: TextStyle(color: Color(0xFFF87171))),
+                                            Flexible(child: Text(tr('Delete'), style: TextStyle(color: Color(0xFFF87171)))),
                                           ],
                                         ),
                                       ),
@@ -1309,7 +1312,7 @@ class _C2AdminHazardDashboardScreenState
                     ],
                   ),
                 ),
-                Container(
+                Flexible(child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -1319,9 +1322,9 @@ class _C2AdminHazardDashboardScreenState
                       color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
                     ),
                   ),
-                  child: Row(
+                  child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
-                      Text(
+                      Flexible(child: Text(
                         tr('MANAGE'),
                         style: TextStyle(
                           color: Color(0xFF38BDF8),
@@ -1329,13 +1332,13 @@ class _C2AdminHazardDashboardScreenState
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
                         ),
-                      ),
+                      )),
                       SizedBox(width: 3),
                       Icon(Icons.arrow_forward_ios_rounded,
                           color: Color(0xFF38BDF8), size: 10),
                     ],
                   ),
-                ),
+                )),
               ],
             ),
           ),

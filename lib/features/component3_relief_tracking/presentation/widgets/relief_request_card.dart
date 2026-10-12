@@ -114,20 +114,20 @@ class ReliefRequestCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
+                Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                   children: [
                     Icon(statusIcon, color: statusColor, size: 18),
                     const SizedBox(width: 8),
-                    Text(
+                    Flexible(child: Text(
                       tr(statusLabel),
                       style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
-                    ),
+                    )),
                   ],
-                ),
+                )),
                 Flexible(child: Text(
                   tr('ETA: {p0}', {'p0': (request.eta).toString()}),
                   style: const TextStyle(

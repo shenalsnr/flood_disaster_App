@@ -116,7 +116,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // App Brand with Glowing Shield
-                  Row(
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       Container(
                         padding: const EdgeInsets.all(7),
@@ -154,10 +154,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         ),
                       ),
                     ],
-                  ),
+                  )),
 
                   // Language + Skip
-                  Row(
+                  Flexible(child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                   const LanguageButton(),
@@ -187,7 +187,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ),
                   ),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ),

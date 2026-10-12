@@ -289,7 +289,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
               isExpanded: true,
               dropdownColor: ShelterTheme.surfaceDarkNavy,
               style: const TextStyle(color: Colors.white),
-              items: items.map((e) => DropdownMenuItem(value: e, child: Text(tr(e)))).toList(),
+              items: items.map((e) => DropdownMenuItem(value: e, child: Text(tr(e), maxLines: 1, overflow: TextOverflow.ellipsis))).toList(),
               onChanged: onChanged,
             ),
           ),
