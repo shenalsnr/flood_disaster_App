@@ -114,7 +114,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: isVerified
@@ -138,7 +138,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
                     letterSpacing: 0.5,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
 

@@ -204,7 +204,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                     style: const TextStyle(color: Colors.white),
                     decoration: _decoration(
                       'e.g. 50',
-                      suffix: selected?.unit,
+                      suffix: selected == null ? null : selected.unit,
                     ),
                     validator: (v) {
                       final n = double.tryParse((v ?? '').trim());
@@ -321,7 +321,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                   ],
                 ),
               ),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
@@ -329,7 +329,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                 ),
                 child: Text(empty ? tr('EMPTY') : tr('LOW'),
                     style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
-              ),
+              )),
             ],
           ),
         ),

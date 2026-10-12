@@ -197,7 +197,7 @@ class NotificationService {
                           ),
                         ),
                       ),
-                      Container(
+                      Flexible(child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
@@ -212,7 +212,7 @@ class NotificationService {
                             fontWeight: FontWeight.w900,
                           ),
                         ),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 3),

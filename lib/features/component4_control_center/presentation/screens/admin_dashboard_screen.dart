@@ -348,7 +348,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         fontSize: 14.5)),
               ),
-              Container(
+              Flexible(child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -361,7 +361,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         color: color,
                         fontSize: 10,
                         fontWeight: FontWeight.bold)),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 10),

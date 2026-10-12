@@ -671,7 +671,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       )),
                     ],
                   )),
-                  GestureDetector(
+                  Flexible(child: GestureDetector(
                     onTap: _openResetPinDialog,
                     child: Text(
                       tr('reset_pin_q'),
@@ -681,7 +681,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -751,7 +751,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     tr('new_officer'),
                     style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
                   )),
-                  GestureDetector(
+                  Flexible(child: GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
@@ -767,7 +767,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 

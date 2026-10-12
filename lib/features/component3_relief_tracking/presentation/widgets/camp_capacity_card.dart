@@ -47,7 +47,7 @@ class CampCapacityCard extends StatelessWidget {
                   size: 44,
                 ),
                 const SizedBox(width: 12),
-                Column(
+                Flexible(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -69,7 +69,7 @@ class CampCapacityCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
+                )),
               ],
             )),
             Flexible(child: Builder(builder: (context) {
@@ -294,7 +294,7 @@ class CampCapacityCard extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
+            Flexible(child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFF3B1E22),
@@ -309,7 +309,7 @@ class CampCapacityCard extends StatelessWidget {
                   letterSpacing: 0.8,
                 ),
               ),
-            ),
+            )),
             const SizedBox(width: 8),
             const Icon(Icons.chevron_right, color: Color(0xFF8A98B0), size: 18),
           ],

@@ -533,7 +533,7 @@ class _OfflineDraftManagementScreenState
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Column(
+                          Flexible(child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -553,7 +553,7 @@ class _OfflineDraftManagementScreenState
                                 ),
                               ),
                             ],
-                          ),
+                          )),
                         ],
                       )),
                       IconButton(
@@ -1012,7 +1012,7 @@ class _OfflineDraftManagementScreenState
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -1023,7 +1023,7 @@ class _OfflineDraftManagementScreenState
                 fontSize: 17,
               ),
             ),
-            Row(
+            Row(mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 7,
@@ -1052,7 +1052,7 @@ class _OfflineDraftManagementScreenState
               ],
             ),
           ],
-        ),
+        )),
         actions: [
           if (_isSyncing)
             const Center(
@@ -1386,7 +1386,7 @@ class _OfflineDraftManagementScreenState
                     ),
                   ),
                   // Status Badge
-                  Container(
+                  Flexible(child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -1406,7 +1406,7 @@ class _OfflineDraftManagementScreenState
                         letterSpacing: 0.4,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 

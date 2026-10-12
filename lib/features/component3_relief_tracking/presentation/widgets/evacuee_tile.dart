@@ -62,7 +62,7 @@ class EvacueeTile extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Column(
+                  Flexible(child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -78,7 +78,7 @@ class EvacueeTile extends StatelessWidget {
                         style: const TextStyle(color: Colors.white54, fontSize: 11),
                       ),
                     ],
-                  ),
+                  )),
                 ],
               )),
               PopupMenuButton<TriagePriority>(
@@ -128,7 +128,7 @@ class EvacueeTile extends StatelessWidget {
           // Triage Tag & Zone
           Row(
             children: [
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: badgeColor.withValues(alpha: 0.15),
@@ -142,7 +142,7 @@ class EvacueeTile extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              )),
               const SizedBox(width: 8),
               Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

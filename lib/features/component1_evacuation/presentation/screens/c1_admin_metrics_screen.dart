@@ -354,7 +354,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         ),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: Row(
+      title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, 
         children: [
           Container(
             padding: const EdgeInsets.all(6),
@@ -389,7 +389,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             ),
           ),
         ],
-      ),
+      )),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(height: 1, color: Colors.white10),

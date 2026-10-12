@@ -197,7 +197,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Container(
+                        Flexible(child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -209,7 +209,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                                   color: color,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold)),
-                        ),
+                        )),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(d['locationZone'] as String? ?? '-',

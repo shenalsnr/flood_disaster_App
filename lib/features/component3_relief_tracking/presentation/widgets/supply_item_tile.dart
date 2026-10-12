@@ -57,7 +57,7 @@ class SupplyItemTile extends StatelessWidget {
               ),
             ),
           ),
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: statusColor.withValues(alpha: 0.2),
@@ -72,7 +72,7 @@ class SupplyItemTile extends StatelessWidget {
                 letterSpacing: 0.8,
               ),
             ),
-          ),
+          )),
         ],
       ),
     );

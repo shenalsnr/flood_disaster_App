@@ -501,7 +501,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ),
           ),
           titleSpacing: 8,
-          title: Column(
+          title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -525,7 +525,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
               ),
             ],
-          ),
+          )),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16),

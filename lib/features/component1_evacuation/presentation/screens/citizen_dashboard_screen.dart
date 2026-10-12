@@ -138,7 +138,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                 iconTheme: const IconThemeData(color: Colors.white),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: Row(
+                title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, 
                   children: [
                     const Icon(
                       Icons.shield_rounded,
@@ -166,11 +166,11 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                       ),
                     ),
                   ],
-                ),
+                )),
                 actions: [
                   const ThemeToggleButton(),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.only(left: 4, right: 12),
                     child: Center(child: _AlertLevelBadge(level: alertLevel)),
                   ),
                 ],
@@ -283,7 +283,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                         ],
                                       ),
                                     ),
-                                    Container(
+                                    Flexible(child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 6,
                                         vertical: 3,
@@ -301,7 +301,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ),
+                                    )),
                                   ],
                                 ),
                         ),
@@ -851,23 +851,23 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                   // Live metrics row
                   Row(
                     children: [
-                      _MetricPill(
+                      Expanded(child: _MetricPill(
                         icon: Icons.water_rounded,
                         label: '${widget.waterLevel.toStringAsFixed(2)} m',
                         hint: tr('Water Level'),
-                      ),
+                      )),
                       const SizedBox(width: 6),
-                      _MetricPill(
+                      Expanded(child: _MetricPill(
                         icon: Icons.grain_rounded,
                         label: tr('{p0} mm', {'p0': (widget.rainfall.toStringAsFixed(1)).toString()}),
                         hint: tr('Rainfall'),
-                      ),
+                      )),
                       const SizedBox(width: 6),
-                      _MetricPill(
+                      Expanded(child: _MetricPill(
                         icon: Icons.air_rounded,
                         label: tr('{p0} kph', {'p0': (widget.windSpeed.toStringAsFixed(1)).toString()}),
                         hint: tr('Wind Speed'),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -973,7 +973,7 @@ class _MetricPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(10),
@@ -984,11 +984,13 @@ class _MetricPill extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white70, size: 14),
           const SizedBox(width: 6),
-          Column(
+          Flexible(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 tr(hint),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 9,
@@ -997,6 +999,8 @@ class _MetricPill extends StatelessWidget {
               ),
               Text(
                 tr(label),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -1004,7 +1008,7 @@ class _MetricPill extends StatelessWidget {
                 ),
               ),
             ],
-          ),
+          )),
         ],
       ),
     );
@@ -1136,7 +1140,7 @@ class _MiniAlertTile extends StatelessWidget {
               ],
             ),
           ),
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
@@ -1150,7 +1154,7 @@ class _MiniAlertTile extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-          ),
+          )),
         ],
       ),
     );

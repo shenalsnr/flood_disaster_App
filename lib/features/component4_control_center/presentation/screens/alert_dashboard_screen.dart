@@ -247,7 +247,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       titleSpacing: 16,
-      title: Column(
+      title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -265,7 +265,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
                 letterSpacing: 1.1),
           ),
         ],
-      ),
+      )),
       actions: [
         const ThemeToggleButton(),
         if (compact)

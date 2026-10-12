@@ -740,7 +740,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       tr('have_acct'),
                       style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
                     )),
-                    GestureDetector(
+                    Flexible(child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
@@ -756,7 +756,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
+                    )),
                   ],
                 ),
 

@@ -466,7 +466,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                         child: Icon(cardIcon, color: accent, size: 20),
                       ),
                       const SizedBox(width: 10),
-                      Column(
+                      Flexible(child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -483,10 +483,10 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                             ),
                           ),
                         ],
-                      ),
+                      )),
                     ],
                   )),
-                  Container(
+                  Flexible(child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: accentBg,
@@ -496,7 +496,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                       tr(cardBadge),
                       style: TextStyle(color: accent, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
-                  ),
+                  )),
                 ],
               ),
               const SizedBox(height: 12),

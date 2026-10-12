@@ -223,10 +223,10 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Row(mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   padding:
@@ -261,7 +261,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
               style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
-        ),
+        )),
       ),
       body: SafeArea(
         child: FadeTransition(
@@ -639,7 +639,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   ),
                 ),
               ),
-              Container(
+              Flexible(child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -657,7 +657,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 8),
@@ -885,7 +885,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                               ),
                             ),
                           ),
-                          Container(
+                          Flexible(child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
@@ -906,7 +906,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                                 letterSpacing: 0.5,
                               ),
                             ),
-                          ),
+                          )),
                         ],
                       ),
                       const SizedBox(height: 3),
@@ -1195,7 +1195,7 @@ class _DispatchConfirmationModalState
           // Header
           Row(
             children: [
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: const Color(0xFF34D399).withValues(alpha: 0.2),
@@ -1210,7 +1210,7 @@ class _DispatchConfirmationModalState
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
+              )),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

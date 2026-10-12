@@ -205,7 +205,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -217,7 +217,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
               style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
-        ),
+        )),
       ),
       body: SafeArea(
         child: FadeTransition(
@@ -436,7 +436,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                             child: const Icon(Icons.people_alt_rounded, color: Color(0xFF34D399), size: 20),
                           ),
                           const SizedBox(width: 12),
-                          Column(
+                          Flexible(child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -455,7 +455,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 ),
                               ),
                             ],
-                          ),
+                          )),
                         ],
                       )),
                       Flexible(child: Container(

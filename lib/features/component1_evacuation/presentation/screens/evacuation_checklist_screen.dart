@@ -225,7 +225,7 @@ class _PremiumProgressHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              Flexible(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -246,8 +246,8 @@ class _PremiumProgressHeader extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-              Container(
+              )),
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: isComplete
@@ -265,7 +265,7 @@ class _PremiumProgressHeader extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 16),

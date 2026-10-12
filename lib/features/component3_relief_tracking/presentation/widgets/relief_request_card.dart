@@ -77,7 +77,7 @@ class ReliefRequestCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: urgencyColor.withValues(alpha: 0.15),
@@ -91,7 +91,7 @@ class ReliefRequestCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 6),

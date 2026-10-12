@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import '../../data/services/firestore_service.dart';
 
 import '../../../../core/localization/app_strings.dart';
@@ -38,11 +38,9 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
         final allMine = snapshot.data!.docs
-            .where(
-              (d) =>
-                  d.data()['campId'] == widget.campId &&
-                  d.data()['hiddenByCamp'] != true,
-            )
+            .where((d) =>
+                d.data()['campId'] == widget.campId &&
+                d.data()['hiddenByCamp'] != true)
             .toList();
         final mine = allMine.take(5).toList();
         if (mine.isEmpty) return const SizedBox.shrink();
@@ -53,27 +51,21 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
-                  child: Text(
-                    tr('SENT TO DMC'),
-                    style: TextStyle(
-                      color: Color(0xFF8A98B0),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                    ),
+                Flexible(child: Text(
+                  tr('SENT TO DMC'),
+                  style: TextStyle(
+                    color: Color(0xFF8A98B0),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
                   ),
-                ),
-                GestureDetector(
+                )),
+                Flexible(child: GestureDetector(
                   onTap: () => _confirmClear(allMine.map((d) => d.id).toList()),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.delete_sweep_outlined,
-                        color: Color(0xFFF87171),
-                        size: 16,
-                      ),
+                      Icon(Icons.delete_sweep_outlined, color: Color(0xFFF87171), size: 16),
                       SizedBox(width: 4),
                       Text(
                         tr('CLEAR'),
@@ -85,7 +77,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                       ),
                     ],
                   ),
-                ),
+                )),
               ],
             ),
             const SizedBox(height: 10),
@@ -107,11 +99,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         ),
         title: Text(
           tr('Clear this list?'),
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
         ),
         content: Text(
           tr('The requests are removed from this list only. The DMC keeps its own records, and any truck on the way will still be shown.'),
@@ -120,15 +108,11 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              tr('Cancel'),
-              style: TextStyle(color: Color(0xFFB6C2D6)),
-            ),
+            child: Text(tr('Cancel'), style: TextStyle(color: Color(0xFFB6C2D6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(0, 44),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
@@ -160,8 +144,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       final qty = data['quantityRequested'];
       final urgency = (data['urgency'] ?? '').toString();
       final qtyText = qty is num ? _trim(qty) : '';
-      detail =
-          'Request: need $qtyText $unit'.trim() +
+      detail = 'Request: need $qtyText $unit'.trim() +
           (urgency.isEmpty ? '' : ' • ${urgency.toUpperCase()}');
     } else if (trigger == 'auto') {
       detail = 'Auto alert: stock ran out';
@@ -187,24 +170,14 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
               children: [
                 Text(
                   tr(itemName),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 3),
-                Text(
-                  tr(detail),
-                  style: const TextStyle(
-                    color: Color(0xFFB6C2D6),
-                    fontSize: 11,
-                  ),
-                ),
+                Text(tr(detail), style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11)),
               ],
             ),
           ),
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor.withValues(alpha: 0.15),
@@ -212,13 +185,9 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             ),
             child: Text(
               resolved ? tr('DONE') : tr('PENDING'),
-              style: TextStyle(
-                color: statusColor,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
             ),
-          ),
+          )),
         ],
       ),
     );

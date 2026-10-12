@@ -136,14 +136,14 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
                           ],
                         ),
                       ),
-                      Container(
+                      Flexible(child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: ShelterTheme.statusSafeGreen.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(tr('ETA: 15 MINS'), style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -257,7 +257,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
           Expanded(
             child: Text(tr(item.name), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
           ),
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: isDepleted ? badgeColor.withValues(alpha: 0.2) : Colors.transparent,
@@ -268,7 +268,7 @@ class _RationInventoryScreenState extends State<RationInventoryScreen> {
               tr(badgeText),
               style: TextStyle(color: badgeColor, fontSize: 10, fontWeight: FontWeight.bold),
             ),
-          ),
+          )),
         ],
       ),
     );

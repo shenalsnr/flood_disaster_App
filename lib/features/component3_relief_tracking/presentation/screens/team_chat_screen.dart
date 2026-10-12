@@ -70,13 +70,13 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
             child: const Icon(Icons.group, color: Colors.white, size: 18),
           ),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(tr('Community Chat'), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             Text(tr('12 online - Inter-Camp Comms'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
           ],
-        ),
+        )),
         actions: [
           IconButton(icon: const Icon(Icons.more_vert, color: Colors.white), onPressed: () {}),
         ],

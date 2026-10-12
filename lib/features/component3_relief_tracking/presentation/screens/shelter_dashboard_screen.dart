@@ -82,7 +82,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                             ],
                           ),
                         ),
-                        Container(
+                        Flexible(child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.transparent,
@@ -90,7 +90,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(tr('+ YES (SYNC OK)'), style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
-                        ),
+                        )),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -183,7 +183,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Flexible(child: Text(tr(item.name), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                            Container(
+                            Flexible(child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
                                 border: Border.all(color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow),
@@ -197,7 +197,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
+                            )),
                           ],
                         ),
                       );

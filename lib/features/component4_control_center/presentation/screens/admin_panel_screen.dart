@@ -655,7 +655,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               ],
             ),
           ),
-          Column(
+          Flexible(child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Switch(
@@ -699,7 +699,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 ],
               ),
             ],
-          ),
+          )),
         ],
       ),
     );

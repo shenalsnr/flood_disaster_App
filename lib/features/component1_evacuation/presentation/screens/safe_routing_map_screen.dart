@@ -160,8 +160,8 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           distanceFilter: 25,
         ),
       ).listen(_onPosition, onError: (Object _) {});
-      // 3) Quick medium-accuracy fix in parallel (much faster than waiting
-      //    for a perfect GPS lock).
+      // 3) Quick network/medium fix in parallel (much faster than waiting for
+      //    a perfect GPS lock).
       Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
@@ -590,7 +590,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -606,7 +606,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
               style: TextStyle(color: Colors.white54, fontSize: 11),
             ),
           ],
-        ),
+        )),
       ),
       body: Stack(
         children: [

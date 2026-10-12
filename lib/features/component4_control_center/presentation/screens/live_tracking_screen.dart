@@ -447,10 +447,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Row(mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   padding:
@@ -491,7 +491,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
-        ),
+        )),
         actions: [
           // Dynamic Status Badge (EN ROUTE / ON SCENE)
           Container(
@@ -509,6 +509,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               ),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 6,
@@ -650,7 +651,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           Positioned(
             top: 12,
             left: 14,
-            child: Container(
+            right: 70,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: const Color(0xFF131C2E).withValues(alpha: 0.9),
@@ -661,6 +665,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 ],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.explore_rounded,
                       color: Color(0xFF38BDF8), size: 14),
@@ -676,6 +681,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   )),
                 ],
               ),
+            ),
             ),
           ),
 
@@ -747,7 +753,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                   ),
                                 )),
                                 const SizedBox(width: 6),
-                                Container(
+                                Flexible(child: Container(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5, vertical: 1),
                                   decoration: BoxDecoration(
@@ -763,7 +769,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
+                                )),
                               ],
                             ),
                             const SizedBox(height: 3),
@@ -778,7 +784,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         ),
                       ),
                       // READ: "ETA 4 MINS" CARD
-                      Container(
+                      Flexible(child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
@@ -814,7 +820,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                             ),
                           ],
                         ),
-                      ),
+                      )),
                     ],
                   ),
 
@@ -1036,7 +1042,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                 ],
               )),
               const SizedBox(width: 8),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: const Color(0xFF34D399).withValues(alpha: 0.15),
@@ -1050,7 +1056,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 18),

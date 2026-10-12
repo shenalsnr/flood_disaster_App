@@ -358,7 +358,7 @@ class _C2AdminHazardDashboardScreenState
                     ],
                   ),
                 ),
-                Container(
+                Flexible(child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: _colorForSeverity(severity).withValues(alpha: 0.15),
@@ -373,7 +373,7 @@ class _C2AdminHazardDashboardScreenState
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
+                )),
               ],
             ),
 
@@ -784,7 +784,7 @@ class _C2AdminHazardDashboardScreenState
               ),
             ),
           ),
-          title: Column(
+          title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -796,7 +796,7 @@ class _C2AdminHazardDashboardScreenState
                 style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.w500),
               ),
             ],
-          ),
+          )),
           actions: [
             const ThemeToggleButton(),
             IconButton(
@@ -1055,7 +1055,7 @@ class _C2AdminHazardDashboardScreenState
                                         // Badges: Severity + Status
                                         Row(
                                           children: [
-                                            Container(
+                                            Flexible(child: Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                               decoration: BoxDecoration(
                                                 color: _colorForSeverity(severity).withValues(alpha: 0.15),
@@ -1069,9 +1069,9 @@ class _C2AdminHazardDashboardScreenState
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ),
+                                            )),
                                             const SizedBox(width: 8),
-                                            Container(
+                                            Flexible(child: Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFF34D399).withValues(alpha: 0.15),
@@ -1085,7 +1085,7 @@ class _C2AdminHazardDashboardScreenState
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ),
+                                            )),
                                           ],
                                         ),
                                       ],

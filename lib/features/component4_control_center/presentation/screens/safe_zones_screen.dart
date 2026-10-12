@@ -277,7 +277,7 @@ class _ZoneCard extends StatelessWidget {
                           fontSize: 15,
                           fontWeight: FontWeight.bold)),
                 ),
-                Container(
+                Flexible(child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
@@ -289,7 +289,7 @@ class _ZoneCard extends StatelessWidget {
                           color: stateColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold)),
-                ),
+                )),
                 PopupMenuButton<String>(
                   color: _card,
                   iconColor: _muted,
