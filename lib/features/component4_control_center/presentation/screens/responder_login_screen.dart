@@ -1,8 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import '../../../../core/localization/app_strings.dart';
-import '../../../../core/localization/language_button.dart';
 import '../widgets/c4_ui.dart';
 
 import '../../data/models/responder_models.dart';

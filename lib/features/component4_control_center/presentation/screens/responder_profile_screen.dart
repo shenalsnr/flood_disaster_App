@@ -600,7 +600,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF1C2740).withValues(alpha: 0.4),
+                color: const Color(0xFF1E293B).withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
@@ -609,20 +609,20 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              height: 52,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFF87171),
-                  side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
-                  backgroundColor:
-                      const Color(0xFFDC2626).withValues(alpha: 0.1),
+                  foregroundColor: Colors.redAccent,
+                  side: const BorderSide(color: Colors.redAccent),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                icon: const Icon(Icons.logout_rounded, size: 20),
-                label: Text(tr('Log Out'),
+                icon: const Icon(Icons.logout, size: 18),
+                label: Text(tr('SIGN OUT'),
                     style: TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700)),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8)),
                 onPressed: () async {
                   await SessionService.clear();
                   if (!mounted) return;

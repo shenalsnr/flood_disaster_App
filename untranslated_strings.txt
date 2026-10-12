@@ -1,88 +1,29 @@
 +94 7X XXX XXXX
-Account Email
-Active Hazards: {p0}
-Add / Change Photo
-Affected Citizen Portal (Component 1)
-Audible Emergency Siren
-Avg Response
 BROADCAST NOW
 BROADCAST ZONE ALERT
 Broadcast Targeted Evacuation Alert
-CROSS-ROLE ACCESS (PAIR TESTING)
-Capture live photo using camera
-Centered to your GPS location
-Choose an image to save to your database profile
-Choose from Gallery / Files
-Citizens Rescued
 Convoy #1
-Coordinates: {p0}° N, {p1}° E
 Culvert Blocked / Water 3ft
-DETECTED LOCATION / ADDRESS
-DISPATCH CONTROLS & TELEMETRY
-Dispatcher Settings
 Dr. Rohan Silva
 ENC-98%
 Emergency Dispatch Station
-Enter Image URL
-Enter Photo URL
-Enter location name or landmark...
-Evacuation routes, weather alerts & checklist
-FIREBASE FIRESTORE SYNCED PROFILE
 Fallen Electric Pole
-Flood Sector
 FloodGuard
-Focus Hazards
-GPS Location error: {p0}
 GPS: {p0}° N, {p1}° E
-Ground truth photo & hazard submission
 HDG: 042° NE • GPS: {p0}°N, {p1}°E
 INCOMING CITIZEN HAZARDS
 KP
 Live Multi-Agency Coordinate Feed
-Location permission is needed to find your location.
-MISSION PERFORMANCE ANALYTICS
 Main St
-My Location
-Nadeeka Perera
-National ID (NIC)
-OFF DUTY (STANDBY)
-ON DUTY (DISPATCH ACTIVE)
-OR SELECT PRESET AVATAR
-Offline GIS Tile Caching (10km)
 PART 4
-Paste a direct HTTPS web link to an image
-Paste a valid HTTPS image URL:
-Phone Contact
-Play critical frequency tone on Level 4 floods
-Please enter a valid HTTP/HTTPS image URL
-Pre-cached offline maps for cellular blackouts
-Profile photo saved to database successfully!
-Profile photo updated and saved to database!
 RELIEF TEAM LEAD | RM
 RS
-Receiving active emergency incident stream
-Relief Camp Triage Leader (Component 3)
-Reset profile photo back to default badge icon
-SIGN OUT FROM DISPATCHER TERMINAL
-Save Photo
 Select zone radius to dispatch early warning sirens and push notifications to all citizen devices.
-Senior Emergency Dispatcher • Unit #04
-Shelter capacity & supply logistics
-Sri Lanka Disaster Management Centre (DMC)
 Sudden Mudslide
-Take Photo (Camera)
-Tap any pin for incident details
-Total Triage
-Units Deployed
-Update Profile Photo
-Upload image from your local device storage
 Verified by GN
-Volunteer Hazard Reporter (Component 2)
 WS SYNC: OK
 We
 WeSafe logo
 WeSafe v1.0.0
 WeSafe — Flood Relief & Early Warning System
-Your Current GPS Position
 name@example.com
-● Tap map to change pin
