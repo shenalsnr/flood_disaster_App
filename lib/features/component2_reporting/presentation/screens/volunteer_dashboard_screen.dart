@@ -7,7 +7,6 @@ import 'package:latlong2/latlong.dart';
 import '../widgets/volunteer_drawer.dart';
 import '../widgets/hazard_report_details_sheet.dart';
 import 'hazard_report_wizard_screen.dart';
-import 'offline_draft_management_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// Main Dashboard Screen for District Volunteer (Component 2: Ground Hazard Reporting).
@@ -193,20 +192,6 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
         ),
         actions: [
           const ThemeToggleButton(),
-          IconButton(
-            tooltip: 'Offline Drafts & Queue (SQLite)',
-            icon: const Icon(Icons.storage_rounded,
-                color: Color(0xFFFF9F0A), size: 21),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OfflineDraftManagementScreen(),
-                ),
-              );
-              setState(() {});
-            },
-          ),
           // Live Status Pill (ONLINE badge from Screenshot 1 & 2)
           Padding(
             padding: const EdgeInsets.only(right: 18),
