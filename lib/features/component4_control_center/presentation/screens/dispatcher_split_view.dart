@@ -146,13 +146,13 @@ class DispatcherSplitView extends StatelessWidget {
                     children: [
                       Icon(Icons.verified, color: Colors.blueAccent, size: 14),
                       SizedBox(width: 4),
-                      Text(
+                      Flexible(child: Text(
                         tr('Verified by GN'),
                         style: TextStyle(
                           color: Colors.blueAccent,
                           fontSize: 11,
                         ),
-                      ),
+                      )),
                     ],
                   ),
               ],

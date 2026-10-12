@@ -112,7 +112,7 @@ class ThemeToggleButton extends StatelessWidget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const LanguageButton(),
+            LanguageButton(),
             const SizedBox(width: 2),
             IconButton(
               tooltip: light ? tr('Switch to dark mode') : tr('Switch to light mode'),

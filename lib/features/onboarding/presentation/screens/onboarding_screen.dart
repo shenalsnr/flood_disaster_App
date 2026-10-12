@@ -160,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   Flexible(child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                  const LanguageButton(),
+                  LanguageButton(),
                   const SizedBox(width: 4),
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 250),

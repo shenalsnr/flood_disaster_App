@@ -4,6 +4,8 @@ import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
 import 'responder_login_screen.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
 
 class ResponderRegisterScreen extends StatefulWidget {
   const ResponderRegisterScreen({super.key});
@@ -213,7 +215,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       ),
                     )),
                     const SizedBox(width: 10),
-                    const LanguageButton(),
+                    LanguageButton(),
                   ],
                 ),
 

@@ -9,6 +9,8 @@ import '../controllers/responder_controller.dart';
 import '../../data/services/session_service.dart';
 import 'role_router.dart';
 import 'responder_register_screen.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
   final UserRole initialRole;
@@ -533,7 +535,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     ),
                   )),
                   const SizedBox(width: 10),
-                  const LanguageButton(),
+                  LanguageButton(),
                 ],
               ),
 
