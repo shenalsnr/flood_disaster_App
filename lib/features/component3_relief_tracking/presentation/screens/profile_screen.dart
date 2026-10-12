@@ -165,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ShelterTheme.primaryActionOrange,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06121F),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

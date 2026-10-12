@@ -26,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       description:
           'Receive instant satellite alerts and predictive water level forecasts before floodwaters reach your residential sector.',
       buttonText: 'Next',
-      accentColor: Color(0xFF40C4FF),
+      accentColor: Color(0xFF38BDF8),
       imagePath: 'assets/images/onboard_early_warning.jpg',
       badgeTopLeft: 'RADAR LIVE • SECTOR 04',
       badgeTopRight: 'HIGH RISK ALERT',
@@ -38,7 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       description:
           'Capture geotagged hazard photos and transmit instant alerts to the Disaster Operations Room—even with zero internet connection.',
       buttonText: 'Next',
-      accentColor: Color(0xFFFF9F0A),
+      accentColor: Color(0xFFFB923C),
       imagePath: 'assets/images/onboard_hazard_report.jpg',
       badgeTopLeft: 'INCIDENT CAM • DMC VERIFIED',
       badgeTopRight: 'OFFLINE QUEUE ACTIVE',
@@ -50,7 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       description:
           'Navigate through real-time safe elevation corridors avoiding flood zones directly to active emergency camps and relief centers.',
       buttonText: 'Get Started',
-      accentColor: Color(0xFF00E676),
+      accentColor: Color(0xFF34D399),
       imagePath: 'assets/images/onboard_safe_shelter.jpg',
       badgeTopLeft: 'EVAC ROUTE ACTIVE • 3.2 KM',
       badgeTopRight: 'SHELTER ZONE A',
@@ -166,7 +166,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ? null
                           : _finishOnboarding,
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF94A3B8),
+                        foregroundColor: const Color(0xFFB6C2D6),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
                           vertical: 6,
@@ -259,7 +259,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             item.description,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 13.5,
                               fontWeight: FontWeight.w400,
                               height: 1.45,
@@ -295,7 +295,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         decoration: BoxDecoration(
                           color: isActive
                               ? accentColor
-                              : const Color(0xFF1E293B),
+                              : const Color(0xFF1C2740),
                           borderRadius: BorderRadius.circular(4),
                           boxShadow: isActive
                               ? [
@@ -322,8 +322,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentColor,
                         foregroundColor:
-                            accentColor == const Color(0xFF00E676) ||
-                                    accentColor == const Color(0xFF40C4FF)
+                            accentColor == const Color(0xFF34D399) ||
+                                    accentColor == const Color(0xFF38BDF8)
                                 ? Colors.black
                                 : Colors.white,
                         elevation: 6,

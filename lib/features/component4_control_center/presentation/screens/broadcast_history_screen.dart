@@ -13,11 +13,11 @@ class BroadcastHistoryScreen extends StatelessWidget {
   Color _color(String sev) {
     switch (sev) {
       case 'Critical':
-        return const Color(0xFFFF5252);
+        return const Color(0xFFF87171);
       case 'Warning':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFBBF24);
       default:
-        return const Color(0xFF40C4FF);
+        return const Color(0xFF38BDF8);
     }
   }
 
@@ -30,7 +30,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           title: const Text('Edit broadcast',
               style: TextStyle(color: Colors.white, fontSize: 16)),
           content: SingleChildScrollView(
@@ -95,7 +95,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF1C2740),
         title:
             const Text('Withdraw warning?', style: TextStyle(color: Colors.white)),
         content: const Text(
@@ -106,7 +106,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text('CANCEL')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('WITHDRAW'),
           ),
@@ -127,15 +127,15 @@ class BroadcastHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         foregroundColor: Colors.white,
         title: const Text('Broadcast History',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Color(0xFFDC2626),
         foregroundColor: Colors.white,
         onPressed: () => showBroadcastDialog(context),
         icon: const Icon(Icons.cell_tower),
@@ -186,7 +186,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                 child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF1C2740),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: color.withValues(alpha: 0.5)),
                 ),
@@ -218,13 +218,13 @@ class BroadcastHistoryScreen extends StatelessWidget {
                         IconButton(
                           tooltip: 'Edit',
                           icon: const Icon(Icons.edit_outlined,
-                              color: Color(0xFF40C4FF), size: 20),
+                              color: Color(0xFF38BDF8), size: 20),
                           onPressed: () => _edit(context, doc.id, d),
                         ),
                         IconButton(
                           tooltip: 'Withdraw',
                           icon: const Icon(Icons.delete_outline,
-                              color: Colors.redAccent, size: 20),
+                              color: Color(0xFFF87171), size: 20),
                           onPressed: () => _withdraw(context, doc.id),
                         ),
                       ],
@@ -238,7 +238,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                       '${d['district'] ?? 'All'} / ${d['city'] ?? 'All'} • '
                       '${d['radiusKm'] ?? '-'} km • $when',
                       style: const TextStyle(
-                          color: Color(0xFF64748B), fontSize: 11),
+                          color: Color(0xFF8A98B0), fontSize: 11),
                     ),
                   ],
                 ),

@@ -112,22 +112,22 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     {
       'title': 'Flash Flood',
       'icon': Icons.water_drop_rounded,
-      'color': Color(0xFF40C4FF), // Light Blue
+      'color': Color(0xFF38BDF8), // Light Blue
     },
     {
       'title': 'Landslide',
       'icon': Icons.landscape_rounded,
-      'color': Color(0xFFFFB300), // Golden Amber
+      'color': Color(0xFFFBBF24), // Golden Amber
     },
     {
       'title': 'Fallen Tree',
       'icon': Icons.park_rounded,
-      'color': Color(0xFF22C55E), // Green
+      'color': Color(0xFF34D399), // Green
     },
     {
       'title': 'Road Blocked',
       'icon': Icons.do_not_disturb_on_rounded,
-      'color': Color(0xFFFF5252), // Red
+      'color': Color(0xFFF87171), // Red
     },
   ];
 
@@ -137,21 +137,21 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
       'title': 'LOW SEVERITY',
       'description':
           'Minor water accumulation. No immediate threat. Safe to proceed with caution.',
-      'color': Color(0xFF00E676), // Green
+      'color': Color(0xFF34D399), // Green
       'hasBorder': false,
     },
     {
       'title': 'MEDIUM SEVERITY',
       'description':
           'Water reaching yard / waist level. Roads partially blocked.',
-      'color': Color(0xFFFF9F0A), // Amber / Orange
+      'color': Color(0xFFFB923C), // Amber / Orange
       'hasBorder': false,
     },
     {
       'title': 'HIGH / CRITICAL',
       'description':
           'Life-threatening. Homes flooded. Urgent rescue or boat needed.',
-      'color': Color(0xFFFF3B3B), // Red
+      'color': Color(0xFFF87171), // Red
       'hasBorder': true,
     },
   ];
@@ -197,7 +197,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     for (var h in _hazards) {
       if (h['title'] == hazard) return h['color'] as Color;
     }
-    return const Color(0xFF40C4FF);
+    return const Color(0xFF38BDF8);
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -227,7 +227,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       : 'Gallery photo selected & attached.')),
                 ],
               ),
-              backgroundColor: const Color(0xFF00E676),
+              backgroundColor: const Color(0xFF34D399),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               duration: const Duration(seconds: 2),
@@ -241,7 +241,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to access image: $e'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: Color(0xFFDC2626),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -252,7 +252,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   void _showAddPhotoSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -287,10 +287,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF9F0A).withValues(alpha: 0.15),
+                  color: const Color(0xFFFB923C).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.camera_alt_rounded, color: Color(0xFFFF9F0A)),
+                child: const Icon(Icons.camera_alt_rounded, color: Color(0xFFFB923C)),
               ),
               title: const Text('Capture with Camera', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               subtitle: const Text('Auto-tags timestamp & GPS coordinates', style: TextStyle(color: Colors.white54, fontSize: 12)),
@@ -304,10 +304,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.photo_library_rounded, color: Color(0xFF40C4FF)),
+                child: const Icon(Icons.photo_library_rounded, color: Color(0xFF38BDF8)),
               ),
               title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               subtitle: const Text('Upload field image from device', style: TextStyle(color: Colors.white54, fontSize: 12)),
@@ -323,12 +323,12 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.redAccent.withValues(alpha: 0.15),
+                    color: Color(0xFFF87171).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                  child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171)),
                 ),
-                title: const Text('Remove Attached Photo', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                title: const Text('Remove Attached Photo', style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.w600)),
                 subtitle: const Text('Clear the currently attached image', style: TextStyle(color: Colors.white54, fontSize: 12)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -356,7 +356,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -393,7 +393,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _selectedNote == note
-                          ? const Color(0xFFFF9F0A)
+                          ? const Color(0xFFFB923C)
                           : const Color(0xFF223454),
                     ),
                   ),
@@ -403,7 +403,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       style: const TextStyle(color: Colors.white, fontSize: 13.5),
                     ),
                     trailing: _selectedNote == note
-                        ? const Icon(Icons.check_circle_rounded, color: Color(0xFFFF9F0A), size: 20)
+                        ? const Icon(Icons.check_circle_rounded, color: Color(0xFFFB923C), size: 20)
                         : null,
                     onTap: () {
                       setState(() => _selectedNote = note);
@@ -458,7 +458,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               child: FractionallySizedBox(
                 widthFactor: 0.33,
                 child: ColoredBox(
-                  color: Color(0xFFFF6D00),
+                  color: Color(0xFF38BDF8),
                   child: SizedBox(height: 3),
                 ),
               ),
@@ -507,7 +507,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               Text(
                 'STEP ${_currentStep + 1} OF 3',
                 style: const TextStyle(
-                  color: Color(0xFF8B9BB4),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.0,
@@ -533,21 +533,21 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.12),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.35),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.35),
                     ),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.circle, color: Color(0xFF00E676), size: 7),
+                      Icon(Icons.circle, color: Color(0xFF34D399), size: 7),
                       SizedBox(width: 5),
                       Text(
                         'ONLINE',
                         style: TextStyle(
-                          color: Color(0xFF00E676),
+                          color: Color(0xFF34D399),
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
@@ -593,7 +593,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               Text(
                 'Step 1 of 3',
                 style: TextStyle(
-                  color: Color(0xFFFF6D00),
+                  color: Color(0xFF38BDF8),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
@@ -601,7 +601,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               Text(
                 'Select Hazard',
                 style: TextStyle(
-                  color: Color(0xFF8B9BB4),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -622,7 +622,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           const Text(
             'Tap the hazard category that best reflects the current ground reality.',
             style: TextStyle(
-              color: Color(0xFF94A3B8),
+              color: Color(0xFFB6C2D6),
               fontSize: 14,
               height: 1.4,
             ),
@@ -673,10 +673,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFF1E293B),
+                color: const Color(0xFF1C2740),
                 width: 1.2,
               ),
             ),
@@ -709,7 +709,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       const Text(
                         'Selected Hazard',
                         style: TextStyle(
-                          color: Color(0xFF8B9BB4),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 11.5,
                           fontWeight: FontWeight.w500,
                         ),
@@ -730,7 +730,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   onPressed: () => setState(() => _currentStep = 0),
                   child: const Text(
                     'Change',
-                    style: TextStyle(color: Color(0xFFFF8F5A), fontSize: 13),
+                    style: TextStyle(color: Color(0xFF7DD3FC), fontSize: 13),
                   ),
                 ),
               ],
@@ -820,13 +820,13 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                   width: 44,
                                   height: 44,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.28),
+                                    color: const Color(0xFFFB923C).withValues(alpha: 0.28),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
                                 const Icon(
                                   Icons.location_on_rounded,
-                                  color: Color(0xFFFF9F0A),
+                                  color: Color(0xFFFB923C),
                                   size: 34,
                                 ),
                                 const Positioned(
@@ -858,8 +858,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: _hasGpsLock
-                                ? const Color(0xFF00E676).withValues(alpha: 0.8)
-                                : const Color(0xFFFF9F0A).withValues(alpha: 0.8),
+                                ? const Color(0xFF34D399).withValues(alpha: 0.8)
+                                : const Color(0xFFFB923C).withValues(alpha: 0.8),
                             width: 1.2,
                           ),
                         ),
@@ -871,8 +871,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                   ? Icons.check_circle_outline_rounded
                                   : Icons.gps_fixed_rounded,
                               color: _hasGpsLock
-                                  ? const Color(0xFF00E676)
-                                  : const Color(0xFFFF9F0A),
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFFFB923C),
                               size: 16,
                             ),
                             const SizedBox(width: 6),
@@ -882,8 +882,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                   : (_hasGpsLock ? 'GPS LOCKED' : 'LOCK GPS'),
                               style: TextStyle(
                                 color: _hasGpsLock
-                                    ? const Color(0xFF00E676)
-                                    : const Color(0xFFFF9F0A),
+                                    ? const Color(0xFF34D399)
+                                    : const Color(0xFFFB923C),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.8,
@@ -917,12 +917,12 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Color(0xFF00E676),
+                                  color: Color(0xFF34D399),
                                 ),
                               )
                             : const Icon(
                                 Icons.my_location_rounded,
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 size: 18,
                               ),
                       ),
@@ -949,7 +949,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           Text(
             'Coordinates: ${_hazardCoords.latitude.toStringAsFixed(4)}° N, ${_hazardCoords.longitude.toStringAsFixed(4)}° E (±4 meters)',
             style: const TextStyle(
-              color: Color(0xFF8B9BB4),
+              color: Color(0xFFB6C2D6),
               fontSize: 13,
               fontWeight: FontWeight.w400,
             ),
@@ -979,7 +979,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(2),
                               decoration: const BoxDecoration(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -1004,7 +1004,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     child: Center(
                       child: Icon(
                         _photoAttached ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
-                        color: _photoAttached ? const Color(0xFF00E676) : const Color(0xFFFF9F0A),
+                        color: _photoAttached ? const Color(0xFF34D399) : const Color(0xFFFB923C),
                         size: 26,
                       ),
                     ),
@@ -1038,7 +1038,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               child: const Center(
                 child: Icon(
                   Icons.mic_none_rounded,
-                  color: Color(0xFF8B9BB4),
+                  color: Color(0xFFB6C2D6),
                   size: 24,
                 ),
               ),
@@ -1055,10 +1055,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             height: 56,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF9F0A), // Vibrant Orange
+                backgroundColor: const Color(0xFFFB923C), // Vibrant Orange
                 foregroundColor: const Color(0xFF140D07),
                 elevation: 4,
-                shadowColor: const Color(0xFFFF9F0A).withValues(alpha: 0.45),
+                shadowColor: const Color(0xFFFB923C).withValues(alpha: 0.45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -1124,16 +1124,16 @@ class _Step1HazardCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: const Color(0xFF131B2B), // Deep slate navy
+          color: const Color(0xFF131C2E), // Deep slate navy
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? const Color(0xFF00B0FF) : const Color(0xFF1E293B),
+            color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF1C2740),
             width: isSelected ? 2.0 : 1.2,
           ),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: const Color(0xFF00B0FF).withValues(alpha: 0.25),
+                color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               )
@@ -1192,12 +1192,12 @@ class _SeverityCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: (hasBorder || isSelected)
               ? color.withValues(alpha: 0.8)
-              : const Color(0xFF1E293B),
+              : const Color(0xFF1C2740),
           width: (hasBorder || isSelected) ? 1.4 : 1.0,
         ),
         boxShadow: [
@@ -1289,10 +1289,10 @@ class _ConfirmActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C2740),
           width: 1.2,
         ),
       ),
@@ -1323,7 +1323,7 @@ class _ConfirmActionCard extends StatelessWidget {
                       Text(
                         subtitle,
                         style: const TextStyle(
-                          color: Color(0xFF8B9BB4),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 12.5,
                         ),
                       ),

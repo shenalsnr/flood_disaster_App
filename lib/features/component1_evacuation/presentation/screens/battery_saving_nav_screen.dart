@@ -271,10 +271,10 @@ class _TopBar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF00E676).withValues(alpha: 0.12),
+              color: const Color(0xFF34D399).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
               border:
-                  Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.4)),
+                  Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.4)),
             ),
             child: const Row(
               children: [
@@ -282,7 +282,7 @@ class _TopBar extends StatelessWidget {
                 SizedBox(width: 5),
                 Text('LIVE',
                     style: TextStyle(
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.2)),
@@ -328,7 +328,7 @@ class _PulsingDotState extends State<_PulsingDot>
         width: 7,
         height: 7,
         decoration: const BoxDecoration(
-            color: Color(0xFF00E676), shape: BoxShape.circle),
+            color: Color(0xFF34D399), shape: BoxShape.circle),
       ),
     );
   }
@@ -360,7 +360,7 @@ class _DistanceDisplay extends StatelessWidget {
                 Text(
                   distanceText,
                   style: const TextStyle(
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     fontSize: 40,
                     fontWeight: FontWeight.w900,
                     height: 1,
@@ -434,14 +434,14 @@ class _DirectionalArrow extends StatelessWidget {
             height: 180,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF00E676).withValues(alpha: 0.07),
+              color: const Color(0xFF34D399).withValues(alpha: 0.07),
               border: Border.all(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.3),
                   width: 2),
             ),
             child: const Icon(
               Icons.navigation_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 110,
             ),
           ),
@@ -525,12 +525,12 @@ class _WaypointDot extends StatelessWidget {
           height: 18,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: done ? const Color(0xFF00E676) : const Color(0xFF222222),
+            color: done ? const Color(0xFF34D399) : const Color(0xFF222222),
             border: Border.all(
               color: done
-                  ? const Color(0xFF00E676)
+                  ? const Color(0xFF34D399)
                   : (isLast
-                      ? const Color(0xFF00E676).withValues(alpha: 0.4)
+                      ? const Color(0xFF34D399).withValues(alpha: 0.4)
                       : Colors.white24),
               width: 2,
             ),
@@ -539,13 +539,13 @@ class _WaypointDot extends StatelessWidget {
               ? const Icon(Icons.check_rounded, size: 12, color: Colors.black)
               : isLast
                   ? const Icon(Icons.shield_rounded,
-                      size: 10, color: Color(0xFF00E676))
+                      size: 10, color: Color(0xFF34D399))
                   : null,
         ),
         const SizedBox(height: 4),
         Text(label,
             style: TextStyle(
-                color: done ? const Color(0xFF00E676) : Colors.white38,
+                color: done ? const Color(0xFF34D399) : Colors.white38,
                 fontSize: 10,
                 fontWeight:
                     done ? FontWeight.bold : FontWeight.normal)),
@@ -566,7 +566,7 @@ class _WaypointLine extends StatelessWidget {
         height: 2,
         margin: const EdgeInsets.only(bottom: 14),
         color: done
-            ? const Color(0xFF00E676)
+            ? const Color(0xFF34D399)
             : Colors.white12,
       ),
     );
@@ -588,7 +588,7 @@ class _ArrivedButton extends StatelessWidget {
         child: ElevatedButton.icon(
           key: const Key('arrived_btn'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00E676),
+            backgroundColor: const Color(0xFF34D399),
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),

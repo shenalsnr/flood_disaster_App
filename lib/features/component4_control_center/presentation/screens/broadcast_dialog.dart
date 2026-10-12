@@ -327,7 +327,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       messenger.showSnackBar(
         const SnackBar(
           content: Text('Zone alert sent. Citizens in the target area see it now.'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
     } catch (e) {
@@ -384,8 +384,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     Polygon(
                       points: p.outer,
                       holePointsList: p.holes.isEmpty ? null : p.holes,
-                      color: Colors.redAccent.withValues(alpha: 0.25),
-                      borderColor: Colors.redAccent,
+                      color: Color(0xFFF87171).withValues(alpha: 0.25),
+                      borderColor: Color(0xFFF87171),
                       borderStrokeWidth: 3,
                     ),
                 ],
@@ -397,8 +397,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     point: _point,
                     radius: _radius * 1000,
                     useRadiusInMeter: true,
-                    color: Colors.redAccent.withValues(alpha: 0.25),
-                    borderColor: Colors.redAccent,
+                    color: Color(0xFFF87171).withValues(alpha: 0.25),
+                    borderColor: Color(0xFFF87171),
                     borderStrokeWidth: 2,
                   ),
                 ],
@@ -410,7 +410,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   width: 40,
                   height: 40,
                   child: const Icon(Icons.location_on,
-                      color: Colors.redAccent, size: 38),
+                      color: Color(0xFFF87171), size: 38),
                 ),
               ],
             ),
@@ -521,7 +521,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
             left: 10,
             bottom: 10,
             child: Material(
-              color: Colors.redAccent,
+              color: Color(0xFFF87171),
               borderRadius: BorderRadius.circular(20),
               child: Padding(
                 padding: const EdgeInsets.only(left: 12, right: 4),
@@ -579,7 +579,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                           min: 0.5,
                           max: 15,
                           divisions: 29,
-                          activeColor: Colors.redAccent,
+                          activeColor: Color(0xFFF87171),
                           onChanged: (v) => setState(() => _radius = v),
                         ),
                       ),
@@ -637,9 +637,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         label: Text(s),
                         selected: _severity == s,
                         selectedColor: (s == 'Critical'
-                                ? const Color(0xFFFF5252)
+                                ? const Color(0xFFF87171)
                                 : s == 'Warning'
-                                    ? const Color(0xFFF59E0B)
+                                    ? const Color(0xFFFBBF24)
                                     : C4.blue)
                             .withValues(alpha: 0.3),
                         backgroundColor: C4.card,

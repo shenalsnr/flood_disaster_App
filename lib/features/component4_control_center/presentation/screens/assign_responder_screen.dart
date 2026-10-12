@@ -129,18 +129,18 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     // Show tactical confirmation toast
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF00E676), width: 1.5),
+          side: const BorderSide(color: Color(0xFF34D399), width: 1.5),
         ),
         content: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: const BoxDecoration(
-                color: Color(0xFF00E676),
+                color: Color(0xFF34D399),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.check, color: Colors.black, size: 16),
@@ -154,7 +154,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   const Text(
                     'DISPATCH ORDER TRANSMITTED',
                     style: TextStyle(
-                      color: Color(0xFF00E676),
+                      color: Color(0xFF34D399),
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.8,
@@ -187,9 +187,9 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     final incident = widget.incident;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
@@ -204,14 +204,14 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF6D00).withValues(alpha: 0.25),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFFFF6D00), width: 0.8),
+                    border: Border.all(color: const Color(0xFF38BDF8), width: 0.8),
                   ),
                   child: const Text(
                     'CREATE',
                     style: TextStyle(
-                      color: Color(0xFFFF6D00),
+                      color: Color(0xFF38BDF8),
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
                     ),
@@ -230,7 +230,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
             ),
             const Text(
               'CRUD: Create • Emergency Dispatch & Unit Allocation',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+              style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
         ),
@@ -265,11 +265,11 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676),
+                              color: const Color(0xFF34D399),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF00E676).withValues(alpha: _pulseAnimation.value),
+                                  color: const Color(0xFF34D399).withValues(alpha: _pulseAnimation.value),
                                   blurRadius: 4,
                                 ),
                               ],
@@ -280,7 +280,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         Text(
                           'TEAM RADIO LIST',
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: Color(0xFFB6C2D6),
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 1.0,
@@ -292,21 +292,21 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       padding:
                           const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: const Color(0xFF40C4FF).withValues(alpha: 0.5),
+                          color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
                         ),
                       ),
                       child: const Row(
                         children: [
                           Icon(Icons.sort_rounded,
-                              size: 12, color: Color(0xFF40C4FF)),
+                              size: 12, color: Color(0xFF38BDF8)),
                           SizedBox(width: 4),
                           Text(
                             'SORTED BY ETA (FASTEST)',
                             style: TextStyle(
-                              color: Color(0xFF40C4FF),
+                              color: Color(0xFF38BDF8),
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
                             ),
@@ -333,7 +333,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 const Text(
                   'DISPATCH MISSION PRIORITY',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
@@ -343,21 +343,21 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _priorityLevel,
-                      dropdownColor: const Color(0xFF1E293B),
+                      dropdownColor: const Color(0xFF1C2740),
                       isExpanded: true,
                       style: const TextStyle(
-                        color: Color(0xFFFF5252),
+                        color: Color(0xFFF87171),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
-                      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF64748B)),
+                      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF8A98B0)),
                       items: const [
                         DropdownMenuItem(
                           value: 'CODE RED (CRITICAL EVACUATION)',
@@ -388,7 +388,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     Flexible(child: Text(
                       'DISPATCHER TACTICAL NOTES',
                       style: TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: Color(0xFFB6C2D6),
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.0,
@@ -397,7 +397,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     Flexible(child: Text(
                       'RADIO BRIEFING',
                       style: TextStyle(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.8),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.8),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -411,21 +411,21 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF131B2B),
+                    fillColor: const Color(0xFF131C2E),
                     hintText: 'Enter mission briefing notes for squad...',
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+                          const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
                     ),
                   ),
                 ),
@@ -450,15 +450,15 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _selectedTeam.isAvailable
-                        ? const Color(0xFFFF6D00)
-                        : const Color(0xFF334155),
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFF2B3A55),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: _selectedTeam.isAvailable ? 6 : 0,
-                    shadowColor: const Color(0xFFFF6D00).withValues(alpha: 0.5),
+                    shadowColor: const Color(0xFF38BDF8).withValues(alpha: 0.5),
                   ),
                   icon: const Icon(Icons.send_rounded, size: 20),
                   label: Text(
@@ -500,13 +500,13 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isAdded
-              ? const Color(0xFF00E676).withValues(alpha: 0.15)
-              : const Color(0xFF1E293B),
+              ? const Color(0xFF34D399).withValues(alpha: 0.15)
+              : const Color(0xFF1C2740),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isAdded
-                ? const Color(0xFF00E676).withValues(alpha: 0.5)
-                : const Color(0xFF334155),
+                ? const Color(0xFF34D399).withValues(alpha: 0.5)
+                : const Color(0xFF2B3A55),
           ),
         ),
         child: Row(
@@ -515,13 +515,13 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
             Icon(
               isAdded ? Icons.check : Icons.add,
               size: 12,
-              color: isAdded ? const Color(0xFF00E676) : const Color(0xFF94A3B8),
+              color: isAdded ? const Color(0xFF34D399) : const Color(0xFFB6C2D6),
             ),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-                color: isAdded ? const Color(0xFF00E676) : const Color(0xFF94A3B8),
+                color: isAdded ? const Color(0xFF34D399) : const Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
               ),
@@ -536,13 +536,13 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     Color severityColor;
     switch (incident.severity) {
       case IncidentSeverity.critical:
-        severityColor = const Color(0xFFFF5252);
+        severityColor = const Color(0xFFF87171);
         break;
       case IncidentSeverity.high:
-        severityColor = const Color(0xFFF59E0B);
+        severityColor = const Color(0xFFFBBF24);
         break;
       case IncidentSeverity.medium:
-        severityColor = const Color(0xFFFFB020);
+        severityColor = const Color(0xFFFBBF24);
         break;
       case IncidentSeverity.low:
         severityColor = const Color(0xFF10B981);
@@ -554,15 +554,15 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFF6D00).withValues(alpha: 0.06),
-            const Color(0xFF131B2B),
+            const Color(0xFF38BDF8).withValues(alpha: 0.06),
+            const Color(0xFF131C2E),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+          color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
           width: 1.2,
         ),
         boxShadow: [
@@ -581,18 +581,18 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.assignment_late_rounded,
-                    color: Color(0xFFFF6D00), size: 16),
+                    color: Color(0xFF38BDF8), size: 16),
               ),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'TARGET INCIDENT FOR FIELD DEPLOYMENT:',
                   style: TextStyle(
-                    color: Color(0xFFFF6D00),
+                    color: Color(0xFF38BDF8),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.0,
@@ -633,7 +633,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           Text(
             incident.location,
             style: const TextStyle(
-              color: Color(0xFF40C4FF),
+              color: Color(0xFF38BDF8),
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -642,12 +642,12 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF070B14),
+              color: const Color(0xFF0B1220),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                const Icon(Icons.water, color: Color(0xFF40C4FF), size: 14),
+                const Icon(Icons.water, color: Color(0xFF38BDF8), size: 14),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -658,12 +658,12 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     ),
                   ),
                 ),
-                const Icon(Icons.gps_fixed, color: Color(0xFF64748B), size: 13),
+                const Icon(Icons.gps_fixed, color: Color(0xFF8A98B0), size: 13),
                 const SizedBox(width: 4),
                 Flexible(child: Text(
                   '${incident.coordinates.latitude.toStringAsFixed(3)}°, ${incident.coordinates.longitude.toStringAsFixed(3)}°',
                   style: const TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 10,
                     fontFamily: 'monospace',
                   ),
@@ -697,7 +697,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 avatar: Icon(
                   f['icon'] as IconData,
                   size: 14,
-                  color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                  color: isSelected ? Colors.white : const Color(0xFFB6C2D6),
                 ),
                 label: Text(f['label'] as String),
                 selected: isSelected,
@@ -707,16 +707,16 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   }
                 },
                 selectedColor: const Color(0xFF0284C7),
-                backgroundColor: const Color(0xFF070B14),
+                backgroundColor: const Color(0xFF0B1220),
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                  color: isSelected ? Colors.white : const Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
                 side: BorderSide(
                   color: isSelected
-                      ? const Color(0xFF40C4FF)
-                      : const Color(0xFF334155),
+                      ? const Color(0xFF38BDF8)
+                      : const Color(0xFF2B3A55),
                 ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -756,8 +756,8 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           gradient: isSelected
               ? LinearGradient(
                   colors: [
-                    const Color(0xFFFF6D00).withValues(alpha: 0.08),
-                    const Color(0xFF1E293B),
+                    const Color(0xFF38BDF8).withValues(alpha: 0.08),
+                    const Color(0xFF1C2740),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -766,21 +766,21 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
           color: isSelected
               ? null
               : isAvailable
-                  ? const Color(0xFF131B2B)
+                  ? const Color(0xFF131C2E)
                   : const Color(0xFF090D17),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFFFF6D00)
+                ? const Color(0xFF38BDF8)
                 : isAvailable
-                    ? const Color(0xFF1E293B)
-                    : const Color(0xFF1E293B).withValues(alpha: 0.4),
+                    ? const Color(0xFF1C2740)
+                    : const Color(0xFF1C2740).withValues(alpha: 0.4),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFFF6D00).withValues(alpha: 0.2),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -803,19 +803,19 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFFF6D00)
+                          ? const Color(0xFF38BDF8)
                           : isAvailable
-                              ? const Color(0xFF64748B)
-                              : const Color(0xFF334155),
+                              ? const Color(0xFF8A98B0)
+                              : const Color(0xFF2B3A55),
                       width: 2,
                     ),
                     color: isSelected
-                        ? const Color(0xFFFF6D00)
+                        ? const Color(0xFF38BDF8)
                         : Colors.transparent,
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                              color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
                               blurRadius: 6,
                             ),
                           ]
@@ -849,18 +849,18 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF40C4FF)
+                              color: const Color(0xFF38BDF8)
                                   .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: const Color(0xFF40C4FF)
+                                color: const Color(0xFF38BDF8)
                                     .withValues(alpha: 0.4),
                               ),
                             ),
                             child: Text(
                               team.callSign,
                               style: const TextStyle(
-                                color: Color(0xFF40C4FF),
+                                color: Color(0xFF38BDF8),
                                 fontSize: 9,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.5,
@@ -874,7 +874,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         '${team.leader} • Crew of ${team.crewCount} • ${team.radioChannel}',
                         style: TextStyle(
                           color: isAvailable
-                              ? const Color(0xFF94A3B8)
+                              ? const Color(0xFFB6C2D6)
                               : Colors.white24,
                           fontSize: 11,
                         ),
@@ -889,12 +889,12 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isAvailable
-                        ? const Color(0xFF00E676).withValues(alpha: 0.15)
+                        ? const Color(0xFF34D399).withValues(alpha: 0.15)
                         : Colors.white12,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color: isAvailable
-                          ? const Color(0xFF00E676)
+                          ? const Color(0xFF34D399)
                           : Colors.transparent,
                       width: 1,
                     ),
@@ -907,7 +907,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                           width: 6,
                           height: 6,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF00E676),
+                            color: Color(0xFF34D399),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -917,7 +917,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                         team.status,
                         style: TextStyle(
                           color: isAvailable
-                              ? const Color(0xFF00E676)
+                              ? const Color(0xFF34D399)
                               : Colors.white38,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
@@ -933,18 +933,18 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF070B14),
+                color: const Color(0xFF0B1220),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  Icon(vehicleIcon, color: const Color(0xFF40C4FF), size: 16),
+                  Icon(vehicleIcon, color: const Color(0xFF38BDF8), size: 16),
                   const SizedBox(width: 6),
                   Flexible(child: Text(
                     'ETA: ${team.eta}',
                     style: TextStyle(
                       color: isAvailable
-                          ? const Color(0xFF00E676)
+                          ? const Color(0xFF34D399)
                           : Colors.white24,
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
@@ -960,14 +960,14 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                   const Spacer(),
                   Icon(Icons.bolt,
                       color: isAvailable
-                          ? const Color(0xFFFFB020)
+                          ? const Color(0xFFFBBF24)
                           : Colors.white24,
                       size: 14),
                   Flexible(child: Text(
                     ' ${team.speedKmh.toInt()} km/h',
                     style: TextStyle(
                       color: isAvailable
-                          ? const Color(0xFF94A3B8)
+                          ? const Color(0xFFB6C2D6)
                           : Colors.white24,
                       fontSize: 10,
                     ),
@@ -981,13 +981,13 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                       borderRadius: BorderRadius.circular(3),
                       child: LinearProgressIndicator(
                         value: team.fuelLevel / 100.0,
-                        backgroundColor: const Color(0xFF1E293B),
+                        backgroundColor: const Color(0xFF1C2740),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           team.fuelLevel > 50
-                              ? const Color(0xFF00E676)
+                              ? const Color(0xFF34D399)
                               : team.fuelLevel > 25
-                                  ? const Color(0xFFFFB020)
-                                  : const Color(0xFFFF5252),
+                                  ? const Color(0xFFFBBF24)
+                                  : const Color(0xFFF87171),
                         ),
                       ),
                     ),
@@ -997,7 +997,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                     '${team.fuelLevel}%',
                     style: TextStyle(
                       color: isAvailable
-                          ? const Color(0xFF94A3B8)
+                          ? const Color(0xFFB6C2D6)
                           : Colors.white24,
                       fontSize: 10,
                     ),
@@ -1011,7 +1011,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
               child: Text(
                 'Gear: ${team.equipment}',
                 style: TextStyle(
-                  color: isAvailable ? const Color(0xFF64748B) : Colors.white24,
+                  color: isAvailable ? const Color(0xFF8A98B0) : Colors.white24,
                   fontSize: 10,
                 ),
                 maxLines: 1,
@@ -1123,10 +1123,10 @@ class _DispatchConfirmationModalState
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF131B2B),
+        color: Color(0xFF131C2E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
-          top: BorderSide(color: Color(0xFFFF6D00), width: 2),
+          top: BorderSide(color: Color(0xFF38BDF8), width: 2),
         ),
       ),
       padding: EdgeInsets.only(
@@ -1158,14 +1158,14 @@ class _DispatchConfirmationModalState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFF00E676)),
+                  border: Border.all(color: const Color(0xFF34D399)),
                 ),
                 child: const Text(
                   'CONFIRM',
                   style: TextStyle(
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1195,46 +1195,46 @@ class _DispatchConfirmationModalState
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFF070B14),
+              color: const Color(0xFF0B1220),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF1E293B)),
+              border: Border.all(color: const Color(0xFF1C2740)),
             ),
             child: Column(
               children: [
                 _buildDossierRow(
                   'TARGET INCIDENT',
                   '#${widget.incident.shortId} • ${widget.incident.title}',
-                  const Color(0xFFFF6D00),
+                  const Color(0xFF38BDF8),
                 ),
-                const Divider(color: Color(0xFF1E293B), height: 16),
+                const Divider(color: Color(0xFF1C2740), height: 16),
                 _buildDossierRow(
                   'ASSIGNED UNIT',
                   '${widget.team.name} (${widget.team.callSign})',
-                  const Color(0xFF40C4FF),
+                  const Color(0xFF38BDF8),
                 ),
-                const Divider(color: Color(0xFF1E293B), height: 16),
+                const Divider(color: Color(0xFF1C2740), height: 16),
                 _buildDossierRow(
                   'SQUAD LEADER',
                   '${widget.team.leader} • Crew of ${widget.team.crewCount}',
                   Colors.white,
                 ),
-                const Divider(color: Color(0xFF1E293B), height: 16),
+                const Divider(color: Color(0xFF1C2740), height: 16),
                 _buildDossierRow(
                   'RADIO COMMS',
                   '${widget.team.radioChannel} • Signal 98%',
-                  const Color(0xFF00E676),
+                  const Color(0xFF34D399),
                 ),
-                const Divider(color: Color(0xFF1E293B), height: 16),
+                const Divider(color: Color(0xFF1C2740), height: 16),
                 _buildDossierRow(
                   'ESTIMATED ARRIVAL',
                   'ETA: ${widget.team.eta} (${widget.team.distance})',
-                  const Color(0xFFFFB020),
+                  const Color(0xFFFBBF24),
                 ),
-                const Divider(color: Color(0xFF1E293B), height: 16),
+                const Divider(color: Color(0xFF1C2740), height: 16),
                 _buildDossierRow(
                   'PRIORITY ORDER',
                   widget.priorityLevel,
-                  const Color(0xFFFF5252),
+                  const Color(0xFFF87171),
                 ),
               ],
             ),
@@ -1246,7 +1246,7 @@ class _DispatchConfirmationModalState
           const Text(
             'PRE-DEPLOYMENT PROTOCOL VERIFICATION:',
             style: TextStyle(
-              color: Color(0xFF94A3B8),
+              color: Color(0xFFB6C2D6),
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.8,
@@ -1287,14 +1287,14 @@ class _DispatchConfirmationModalState
           // Action Button
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00E676),
+              backgroundColor: const Color(0xFF34D399),
               foregroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 8,
-              shadowColor: const Color(0xFF00E676).withValues(alpha: 0.5),
+              shadowColor: const Color(0xFF34D399).withValues(alpha: 0.5),
             ),
             icon: _isTransmitting
                 ? const SizedBox(
@@ -1334,7 +1334,7 @@ class _DispatchConfirmationModalState
             Checkbox(
               value: value,
               onChanged: onChanged,
-              activeColor: const Color(0xFF00E676),
+              activeColor: const Color(0xFF34D399),
               checkColor: Colors.black,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               visualDensity: VisualDensity.compact,
@@ -1342,14 +1342,14 @@ class _DispatchConfirmationModalState
             Icon(
               icon,
               size: 14,
-              color: value ? const Color(0xFF00E676) : const Color(0xFF475569),
+              color: value ? const Color(0xFF34D399) : const Color(0xFF475569),
             ),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: value ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                  color: value ? const Color(0xFFCBD5E1) : const Color(0xFF8A98B0),
                   fontSize: 11,
                 ),
               ),
@@ -1367,7 +1367,7 @@ class _DispatchConfirmationModalState
         Flexible(child: Text(
           label,
           style: const TextStyle(
-            color: Color(0xFF64748B),
+            color: Color(0xFF8A98B0),
             fontSize: 10,
             fontWeight: FontWeight.w800,
           ),

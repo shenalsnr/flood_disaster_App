@@ -214,7 +214,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
         ),
         title: const Row(
           children: [
-            Icon(Icons.location_off_outlined, color: Color(0xFFFF9F0A)),
+            Icon(Icons.location_off_outlined, color: Color(0xFFFB923C)),
             SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -232,7 +232,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFF00E676),
+              backgroundColor: const Color(0xFF34D399),
               foregroundColor: Colors.black,
             ),
             onPressed: () => Navigator.pop(ctx, 'go'),
@@ -313,7 +313,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(
           content: Text(notice),
-          backgroundColor: const Color(0xFFFF9F0A),
+          backgroundColor: const Color(0xFFFB923C),
           duration: const Duration(seconds: 8),
           showCloseIcon: true,
         ));
@@ -522,10 +522,10 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     for (final z in _zones) {
       if (!z.hasLocation || z.id == target?.id) continue;
       final color = z.state == SafeZoneState.open
-          ? const Color(0xFF00E676).withValues(alpha: 0.6)
+          ? const Color(0xFF34D399).withValues(alpha: 0.6)
           : z.state == SafeZoneState.full
-              ? const Color(0xFFFF9F0A)
-              : const Color(0xFFFF5252);
+              ? const Color(0xFFFB923C)
+              : const Color(0xFFF87171);
       markers.add(Marker(
         point: z.point,
         width: 44,
@@ -624,9 +624,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                       points: hasRoad
                           ? [_userLocation, ..._routePoints, target.point]
                           : [_userLocation, target.point],
-                      color: const Color(0xFF00E676),
+                      color: const Color(0xFF34D399),
                       strokeWidth: 5.0,
-                      borderColor: const Color(0xFF00E676),
+                      borderColor: const Color(0xFF34D399),
                       borderStrokeWidth: 1.5,
                     ),
                   ],
@@ -697,14 +697,14 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFF9F0A)),
+                    border: Border.all(color: const Color(0xFFFB923C)),
                   ),
                   child: Text(
                     _locIssue == _LocIssue.none
                         ? 'Finding your location...'
                         : 'Location is off - tap to turn on (demo location shown)',
                     style:
-                        const TextStyle(color: Color(0xFFFF9F0A), fontSize: 11),
+                        const TextStyle(color: Color(0xFFFB923C), fontSize: 11),
                   ),
                 ),
               ),
@@ -723,12 +723,12 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                   shape: BoxShape.circle,
                   color: Colors.black.withValues(alpha: 0.6),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.2),
                       blurRadius: 12,
                       spreadRadius: 2,
                     ),
@@ -736,7 +736,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                 ),
                 child: const Icon(
                   Icons.battery_saver_rounded,
-                  color: Color(0xFF00E676),
+                  color: Color(0xFF34D399),
                   size: 28,
                 ),
               ),
@@ -932,7 +932,7 @@ class _SafeZoneMarker extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF00E676),
+            color: const Color(0xFF34D399),
             borderRadius: BorderRadius.circular(6),
           ),
           child: const Text(
@@ -945,7 +945,7 @@ class _SafeZoneMarker extends StatelessWidget {
             ),
           ),
         ),
-        const Icon(Icons.location_pin, color: Color(0xFF00E676), size: 32),
+        const Icon(Icons.location_pin, color: Color(0xFF34D399), size: 32),
       ],
     );
   }
@@ -964,18 +964,18 @@ class _MapLegend extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.navigation_rounded, color: Color(0xFF40C4FF), size: 14),
+          Icon(Icons.navigation_rounded, color: Color(0xFF38BDF8), size: 14),
           SizedBox(width: 4),
           Text('You', style: TextStyle(color: Colors.white70, fontSize: 12)),
           SizedBox(width: 12),
-          Icon(Icons.location_pin, color: Color(0xFF00E676), size: 14),
+          Icon(Icons.location_pin, color: Color(0xFF34D399), size: 14),
           SizedBox(width: 4),
           Text(
             'Safe Zone',
             style: TextStyle(color: Colors.white70, fontSize: 12),
           ),
           SizedBox(width: 12),
-          Icon(Icons.remove, color: Color(0xFF00E676), size: 14),
+          Icon(Icons.remove, color: Color(0xFF34D399), size: 14),
           SizedBox(width: 4),
           Text('Route', style: TextStyle(color: Colors.white70, fontSize: 12)),
         ],
@@ -1063,16 +1063,16 @@ class _BottomActionCard extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: (hasTarget
-                          ? const Color(0xFF00E676)
-                          : const Color(0xFFFF9F0A))
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFFFB923C))
                       .withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   hasTarget ? Icons.shield_rounded : Icons.warning_amber_rounded,
                   color: hasTarget
-                      ? const Color(0xFF00E676)
-                      : const Color(0xFFFF9F0A),
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFFFB923C),
                   size: 24,
                 ),
               ),
@@ -1113,7 +1113,7 @@ class _BottomActionCard extends StatelessWidget {
                       Text(
                         '~$walkMinutes min',
                         style: const TextStyle(
-                          color: Color(0xFFFFD740),
+                          color: Color(0xFFFBBF24),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1162,18 +1162,18 @@ class _BottomActionCard extends StatelessWidget {
               height: 52,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFFF9F0A)),
+                  side: const BorderSide(color: Color(0xFFFB923C)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 onPressed: onCallDmc,
                 icon: const Icon(Icons.phone_in_talk_outlined,
-                    color: Color(0xFFFF9F0A)),
+                    color: Color(0xFFFB923C)),
                 label: const Text(
                   'CALL DMC HOTLINE 117',
                   style: TextStyle(
-                    color: Color(0xFFFF9F0A),
+                    color: Color(0xFFFB923C),
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
                   ),
@@ -1192,7 +1192,7 @@ class _BottomActionCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 key: const Key('start_navigating_btn'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00E676),
+                  backgroundColor: const Color(0xFF34D399),
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

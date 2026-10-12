@@ -54,7 +54,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
           'Water level reached 1.2m over the culvert on Kolonnawa Road. High velocity flow towards low-lying settlements. Sandbags deployed.',
       reporter: 'Kapila Perera (Volunteer)',
       icon: Icons.waves_rounded,
-      iconColor: Color(0xFFFF5252),
+      iconColor: Color(0xFFF87171),
       waterLevel: 1.2,
     ),
     HazardReportItem(
@@ -68,7 +68,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
           'Active slope slippage detected along the upper hill cut. Minor mudflow over the lower access path. Verification team en route.',
       reporter: 'Kapila Perera (Volunteer)',
       icon: Icons.landscape_rounded,
-      iconColor: Color(0xFFFFB300),
+      iconColor: Color(0xFFFBBF24),
       waterLevel: null,
     ),
   ];
@@ -124,25 +124,25 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
   Color _colorForHazard(String hazard) {
     final lower = hazard.toLowerCase();
     if (lower.contains('tree')) {
-      return const Color(0xFF22C55E); // Green
+      return const Color(0xFF34D399); // Green
     } else if (lower.contains('flood')) {
-      return const Color(0xFFFF5252); // Red / Coral
+      return const Color(0xFFF87171); // Red / Coral
     } else if (lower.contains('landslide')) {
-      return const Color(0xFFFFB300); // Amber
+      return const Color(0xFFFBBF24); // Amber
     } else if (lower.contains('road') || lower.contains('blocked') || lower.contains('blockage')) {
-      return const Color(0xFFFF5252); // Red
+      return const Color(0xFFF87171); // Red
     } else if (lower.contains('building')) {
       return const Color(0xFFCBD5E1); // Slate / White
     } else if (lower.contains('bridge')) {
-      return const Color(0xFFFF9F0A); // Orange
+      return const Color(0xFFFB923C); // Orange
     }
-    return const Color(0xFFFFB300);
+    return const Color(0xFFFBBF24);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       drawer: VolunteerDrawer(
         onProfileTap: () => setState(() => _selectedTabIndex = 3),
         onReportsTap: () => setState(() => _selectedTabIndex = 1),
@@ -157,7 +157,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
@@ -166,7 +166,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
           children: [
             const Icon(
               Icons.shield_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 24,
             ),
             const SizedBox(width: 8),
@@ -184,7 +184,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                   ),
                   TextSpan(
                     text: 'Safe',
-                    style: TextStyle(color: Color(0xFF00E676)),
+                    style: TextStyle(color: Color(0xFF34D399)),
                   ),
                 ],
               ),
@@ -196,7 +196,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
           IconButton(
             tooltip: 'Offline Drafts & Queue (SQLite)',
             icon: const Icon(Icons.storage_rounded,
-                color: Color(0xFFFF9F0A), size: 21),
+                color: Color(0xFFFB923C), size: 21),
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -214,10 +214,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.12),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.35),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.35),
                   ),
                 ),
                 child: Row(
@@ -229,11 +229,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                         width: 7,
                         height: 7,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF00E676),
+                          color: Color(0xFF34D399),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                               blurRadius: 6,
                               spreadRadius: 1,
                             ),
@@ -245,7 +245,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                     const Text(
                       'ONLINE',
                       style: TextStyle(
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.8,
@@ -275,7 +275,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
         decoration: const BoxDecoration(
           color: Color(0xFF0A111E),
           border: Border(
-            top: BorderSide(color: Color(0xFF1E293B), width: 1),
+            top: BorderSide(color: Color(0xFF1C2740), width: 1),
           ),
         ),
         child: BottomNavigationBar(
@@ -284,8 +284,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFFFF6D00),
-          unselectedItemColor: const Color(0xFF64748B),
+          selectedItemColor: const Color(0xFF38BDF8),
+          unselectedItemColor: const Color(0xFF8A98B0),
           selectedLabelStyle: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -329,8 +329,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
 
     return SafeArea(
       child: RefreshIndicator(
-        color: const Color(0xFFFF6D00),
-        backgroundColor: const Color(0xFF070B14),
+        color: const Color(0xFF38BDF8),
+        backgroundColor: const Color(0xFF0B1220),
         onRefresh: () async {
           setState(() {});
         },
@@ -352,7 +352,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                         const Text(
                           'District Volunteer',
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: Color(0xFFB6C2D6),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.2,
@@ -383,12 +383,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFF9F0A),
+                          color: const Color(0xFFFB923C),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF9F0A).withValues(alpha: 0.3),
+                            color: const Color(0xFFFB923C).withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 3),
                           ),
@@ -400,7 +400,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return const CircleAvatar(
-                              backgroundColor: Color(0xFFFF6D00),
+                              backgroundColor: Color(0xFF38BDF8),
                               child: Text(
                                 'KP',
                                 style: TextStyle(
@@ -427,12 +427,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                   color: const Color(0xFF1E1117), // Deep dark reddish/black
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFFF3B3B).withValues(alpha: 0.6),
+                    color: const Color(0xFFF87171).withValues(alpha: 0.6),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF3B3B).withValues(alpha: 0.12),
+                      color: const Color(0xFFF87171).withValues(alpha: 0.12),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -444,12 +444,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF3B3B).withValues(alpha: 0.15),
+                        color: const Color(0xFFF87171).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.warning_amber_rounded,
-                        color: Color(0xFFFF3B3B),
+                        color: Color(0xFFF87171),
                         size: 24,
                       ),
                     ),
@@ -461,7 +461,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                           Text(
                             'Kelani River Level: WARNING',
                             style: TextStyle(
-                              color: Color(0xFFFF3B3B),
+                              color: Color(0xFFF87171),
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.2,
@@ -509,7 +509,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                     child: const Text(
                       'View All',
                       style: TextStyle(
-                        color: Color(0xFFFF8F5A),
+                        color: Color(0xFF7DD3FC),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -602,7 +602,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             const SizedBox(height: 4),
             const Text(
               'Live reports submitted by you and the District Operations Unit.',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+              style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -683,7 +683,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                   height: 50,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF5252).withValues(alpha: 0.9),
+                      color: const Color(0xFFF87171).withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
                       boxShadow: const [
@@ -703,7 +703,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                   height: 50,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFB300).withValues(alpha: 0.9),
+                      color: const Color(0xFFFBBF24).withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
                       boxShadow: const [
@@ -727,14 +727,14 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B).withValues(alpha: 0.92),
+                color: const Color(0xFF131C2E).withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFF334155)),
+                border: Border.all(color: const Color(0xFF2B3A55)),
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.location_searching_rounded, color: Color(0xFF00E676), size: 20),
+                  Icon(Icons.location_searching_rounded, color: Color(0xFF34D399), size: 20),
                   SizedBox(width: 8),
                   Text(
                     'Active Volunteer Sector: Kelani Basin',
@@ -769,10 +769,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                 height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFFF9F0A), width: 3),
+                  border: Border.all(color: const Color(0xFFFB923C), width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF9F0A).withValues(alpha: 0.4),
+                      color: const Color(0xFFFB923C).withValues(alpha: 0.4),
                       blurRadius: 18,
                     ),
                   ],
@@ -802,22 +802,22 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             const SizedBox(height: 4),
             Text(
               userEmail,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 14),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                color: const Color(0xFF34D399).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.4),
                 ),
               ),
               child: const Text(
                 'OFFICIAL DISTRICT VOLUNTEER',
                 style: TextStyle(
-                  color: Color(0xFF00E676),
+                  color: Color(0xFF34D399),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
@@ -829,11 +829,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             // Metrics row
             Row(
               children: [
-                _buildStatTile('24', 'Reports Sent', const Color(0xFFFF6D00)),
+                _buildStatTile('24', 'Reports Sent', const Color(0xFF38BDF8)),
                 const SizedBox(width: 12),
-                _buildStatTile('19', 'Verified', const Color(0xFF00E676)),
+                _buildStatTile('19', 'Verified', const Color(0xFF34D399)),
                 const SizedBox(width: 12),
-                _buildStatTile('100%', 'Sync Rate', const Color(0xFF40C4FF)),
+                _buildStatTile('100%', 'Sync Rate', const Color(0xFF38BDF8)),
               ],
             ),
 
@@ -842,18 +842,18 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B),
+                color: const Color(0xFF131C2E),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                border: Border.all(color: const Color(0xFF1C2740)),
               ),
               child: Column(
                 children: [
                   _buildProfileRow('Badge ID', 'VOL-WP-2026-084'),
-                  const Divider(color: Color(0xFF1E293B), height: 24),
+                  const Divider(color: Color(0xFF1C2740), height: 24),
                   _buildProfileRow('Division', 'Kolonnawa / Colombo East'),
-                  const Divider(color: Color(0xFF1E293B), height: 24),
+                  const Divider(color: Color(0xFF1C2740), height: 24),
                   _buildProfileRow('Emergency Role', 'Flood Scout & Water Gauge'),
-                  const Divider(color: Color(0xFF1E293B), height: 24),
+                  const Divider(color: Color(0xFF1C2740), height: 24),
                   _buildProfileRow('Affiliation', 'DMC Community Network'),
                 ],
               ),
@@ -869,9 +869,9 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF131B2B),
+          color: const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF1E293B)),
+          border: Border.all(color: const Color(0xFF1C2740)),
         ),
         child: Column(
           children: [
@@ -886,7 +886,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11.5),
+              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11.5),
             ),
           ],
         ),
@@ -898,7 +898,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(child: Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5))),
+        Flexible(child: Text(label, style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13.5))),
         Flexible(child: Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5))),
       ],
     );
@@ -957,9 +957,9 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [
-                Color(0xFFFFB300), // Rich amber gold
+                Color(0xFFFBBF24), // Rich amber gold
                 Color(0xFFFF8F00), // Vibrant amber
-                Color(0xFFFF6D00), // Deep energetic orange
+                Color(0xFF38BDF8), // Deep energetic orange
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -967,7 +967,7 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF6D00).withValues(alpha: 0.42),
+                color: const Color(0xFF38BDF8).withValues(alpha: 0.42),
                 blurRadius: 30,
                 offset: const Offset(0, 14),
                 spreadRadius: -2,
@@ -1093,7 +1093,7 @@ class _RecentReportCard extends StatelessWidget {
         color: const Color(0xFF111B2E), // Dark navy card
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C2740),
           width: 1,
         ),
         boxShadow: [
@@ -1153,7 +1153,7 @@ class _RecentReportCard extends StatelessWidget {
                       Text(
                         '${report.location} • ${report.timeAgo}',
                         style: const TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                         ),
@@ -1171,21 +1171,21 @@ class _RecentReportCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isVerified
-                        ? const Color(0xFF00E676).withValues(alpha: 0.12)
-                        : const Color(0xFFFFB300).withValues(alpha: 0.12),
+                        ? const Color(0xFF34D399).withValues(alpha: 0.12)
+                        : const Color(0xFFFBBF24).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color: isVerified
-                          ? const Color(0xFF00E676).withValues(alpha: 0.3)
-                          : const Color(0xFFFFB300).withValues(alpha: 0.3),
+                          ? const Color(0xFF34D399).withValues(alpha: 0.3)
+                          : const Color(0xFFFBBF24).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
                     report.status.toUpperCase(),
                     style: TextStyle(
                       color: isVerified
-                          ? const Color(0xFF00E676)
-                          : const Color(0xFFFFB300),
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFFFBBF24),
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,

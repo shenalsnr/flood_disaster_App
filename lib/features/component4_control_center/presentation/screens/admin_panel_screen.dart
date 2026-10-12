@@ -21,13 +21,13 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
-  static const Color _orange = Color(0xFFFF9F0A);
+  static const Color _bg = Color(0xFF131C2E);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _orange = Color(0xFFFB923C);
 
   final _service = AdminUserService.instance;
   String _filter = 'all'; // 'all' or a role key
@@ -72,7 +72,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
-      backgroundColor: error ? Colors.redAccent : const Color(0xFF1E293B),
+      backgroundColor: error ? Color(0xFFDC2626) : const Color(0xFF1C2740),
     ));
   }
 
@@ -124,6 +124,42 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     if (ok == true) {
       await _run(() => _service.deleteUser(u.email), '${u.name} deleted');
     }
+  }
+
+  Future<void> _editDetails(_UserRow u) async {
+    Map<String, dynamic>? data;
+    try {
+      data = await _service.getUser(u.email).timeout(const Duration(seconds: 10));
+    } catch (e) {
+      _toast('Could not load the account: $e', error: true);
+      return;
+    }
+    if (!mounted) return;
+    final res = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => _EditDetailsDialog(
+        name: (data?['fullName'] as String?) ?? u.name,
+        email: u.email,
+        phone: (data?['phoneNumber'] as String?) ?? '',
+        nic: (data?['nic'] as String?) ?? '',
+      ),
+    );
+    if (res == null) return;
+    final newEmail = (res['email'] ?? u.email).toLowerCase().trim();
+    if (u.email == _myEmail && newEmail != u.email) {
+      _toast('You cannot change your own sign-in email here.', error: true);
+      return;
+    }
+    await _run(
+      () => _service.updateDetails(
+        oldEmail: u.email,
+        fullName: res['name'] ?? u.name,
+        newEmail: newEmail,
+        phone: res['phone'] ?? '',
+        nic: res['nic'] ?? '',
+      ),
+      'Details updated',
+    );
   }
 
   Future<void> _changeRole(_UserRow u) async {
@@ -361,7 +397,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   static InputDecoration _decoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+        hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
         filled: true,
         fillColor: _bg,
         contentPadding:
@@ -636,12 +672,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 color: _card,
                 icon: const Icon(Icons.more_horiz, color: _muted),
                 onSelected: (v) {
+                  if (v == 'edit') _editDetails(u);
                   if (v == 'role') _changeRole(u);
                   if (v == 'area') _changeArea(u);
                   if (v == 'pw') _resetPassword(u);
                   if (v == 'del') _delete(u);
                 },
                 itemBuilder: (_) => [
+                  const PopupMenuItem(
+                      value: 'edit',
+                      child: Text('Edit details',
+                          style: TextStyle(color: Colors.white))),
                   if (isStaff)
                     const PopupMenuItem(
                         value: 'role',
@@ -721,9 +762,9 @@ class _AddStaffDialog extends StatefulWidget {
 }
 
 class _AddStaffDialogState extends State<_AddStaffDialog> {
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
 
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
@@ -901,10 +942,10 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                     return ChoiceChip(
                       showCheckmark: false,
                       selected: sel,
-                      backgroundColor: const Color(0xFF070B14),
+                      backgroundColor: const Color(0xFF0B1220),
                       selectedColor: _accent.withValues(alpha: 0.2),
                       side: BorderSide(
-                          color: sel ? _accent : const Color(0xFF1E293B)),
+                          color: sel ? _accent : const Color(0xFF1C2740)),
                       label: Text(e.value,
                           style: TextStyle(
                               color: sel ? _accent : Colors.white,
@@ -957,7 +998,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   const SizedBox(height: 10),
                   Text(_error!,
                       style: const TextStyle(
-                          color: Colors.redAccent, fontSize: 12)),
+                          color: Color(0xFFF87171), fontSize: 12)),
                 ],
                 const SizedBox(height: 16),
                 Row(
@@ -1016,7 +1057,7 @@ class _CampPicker extends StatelessWidget {
     final picked = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       builder: (_) => _CampSheet(camps: camps, value: value, newKey: _newKey),
     );
     if (picked == null) return;
@@ -1060,9 +1101,9 @@ class _CampPicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF131B2B),
+          color: const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF1E293B)),
+          border: Border.all(color: const Color(0xFF1C2740)),
         ),
         child: Row(
           children: [
@@ -1071,12 +1112,12 @@ class _CampPicker extends StatelessWidget {
                 value ?? 'Choose a camp',
                 style: TextStyle(
                     color: value == null
-                        ? const Color(0xFF5E6D82)
+                        ? const Color(0xFF8A98B0)
                         : Colors.white,
                     fontSize: value == null ? 13 : 14),
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Color(0xFF8E9BAE)),
+            const Icon(Icons.arrow_drop_down, color: Color(0xFFB6C2D6)),
           ],
         ),
       ),
@@ -1113,7 +1154,7 @@ class _AddCampDialogState extends State<_AddCampDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       title: Text(widget.title,
           style: const TextStyle(color: Colors.white, fontSize: 16)),
       content: TextField(
@@ -1127,11 +1168,118 @@ class _AddCampDialogState extends State<_AddCampDialog> {
         TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF8E9BAE)))),
+                style: TextStyle(color: Color(0xFFB6C2D6)))),
         TextButton(
             onPressed: () => Navigator.pop(context, _ctrl.text.trim()),
             child: Text(widget.confirm,
-                style: const TextStyle(color: Color(0xFFFF5252)))),
+                style: const TextStyle(color: Color(0xFFF87171)))),
+      ],
+    );
+  }
+}
+
+/// Edit name, email, phone and NIC of an account.
+class _EditDetailsDialog extends StatefulWidget {
+  final String name;
+  final String email;
+  final String phone;
+  final String nic;
+  const _EditDetailsDialog({
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.nic,
+  });
+
+  @override
+  State<_EditDetailsDialog> createState() => _EditDetailsDialogState();
+}
+
+class _EditDetailsDialogState extends State<_EditDetailsDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _name = TextEditingController(text: widget.name);
+  late final _email = TextEditingController(text: widget.email);
+  late final _phone = TextEditingController(text: widget.phone);
+  late final _nic = TextEditingController(text: widget.nic);
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _email.dispose();
+    _phone.dispose();
+    _nic.dispose();
+    super.dispose();
+  }
+
+  Widget _field(String label, TextEditingController c,
+      {TextInputType? type, String? Function(String?)? validator}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: c,
+        keyboardType: type,
+        validator: validator,
+        style: const TextStyle(color: Colors.white),
+        decoration: _AdminPanelScreenState._decoration(label),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFF0B1220),
+      title: const Text('Edit details',
+          style: TextStyle(color: Colors.white, fontSize: 16)),
+      content: SizedBox(
+        width: (MediaQuery.sizeOf(context).width - 96).clamp(240.0, 400.0).toDouble(),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _field('Full name', _name,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Enter a name'
+                        : null),
+                _field('Email (sign-in)', _email,
+                    type: TextInputType.emailAddress,
+                    validator: (v) {
+                      final t = (v ?? '').trim();
+                      return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)
+                          ? null
+                          : 'Enter a valid email';
+                    }),
+                _field('Phone number', _phone,
+                    type: TextInputType.phone,
+                    validator: (v) {
+                      final d = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                      return d.length < 9 ? 'Enter a valid phone number' : null;
+                    }),
+                _field('NIC', _nic),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel',
+                style: TextStyle(color: Color(0xFFB6C2D6)))),
+        TextButton(
+            onPressed: () {
+              if (!_formKey.currentState!.validate()) return;
+              Navigator.pop(context, {
+                'name': _name.text.trim(),
+                'email': _email.text.trim(),
+                'phone': _phone.text.trim(),
+                'nic': _nic.text.trim(),
+              });
+            },
+            child: const Text('SAVE',
+                style: TextStyle(color: Color(0xFFF87171)))),
       ],
     );
   }
@@ -1159,7 +1307,7 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       title: Text('New password for ${widget.name}',
           style: const TextStyle(color: Colors.white, fontSize: 16)),
       content: TextField(
@@ -1172,11 +1320,11 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
         TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF8E9BAE)))),
+                style: TextStyle(color: Color(0xFFB6C2D6)))),
         TextButton(
             onPressed: () => Navigator.pop(context, _ctrl.text.trim()),
             child: const Text('SAVE',
-                style: TextStyle(color: Color(0xFFFF5252)))),
+                style: TextStyle(color: Color(0xFFF87171)))),
       ],
     );
   }
@@ -1209,7 +1357,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
   }
 
   Widget _subtitle(String camp, SafeZone? z) {
-    const muted = Color(0xFF8E9BAE);
+    const muted = Color(0xFFB6C2D6);
     final n = _leadersOf(camp).length;
     final located = z != null && z.hasLocation;
     return Column(
@@ -1223,7 +1371,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
               ? 'On citizen map - ${z.occupied}/${z.capacity} (${z.stateLabel})'
               : 'Not on the map yet - tap the pin to place it',
           style: TextStyle(
-              color: located ? const Color(0xFF00E676) : const Color(0xFFFF9F0A),
+              color: located ? const Color(0xFF34D399) : const Color(0xFFFB923C),
               fontSize: 11),
         ),
       ],
@@ -1234,19 +1382,19 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         title: Text(title,
             style: const TextStyle(color: Colors.white, fontSize: 16)),
-        content: Text(body, style: const TextStyle(color: Color(0xFF8E9BAE))),
+        content: Text(body, style: const TextStyle(color: Color(0xFFB6C2D6))),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text('Cancel',
-                  style: TextStyle(color: Color(0xFF8E9BAE)))),
+                  style: TextStyle(color: Color(0xFFB6C2D6)))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(action,
-                  style: const TextStyle(color: Color(0xFFFF5252)))),
+                  style: const TextStyle(color: Color(0xFFF87171)))),
         ],
       ),
     );
@@ -1306,15 +1454,15 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    const card = Color(0xFF131B2B);
-    const muted = Color(0xFF8E9BAE);
-    const accent = Color(0xFFFF5252);
+    const card = Color(0xFF131C2E);
+    const muted = Color(0xFFB6C2D6);
+    const accent = Color(0xFFF87171);
     return AlertDialog(
       backgroundColor: card,
       title: const Text('Manage camps',
           style: TextStyle(color: Colors.white, fontSize: 16)),
       content: SizedBox(
-        width: 360,
+        width: (MediaQuery.sizeOf(context).width - 96).clamp(240.0, 360.0).toDouble(),
         child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: widget.service.watchCamps(),
           builder: (context, snap) {
@@ -1374,8 +1522,8 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
                                             : Icons.add_location_alt_outlined,
                                         color: (zones[_id(c)]?.hasLocation ??
                                                 false)
-                                            ? const Color(0xFF00E676)
-                                            : const Color(0xFFFF9F0A),
+                                            ? const Color(0xFF34D399)
+                                            : const Color(0xFFFB923C),
                                         size: 20,
                                       ),
                                       onPressed: () => _editZone(c),
@@ -1443,8 +1591,8 @@ class _CampSheetState extends State<_CampSheet> {
 
   @override
   Widget build(BuildContext context) {
-    const accent = Color(0xFFFF5252);
-    const muted = Color(0xFF8E9BAE);
+    const accent = Color(0xFFF87171);
+    const muted = Color(0xFFB6C2D6);
     final q = _q.trim().toLowerCase();
     final shown = widget.camps
         .where((c) => q.isEmpty || c.toLowerCase().contains(q))

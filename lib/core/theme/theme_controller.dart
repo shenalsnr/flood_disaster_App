@@ -45,7 +45,7 @@ class ThemeController extends ChangeNotifier {
         statusBarIconBrightness: _light ? Brightness.dark : Brightness.light,
         statusBarBrightness: _light ? Brightness.light : Brightness.dark,
         systemNavigationBarColor:
-            _light ? const Color(0xFFF1F5F9) : const Color(0xFF070B14),
+            _light ? const Color(0xFFF1F5F9) : const Color(0xFF0B1220),
         systemNavigationBarIconBrightness:
             _light ? Brightness.dark : Brightness.light,
       ),

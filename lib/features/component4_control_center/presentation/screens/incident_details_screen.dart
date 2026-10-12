@@ -480,7 +480,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
   Widget _actions() {
     final primaryStyle = FilledButton.styleFrom(
       backgroundColor: C4.accent,
-      foregroundColor: Colors.white,
+      foregroundColor: const Color(0xFF06121F),
       minimumSize: const Size.fromHeight(48),
     );
     final inc = incident;
@@ -494,7 +494,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
             'High priority alert for all residents within 2 km of ${inc.location}.',
         center: inc.coordinates,
       ),
-      icon: const Icon(Icons.cell_tower, size: 18, color: Color(0xFFFF5252)),
+      icon: const Icon(Icons.cell_tower, size: 18, color: Color(0xFFF87171)),
       label: const Text('Broadcast'),
     );
 
@@ -567,7 +567,7 @@ class _IncidentDetailsScreenState extends State<IncidentDetailsScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.redAccent),
+                        foregroundColor: Color(0xFFF87171)),
                     onPressed: _cancelDispatch,
                     icon: const Icon(Icons.close, size: 18),
                     label: const Text('Cancel'),

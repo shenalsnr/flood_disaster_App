@@ -48,9 +48,9 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+              border: Border.all(color: const Color(0xFF1C2740), width: 1.5),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.5),
@@ -65,7 +65,7 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _MapRoadsPainter(
-                      roadColor: const Color(0xFF1E293B),
+                      roadColor: const Color(0xFF1C2740),
                       highlightColor: AppColors.primaryLight.withValues(
                         alpha: 0.8,
                       ),
@@ -94,7 +94,7 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFF1E293B).withValues(alpha: 0.8),
+                        color: const Color(0xFF1C2740).withValues(alpha: 0.8),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.primary.withValues(alpha: 0.35),
@@ -121,7 +121,7 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                     height: 76,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFFFFB020), Color(0xFFFF6B2C)],
+                        colors: [Color(0xFFFBBF24), Color(0xFFFF6B2C)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -138,7 +138,7 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                     child: const Center(
                       child: Icon(
                         Icons.warning_rounded,
-                        color: Color(0xFF131B2B),
+                        color: Color(0xFF131C2E),
                         size: 44,
                       ),
                     ),
@@ -156,14 +156,14 @@ class _EarlyWarningVisualState extends State<EarlyWarningVisual>
                     ),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFFFF5252), Color(0xFFB91C1C)],
+                        colors: [Color(0xFFF87171), Color(0xFFB91C1C)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF5252)
+                          color: const Color(0xFFF87171)
                               .withValues(alpha: 0.45),
                           blurRadius: 16,
                           offset: const Offset(0, 8),
@@ -277,9 +277,9 @@ class _ReportHazardsVisualState extends State<ReportHazardsVisual>
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+              border: Border.all(color: const Color(0xFF1C2740), width: 1.5),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.5),
@@ -361,9 +361,9 @@ class _IPhoneMockup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF334155), width: 2),
+        border: Border.all(color: const Color(0xFF2B3A55), width: 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.7),
@@ -379,7 +379,7 @@ class _IPhoneMockup extends StatelessWidget {
             // iPhone Status Bar & Dynamic Island
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -431,13 +431,13 @@ class _IPhoneMockup extends StatelessWidget {
             // Header: < Report a Hazard
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF1C2740),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Icon(
@@ -468,7 +468,7 @@ class _IPhoneMockup extends StatelessWidget {
                   // Road map background
                   CustomPaint(
                     painter: _MapRoadsPainter(
-                      roadColor: const Color(0xFF1E293B),
+                      roadColor: const Color(0xFF1C2740),
                       highlightColor: Colors.transparent,
                     ),
                   ),
@@ -515,7 +515,7 @@ class _IPhoneMockup extends StatelessWidget {
                   Container(
                     height: 14,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF1C2740),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -523,7 +523,7 @@ class _IPhoneMockup extends StatelessWidget {
                   Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B).withValues(alpha: 0.6),
+                      color: const Color(0xFF1C2740).withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -615,9 +615,9 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+              border: Border.all(color: const Color(0xFF1C2740), width: 1.5),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.5),
@@ -632,7 +632,7 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _MapRoadsPainter(
-                      roadColor: const Color(0xFF1E293B),
+                      roadColor: const Color(0xFF1C2740),
                       highlightColor: Colors.transparent,
                     ),
                   ),
@@ -674,12 +674,12 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
                       shape: BoxShape.circle,
                       color: const Color(0xFF16A34A),
                       border: Border.all(
-                        color: const Color(0xFF4ADE80),
+                        color: const Color(0xFF34D399),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF22C55E).withValues(alpha: 0.6),
+                          color: const Color(0xFF34D399).withValues(alpha: 0.6),
                           blurRadius: 14,
                           spreadRadius: 2,
                         ),
@@ -703,7 +703,7 @@ class _SafeRoutesVisualState extends State<SafeRoutesVisual>
                     subtitle: 'Check-Ins',
                     trailing: const Icon(
                       Icons.check_circle_rounded,
-                      color: Color(0xFF22C55E),
+                      color: Color(0xFF34D399),
                       size: 18,
                     ),
                   ),
@@ -740,15 +740,15 @@ class _ShelterWaypointPin extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: const Color(0xFF0F2E1E),
-        border: Border.all(color: const Color(0xFF22C55E), width: 2),
+        border: Border.all(color: const Color(0xFF34D399), width: 2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF22C55E).withValues(alpha: 0.4),
+            color: const Color(0xFF34D399).withValues(alpha: 0.4),
             blurRadius: 10,
           ),
         ],
       ),
-      child: const Icon(Icons.home_rounded, color: Color(0xFF4ADE80), size: 15),
+      child: const Icon(Icons.home_rounded, color: Color(0xFF34D399), size: 15),
     );
   }
 }
@@ -779,7 +779,7 @@ class _ShelterBadge extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF22C55E).withValues(alpha: 0.25),
+            color: const Color(0xFF34D399).withValues(alpha: 0.25),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -794,7 +794,7 @@ class _ShelterBadge extends StatelessWidget {
               color: const Color(0xFF16A34A).withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xFF4ADE80), size: 18),
+            child: Icon(icon, color: const Color(0xFF34D399), size: 18),
           ),
           const SizedBox(width: 10),
           Column(
@@ -814,7 +814,7 @@ class _ShelterBadge extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color: const Color(0xFF4ADE80).withValues(alpha: 0.9),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.9),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -960,7 +960,7 @@ class _FloodWavesPainter extends CustomPainter {
     // Front crest wave (light cyan)
     final frontWavePaint = Paint()
       ..shader = const LinearGradient(
-        colors: [Color(0xFF40C4FF), Color(0xFF0284C7)],
+        colors: [Color(0xFF38BDF8), Color(0xFF0284C7)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, w, h));
@@ -1023,7 +1023,7 @@ class _RealisticPersonPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final pantsPaint = Paint()
-      ..color = const Color(0xFF334155)
+      ..color = const Color(0xFF2B3A55)
       ..style = PaintingStyle.fill;
 
     // 1. Trousers (Bottom)
@@ -1261,7 +1261,7 @@ class _StopHandPinPainter extends CustomPainter {
 
     // Water ripple ring at the base of pin
     final ripplePaint = Paint()
-      ..color = const Color(0xFF40C4FF).withValues(alpha: 0.7)
+      ..color = const Color(0xFF38BDF8).withValues(alpha: 0.7)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawOval(
@@ -1372,7 +1372,7 @@ class _SubmergedHazardTrianglePainter extends CustomPainter {
 
     // Water ripple at base
     final ripple = Paint()
-      ..color = const Color(0xFF40C4FF).withValues(alpha: 0.8)
+      ..color = const Color(0xFF38BDF8).withValues(alpha: 0.8)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4;
     canvas.drawLine(Offset(-2, h * 0.9), Offset(w + 2, h * 0.9), ripple);
@@ -1397,7 +1397,7 @@ class _SignalWavesPainter extends CustomPainter {
       final alpha = (1.0 - t).clamp(0.0, 1.0);
 
       final paint = Paint()
-        ..color = const Color(0xFFFF8F5A).withValues(alpha: alpha * 0.8)
+        ..color = const Color(0xFF7DD3FC).withValues(alpha: alpha * 0.8)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0;
 
@@ -1448,7 +1448,7 @@ class _NeonRoutePainter extends CustomPainter {
 
     // 1. Wide ambient green glow
     final glowPaint = Paint()
-      ..color = const Color(0xFF22C55E).withValues(alpha: 0.3)
+      ..color = const Color(0xFF34D399).withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 16.0
       ..strokeCap = StrokeCap.round
@@ -1458,7 +1458,7 @@ class _NeonRoutePainter extends CustomPainter {
 
     // 2. Medium vibrant green line
     final midPaint = Paint()
-      ..color = const Color(0xFF22C55E)
+      ..color = const Color(0xFF34D399)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6.0
       ..strokeCap = StrokeCap.round;

@@ -36,7 +36,7 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF1C2740),
         title: const Text('Archive incident?',
             style: TextStyle(color: Colors.white)),
         content: const Text(
@@ -47,7 +47,7 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text('CANCEL')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('ARCHIVE'),
           ),
@@ -61,9 +61,9 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
   Widget build(BuildContext context) {
     final list = _c.resolvedIncidents;
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         foregroundColor: Colors.white,
         title: const Text('Resolved Incidents',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
@@ -85,9 +85,9 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
                   child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +99,7 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
                       const SizedBox(height: 4),
                       Text(i.location,
                           style: const TextStyle(
-                              color: Color(0xFF94A3B8), fontSize: 12)),
+                              color: Color(0xFFB6C2D6), fontSize: 12)),
                       const SizedBox(height: 6),
                       Text(
                         '${i.resolutionType ?? "Resolved"} • ${i.evacuatedCount} evacuated'
@@ -125,9 +125,9 @@ class _IncidentHistoryScreenState extends State<IncidentHistoryScreen> {
                           TextButton.icon(
                             onPressed: () => _archive(i),
                             icon: const Icon(Icons.archive_outlined,
-                                size: 16, color: Colors.redAccent),
+                                size: 16, color: Color(0xFFF87171)),
                             label: const Text('ARCHIVE',
-                                style: TextStyle(color: Colors.redAccent)),
+                                style: TextStyle(color: Color(0xFFF87171))),
                           ),
                         ],
                       ),

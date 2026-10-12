@@ -53,7 +53,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                 Flexible(child: Text(
                   'SENT TO DMC',
                   style: TextStyle(
-                    color: Color(0xFF7E8B9B),
+                    color: Color(0xFF8A98B0),
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
@@ -64,12 +64,12 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.delete_sweep_outlined, color: Color(0xFFFF5252), size: 16),
+                      Icon(Icons.delete_sweep_outlined, color: Color(0xFFF87171), size: 16),
                       SizedBox(width: 4),
                       Text(
                         'CLEAR',
                         style: TextStyle(
-                          color: Color(0xFFFF5252),
+                          color: Color(0xFFF87171),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -91,10 +91,10 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF1E293B)),
+          side: const BorderSide(color: Color(0xFF1C2740)),
         ),
         title: const Text(
           'Clear this list?',
@@ -103,17 +103,17 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         content: const Text(
           'The requests are removed from this list only. The DMC keeps its '
           'own records, and any truck on the way will still be shown.',
-          style: TextStyle(color: Color(0xFF8E9BAE), fontSize: 13),
+          style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFF8E9BAE))),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFFB6C2D6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFFFF5252),
+              backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
             child: const Text('Clear'),
@@ -152,15 +152,15 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       detail = 'Urgent dispatch: stock ran out';
     }
 
-    final statusColor = resolved ? const Color(0xFF00E676) : const Color(0xFFFF9F0A);
+    final statusColor = resolved ? const Color(0xFF34D399) : const Color(0xFFFB923C);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: const Color(0xFF1C2740)),
       ),
       child: Row(
         children: [
@@ -173,7 +173,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                   style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 3),
-                Text(detail, style: const TextStyle(color: Color(0xFF8E9BAE), fontSize: 11)),
+                Text(detail, style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11)),
               ],
             ),
           ),

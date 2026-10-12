@@ -107,7 +107,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             boxShadow: [
@@ -124,12 +124,12 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5252).withValues(alpha: 0.1),
+                  color: const Color(0xFFF87171).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.warning_rounded,
-                  color: Color(0xFFFF5252),
+                  color: Color(0xFFF87171),
                   size: 32,
                 ),
               ),
@@ -179,7 +179,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(ctx).pop(true),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF5252),
+                        backgroundColor: const Color(0xFFDC2626),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
@@ -209,7 +209,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -218,7 +218,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              color: const Color(0xFF070B14).withValues(alpha: 0.7),
+              color: const Color(0xFF0B1220).withValues(alpha: 0.7),
             ),
           ),
         ),
@@ -247,13 +247,13 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       '$count',
                       style: const TextStyle(
-                        color: Color(0xFF40C4FF),
+                        color: Color(0xFF38BDF8),
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
                       ),
@@ -272,7 +272,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: SafeArea(
@@ -283,10 +283,10 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF40C4FF).withValues(alpha: 0.1),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF40C4FF).withValues(alpha: 0.3),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -294,18 +294,18 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF40C4FF).withValues(alpha: 0.2),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.info_outline_rounded,
-                          color: Color(0xFF40C4FF), size: 18),
+                          color: Color(0xFF38BDF8), size: 18),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
                         'These contacts will be notified automatically in an emergency situation.',
                         style: TextStyle(
-                          color: Color(0xFF40C4FF),
+                          color: Color(0xFF38BDF8),
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           height: 1.4,
@@ -329,7 +329,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF40C4FF)),
+                        child: CircularProgressIndicator(color: Color(0xFF38BDF8)),
                       );
                     }
 
@@ -374,14 +374,14 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF40C4FF), Color(0xFF00B0FF)],
+              colors: [Color(0xFF38BDF8), Color(0xFF38BDF8)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF40C4FF).withValues(alpha: 0.3),
+                color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 6),
               ),
@@ -453,7 +453,7 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             boxShadow: [
@@ -476,12 +476,12 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.contact_phone_rounded,
-                        color: Color(0xFF40C4FF),
+                        color: Color(0xFF38BDF8),
                         size: 24,
                       ),
                     ),
@@ -563,14 +563,14 @@ class _PremiumContactDialogState extends State<_PremiumContactDialog> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF40C4FF), Color(0xFF00B0FF)],
+                            colors: [Color(0xFF38BDF8), Color(0xFF38BDF8)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF40C4FF).withValues(alpha: 0.3),
+                              color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -631,10 +631,10 @@ class _PremiumContactTile extends StatelessWidget {
 
   Color _avatarColor(String name) {
     const colors = [
-      Color(0xFF40C4FF),
-      Color(0xFF00E676),
-      Color(0xFFFFD740),
-      Color(0xFFFF6D00),
+      Color(0xFF38BDF8),
+      Color(0xFF34D399),
+      Color(0xFFFBBF24),
+      Color(0xFF38BDF8),
       Color(0xFFE040FB),
     ];
     return colors[name.codeUnitAt(0) % colors.length];
@@ -655,7 +655,7 @@ class _PremiumContactTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
         boxShadow: [
@@ -751,13 +751,13 @@ class _PremiumContactTile extends StatelessWidget {
               children: [
                 _PremiumIconButton(
                   icon: Icons.edit_rounded,
-                  color: const Color(0xFF40C4FF),
+                  color: const Color(0xFF38BDF8),
                   onTap: onEdit,
                 ),
                 const SizedBox(height: 8),
                 _PremiumIconButton(
                   icon: Icons.delete_outline_rounded,
-                  color: const Color(0xFFFF5252),
+                  color: const Color(0xFFF87171),
                   onTap: onDelete,
                 ),
               ],
@@ -849,7 +849,7 @@ class _PremiumDialogField extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.2),
               fontSize: 15,
             ),
-            prefixIcon: Icon(icon, color: const Color(0xFF40C4FF), size: 22),
+            prefixIcon: Icon(icon, color: const Color(0xFF38BDF8), size: 22),
             filled: true,
             fillColor: const Color(0xFF0A0F1A),
             contentPadding:
@@ -866,17 +866,17 @@ class _PremiumDialogField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF40C4FF), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFFF5252)),
+              borderSide: const BorderSide(color: Color(0xFFF87171)),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFFF5252), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFFF87171), width: 1.5),
             ),
-            errorStyle: const TextStyle(color: Color(0xFFFF5252), fontWeight: FontWeight.w500),
+            errorStyle: const TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.w500),
           ),
         ),
       ],
@@ -896,13 +896,13 @@ class _PremiumEmptyContactState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: const Color(0xFF40C4FF).withValues(alpha: 0.05),
+              color: const Color(0xFF38BDF8).withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.group_add_rounded,
               size: 72,
-              color: Color(0xFF40C4FF),
+              color: Color(0xFF38BDF8),
             ),
           ),
           const SizedBox(height: 24),

@@ -137,11 +137,11 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    _buildTriageChip(TriagePriority.green, 'Green (Stable)', const Color(0xFF69F0AE)),
+                    _buildTriageChip(TriagePriority.green, 'Green (Stable)', const Color(0xFF6EE7B7)),
                     const SizedBox(width: 6),
                     _buildTriageChip(TriagePriority.yellow, 'Yellow (Care)', const Color(0xFFFFAB40)),
                     const SizedBox(width: 6),
-                    _buildTriageChip(TriagePriority.red, 'Red (Urgent)', const Color(0xFFFF5252)),
+                    _buildTriageChip(TriagePriority.red, 'Red (Urgent)', const Color(0xFFF87171)),
                   ],
                 ),
                 const SizedBox(height: 12),

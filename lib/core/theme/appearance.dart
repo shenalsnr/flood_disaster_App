@@ -58,7 +58,7 @@ class ThemeToggleTile extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   const ThemeToggleTile({
     super.key,
-    this.activeColor = const Color(0xFF00E676),
+    this.activeColor = const Color(0xFF34D399),
     this.contentPadding,
   });
 

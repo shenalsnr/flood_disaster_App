@@ -38,11 +38,11 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       case 'AVAILABLE':
         return const Color(0xFF10B981);
       case 'EN ROUTE':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFBBF24);
       case 'ON SCENE':
-        return const Color(0xFFFF5252);
+        return const Color(0xFFF87171);
       default:
-        return const Color(0xFF64748B);
+        return const Color(0xFF8A98B0);
     }
   }
 
@@ -74,13 +74,13 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
 
     InputDecoration deco(String l) => InputDecoration(
           labelText: l,
-          labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+          labelStyle: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 12),
           filled: true,
-          fillColor: const Color(0xFF131B2B),
+          fillColor: const Color(0xFF131C2E),
           isDense: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF334155)),
+            borderSide: const BorderSide(color: Color(0xFF2B3A55)),
           ),
         );
 
@@ -105,11 +105,11 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           title: Text(isEdit ? 'Edit response unit' : 'Add response unit',
               style: const TextStyle(color: Colors.white, fontSize: 16)),
           content: SizedBox(
-            width: 400,
+            width: (MediaQuery.sizeOf(ctx).width - 96).clamp(240.0, 400.0).toDouble(),
             child: Form(
               key: formKey,
               child: SingleChildScrollView(
@@ -131,8 +131,9 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                     ]),
                     field(eta, 'ETA (minutes)', number: true),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: status,
-                      dropdownColor: const Color(0xFF1E293B),
+                      dropdownColor: const Color(0xFF1C2740),
                       decoration: deco('Status'),
                       style: const TextStyle(color: Colors.white, fontSize: 13),
                       items: const ['AVAILABLE', 'EN ROUTE', 'ON SCENE', 'OFF DUTY']
@@ -207,7 +208,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF1C2740),
         title: const Text('Delete unit?',
             style: TextStyle(color: Colors.white)),
         content: Text('${t.name} (${t.callSign}) will be removed permanently.',
@@ -217,7 +218,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text('CANCEL')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('DELETE'),
           ),
@@ -241,16 +242,16 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
   Widget build(BuildContext context) {
     final units = _c.sortedTeamsByEta;
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         foregroundColor: Colors.white,
         title: const Text('Response Units',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFF6D00),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFF38BDF8),
+        foregroundColor: const Color(0xFF06121F),
         onPressed: () => _openForm(),
         icon: const Icon(Icons.add),
         label: const Text('ADD UNIT'),
@@ -279,9 +280,9 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                   child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,11 +310,11 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                             Text(
                                 '${t.callSign} • ${t.vehicleType} • crew ${t.crewCount}',
                                 style: const TextStyle(
-                                    color: Color(0xFF94A3B8), fontSize: 11)),
+                                    color: Color(0xFFB6C2D6), fontSize: 11)),
                             if (t.leader.isNotEmpty)
                               Text('Leader: ${t.leader}',
                                   style: const TextStyle(
-                                      color: Color(0xFF94A3B8), fontSize: 11)),
+                                      color: Color(0xFFB6C2D6), fontSize: 11)),
                             const SizedBox(height: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -334,13 +335,13 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                       IconButton(
                         tooltip: 'Edit',
                         icon: const Icon(Icons.edit_outlined,
-                            color: Color(0xFF40C4FF)),
+                            color: Color(0xFF38BDF8)),
                         onPressed: () => _openForm(t),
                       ),
                       IconButton(
                         tooltip: 'Delete',
                         icon: const Icon(Icons.delete_outline,
-                            color: Colors.redAccent),
+                            color: Color(0xFFF87171)),
                         onPressed: () => _confirmDelete(t),
                       ),
                     ],

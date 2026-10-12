@@ -95,7 +95,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -104,7 +104,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              color: const Color(0xFF070B14).withValues(alpha: 0.7),
+              color: const Color(0xFF0B1220).withValues(alpha: 0.7),
             ),
           ),
         ),
@@ -133,7 +133,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: SafeArea(
@@ -303,17 +303,17 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                 _PremiumRippleRing(
                   listenable: rippleController,
                   delay: 0.0,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                 ),
                 _PremiumRippleRing(
                   listenable: rippleController,
                   delay: 0.33,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                 ),
                 _PremiumRippleRing(
                   listenable: rippleController,
                   delay: 0.66,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                 ),
               ],
 
@@ -332,7 +332,7 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                         gradient: RadialGradient(
                           colors: isLoading
                               ? [const Color(0xFF1A3A1A), const Color(0xFF0D1D0D)]
-                              : [const Color(0xFF00E676), const Color(0xFF00B259)],
+                              : [const Color(0xFF34D399), const Color(0xFF00B259)],
                         ),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: isLoading ? 0.05 : 0.2),
@@ -348,7 +348,7 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                               ]
                             : [
                                 BoxShadow(
-                                  color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                                  color: const Color(0xFF34D399).withValues(alpha: 0.5),
                                   blurRadius: 40,
                                   spreadRadius: 10,
                                 ),
@@ -442,7 +442,7 @@ class _PremiumSuccessState extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(32),
             border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             boxShadow: [
@@ -462,14 +462,14 @@ class _PremiumSuccessState extends StatelessWidget {
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.5),
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.2),
                       blurRadius: 30,
                       spreadRadius: 10,
                     ),
@@ -478,7 +478,7 @@ class _PremiumSuccessState extends StatelessWidget {
                 child: const Center(
                   child: Icon(
                     Icons.check_rounded,
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     size: 64,
                   ),
                 ),
@@ -528,10 +528,10 @@ class _PremiumSuccessState extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.08),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -539,12 +539,12 @@ class _PremiumSuccessState extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                        color: const Color(0xFF34D399).withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.location_on_rounded,
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         size: 20,
                       ),
                     ),
@@ -556,7 +556,7 @@ class _PremiumSuccessState extends StatelessWidget {
                           Text(
                             'Current Safe Zone',
                             style: TextStyle(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
@@ -600,7 +600,7 @@ class _PremiumSuccessState extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00E676),
+                  backgroundColor: const Color(0xFF34D399),
                   minimumSize: const Size(double.infinity, 56),
                   elevation: 0,
                   shape: RoundedRectangleBorder(

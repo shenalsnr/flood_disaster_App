@@ -16,7 +16,7 @@ class DispatcherSplitView extends StatelessWidget {
         actions: [
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: Colors.redAccent,
+              backgroundColor: Color(0xFFDC2626),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -51,7 +51,7 @@ class DispatcherSplitView extends StatelessWidget {
                   title: 'Sudden Mudslide',
                   location: 'Kiriella - GN Div 4',
                   severity: 'LIFE THREATENING',
-                  severityColor: Colors.redAccent,
+                  severityColor: Color(0xFFF87171),
                   isVerified: true,
                 ),
                 _buildIncidentCard(
@@ -197,7 +197,7 @@ class DispatcherSplitView extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx),
             child: const Text(
               'BROADCAST NOW',

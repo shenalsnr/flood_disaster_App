@@ -114,7 +114,7 @@ class _NewRequestDialogState extends State<NewRequestDialog> {
                     const SizedBox(width: 6),
                     _buildUrgencyChip(RequestUrgency.high, 'High Priority', Colors.orangeAccent),
                     const SizedBox(width: 6),
-                    _buildUrgencyChip(RequestUrgency.immediate, 'Immediate', Colors.redAccent),
+                    _buildUrgencyChip(RequestUrgency.immediate, 'Immediate', Color(0xFFF87171)),
                   ],
                 ),
                 const SizedBox(height: 12),

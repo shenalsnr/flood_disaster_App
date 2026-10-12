@@ -7,24 +7,25 @@ import '../../../component1_evacuation/services/safe_zone_service.dart';
 import '../../data/services/admin_user_service.dart';
 import '../../data/services/session_service.dart';
 import '../controllers/responder_controller.dart';
+import '../widgets/edit_user_dialog.dart';
 import 'admin_panel_screen.dart';
 import 'responder_login_screen.dart';
 import 'safe_zones_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
-/// Landing page for administrators: a live, read-only overview of accounts
-/// and shelters, with shortcuts to the existing admin tools. It never writes
-/// to Firestore.
+/// Landing page for administrators: a live overview of accounts and
+/// shelters, with shortcuts to the existing admin tools. Only the registered
+/// citizens page edits / deletes accounts.
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
-  static const Color _orange = Color(0xFFFF9F0A);
+  static const Color _bg = Color(0xFF131C2E);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _orange = Color(0xFFFB923C);
 
   Future<void> _signOut(BuildContext context) async {
     await SessionService.clear();
@@ -475,14 +476,94 @@ class _CitizensScreen extends StatefulWidget {
 }
 
 class _CitizensScreenState extends State<_CitizensScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
+  static const Color _bg = Color(0xFF131C2E);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
+  static const Color _green = Color(0xFF34D399);
 
   String _query = '';
+
+  void _toast(String msg, {bool error = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg),
+      backgroundColor: error ? Color(0xFFDC2626) : const Color(0xFF1C2740),
+    ));
+  }
+
+  Future<void> _run(Future<void> Function() action, String okMsg) async {
+    try {
+      await action().timeout(const Duration(seconds: 10));
+      _toast(okMsg);
+    } catch (e) {
+      _toast('Could not complete: $e', error: true);
+    }
+  }
+
+  Future<void> _edit(QueryDocumentSnapshot<Map<String, dynamic>> d) async {
+    final m = d.data();
+    final email = ((m['email'] as String?) ?? d.id).toLowerCase().trim();
+    final res = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => EditUserDialog(
+        name: (m['fullName'] as String?) ?? '',
+        email: email,
+        phone: (m['phoneNumber'] as String?) ?? '',
+        nic: (m['nic'] as String?) ?? '',
+        showLocation: true,
+        city: (m['city'] as String?) ?? '',
+        district: (m['district'] as String?) ?? '',
+        zone: (m['floodZone'] as String?) ?? '',
+      ),
+    );
+    if (res == null) return;
+    await _run(
+      () => AdminUserService.instance.updateDetails(
+        oldEmail: d.id,
+        fullName: res['name'] ?? '',
+        newEmail: res['email'] ?? email,
+        phone: res['phone'] ?? '',
+        nic: res['nic'] ?? '',
+        city: res['city'] ?? '',
+        district: res['district'] ?? '',
+        floodZone: res['zone'] ?? '',
+      ),
+      'Details updated',
+    );
+  }
+
+  Future<void> _delete(QueryDocumentSnapshot<Map<String, dynamic>> d) async {
+    final m = d.data();
+    final name = ((m['fullName'] as String?) ?? '').trim();
+    final email = (m['email'] as String?) ?? d.id;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: _card,
+        title: const Text('Delete account?',
+            style: TextStyle(color: Colors.white)),
+        content: Text(
+          '${name.isEmpty ? email : name} ($email) will be removed '
+          'permanently and can no longer sign in.',
+          style: const TextStyle(color: _muted),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel', style: TextStyle(color: _muted))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('DELETE', style: TextStyle(color: _accent))),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await _run(() => AdminUserService.instance.deleteUser(d.id),
+          '${name.isEmpty ? email : name} deleted');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -546,7 +627,7 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                   onChanged: (v) => setState(() => _query = v),
                   decoration: InputDecoration(
                     hintText: 'Search name, email, district...',
-                    hintStyle: const TextStyle(color: Color(0xFF5E6D82)),
+                    hintStyle: const TextStyle(color: Color(0xFF8A98B0)),
                     prefixIcon: const Icon(Icons.search, color: _muted),
                     filled: true,
                     fillColor: _card,
@@ -652,9 +733,28 @@ class _CitizensScreenState extends State<_CitizensScreen> {
                 if (zone.isNotEmpty)
                   Text(zone,
                       style: const TextStyle(
-                          color: Color(0xFF5E6D82), fontSize: 11.5)),
+                          color: Color(0xFF8A98B0), fontSize: 11.5)),
               ],
             ),
+          ),
+          PopupMenuButton<String>(
+            color: _card,
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.more_vert, color: _muted),
+            onSelected: (v) {
+              if (v == 'edit') _edit(d);
+              if (v == 'del') _delete(d);
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                  value: 'edit',
+                  child: Text('Edit details',
+                      style: TextStyle(color: Colors.white))),
+              PopupMenuItem(
+                  value: 'del',
+                  child: Text('Delete account',
+                      style: TextStyle(color: _accent))),
+            ],
           ),
         ],
       ),

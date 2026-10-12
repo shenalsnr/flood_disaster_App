@@ -64,7 +64,7 @@ class _EvacuationChecklistScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -73,7 +73,7 @@ class _EvacuationChecklistScreenState
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              color: const Color(0xFF070B14).withValues(alpha: 0.7),
+              color: const Color(0xFF0B1220).withValues(alpha: 0.7),
             ),
           ),
         ),
@@ -99,7 +99,7 @@ class _EvacuationChecklistScreenState
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: SafeArea(
@@ -114,7 +114,7 @@ class _EvacuationChecklistScreenState
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF00E676)),
+                  child: CircularProgressIndicator(color: Color(0xFF34D399)),
                 );
               }
 
@@ -200,18 +200,18 @@ class _PremiumProgressHeader extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isComplete
-              ? const Color(0xFF00E676).withValues(alpha: 0.3)
+              ? const Color(0xFF34D399).withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.05),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: isComplete
-                ? const Color(0xFF00E676).withValues(alpha: 0.1)
+                ? const Color(0xFF34D399).withValues(alpha: 0.1)
                 : Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
@@ -230,7 +230,7 @@ class _PremiumProgressHeader extends StatelessWidget {
                   Text(
                     isComplete ? 'Ready for Evacuation' : 'Packing Progress',
                     style: TextStyle(
-                      color: isComplete ? const Color(0xFF00E676) : Colors.white,
+                      color: isComplete ? const Color(0xFF34D399) : Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                     ),
@@ -250,16 +250,16 @@ class _PremiumProgressHeader extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: isComplete
-                      ? const Color(0xFF00E676).withValues(alpha: 0.15)
-                      : const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                      ? const Color(0xFF34D399).withValues(alpha: 0.15)
+                      : const Color(0xFF38BDF8).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '$pct%',
                   style: TextStyle(
                     color: isComplete
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFF40C4FF),
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFF38BDF8),
                     fontSize: 16,
                     fontWeight: FontWeight.w900,
                   ),
@@ -273,9 +273,9 @@ class _PremiumProgressHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 10,
-              backgroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF0B1220),
               valueColor: AlwaysStoppedAnimation<Color>(
-                isComplete ? const Color(0xFF00E676) : const Color(0xFF40C4FF),
+                isComplete ? const Color(0xFF34D399) : const Color(0xFF38BDF8),
               ),
             ),
           ),
@@ -300,7 +300,7 @@ class _PremiumAddItemField extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B),
+                color: const Color(0xFF131C2E),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                 boxShadow: [
@@ -338,14 +338,14 @@ class _PremiumAddItemField extends StatelessWidget {
               height: 54,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF00E676), Color(0xFF00C853)],
+                  colors: [Color(0xFF34D399), Color(0xFF34D399)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -384,12 +384,12 @@ class _PremiumChecklistItemTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: item.isPacked
-            ? const Color(0xFF00E676).withValues(alpha: 0.05)
-            : const Color(0xFF131B2B),
+            ? const Color(0xFF34D399).withValues(alpha: 0.05)
+            : const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: item.isPacked
-              ? const Color(0xFF00E676).withValues(alpha: 0.2)
+              ? const Color(0xFF34D399).withValues(alpha: 0.2)
               : Colors.white.withValues(alpha: 0.05),
           width: 1.5,
         ),
@@ -419,19 +419,19 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                   height: 28,
                   decoration: BoxDecoration(
                     color: item.isPacked
-                        ? const Color(0xFF00E676)
+                        ? const Color(0xFF34D399)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: item.isPacked
-                          ? const Color(0xFF00E676)
+                          ? const Color(0xFF34D399)
                           : Colors.white.withValues(alpha: 0.3),
                       width: 2,
                     ),
                     boxShadow: item.isPacked
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.4),
                               blurRadius: 8,
                             ),
                           ]
@@ -469,14 +469,14 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF5252).withValues(alpha: 0.1),
+                    color: const Color(0xFFF87171).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: IconButton(
                     padding: EdgeInsets.zero,
                     icon: const Icon(
                       Icons.delete_outline_rounded,
-                      color: Color(0xFFFF5252),
+                      color: Color(0xFFF87171),
                       size: 20,
                     ),
                     tooltip: 'Delete Item',

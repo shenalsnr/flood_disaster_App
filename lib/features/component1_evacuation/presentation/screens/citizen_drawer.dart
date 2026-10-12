@@ -50,7 +50,7 @@ class CitizenDrawer extends StatelessWidget {
       backgroundColor: Colors.transparent, // Rely on Container for styling
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF070B14),
+          color: Color(0xFF0B1220),
           border: Border(right: BorderSide(color: Colors.white10, width: 1)),
         ),
         child: SafeArea(
@@ -67,7 +67,7 @@ class CitizenDrawer extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       const Color(0xFF112240).withValues(alpha: 0.8),
-                      const Color(0xFF070B14),
+                      const Color(0xFF0B1220),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -94,7 +94,7 @@ class CitizenDrawer extends StatelessWidget {
                               photoUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (ctx, err, stack) => Center(
-                                child: Text(initials, style: const TextStyle(color: Color(0xFF070B14), fontSize: 22, fontWeight: FontWeight.w900)),
+                                child: Text(initials, style: const TextStyle(color: Color(0xFF0B1220), fontSize: 22, fontWeight: FontWeight.w900)),
                               ),
                             ));
                           } else {
@@ -102,7 +102,7 @@ class CitizenDrawer extends StatelessWidget {
                               base64Decode(photoUrl),
                               fit: BoxFit.cover,
                               errorBuilder: (ctx, err, stack) => Center(
-                                child: Text(initials, style: const TextStyle(color: Color(0xFF070B14), fontSize: 22, fontWeight: FontWeight.w900)),
+                                child: Text(initials, style: const TextStyle(color: Color(0xFF0B1220), fontSize: 22, fontWeight: FontWeight.w900)),
                               ),
                             ));
                           }
@@ -111,7 +111,7 @@ class CitizenDrawer extends StatelessWidget {
                             child: Text(
                               initials,
                               style: const TextStyle(
-                                color: Color(0xFF070B14),
+                                color: Color(0xFF0B1220),
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1,
@@ -127,13 +127,13 @@ class CitizenDrawer extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                              colors: [Color(0xFF34D399), Color(0xFF00BFA5)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                                color: const Color(0xFF34D399).withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -154,18 +154,18 @@ class CitizenDrawer extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676)
+                              color: const Color(0xFF34D399)
                                   .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: const Color(0xFF00E676)
+                                color: const Color(0xFF34D399)
                                     .withValues(alpha: 0.3),
                               ),
                             ),
                             child: const Text(
                               'CITIZEN',
                               style: TextStyle(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 fontSize: 9,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1.5,
@@ -278,12 +278,12 @@ class CitizenDrawer extends StatelessWidget {
                       height: 52,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFFF5252),
+                          foregroundColor: const Color(0xFFF87171),
                           side: const BorderSide(
-                            color: Color(0xFFFF5252),
+                            color: Color(0xFFF87171),
                             width: 1.5,
                           ),
-                          backgroundColor: const Color(0xFFFF5252)
+                          backgroundColor: const Color(0xFFDC2626)
                               .withValues(alpha: 0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),

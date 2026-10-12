@@ -177,7 +177,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Dispatch status changed to $newStatus!'),
-              backgroundColor: const Color(0xFF00E676),
+              backgroundColor: const Color(0xFF34D399),
             ),
           );
         },
@@ -199,7 +199,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             SnackBar(
               content: Text(
                   'Team Reassigned! ${newTeam.name} (${newTeam.callSign}) is now EN ROUTE.'),
-              backgroundColor: const Color(0xFF40C4FF),
+              backgroundColor: const Color(0xFF38BDF8),
             ),
           );
         },
@@ -227,21 +227,21 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFFF5252), width: 1.5),
+            side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
           ),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5252).withValues(alpha: 0.2),
+                  color: const Color(0xFFF87171).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.cancel_rounded,
-                    color: Color(0xFFFF5252), size: 22),
+                    color: Color(0xFFF87171), size: 22),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -264,16 +264,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFFF5252).withValues(alpha: 0.3),
+                      color: const Color(0xFFF87171).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.warning_amber_rounded,
-                          color: Color(0xFFFF5252), size: 18),
+                          color: Color(0xFFF87171), size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -292,7 +292,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 const Text(
                   'SELECT CANCELLATION REASON:',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
@@ -302,14 +302,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: selectedReason,
-                      dropdownColor: const Color(0xFF131B2B),
+                      dropdownColor: const Color(0xFF131C2E),
                       isExpanded: true,
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       items: cancellationReasons.map((r) {
@@ -330,7 +330,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 const Text(
                   'OPERATOR AUDIT REMARKS:',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
@@ -345,10 +345,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                     hintText: 'Enter optional operator notes...',
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     filled: true,
-                    fillColor: const Color(0xFF131B2B),
+                    fillColor: const Color(0xFF131C2E),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                     ),
                   ),
                 ),
@@ -363,7 +363,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                backgroundColor: const Color(0xFFFF5252),
+                backgroundColor: const Color(0xFFDC2626),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -384,16 +384,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: const Color(0xFF070B14),
+                    backgroundColor: const Color(0xFF0B1220),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: Color(0xFFFF5252)),
+                      side: const BorderSide(color: Color(0xFFF87171)),
                     ),
                     content: Row(
                       children: [
                         const Icon(Icons.info_outline,
-                            color: Color(0xFFFF5252), size: 18),
+                            color: Color(0xFFF87171), size: 18),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -424,9 +424,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
     final isOnScene = _dispatchStatus == 'ON SCENE';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
@@ -441,14 +441,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF40C4FF).withValues(alpha: 0.2),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFF40C4FF), width: 0.8),
+                    border: Border.all(color: const Color(0xFF38BDF8), width: 0.8),
                   ),
                   child: const Text(
                     'M4-07',
                     style: TextStyle(
-                      color: Color(0xFF40C4FF),
+                      color: Color(0xFF38BDF8),
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
                     ),
@@ -473,7 +473,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               '${team.name} ➔ Incident #${widget.incident.id}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
         ),
@@ -484,13 +484,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
             decoration: BoxDecoration(
               color: isOnScene
-                  ? const Color(0xFF40C4FF).withValues(alpha: 0.2)
-                  : const Color(0xFF00E676).withValues(alpha: 0.2),
+                  ? const Color(0xFF38BDF8).withValues(alpha: 0.2)
+                  : const Color(0xFF34D399).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isOnScene
-                    ? const Color(0xFF40C4FF)
-                    : const Color(0xFF00E676),
+                    ? const Color(0xFF38BDF8)
+                    : const Color(0xFF34D399),
               ),
             ),
             child: Row(
@@ -500,8 +500,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   height: 6,
                   decoration: BoxDecoration(
                     color: isOnScene
-                        ? const Color(0xFF40C4FF)
-                        : const Color(0xFF00E676),
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFF34D399),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -510,8 +510,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   _dispatchStatus,
                   style: TextStyle(
                     color: isOnScene
-                        ? const Color(0xFF40C4FF)
-                        : const Color(0xFF00E676),
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFF34D399),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.6,
@@ -530,7 +530,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             options: MapOptions(
               initialCenter: _squadLocation,
               initialZoom: 14.2,
-              backgroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF0B1220),
             ),
             children: [
               TileLayer(
@@ -543,7 +543,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 polylines: [
                   Polyline(
                     points: _routePoints,
-                    color: const Color(0xFF40C4FF),
+                    color: const Color(0xFF38BDF8),
                     strokeWidth: 4.5,
                   ),
                 ],
@@ -567,7 +567,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF00E676)
+                                color: const Color(0xFF34D399)
                                     .withValues(alpha: 0.4),
                                 width: 2,
                               ),
@@ -610,12 +610,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       child: Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF5252),
+                          color: const Color(0xFFF87171),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFF5252)
+                              color: const Color(0xFFF87171)
                                   .withValues(alpha: 0.6),
                               blurRadius: 14,
                             ),
@@ -638,9 +638,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B).withValues(alpha: 0.9),
+                color: const Color(0xFF131C2E).withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                border: Border.all(color: const Color(0xFF1C2740)),
                 boxShadow: const [
                   BoxShadow(color: Colors.black45, blurRadius: 6),
                 ],
@@ -648,7 +648,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               child: Row(
                 children: [
                   const Icon(Icons.explore_rounded,
-                      color: Color(0xFF40C4FF), size: 14),
+                      color: Color(0xFF38BDF8), size: 14),
                   const SizedBox(width: 6),
                   Flexible(child: Text(
                     'HDG: 042° NE • GPS: ${_squadLocation.latitude.toStringAsFixed(3)}°N, ${_squadLocation.longitude.toStringAsFixed(3)}°E',
@@ -672,8 +672,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               children: [
                 FloatingActionButton.small(
                   heroTag: 'center_squad',
-                  backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: const Color(0xFF40C4FF),
+                  backgroundColor: const Color(0xFF1C2740),
+                  foregroundColor: const Color(0xFF38BDF8),
                   tooltip: 'Center on Response Squad',
                   onPressed: () => _mapController.move(_squadLocation, 14.5),
                   child: const Icon(Icons.navigation_rounded),
@@ -681,8 +681,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 const SizedBox(height: 8),
                 FloatingActionButton.small(
                   heroTag: 'center_incident',
-                  backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: const Color(0xFFFF5252),
+                  backgroundColor: const Color(0xFF1C2740),
+                  foregroundColor: const Color(0xFFF87171),
                   tooltip: 'Center on Incident',
                   onPressed: () => _mapController.move(_incidentLocation, 14.5),
                   child: const Icon(Icons.crisis_alert_rounded),
@@ -699,9 +699,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B),
+                color: const Color(0xFF131C2E),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+                border: Border.all(color: const Color(0xFF1C2740), width: 1.5),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black87,
@@ -736,14 +736,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF40C4FF)
+                                    color: const Color(0xFF38BDF8)
                                         .withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     team.callSign,
                                     style: const TextStyle(
-                                      color: Color(0xFF40C4FF),
+                                      color: Color(0xFF38BDF8),
                                       fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -755,7 +755,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                             Text(
                               '${team.leader} • Radio ${team.radioChannel}',
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 11,
                               ),
                             ),
@@ -767,12 +767,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF131B2B),
+                          color: const Color(0xFF131C2E),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: isOnScene
-                                ? const Color(0xFF40C4FF)
-                                : const Color(0xFF00E676),
+                                ? const Color(0xFF38BDF8)
+                                : const Color(0xFF34D399),
                             width: 1.5,
                           ),
                         ),
@@ -782,8 +782,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                               isOnScene ? 'ON SCENE' : 'ETA $_minutesLeft MINS',
                               style: TextStyle(
                                 color: isOnScene
-                                    ? const Color(0xFF40C4FF)
-                                    : const Color(0xFF00E676),
+                                    ? const Color(0xFF38BDF8)
+                                    : const Color(0xFF34D399),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
                               ),
@@ -793,7 +793,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                   ? 'Stationed'
                                   : '$_kmLeft km • ${_speedKmh.toInt()} km/h',
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 10,
                               ),
                             ),
@@ -812,19 +812,19 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Row(
                         children: [
                           const Icon(Icons.water,
-                              color: Color(0xFF40C4FF), size: 12),
+                              color: Color(0xFF38BDF8), size: 12),
                           const SizedBox(width: 4),
                           Text(
                             'Water Level on Route: ${widget.incident.waterDepth}',
                             style: const TextStyle(
-                                color: Color(0xFF94A3B8), fontSize: 10),
+                                color: Color(0xFFB6C2D6), fontSize: 10),
                           ),
                         ],
                       ),
                       Flexible(child: Text(
                         '${(_routeProgress * 100).toInt()}% En Route',
                         style: const TextStyle(
-                          color: Color(0xFF40C4FF),
+                          color: Color(0xFF38BDF8),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -836,11 +836,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: _routeProgress,
-                      backgroundColor: const Color(0xFF1E293B),
+                      backgroundColor: const Color(0xFF1C2740),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isOnScene
-                            ? const Color(0xFF40C4FF)
-                            : const Color(0xFFFF6D00),
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF38BDF8),
                       ),
                       minHeight: 6,
                     ),
@@ -855,8 +855,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Expanded(
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF40C4FF),
-                            side: const BorderSide(color: Color(0xFF40C4FF)),
+                            foregroundColor: const Color(0xFF38BDF8),
+                            side: const BorderSide(color: Color(0xFF38BDF8)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -879,8 +879,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Expanded(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6D00),
-                            foregroundColor: Colors.white,
+                            backgroundColor: const Color(0xFF38BDF8),
+                            foregroundColor: const Color(0xFF06121F),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -913,14 +913,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.cancel_outlined,
-                              color: const Color(0xFFFF5252)
+                              color: const Color(0xFFF87171)
                                   .withValues(alpha: 0.8),
                               size: 14),
                           const SizedBox(width: 6),
                           Flexible(child: Text(
                             'CANCEL DISPATCH (STAND DOWN / REASSIGN)',
                             style: TextStyle(
-                              color: const Color(0xFFFF5252)
+                              color: const Color(0xFFF87171)
                                   .withValues(alpha: 0.9),
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -978,9 +978,9 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF131B2B),
+        color: Color(0xFF131C2E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFF40C4FF), width: 2)),
+        border: Border(top: BorderSide(color: Color(0xFF38BDF8), width: 2)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1000,7 +1000,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           const SizedBox(height: 14),
           Row(
             children: [
-              const Icon(Icons.radio_rounded, color: Color(0xFF40C4FF), size: 24),
+              const Icon(Icons.radio_rounded, color: Color(0xFF38BDF8), size: 24),
               const SizedBox(width: 10),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1016,7 +1016,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                   Text(
                     '${widget.team.name} • Lead: ${widget.team.leader}',
                     style:
-                        const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                        const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
                   ),
                 ],
               )),
@@ -1024,13 +1024,13 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
                   'ENC-98%',
                   style: TextStyle(
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1044,12 +1044,12 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF070B14),
+              color: const Color(0xFF0B1220),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: _isTalking
-                    ? const Color(0xFF00E676)
-                    : const Color(0xFF1E293B),
+                    ? const Color(0xFF34D399)
+                    : const Color(0xFF1C2740),
               ),
             ),
             child: Column(
@@ -1067,8 +1067,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                       height: height,
                       decoration: BoxDecoration(
                         color: _isTalking
-                            ? const Color(0xFF00E676)
-                            : const Color(0xFF334155),
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFF2B3A55),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     );
@@ -1081,8 +1081,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                     : 'CHANNEL STANDBY • HOLD BUTTON TO TALK',
                   style: TextStyle(
                     color: _isTalking
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFF64748B),
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFF8A98B0),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.6,
@@ -1104,13 +1104,13 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 color: _isTalking
-                    ? const Color(0xFF00E676)
+                    ? const Color(0xFF34D399)
                     : const Color(0xFF0284C7),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: _isTalking
-                        ? const Color(0xFF00E676).withValues(alpha: 0.4)
+                        ? const Color(0xFF34D399).withValues(alpha: 0.4)
                         : const Color(0xFF0284C7).withValues(alpha: 0.3),
                     blurRadius: 10,
                   ),
@@ -1143,8 +1143,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           // Direct Phone Call Option
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF40C4FF),
-              side: const BorderSide(color: Color(0xFF40C4FF)),
+              foregroundColor: const Color(0xFF38BDF8),
+              side: const BorderSide(color: Color(0xFF38BDF8)),
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -1230,14 +1230,14 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+            side: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
           ),
           title: const Row(
             children: [
-              Icon(Icons.swap_horiz_rounded, color: Color(0xFFFF6D00), size: 24),
+              Icon(Icons.swap_horiz_rounded, color: Color(0xFF38BDF8), size: 24),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -1262,13 +1262,13 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               const SizedBox(height: 6),
               Text(
                 '${widget.currentTeam.name} will be marked AVAILABLE again.',
-                style: const TextStyle(color: Color(0xFF00E676), fontSize: 11),
+                style: const TextStyle(color: Color(0xFF34D399), fontSize: 11),
               ),
               const SizedBox(height: 12),
               const Text(
                 'REASSIGNMENT REASON:',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1277,14 +1277,14 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF2B3A55)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: reassignReason,
-                    dropdownColor: const Color(0xFF131B2B),
+                    dropdownColor: const Color(0xFF131C2E),
                     isExpanded: true,
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                     items: reasons.map((r) {
@@ -1305,8 +1305,8 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF38BDF8),
+                foregroundColor: const Color(0xFF06121F),
               ),
               onPressed: () {
                 Navigator.of(ctx).pop();
@@ -1325,9 +1325,9 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF131B2B),
+        color: Color(0xFF131C2E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFFFF6D00), width: 2)),
+        border: Border(top: BorderSide(color: Color(0xFF38BDF8), width: 2)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -1383,7 +1383,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                       border: Border(
                         bottom: BorderSide(
                           color: _activeTab == 0
-                              ? const Color(0xFFFF6D00)
+                              ? const Color(0xFF38BDF8)
                               : Colors.transparent,
                           width: 2,
                         ),
@@ -1394,8 +1394,8 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: _activeTab == 0
-                            ? const Color(0xFFFF6D00)
-                            : const Color(0xFF64748B),
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF8A98B0),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1412,7 +1412,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                       border: Border(
                         bottom: BorderSide(
                           color: _activeTab == 1
-                              ? const Color(0xFFFF6D00)
+                              ? const Color(0xFF38BDF8)
                               : Colors.transparent,
                           width: 2,
                         ),
@@ -1423,8 +1423,8 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: _activeTab == 1
-                            ? const Color(0xFFFF6D00)
-                            : const Color(0xFF64748B),
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF8A98B0),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1442,7 +1442,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             const Text(
               'UPDATE MISSION STAGE (STATUS BADGE):',
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -1455,7 +1455,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     'EN ROUTE',
                     Icons.directions_boat_rounded,
                     _selectedStatus == 'EN ROUTE',
-                    const Color(0xFF00E676),
+                    const Color(0xFF34D399),
                     () => setState(() => _selectedStatus = 'EN ROUTE'),
                   ),
                 ),
@@ -1465,7 +1465,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     'ON SCENE',
                     Icons.pin_drop_rounded,
                     _selectedStatus == 'ON SCENE',
-                    const Color(0xFF40C4FF),
+                    const Color(0xFF38BDF8),
                     () => setState(() => _selectedStatus = 'ON SCENE'),
                   ),
                 ),
@@ -1478,7 +1478,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             const Text(
               'UPDATE TACTICAL DISPATCH NOTES:',
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -1490,12 +1490,12 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               style: const TextStyle(color: Colors.white, fontSize: 12),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF131B2B),
+                fillColor: const Color(0xFF131C2E),
                 hintText: 'Enter mission briefing updates...',
                 hintStyle: const TextStyle(color: Color(0xFF475569)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                 ),
               ),
             ),
@@ -1505,8 +1505,8 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             // Save Status & Notes Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF38BDF8),
+                foregroundColor: const Color(0xFF06121F),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -1526,8 +1526,8 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             // Resolve incident shortcut
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF00E676),
-                side: const BorderSide(color: Color(0xFF00E676)),
+                foregroundColor: const Color(0xFF34D399),
+                side: const BorderSide(color: Color(0xFF34D399)),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -1550,7 +1550,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             const Text(
               'SELECT A DIFFERENT AVAILABLE RESPONSE TEAM:',
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -1569,11 +1569,11 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF131B2B),
+                      color: const Color(0xFF131C2E),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: team.isAvailable
-                            ? const Color(0xFF334155)
+                            ? const Color(0xFF2B3A55)
                             : Colors.white10,
                       ),
                     ),
@@ -1584,7 +1584,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                               ? Icons.directions_boat
                               : Icons.local_shipping,
                           color: team.isAvailable
-                              ? const Color(0xFF40C4FF)
+                              ? const Color(0xFF38BDF8)
                               : Colors.white24,
                           size: 20,
                         ),
@@ -1606,7 +1606,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                               Text(
                                 'ETA: ${team.eta} • ${team.vehicleType}',
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: Color(0xFFB6C2D6),
                                   fontSize: 10,
                                 ),
                               ),
@@ -1616,7 +1616,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                             backgroundColor: team.isAvailable
-                                ? const Color(0xFFFF6D00)
+                                ? const Color(0xFF38BDF8)
                                 : Colors.white12,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
@@ -1655,10 +1655,10 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? activeColor.withValues(alpha: 0.2)
-              : const Color(0xFF131B2B),
+              : const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? activeColor : const Color(0xFF334155),
+            color: isSelected ? activeColor : const Color(0xFF2B3A55),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -1666,13 +1666,13 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon,
-                color: isSelected ? activeColor : const Color(0xFF64748B),
+                color: isSelected ? activeColor : const Color(0xFF8A98B0),
                 size: 16),
             const SizedBox(width: 6),
             Flexible(child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? activeColor : const Color(0xFF94A3B8),
+                color: isSelected ? activeColor : const Color(0xFFB6C2D6),
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),

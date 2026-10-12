@@ -77,7 +77,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
         const SnackBar(
           content: Text(
               'Please accept the flood early warning agreement to proceed.'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
       return;
@@ -116,7 +116,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.cloud_done_rounded, color: Color(0xFF00E676)),
+              const Icon(Icons.cloud_done_rounded, color: Color(0xFF34D399)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -126,7 +126,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -146,7 +146,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Firebase Registration Error: $e'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
     }
@@ -157,7 +157,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     final isCustomSector = _selectedSector == 'Other (Type Custom Flood Zone)';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -188,7 +188,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           color: const Color(0xFF151E32),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF1E293B),
+                            color: const Color(0xFF1C2740),
                             width: 1,
                           ),
                         ),
@@ -217,10 +217,10 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 // Top Info Card with Green Accent Bar
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF1C2740),
                       width: 1,
                     ),
                   ),
@@ -248,7 +248,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                     child: const Center(
                                       child: Icon(
                                         Icons.flood,
-                                        color: Color(0xFFFF6D00),
+                                        color: Color(0xFF38BDF8),
                                         size: 28,
                                       ),
                                     ),
@@ -273,7 +273,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                         Text(
                                           'Flood & Disaster Preparedness Network',
                                           style: TextStyle(
-                                            color: Color(0xFF94A3B8),
+                                            color: Color(0xFFB6C2D6),
                                             fontSize: 11,
                                           ),
                                         ),
@@ -287,7 +287,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           Container(
                             width: 6,
                             decoration: const BoxDecoration(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                             ),
                           ),
                         ],
@@ -438,18 +438,18 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
+                    border: Border.all(color: const Color(0xFF1C2740)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _selectedSector,
-                      dropdownColor: const Color(0xFF1E293B),
+                      dropdownColor: const Color(0xFF1C2740),
                       isExpanded: true,
                       icon: const Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFFFF6D00),
+                        color: Color(0xFF38BDF8),
                         size: 24,
                       ),
                       style: const TextStyle(
@@ -468,7 +468,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                 const Padding(
                                   padding: EdgeInsets.only(right: 8),
                                   child: Icon(Icons.edit_note,
-                                      color: Color(0xFFFF6D00), size: 18),
+                                      color: Color(0xFF38BDF8), size: 18),
                                 ),
                               Expanded(
                                 child: Text(
@@ -476,7 +476,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: isOther
-                                        ? const Color(0xFFFF9F0A)
+                                        ? const Color(0xFFFB923C)
                                         : Colors.white,
                                     fontWeight: isOther
                                         ? FontWeight.bold
@@ -509,7 +509,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       color: const Color(0xFF111C33),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.6),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.6),
                         width: 1.2,
                       ),
                     ),
@@ -519,12 +519,12 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         Row(
                           children: [
                             const Icon(Icons.edit_location_alt_outlined,
-                                color: Color(0xFFFF6D00), size: 18),
+                                color: Color(0xFF38BDF8), size: 18),
                             const SizedBox(width: 8),
                             Flexible(child: Text(
                               'TYPE YOUR CUSTOM FLOOD ZONE / AREA',
                               style: TextStyle(
-                                color: const Color(0xFFFF6D00)
+                                color: const Color(0xFF38BDF8)
                                     .withValues(alpha: 0.9),
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
@@ -540,27 +540,27 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                               color: Colors.white, fontSize: 13),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: const Color(0xFF131B2B),
+                            fillColor: const Color(0xFF131C2E),
                             hintText:
                                 'e.g. Wellampitiya GN Div 5 / Sedawatta Lowland',
                             hintStyle: const TextStyle(
-                                color: Color(0xFF64748B), fontSize: 12),
+                                color: Color(0xFF8A98B0), fontSize: 12),
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide:
-                                  const BorderSide(color: Color(0xFF1E293B)),
+                                  const BorderSide(color: Color(0xFF1C2740)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide:
-                                  const BorderSide(color: Color(0xFF1E293B)),
+                                  const BorderSide(color: Color(0xFF1C2740)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: const BorderSide(
-                                  color: Color(0xFFFF6D00), width: 1.5),
+                                  color: Color(0xFF38BDF8), width: 1.5),
                             ),
                           ),
                           validator: (v) {
@@ -591,7 +591,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: const Color(0xFF94A3B8),
+                        color: const Color(0xFFB6C2D6),
                         size: 20,
                       ),
                       onPressed: () {
@@ -619,7 +619,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         _obscureConfirmPassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: const Color(0xFF94A3B8),
+                        color: const Color(0xFFB6C2D6),
                         size: 20,
                       ),
                       onPressed: () {
@@ -662,7 +662,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Text(
                         'I agree to receive SMS & push emergency flood alerts for my residential sector and consent to location-based early warning broadcasts.',
                         style: TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 12,
                           height: 1.4,
                         ),
@@ -679,7 +679,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.35),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
                         blurRadius: 18,
                         offset: const Offset(0, 6),
                       ),
@@ -731,7 +731,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                   children: [
                     Flexible(child: Text(
                       'Already have an account? ',
-                      style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                      style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
                     )),
                     GestureDetector(
                       onTap: () {
@@ -744,7 +744,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: const Text(
                         'Log In here',
                         style: TextStyle(
-                          color: Color(0xFFFF6D00),
+                          color: Color(0xFF38BDF8),
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                         ),
@@ -768,7 +768,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
       child: Text(
         label,
         style: const TextStyle(
-          color: Color(0xFF94A3B8),
+          color: Color(0xFFB6C2D6),
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -784,23 +784,23 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
   }) {
     return InputDecoration(
       filled: true,
-      fillColor: const Color(0xFF131B2B),
+      fillColor: const Color(0xFF131C2E),
       hintText: hint,
       hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 13),
-      prefixIcon: Icon(icon, color: const Color(0xFFFF6D00), size: 20),
+      prefixIcon: Icon(icon, color: const Color(0xFF38BDF8), size: 20),
       suffixIcon: suffix,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1E293B)),
+        borderSide: const BorderSide(color: Color(0xFF1C2740)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1E293B)),
+        borderSide: const BorderSide(color: Color(0xFF1C2740)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
       ),
     );
   }

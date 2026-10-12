@@ -102,9 +102,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   // ── Severity styling ───────────────────────────────────────────────────────
   static const _severityColors = {
-    'Watch': Color(0xFFFFC107),
-    'Warning': Color(0xFFFF6D00),
-    'Critical': Color(0xFFFF1744),
+    'Watch': Color(0xFFFBBF24),
+    'Warning': Color(0xFF38BDF8),
+    'Critical': Color(0xFFF87171),
   };
 
   static const _severityIcons = {
@@ -161,18 +161,18 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       if (_editingId != null) {
         // UPDATE existing document
         await _warningsCol.doc(_editingId).update(alert.toMap()).queued();
-        _showSnack('✅ Warning updated successfully.', const Color(0xFF00E676));
+        _showSnack('✅ Warning updated successfully.', const Color(0xFF34D399));
       } else {
         // CREATE new document
         await _warningsCol.add(alert.toMap()).queued();
         _showSnack(
           '📡 Warning broadcast to all citizens!',
-          const Color(0xFF00E676),
+          const Color(0xFF34D399),
         );
       }
       _resetForm();
     } catch (e) {
-      _showSnack('❌ Error: $e', const Color(0xFFFF1744));
+      _showSnack('❌ Error: $e', const Color(0xFFF87171));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -183,10 +183,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     if (!confirmed) return;
     try {
       await _warningsCol.doc(docId).delete();
-      _showSnack('✅ Warning resolved and removed.', const Color(0xFF00E676));
+      _showSnack('✅ Warning resolved and removed.', const Color(0xFF34D399));
       if (_editingId == docId) _resetForm();
     } catch (e) {
-      _showSnack('❌ Error: $e', const Color(0xFFFF1744));
+      _showSnack('❌ Error: $e', const Color(0xFFF87171));
     }
   }
 
@@ -285,7 +285,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                  backgroundColor: const Color(0xFF00E676),
+                  backgroundColor: const Color(0xFF34D399),
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -308,7 +308,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: _buildAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
@@ -320,7 +320,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               label: _editingId == null
                   ? 'Broadcast New Warning'
                   : 'Edit Warning',
-              color: const Color(0xFF00E676),
+              color: const Color(0xFF34D399),
             ),
             const SizedBox(height: 14),
             _buildForm(),
@@ -328,7 +328,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             _buildSectionHeader(
               icon: Icons.crisis_alert_rounded,
               label: 'Active Warnings',
-              color: const Color(0xFFFF1744),
+              color: const Color(0xFFF87171),
               trailing: _buildLiveBadge(),
             ),
             const SizedBox(height: 14),
@@ -341,7 +341,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       actions: const [ThemeToggleButton()],
@@ -358,12 +358,12 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF1744).withValues(alpha: 0.15),
+              color: const Color(0xFFF87171).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.admin_panel_settings_rounded,
-              color: Color(0xFFFF1744),
+              color: Color(0xFFF87171),
               size: 20,
             ),
           ),
@@ -382,7 +382,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
                 TextSpan(
                   text: 'Metrics',
-                  style: TextStyle(color: Color(0xFF00E676)),
+                  style: TextStyle(color: Color(0xFF34D399)),
                 ),
               ],
             ),
@@ -426,10 +426,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF1744).withValues(alpha: 0.15),
+          color: const Color(0xFFF87171).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFFF1744).withValues(alpha: 0.4),
+            color: const Color(0xFFF87171).withValues(alpha: 0.4),
           ),
         ),
         child: Row(
@@ -439,7 +439,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFFFF1744),
+                color: Color(0xFFF87171),
                 shape: BoxShape.circle,
               ),
             ),
@@ -447,7 +447,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             const Text(
               'LIVE',
               style: TextStyle(
-                color: Color(0xFFFF1744),
+                color: Color(0xFFF87171),
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
@@ -469,15 +469,15 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _editingId != null
-              ? const Color(0xFFFFC107).withValues(alpha: 0.4)
+              ? const Color(0xFFFBBF24).withValues(alpha: 0.4)
               : Colors.white10,
         ),
         boxShadow: [
           BoxShadow(
             color:
                 (_editingId != null
-                        ? const Color(0xFFFFC107)
-                        : const Color(0xFF00E676))
+                        ? const Color(0xFFFBBF24)
+                        : const Color(0xFF34D399))
                     .withValues(alpha: 0.06),
             blurRadius: 20,
             spreadRadius: 2,
@@ -498,17 +498,17 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFC107).withValues(alpha: 0.1),
+                  color: const Color(0xFFFBBF24).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFFFFC107).withValues(alpha: 0.3),
+                    color: const Color(0xFFFBBF24).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.edit_rounded,
-                      color: Color(0xFFFFC107),
+                      color: Color(0xFFFBBF24),
                       size: 16,
                     ),
                     const SizedBox(width: 8),
@@ -516,7 +516,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       child: Text(
                         'Editing warning — changes will propagate instantly.',
                         style: TextStyle(
-                          color: const Color(0xFFFFC107).withValues(alpha: 0.9),
+                          color: const Color(0xFFFBBF24).withValues(alpha: 0.9),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -526,7 +526,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       onTap: _resetForm,
                       child: const Icon(
                         Icons.close_rounded,
-                        color: Color(0xFFFFC107),
+                        color: Color(0xFFFBBF24),
                         size: 16,
                       ),
                     ),
@@ -651,8 +651,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 onPressed: _isSaving ? null : _broadcastWarning,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _editingId != null
-                      ? const Color(0xFFFFC107)
-                      : const Color(0xFFFF1744),
+                      ? const Color(0xFFFBBF24)
+                      : const Color(0xFFF87171),
                   foregroundColor: Colors.black,
                   disabledBackgroundColor: Colors.white12,
                   shape: RoundedRectangleBorder(
@@ -856,17 +856,17 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF00E676), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF34D399), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF1744)),
+        borderSide: const BorderSide(color: Color(0xFFF87171)),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF1744), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFFF87171), width: 1.5),
       ),
-      errorStyle: const TextStyle(color: Color(0xFFFF1744), fontSize: 11),
+      errorStyle: const TextStyle(color: Color(0xFFF87171), fontSize: 11),
     );
   }
 
@@ -882,7 +882,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(color: Color(0xFF00E676)),
+              child: CircularProgressIndicator(color: Color(0xFF34D399)),
             ),
           );
         }
@@ -891,7 +891,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           return _buildEmptyState(
             icon: Icons.error_outline_rounded,
             message: 'Error loading warnings.\n${snapshot.error}',
-            color: const Color(0xFFFF1744),
+            color: const Color(0xFFF87171),
           );
         }
 
@@ -901,7 +901,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           return _buildEmptyState(
             icon: Icons.shield_rounded,
             message: 'No active warnings.\nAll zones are currently safe.',
-            color: const Color(0xFF00E676),
+            color: const Color(0xFF34D399),
           );
         }
 
@@ -921,7 +921,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   Widget _buildAlertCard(WarningAlert alert) {
     final severityColor =
-        _severityColors[alert.severity] ?? const Color(0xFFFFC107);
+        _severityColors[alert.severity] ?? const Color(0xFFFBBF24);
     final severityIcon =
         _severityIcons[alert.severity] ?? Icons.warning_rounded;
     final isBeingEdited = _editingId == alert.id;
@@ -931,12 +931,12 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
         color: isBeingEdited
-            ? const Color(0xFFFFC107).withValues(alpha: 0.07)
+            ? const Color(0xFFFBBF24).withValues(alpha: 0.07)
             : const Color(0xFF0D1B2A),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isBeingEdited
-              ? const Color(0xFFFFC107).withValues(alpha: 0.5)
+              ? const Color(0xFFFBBF24).withValues(alpha: 0.5)
               : severityColor.withValues(alpha: 0.25),
           width: isBeingEdited ? 1.5 : 1,
         ),
@@ -1046,7 +1046,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 // Edit button
                 _buildCardIconBtn(
                   icon: Icons.edit_rounded,
-                  color: const Color(0xFFFFC107),
+                  color: const Color(0xFFFBBF24),
                   tooltip: 'Edit',
                   onTap: () => _populateFormForEdit(alert),
                 ),
@@ -1054,7 +1054,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 // Resolve button
                 _buildCardIconBtn(
                   icon: Icons.check_circle_outline_rounded,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                   tooltip: 'Resolve',
                   onTap: () => _resolveWarning(alert.id),
                 ),

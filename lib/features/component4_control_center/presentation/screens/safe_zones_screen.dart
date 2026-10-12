@@ -11,13 +11,13 @@ import '../../../component1_evacuation/services/safe_zone_service.dart';
 import '../../data/services/admin_user_service.dart';
 import '../../../../core/theme/appearance.dart';
 
-const Color _bg = Color(0xFF131B2B);
-const Color _card = Color(0xFF131B2B);
-const Color _border = Color(0xFF1E293B);
-const Color _muted = Color(0xFF8E9BAE);
-const Color _accent = Color(0xFFFF5252);
-const Color _green = Color(0xFF00E676);
-const Color _orange = Color(0xFFFF9F0A);
+const Color _bg = Color(0xFF131C2E);
+const Color _card = Color(0xFF131C2E);
+const Color _border = Color(0xFF1C2740);
+const Color _muted = Color(0xFFB6C2D6);
+const Color _accent = Color(0xFFF87171);
+const Color _green = Color(0xFF34D399);
+const Color _orange = Color(0xFFFB923C);
 
 /// A camp leader account the administrator can assign to a safe zone.
 class _Leader {
@@ -529,7 +529,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
         hintText: hint,
         suffixIcon: suffix,
         labelStyle: const TextStyle(color: _muted),
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82)),
+        hintStyle: const TextStyle(color: Color(0xFF8A98B0)),
         filled: true,
         fillColor: _card,
         enabledBorder: OutlineInputBorder(

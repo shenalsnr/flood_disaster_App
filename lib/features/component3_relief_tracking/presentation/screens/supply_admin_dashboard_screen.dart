@@ -17,13 +17,13 @@ class SupplyAdminDashboardScreen extends StatefulWidget {
 }
 
 class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
-  static const Color _orange = Color(0xFFFF9F0A);
+  static const Color _bg = Color(0xFF131C2E);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _orange = Color(0xFFFB923C);
   static const Color _blue = Color(0xFF448AFF);
 
   Stream<QuerySnapshot<Map<String, dynamic>>>? _stream;
@@ -107,7 +107,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
     } catch (e) {
       messenger.showSnackBar(SnackBar(
         content: Text('Could not save: $e'),
-        backgroundColor: const Color(0xFFFF1744),
+        backgroundColor: const Color(0xFFDC2626),
         showCloseIcon: true,
       ));
     }
@@ -154,7 +154,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
 
         final pending = byStatus(['pending']);
         final onTheWay = byStatus(['dispatched']);
-        final done = byStatus(['arrived', 'resolved']).take(5).toList();
+        final done = byStatus(['arrived', 'resolved']);
 
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -207,13 +207,100 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
                 )),
             const SizedBox(height: 14),
 
-            _section('RECENTLY COMPLETED', null),
-            if (done.isEmpty) _empty('Nothing completed yet.'),
-            ...done.map((d) => _requestCard(d.data(), showDriver: true)),
+            _completedButton(done.length),
           ],
         );
       },
     );
+  }
+
+  /// Button that opens the completed requests on their own page.
+  Widget _completedButton(int count) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: _openCompleted,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.history_rounded, color: _green),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Recently completed',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text(
+                          count == 0
+                              ? 'Nothing completed yet'
+                              : '$count completed request${count == 1 ? '' : 's'}',
+                          style: const TextStyle(color: _muted, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: _muted),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  void _openCompleted() {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => Scaffold(
+        backgroundColor: _bg,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF0D1424),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          title: const Text(
+            'Recently Completed',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          ),
+          actions: const [ThemeToggleButton()],
+        ),
+        body: SafeArea(
+          child: _stream == null
+              ? _note('Unavailable right now.')
+              : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _stream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return _note('Could not load requests.\n${snapshot.error}');
+                    }
+                    if (!snapshot.hasData) {
+                      return const Center(
+                          child: CircularProgressIndicator(color: _accent));
+                    }
+                    final done = snapshot.data!.docs
+                        .where((d) => ['arrived', 'resolved']
+                            .contains(d.data()['status']))
+                        .toList();
+                    if (done.isEmpty) {
+                      return _note('Nothing completed yet.');
+                    }
+                    return ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: done
+                          .map((d) => _requestCard(d.data(), showDriver: true))
+                          .toList(),
+                    );
+                  },
+                ),
+        ),
+      ),
+    ));
   }
 
   Widget _note(String text) => Center(
@@ -221,13 +308,13 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           padding: const EdgeInsets.all(24),
           child: Text(text,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF7E8B9B), fontSize: 12)),
+              style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 12)),
         ),
       );
 
   Widget _empty(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 12)),
+        child: Text(text, style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 12)),
       );
 
   Widget _section(String title, String? help) => Padding(
@@ -238,14 +325,14 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
             Text(
               title,
               style: const TextStyle(
-                color: Color(0xFF7E8B9B),
+                color: Color(0xFF8A98B0),
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
               ),
             ),
             if (help != null)
-              Text(help, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 11)),
+              Text(help, style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 11)),
           ],
         ),
       );
@@ -265,7 +352,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
               const SizedBox(height: 2),
               Text(label,
                   style: const TextStyle(
-                      color: Color(0xFF63738A), fontSize: 9, fontWeight: FontWeight.bold)),
+                      color: Color(0xFF8A98B0), fontSize: 9, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -289,7 +376,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
 
     Color urgencyColor = _green;
     if (urgency == 'urgent') urgencyColor = _orange;
-    if (urgency == 'critical' || (isAuto && urgency.isEmpty)) urgencyColor = const Color(0xFFFF1744);
+    if (urgency == 'critical' || (isAuto && urgency.isEmpty)) urgencyColor = const Color(0xFFF87171);
 
     final statusColor = status == 'pending'
         ? _orange
@@ -394,11 +481,11 @@ class _DriverFormDialog extends StatefulWidget {
 }
 
 class _DriverFormDialogState extends State<_DriverFormDialog> {
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _field = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
 
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
@@ -544,7 +631,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
 
   InputDecoration _decoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+        hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
         filled: true,
         fillColor: _field,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

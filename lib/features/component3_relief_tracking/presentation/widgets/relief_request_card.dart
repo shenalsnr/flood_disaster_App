@@ -16,7 +16,7 @@ class ReliefRequestCard extends StatelessWidget {
 
     switch (request.urgency) {
       case RequestUrgency.immediate:
-        urgencyColor = const Color(0xFFFF5252);
+        urgencyColor = const Color(0xFFF87171);
         urgencyLabel = 'IMMEDIATE';
         break;
       case RequestUrgency.high:
@@ -24,7 +24,7 @@ class ReliefRequestCard extends StatelessWidget {
         urgencyLabel = 'HIGH PRIORITY';
         break;
       case RequestUrgency.routine:
-        urgencyColor = const Color(0xFF69F0AE);
+        urgencyColor = const Color(0xFF6EE7B7);
         urgencyLabel = 'ROUTINE';
         break;
     }

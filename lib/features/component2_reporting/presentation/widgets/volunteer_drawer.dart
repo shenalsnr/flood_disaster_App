@@ -25,14 +25,14 @@ class VolunteerDrawer extends StatelessWidget {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0xFF334155)),
+          side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
         title: const Row(
           children: [
-            Icon(Icons.logout_rounded, color: Color(0xFFFF5252), size: 24),
+            Icon(Icons.logout_rounded, color: Color(0xFFF87171), size: 24),
             SizedBox(width: 10),
             Flexible(child: Text(
               'Confirm Log Out',
@@ -46,7 +46,7 @@ class VolunteerDrawer extends StatelessWidget {
         ),
         content: const Text(
           'Are you sure you want to log out from the Volunteer Reporting console?',
-          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+          style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 14),
         ),
         actions: [
           TextButton(
@@ -55,7 +55,7 @@ class VolunteerDrawer extends StatelessWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFFFF5252),
+              backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -89,14 +89,14 @@ class VolunteerDrawer extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0xFF334155)),
+          side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
         title: const Row(
           children: [
-            Icon(Icons.support_agent_rounded, color: Color(0xFF00E676), size: 24),
+            Icon(Icons.support_agent_rounded, color: Color(0xFF34D399), size: 24),
             SizedBox(width: 10),
             Flexible(child: Text(
               'Emergency Volunteer Help',
@@ -127,8 +127,8 @@ class VolunteerDrawer extends StatelessWidget {
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFF00E676),
-              foregroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF34D399),
+              foregroundColor: const Color(0xFF0B1220),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
@@ -143,14 +143,14 @@ class VolunteerDrawer extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0xFF334155)),
+          side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
         title: const Row(
           children: [
-            Icon(Icons.shield_rounded, color: Color(0xFF00E676), size: 24),
+            Icon(Icons.shield_rounded, color: Color(0xFF34D399), size: 24),
             SizedBox(width: 10),
             Flexible(child: Text(
               'About WeSafe',
@@ -174,15 +174,15 @@ class VolunteerDrawer extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'Version 1.0.0 (Release Build)',
-              style: TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold, fontSize: 12),
+              style: TextStyle(color: Color(0xFF34D399), fontWeight: FontWeight.bold, fontSize: 12),
             ),
           ],
         ),
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFF00E676),
-              foregroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF34D399),
+              foregroundColor: const Color(0xFF0B1220),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
@@ -214,7 +214,7 @@ class VolunteerDrawer extends StatelessWidget {
       backgroundColor: Colors.transparent,
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF070B14),
+          color: Color(0xFF0B1220),
           border: Border(right: BorderSide(color: Colors.white10, width: 1)),
         ),
         child: SafeArea(
@@ -228,7 +228,7 @@ class VolunteerDrawer extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       const Color(0xFF112240).withValues(alpha: 0.85),
-                      const Color(0xFF070B14),
+                      const Color(0xFF0B1220),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -246,13 +246,13 @@ class VolunteerDrawer extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFF9F0A), Color(0xFFFF5722)],
+                          colors: [Color(0xFFFB923C), Color(0xFFFF5722)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF9F0A).withValues(alpha: 0.35),
+                            color: const Color(0xFFFB923C).withValues(alpha: 0.35),
                             blurRadius: 14,
                             offset: const Offset(0, 4),
                           ),
@@ -287,16 +287,16 @@ class VolunteerDrawer extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                                color: const Color(0xFF34D399).withValues(alpha: 0.3),
                               ),
                             ),
                             child: const Text(
                               'VOLUNTEER',
                               style: TextStyle(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 fontSize: 9,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1.5,
@@ -434,12 +434,12 @@ class VolunteerDrawer extends StatelessWidget {
                       height: 52,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFFF5252),
+                          foregroundColor: const Color(0xFFF87171),
                           side: const BorderSide(
-                            color: Color(0xFFFF5252),
+                            color: Color(0xFFF87171),
                             width: 1.5,
                           ),
-                          backgroundColor: const Color(0xFFFF5252).withValues(alpha: 0.1),
+                          backgroundColor: const Color(0xFFDC2626).withValues(alpha: 0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -478,7 +478,7 @@ class VolunteerDrawer extends StatelessWidget {
   static void _showSettingsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -509,7 +509,7 @@ class VolunteerDrawer extends StatelessWidget {
                 const ThemeToggleTile(contentPadding: EdgeInsets.zero),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  activeTrackColor: const Color(0xFF00E676),
+                  activeTrackColor: const Color(0xFF34D399),
                   title: const Text('High Accuracy GPS Tracking', style: TextStyle(color: Colors.white, fontSize: 15)),
                   subtitle: const Text('Auto-capture exact hazard coordinates', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   value: true,
@@ -517,7 +517,7 @@ class VolunteerDrawer extends StatelessWidget {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  activeTrackColor: const Color(0xFF00E676),
+                  activeTrackColor: const Color(0xFF34D399),
                   title: const Text('Offline Local Caching', style: TextStyle(color: Colors.white, fontSize: 15)),
                   subtitle: const Text('Queue hazard reports when signal is lost', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   value: true,
@@ -525,7 +525,7 @@ class VolunteerDrawer extends StatelessWidget {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  activeTrackColor: const Color(0xFF00E676),
+                  activeTrackColor: const Color(0xFF34D399),
                   title: const Text('Urgent Emergency Sirens', style: TextStyle(color: Colors.white, fontSize: 15)),
                   subtitle: const Text('Audible warning when river level breaches red zone', style: TextStyle(color: Colors.white54, fontSize: 12)),
                   value: true,

@@ -53,7 +53,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
   void _showImageSourceDialog(String email) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFF1C2740),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -104,7 +104,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF0F172A).withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF334155)),
+                border: Border.all(color: const Color(0xFF2B3A55)),
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -144,7 +144,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                         const SizedBox(width: 12),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                            backgroundColor: const Color(0xFF00E676),
+                            backgroundColor: const Color(0xFF34D399),
                             foregroundColor: Colors.black,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -182,16 +182,16 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: const Color(0xFF00E676).withValues(alpha: 0.7)),
+        prefixIcon: Icon(icon, color: const Color(0xFF34D399).withValues(alpha: 0.7)),
         filled: true,
-        fillColor: const Color(0xFF1E293B).withValues(alpha: 0.5),
+        fillColor: const Color(0xFF1C2740).withValues(alpha: 0.5),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.transparent),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF00E676)),
+          borderSide: const BorderSide(color: Color(0xFF34D399)),
         ),
       ),
     );
@@ -216,7 +216,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: userEmail == null
@@ -226,7 +226,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                   stream: _firestore.collection('users').doc(userEmail).snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Color(0xFF00E676)));
+                      return const Center(child: CircularProgressIndicator(color: Color(0xFF34D399)));
                     }
 
                     final data = snapshot.data?.data() as Map<String, dynamic>? ?? {};
@@ -256,13 +256,13 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                                      colors: [Color(0xFF34D399), Color(0xFF00BFA5)],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
                                         blurRadius: 20,
                                         spreadRadius: 2,
                                         offset: const Offset(0, 8),
@@ -274,7 +274,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                     child: Container(
                                       decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Color(0xFF070B14),
+                                        color: Color(0xFF0B1220),
                                       ),
                                       clipBehavior: Clip.hardEdge,
                                       child: data['photoUrl'] != null && data['photoUrl'].toString().isNotEmpty
@@ -283,15 +283,15 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                                   data['photoUrl'],
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) =>
-                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
+                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF34D399)),
                                                 ))
                                               : Unfiltered(child: Image.memory(
                                                   base64Decode(data['photoUrl']),
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) =>
-                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
+                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF34D399)),
                                                 )))
-                                          : const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
+                                          : const Icon(Icons.person_rounded, size: 60, color: Color(0xFF34D399)),
                                     ),
                                   ),
                                 ),
@@ -304,7 +304,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Center(
-                                      child: CircularProgressIndicator(color: Color(0xFF00E676)),
+                                      child: CircularProgressIndicator(color: Color(0xFF34D399)),
                                     ),
                                   ),
                                 // Edit Badge
@@ -314,11 +314,11 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF1E293B),
+                                      color: const Color(0xFF1C2740),
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: const Color(0xFF00E676), width: 2),
+                                      border: Border.all(color: const Color(0xFF34D399), width: 2),
                                     ),
-                                    child: const Icon(Icons.camera_alt_rounded, color: Color(0xFF00E676), size: 18),
+                                    child: const Icon(Icons.camera_alt_rounded, color: Color(0xFF34D399), size: 18),
                                   ),
                                 ),
                               ],
@@ -338,14 +338,14 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.3)),
+                              border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.3)),
                             ),
                             child: const Text(
                               'AFFECTED CITIZEN',
                               style: TextStyle(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.2,
@@ -362,7 +362,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(24),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E293B).withValues(alpha: 0.4),
+                                  color: const Color(0xFF1C2740).withValues(alpha: 0.4),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                                 ),
@@ -414,10 +414,10 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                             child: ElevatedButton(
                               onPressed: () => _editProfile(data, userEmail),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00E676),
+                                backgroundColor: const Color(0xFF34D399),
                                 foregroundColor: Colors.black,
                                 elevation: 8,
-                                shadowColor: const Color(0xFF00E676).withValues(alpha: 0.4),
+                                shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
                               child: const Row(
@@ -463,10 +463,10 @@ class _ProfileRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF00E676).withValues(alpha: 0.1),
+            color: const Color(0xFF34D399).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF00E676), size: 24),
+          child: Icon(icon, color: const Color(0xFF34D399), size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(

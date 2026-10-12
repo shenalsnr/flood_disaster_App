@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,13 +21,14 @@ class PersonalInformationScreen extends StatefulWidget {
 }
 
 class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
+  static const Color _bg = Color(0xFF0B1220);
+  static const Color _card = Color(0xFF1C2740);
+  static const Color _field = Color(0xFF1C2740);
+  static const Color _border = Color(0xFF2B3A55);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFF34D399);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _danger = Color(0xFFF87171);
 
   final ResponderController _auth = ResponderController();
 
@@ -99,8 +101,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             ),
             if (hasPhoto)
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Color(0xFFFF1744)),
-                title: const Text('Remove photo', style: TextStyle(color: Color(0xFFFF1744))),
+                leading: const Icon(Icons.delete_outline, color: _danger),
+                title: const Text('Remove photo', style: TextStyle(color: _danger)),
                 onTap: () => Navigator.pop(ctx, 'remove'),
               ),
           ],
@@ -191,7 +193,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(text),
-        backgroundColor: error ? const Color(0xFFFF1744) : _green,
+        backgroundColor: error ? const Color(0xFFDC2626) : _card,
         showCloseIcon: true,
       ),
     );
@@ -204,14 +206,14 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   Widget build(BuildContext context) {
     final user = _user;
     return Scaffold(
-      backgroundColor: _bg,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1424),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           'Personal Information',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
         ),
         actions: [
           if (user != null && !_editing)
@@ -223,12 +225,23 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             ),
         ],
       ),
-      body: SafeArea(
-        child: user == null
-            ? const Center(
-                child: Text('No user is logged in.', style: TextStyle(color: _muted)),
-              )
-            : _buildBody(user),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-0.8, -0.6),
+            radius: 1.5,
+            colors: [Color(0xFF112240), _bg],
+          ),
+        ),
+        child: SafeArea(
+          child: user == null
+              ? const Center(
+                  child: Text('No user is logged in.', style: TextStyle(color: _muted)),
+                )
+              : _buildBody(user),
+        ),
       ),
     );
   }
@@ -241,7 +254,29 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         Center(
           child: Stack(
             children: [
-              LeaderAvatar(name: user.fullName, photoUrl: user.photoUrl, size: 104),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF34D399), Color(0xFF00BFA5)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _accent.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: LeaderAvatar(
+                      name: user.fullName, photoUrl: user.photoUrl, size: 104),
+                ),
+              ),
               if (_photoBusy)
                 const Positioned.fill(
                   child: Center(child: CircularProgressIndicator(color: _accent)),
@@ -254,11 +289,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _accent,
+                      color: _card,
                       shape: BoxShape.circle,
-                      border: Border.all(color: _bg, width: 3),
+                      border: Border.all(color: _accent, width: 2),
                     ),
-                    child: const Icon(Icons.photo_camera, color: Colors.white, size: 16),
+                    child: const Icon(Icons.camera_alt_rounded, color: _accent, size: 16),
                   ),
                 ),
               ),
@@ -277,21 +312,33 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         ),
         const SizedBox(height: 4),
         Center(
-          child: Text(
-            user.roleTitle,
-            style: const TextStyle(
-                color: _muted, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: _accent.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _accent.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              user.roleTitle,
+              style: const TextStyle(
+                  color: _accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+            ),
           ),
         ),
         const SizedBox(height: 18),
 
         // Details
-        Container(
-          padding: const EdgeInsets.all(16),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: _card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _border),
+            color: _card.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Form(
             key: _formKey,
@@ -346,7 +393,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                           backgroundColor: _accent,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06121F),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
@@ -356,7 +403,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                                 width: 16,
                                 height: 16,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
+                                    strokeWidth: 2, color: Color(0xFF06121F)),
                               )
                             : const Icon(Icons.check, size: 16),
                         label: Text(_saving ? 'SAVING...' : 'SAVE',
@@ -369,6 +416,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             ),
           ),
         ),
+          ),
+        ),
       ],
     );
   }
@@ -377,12 +426,12 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(
           children: [
-            Flexible(child: Text(text,
+            Flexible(child: Text(text.toUpperCase(),
                 style: const TextStyle(
-                    color: _muted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.6))),
+                    color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0))),
             if (help != null) ...[
               const SizedBox(width: 8),
-              Text(help, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 10)),
+              Text(help, style: const TextStyle(color: _muted, fontSize: 10)),
             ],
           ],
         ),
@@ -390,12 +439,12 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
   Widget _value(String text) => Text(
         text.isEmpty ? '-' : text,
-        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
       );
 
   InputDecoration _decoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+        hintStyle: const TextStyle(color: _muted, fontSize: 13),
         filled: true,
         fillColor: _field,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

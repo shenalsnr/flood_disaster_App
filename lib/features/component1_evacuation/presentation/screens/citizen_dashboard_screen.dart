@@ -123,7 +123,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             final isPulse = topAlert != null;
 
             return Scaffold(
-              backgroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF0B1220),
               drawer: const CitizenDrawer(),
               extendBodyBehindAppBar: true,
               appBar: AppBar(
@@ -141,7 +141,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                   children: [
                     const Icon(
                       Icons.shield_rounded,
-                      color: Color(0xFF00E676),
+                      color: Color(0xFF34D399),
                       size: 24,
                     ),
                     const SizedBox(width: 8),
@@ -159,7 +159,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                           ),
                           TextSpan(
                             text: 'Safe',
-                            style: TextStyle(color: Color(0xFF00E676)),
+                            style: TextStyle(color: Color(0xFF34D399)),
                           ),
                         ],
                       ),
@@ -181,7 +181,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                   gradient: RadialGradient(
                     center: Alignment(-0.8, -0.6),
                     radius: 1.5,
-                    colors: [Color(0xFF112240), Color(0xFF070B14)],
+                    colors: [Color(0xFF112240), Color(0xFF0B1220)],
                   ),
                 ),
                 child: SafeArea(
@@ -203,7 +203,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                           decoration: BoxDecoration(
                             color: const Color(0xFF0F172A),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFF1E293B)),
+                            border: Border.all(color: const Color(0xFF1C2740)),
                           ),
                           child: isLoading
                               ? const Center(
@@ -216,7 +216,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Color(0xFF00E676),
+                                        color: Color(0xFF34D399),
                                       ),
                                     ),
                                   ),
@@ -227,11 +227,11 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                       width: 40,
                                       height: 40,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF00E676)
+                                        color: const Color(0xFF34D399)
                                             .withValues(alpha: 0.15),
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: const Color(0xFF00E676)
+                                          color: const Color(0xFF34D399)
                                               .withValues(alpha: 0.4),
                                         ),
                                       ),
@@ -242,17 +242,17 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                                   photoUrl,
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) =>
-                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF34D399), size: 22),
                                                 ))
                                               : Unfiltered(child: Image.memory(
                                                   base64Decode(photoUrl),
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) =>
-                                                      const Icon(Icons.person_rounded, color: Color(0xFF00E676), size: 22),
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF34D399), size: 22),
                                                 )))
                                           : const Icon(
                                               Icons.person_rounded,
-                                              color: Color(0xFF00E676),
+                                              color: Color(0xFF34D399),
                                               size: 22,
                                             ),
                                     ),
@@ -288,14 +288,14 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF00E676)
+                                        color: const Color(0xFF34D399)
                                             .withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: const Text(
                                         'ACTIVE',
                                         style: TextStyle(
-                                          color: Color(0xFF00E676),
+                                          color: Color(0xFF34D399),
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -334,7 +334,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 width: 4,
                                 height: 18,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFF6D00),
+                                  color: const Color(0xFF38BDF8),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -364,11 +364,11 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                               width: 4,
                               height: 22,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00E676),
+                                color: const Color(0xFF34D399),
                                 borderRadius: BorderRadius.circular(2),
                                 boxShadow: const [
                                   BoxShadow(
-                                    color: Color(0x6600E676),
+                                    color: Color(0x6634D399),
                                     blurRadius: 8,
                                   ),
                                 ],
@@ -394,7 +394,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                           icon: Icons.alt_route_rounded,
                           title: 'Safe Route',
                           subtitle: 'Fastest path to high ground',
-                          color: const Color(0xFFFFD740),
+                          color: const Color(0xFFFBBF24),
                           isPrimary: true,
                         ),
 
@@ -409,7 +409,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                     _push(const EvacuationChecklistScreen()),
                                 icon: Icons.checklist_rounded,
                                 label: 'Go Bag\nChecklist',
-                                color: const Color(0xFF00E676),
+                                color: const Color(0xFF34D399),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -419,7 +419,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                     _push(const EmergencyContactsScreen()),
                                 icon: Icons.contact_phone_rounded,
                                 label: 'Emergency\nContacts',
-                                color: const Color(0xFF40C4FF),
+                                color: const Color(0xFF38BDF8),
                               ),
                             ),
                           ],
@@ -433,7 +433,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                           icon: Icons.verified_user_rounded,
                           title: 'Safe Arrival Check-In',
                           subtitle: 'Mark yourself and family as safe',
-                          color: const Color(0xFFFF6D00),
+                          color: const Color(0xFF38BDF8),
                           isPrimary: false,
                         ),
 
@@ -520,7 +520,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B), // Very dark slate/blue
+            color: const Color(0xFF131C2E), // Very dark slate/blue
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: widget.isPrimary
@@ -649,7 +649,7 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.05),
@@ -725,9 +725,9 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
   late AnimationController _bgController;
 
   static const _gradients = {
-    'Watch': [Color(0xFFFFB300), Color(0xFFFF8F00)],
-    'Warning': [Color(0xFFFF6D00), Color(0xFFE65100)],
-    'Critical': [Color(0xFFFF1744), Color(0xFFD50000)], // More vibrant reds
+    'Watch': [Color(0xFFFBBF24), Color(0xFFFF8F00)],
+    'Warning': [Color(0xFF38BDF8), Color(0xFFE65100)],
+    'Critical': [Color(0xFFF87171), Color(0xFFD50000)], // More vibrant reds
   };
 
   @override
@@ -747,7 +747,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
 
   @override
   Widget build(BuildContext context) {
-    final gradColors = _gradients[widget.severity] ?? [const Color(0xFFFF1744), const Color(0xFFD50000)];
+    final gradColors = _gradients[widget.severity] ?? [const Color(0xFFF87171), const Color(0xFFD50000)];
     final isCritical = widget.severity == 'Critical';
 
     return Container(
@@ -1027,12 +1027,12 @@ class _AllClearCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFF00E676).withValues(alpha: 0.3),
+          color: const Color(0xFF34D399).withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00E676).withValues(alpha: 0.08),
+            color: const Color(0xFF34D399).withValues(alpha: 0.08),
             blurRadius: 20,
           ),
         ],
@@ -1043,12 +1043,12 @@ class _AllClearCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+              color: const Color(0xFF34D399).withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.shield_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 28,
             ),
           ),
@@ -1060,7 +1060,7 @@ class _AllClearCard extends StatelessWidget {
                 const Text(
                   'All Clear',
                   style: TextStyle(
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1088,14 +1088,14 @@ class _MiniAlertTile extends StatelessWidget {
   const _MiniAlertTile({required this.alert});
 
   static const _colors = {
-    'Watch': Color(0xFFFFC107),
-    'Warning': Color(0xFFFF6D00),
-    'Critical': Color(0xFFFF1744),
+    'Watch': Color(0xFFFBBF24),
+    'Warning': Color(0xFF38BDF8),
+    'Critical': Color(0xFFF87171),
   };
 
   @override
   Widget build(BuildContext context) {
-    final color = _colors[alert.severity] ?? const Color(0xFFFFC107);
+    final color = _colors[alert.severity] ?? const Color(0xFFFBBF24);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1206,13 +1206,13 @@ class _AlertLevelBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSafe = level == 'SAFE';
     final bgColor = isSafe
-        ? const Color(0xFF00E676).withValues(alpha: 0.15)
+        ? const Color(0xFF34D399).withValues(alpha: 0.15)
         : const Color(0xFFB71C1C).withValues(alpha: 0.8);
     final borderColor = isSafe
-        ? const Color(0xFF00E676).withValues(alpha: 0.4)
+        ? const Color(0xFF34D399).withValues(alpha: 0.4)
         : Colors.redAccent.shade100.withValues(alpha: 0.5);
     final shadowColor = isSafe
-        ? const Color(0x3300E676)
+        ? const Color(0x3334D399)
         : const Color(0x4DB71C1C);
 
     return Container(
@@ -1226,7 +1226,7 @@ class _AlertLevelBadge extends StatelessWidget {
       child: Text(
         level,
         style: TextStyle(
-          color: isSafe ? const Color(0xFF00E676) : Colors.white,
+          color: isSafe ? const Color(0xFF34D399) : Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w900,
           letterSpacing: 1.5,
@@ -1274,19 +1274,19 @@ class _PremiumStatusFooter extends StatelessWidget {
           _buildStatusRow(
             Icons.cell_tower,
             'Network: Online',
-            const Color(0xFF00E676),
+            const Color(0xFF34D399),
           ),
           const SizedBox(height: 14),
           _buildStatusRow(
             Icons.offline_pin_rounded,
             'Map cached (10km)',
-            const Color(0xFF40C4FF),
+            const Color(0xFF38BDF8),
           ),
           const SizedBox(height: 14),
           _buildStatusRow(
             Icons.battery_4_bar_rounded,
             'Battery-save ON',
-            const Color(0xFFFFD740),
+            const Color(0xFFFBBF24),
           ),
         ],
       ),

@@ -15,7 +15,7 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Offline map cache cleared successfully.'),
-        backgroundColor: Color(0xFF00E676),
+        backgroundColor: Color(0xFF34D399),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -24,9 +24,9 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         title: const Text(
           'Settings',
@@ -39,7 +39,7 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
         children: [
           _buildSectionHeader('Notifications'),
           SwitchListTile(
-            activeThumbColor: const Color(0xFF00E676),
+            activeThumbColor: const Color(0xFF34D399),
             title: const Text(
               'Push Notifications',
               style: TextStyle(color: Colors.white),
@@ -85,7 +85,7 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
       child: Text(
         title.toUpperCase(),
         style: const TextStyle(
-          color: Color(0xFF00E676),
+          color: Color(0xFF34D399),
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,

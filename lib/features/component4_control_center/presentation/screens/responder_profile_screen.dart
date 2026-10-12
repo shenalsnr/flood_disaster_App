@@ -46,9 +46,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
     final user = _controller.currentUser;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -83,11 +83,11 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFFFF6D00),
+                                color: const Color(0xFF38BDF8),
                                 width: 2.5,
                               ),
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF1E3A8A), Color(0xFF131B2B)],
+                                colors: [Color(0xFF1E3A8A), Color(0xFF131C2E)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -96,7 +96,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                                 ? const Center(
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: Color(0xFFFF6D00),
+                                      color: Color(0xFF38BDF8),
                                     ),
                                   )
                                 : _buildAvatarImage(user?.photoUrl),
@@ -110,11 +110,11 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                             height: 20,
                             decoration: BoxDecoration(
                               color: isOnDuty
-                                  ? const Color(0xFF00E676)
+                                  ? const Color(0xFF34D399)
                                   : Colors.grey,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF070B14),
+                                color: const Color(0xFF0B1220),
                                 width: 2,
                               ),
                             ),
@@ -130,13 +130,13 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFF6D00),
+                                color: const Color(0xFF38BDF8),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: const Color(0xFF070B14), width: 2),
+                                    color: const Color(0xFF0B1220), width: 2),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFFF6D00)
+                                    color: const Color(0xFF38BDF8)
                                         .withValues(alpha: 0.5),
                                     blurRadius: 8,
                                   ),
@@ -163,19 +163,19 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                           color: const Color(0xFF151E32),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFFFF6D00).withValues(alpha: 0.5),
+                            color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
                           ),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.add_a_photo_outlined,
-                                size: 14, color: Color(0xFFFF6D00)),
+                                size: 14, color: Color(0xFF38BDF8)),
                             SizedBox(width: 6),
                             Text(
                               'Add / Change Photo',
                               style: TextStyle(
-                                color: Color(0xFFFF9F0A),
+                                color: Color(0xFFFB923C),
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -198,7 +198,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       user?.roleTitle ??
                           'Senior Emergency Dispatcher • Unit #04',
                       style: const TextStyle(
-                        color: Color(0xFF40C4FF),
+                        color: Color(0xFF38BDF8),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -209,7 +209,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                           ? user!.floodZone
                           : 'Sri Lanka Disaster Management Centre (DMC)',
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: Color(0xFFB6C2D6),
                         fontSize: 11,
                       ),
                     ),
@@ -223,9 +223,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF1E293B)),
+                  border: Border.all(color: const Color(0xFF1C2740)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,12 +233,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                     Row(
                       children: [
                         const Icon(Icons.verified_user_rounded,
-                            color: Color(0xFF00E676), size: 18),
+                            color: Color(0xFF34D399), size: 18),
                         const SizedBox(width: 8),
                         Flexible(child: Text(
                           'FIREBASE FIRESTORE SYNCED PROFILE',
                           style: TextStyle(
-                            color: Color(0xFF00E676),
+                            color: Color(0xFF34D399),
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.8,
@@ -249,14 +249,14 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00E676)
+                            color: const Color(0xFF34D399)
                                 .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
                             'ONLINE',
                             style: TextStyle(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
@@ -307,12 +307,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isOnDuty
-                        ? const Color(0xFF00E676).withValues(alpha: 0.5)
-                        : const Color(0xFF334155),
+                        ? const Color(0xFF34D399).withValues(alpha: 0.5)
+                        : const Color(0xFF2B3A55),
                   ),
                 ),
                 child: Row(
@@ -321,7 +321,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: isOnDuty ? const Color(0xFF00E676) : Colors.grey,
+                        color: isOnDuty ? const Color(0xFF34D399) : Colors.grey,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -336,7 +336,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                                 : 'OFF DUTY (STANDBY)',
                             style: TextStyle(
                               color: isOnDuty
-                                  ? const Color(0xFF00E676)
+                                  ? const Color(0xFF34D399)
                                   : Colors.white54,
                               fontSize: 12,
                               fontWeight: FontWeight.w900,
@@ -346,7 +346,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                           const Text(
                             'Receiving active emergency incident stream',
                             style: TextStyle(
-                              color: Color(0xFF64748B),
+                              color: Color(0xFF8A98B0),
                               fontSize: 11,
                             ),
                           ),
@@ -355,7 +355,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                     ),
                     Switch(
                       value: isOnDuty,
-                      activeThumbColor: const Color(0xFF00E676),
+                      activeThumbColor: const Color(0xFF34D399),
                       onChanged: (val) {
                         _controller.toggleDutyStatus(val);
                         setState(() {});
@@ -371,7 +371,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const Text(
                 'MISSION PERFORMANCE ANALYTICS',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
@@ -385,7 +385,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       label: 'Total Triage',
                       value: '128',
                       icon: Icons.assignment_outlined,
-                      color: const Color(0xFFFF6D00),
+                      color: const Color(0xFF38BDF8),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -394,7 +394,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       label: 'Units Deployed',
                       value: '94',
                       icon: Icons.local_shipping_outlined,
-                      color: const Color(0xFF40C4FF),
+                      color: const Color(0xFF38BDF8),
                     ),
                   ),
                 ],
@@ -407,7 +407,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       label: 'Citizens Rescued',
                       value: '412',
                       icon: Icons.health_and_safety_outlined,
-                      color: const Color(0xFF00E676),
+                      color: const Color(0xFF34D399),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -428,7 +428,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const Text(
                 'CROSS-ROLE ACCESS (PAIR TESTING)',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
@@ -437,9 +437,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF1E293B)),
+                  border: Border.all(color: const Color(0xFF1C2740)),
                 ),
                 child: Column(
                   children: [
@@ -447,7 +447,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       title: 'Affected Citizen Portal (Component 1)',
                       subtitle: 'Evacuation routes, weather alerts & checklist',
                       icon: Icons.person_pin_circle_outlined,
-                      color: const Color(0xFF00E676),
+                      color: const Color(0xFF34D399),
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -456,12 +456,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                         );
                       },
                     ),
-                    const Divider(color: Color(0xFF1E293B), height: 1),
+                    const Divider(color: Color(0xFF1C2740), height: 1),
                     _buildRoleSwitchTile(
                       title: 'Volunteer Hazard Reporter (Component 2)',
                       subtitle: 'Ground truth photo & hazard submission',
                       icon: Icons.add_location_alt_outlined,
-                      color: const Color(0xFF40C4FF),
+                      color: const Color(0xFF38BDF8),
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -470,7 +470,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                         );
                       },
                     ),
-                    const Divider(color: Color(0xFF1E293B), height: 1),
+                    const Divider(color: Color(0xFF1C2740), height: 1),
                     _buildRoleSwitchTile(
                       title: 'Relief Camp Triage Leader (Component 3)',
                       subtitle: 'Shelter capacity & supply logistics',
@@ -494,7 +494,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const Text(
                 'DISPATCH CONTROLS & TELEMETRY',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
@@ -503,14 +503,14 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF1E293B)),
+                  border: Border.all(color: const Color(0xFF1C2740)),
                 ),
                 child: Column(
                   children: [
-                    const ThemeToggleTile(activeColor: Color(0xFFFF6D00)),
-                    const Divider(color: Color(0xFF1E293B), height: 1),
+                    const ThemeToggleTile(activeColor: Color(0xFF38BDF8)),
+                    const Divider(color: Color(0xFF1C2740), height: 1),
                     SwitchListTile(
                       dense: true,
                       title: const Text(
@@ -524,15 +524,15 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       subtitle: const Text(
                         'Play critical frequency tone on Level 4 floods',
                         style: TextStyle(
-                          color: Color(0xFF64748B),
+                          color: Color(0xFF8A98B0),
                           fontSize: 11,
                         ),
                       ),
                       value: _audioSirenAlerts,
-                      activeThumbColor: const Color(0xFFFF6D00),
+                      activeThumbColor: const Color(0xFF38BDF8),
                       onChanged: (v) => setState(() => _audioSirenAlerts = v),
                     ),
-                    const Divider(color: Color(0xFF1E293B), height: 1),
+                    const Divider(color: Color(0xFF1C2740), height: 1),
                     SwitchListTile(
                       dense: true,
                       title: const Text(
@@ -546,12 +546,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       subtitle: const Text(
                         'Pre-cached offline maps for cellular blackouts',
                         style: TextStyle(
-                          color: Color(0xFF64748B),
+                          color: Color(0xFF8A98B0),
                           fontSize: 11,
                         ),
                       ),
                       value: _offlineCaching,
-                      activeThumbColor: const Color(0xFF00E676),
+                      activeThumbColor: const Color(0xFF34D399),
                       onChanged: (v) => setState(() => _offlineCaching = v),
                     ),
                   ],
@@ -563,8 +563,8 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               // Sign Out Button
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.redAccent,
-                  side: const BorderSide(color: Colors.redAccent),
+                  foregroundColor: Color(0xFFF87171),
+                  side: const BorderSide(color: Color(0xFFF87171)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -606,9 +606,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: const Color(0xFF1C2740)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,7 +631,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF94A3B8),
+              color: Color(0xFFB6C2D6),
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -668,7 +668,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+        style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 11),
       ),
       trailing: const Icon(
         Icons.arrow_forward_ios,
@@ -686,12 +686,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 15, color: const Color(0xFFFF6D00)),
+        Icon(icon, size: 15, color: const Color(0xFF38BDF8)),
         const SizedBox(width: 8),
         Flexible(child: Text(
           '$label: ',
           style: const TextStyle(
-            color: Color(0xFF94A3B8),
+            color: Color(0xFFB6C2D6),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -716,7 +716,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       return const Icon(
         Icons.shield_rounded,
         size: 44,
-        color: Color(0xFFFF9F0A),
+        color: Color(0xFFFB923C),
       );
     }
 
@@ -736,7 +736,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             errorBuilder: (context, error, stackTrace) => const Icon(
               Icons.shield_rounded,
               size: 44,
-              color: Color(0xFFFF9F0A),
+              color: Color(0xFFFB923C),
             ),
           )),
         );
@@ -744,7 +744,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
         return const Icon(
           Icons.shield_rounded,
           size: 44,
-          color: Color(0xFFFF9F0A),
+          color: Color(0xFFFB923C),
         );
       }
     }
@@ -759,7 +759,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           errorBuilder: (context, error, stackTrace) => const Icon(
             Icons.shield_rounded,
             size: 44,
-            color: Color(0xFFFF9F0A),
+            color: Color(0xFFFB923C),
           ),
         )),
       );
@@ -768,7 +768,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
     return const Icon(
       Icons.shield_rounded,
       size: 44,
-      color: Color(0xFFFF9F0A),
+      color: Color(0xFFFB923C),
     );
   }
 
@@ -807,7 +807,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
         const SnackBar(
           content: Row(
             children: [
-              Icon(Icons.cloud_done_rounded, color: Color(0xFF00E676)),
+              Icon(Icons.cloud_done_rounded, color: Color(0xFF34D399)),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -817,7 +817,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               ),
             ],
           ),
-          backgroundColor: Color(0xFF1E293B),
+          backgroundColor: Color(0xFF1C2740),
           duration: Duration(seconds: 3),
         ),
       );
@@ -827,7 +827,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update photo: $e'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
     }
@@ -855,7 +855,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
         const SnackBar(
           content: Row(
             children: [
-              Icon(Icons.cloud_done_rounded, color: Color(0xFF00E676)),
+              Icon(Icons.cloud_done_rounded, color: Color(0xFF34D399)),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -865,7 +865,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               ),
             ],
           ),
-          backgroundColor: Color(0xFF1E293B),
+          backgroundColor: Color(0xFF1C2740),
           duration: Duration(seconds: 3),
         ),
       );
@@ -875,7 +875,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update photo: $e'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
     }
@@ -895,7 +895,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -911,7 +911,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
+                    color: const Color(0xFF2B3A55),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -920,7 +920,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const Row(
                 children: [
                   Icon(Icons.account_circle_rounded,
-                      color: Color(0xFFFF6D00), size: 24),
+                      color: Color(0xFF38BDF8), size: 24),
                   SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -937,7 +937,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                         Text(
                           'Choose an image to save to your database profile',
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: Color(0xFFB6C2D6),
                             fontSize: 12,
                           ),
                         ),
@@ -954,11 +954,11 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.photo_library_rounded,
-                      color: Color(0xFF40C4FF), size: 22),
+                      color: Color(0xFF38BDF8), size: 22),
                 ),
                 title: const Text(
                   'Choose from Gallery / Files',
@@ -969,7 +969,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                 ),
                 subtitle: const Text(
                   'Upload image from your local device storage',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                  style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11),
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios,
                     size: 14, color: Colors.white38),
@@ -978,7 +978,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   _pickImageFromSource(ImageSource.gallery);
                 },
               ),
-              const Divider(color: Color(0xFF1E293B)),
+              const Divider(color: Color(0xFF1C2740)),
               // Option 2: Camera
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -986,11 +986,11 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.camera_alt_rounded,
-                      color: Color(0xFF00E676), size: 22),
+                      color: Color(0xFF34D399), size: 22),
                 ),
                 title: const Text(
                   'Take Photo (Camera)',
@@ -1001,7 +1001,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                 ),
                 subtitle: const Text(
                   'Capture live photo using camera',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                  style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11),
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios,
                     size: 14, color: Colors.white38),
@@ -1010,7 +1010,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   _pickImageFromSource(ImageSource.camera);
                 },
               ),
-              const Divider(color: Color(0xFF1E293B)),
+              const Divider(color: Color(0xFF1C2740)),
               // Option 3: URL input
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -1018,11 +1018,11 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.15),
+                    color: const Color(0xFFFB923C).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.link_rounded,
-                      color: Color(0xFFFF9F0A), size: 22),
+                      color: Color(0xFFFB923C), size: 22),
                 ),
                 title: const Text(
                   'Enter Image URL',
@@ -1033,7 +1033,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                 ),
                 subtitle: const Text(
                   'Paste a direct HTTPS web link to an image',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                  style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11),
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios,
                     size: 14, color: Colors.white38),
@@ -1047,7 +1047,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               const Text(
                 'OR SELECT PRESET AVATAR',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
@@ -1069,7 +1069,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFF6D00).withValues(alpha: 0.6),
+                          color: const Color(0xFF38BDF8).withValues(alpha: 0.6),
                           width: 2,
                         ),
                       ),
@@ -1090,29 +1090,29 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               ),
               if (hasPhoto) ...[
                 const SizedBox(height: 16),
-                const Divider(color: Color(0xFF1E293B)),
+                const Divider(color: Color(0xFF1C2740)),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Container(
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withValues(alpha: 0.15),
+                      color: Color(0xFFF87171).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.delete_outline_rounded,
-                        color: Colors.redAccent, size: 22),
+                        color: Color(0xFFF87171), size: 22),
                   ),
                   title: const Text(
                     'Remove Photo',
                     style: TextStyle(
-                        color: Colors.redAccent,
+                        color: Color(0xFFF87171),
                         fontSize: 14,
                         fontWeight: FontWeight.bold),
                   ),
                   subtitle: const Text(
                     'Reset profile photo back to default badge icon',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                    style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11),
                   ),
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -1133,7 +1133,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Enter Photo URL',
@@ -1145,7 +1145,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           children: [
             const Text(
               'Paste a valid HTTPS image URL:',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+              style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 12),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -1153,10 +1153,10 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF1E293B),
+                fillColor: const Color(0xFF1C2740),
                 hintText: 'https://example.com/avatar.jpg',
                 hintStyle:
-                    const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                    const TextStyle(color: Color(0xFF8A98B0), fontSize: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -1185,7 +1185,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Please enter a valid HTTP/HTTPS image URL'),
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor: Color(0xFFDC2626),
                   ),
                 );
               }

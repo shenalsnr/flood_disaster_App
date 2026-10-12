@@ -77,8 +77,8 @@ class NotificationService {
             'Alerts when offline hazard reports are auto-submitted to cloud.',
         importance: Importance.max,
         priority: Priority.high,
-        color: Color(0xFF00E676),
-        ledColor: Color(0xFF00E676),
+        color: Color(0xFF34D399),
+        ledColor: Color(0xFF34D399),
         ledOnMs: 1000,
         ledOffMs: 500,
         enableLights: true,
@@ -128,7 +128,7 @@ class NotificationService {
         playSound: true,
         enableVibration: true,
         enableLights: true,
-        color: Color(0xFFFF1744),
+        color: Color(0xFFF87171),
       );
       await _localNotifications.show(
         id: id,
@@ -161,7 +161,7 @@ class NotificationService {
         elevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF00E676), width: 1.2),
+          side: const BorderSide(color: Color(0xFF34D399), width: 1.2),
         ),
         duration: const Duration(seconds: 5),
         content: Row(
@@ -170,12 +170,12 @@ class NotificationService {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                color: const Color(0xFF34D399).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.cloud_done_rounded,
-                color: Color(0xFF00E676),
+                color: Color(0xFF34D399),
                 size: 24,
               ),
             ),
@@ -201,13 +201,13 @@ class NotificationService {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                          color: const Color(0xFF34D399).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
                           'SYNCED',
                           style: TextStyle(
-                            color: Color(0xFF00E676),
+                            color: Color(0xFF34D399),
                             fontSize: 9.5,
                             fontWeight: FontWeight.w900,
                           ),
@@ -219,7 +219,7 @@ class NotificationService {
                   Text(
                     body,
                     style: const TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 12,
                       height: 1.35,
                     ),

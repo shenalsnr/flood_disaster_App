@@ -26,9 +26,9 @@ class CampCapacityCard extends StatelessWidget {
     if (capacityRatio > 0.85) {
       progressColor = const Color(0xFFFF453A); // Red accent
     } else if (capacityRatio > 0.70) {
-      progressColor = const Color(0xFFFF9F0A); // Orange accent
+      progressColor = const Color(0xFFFB923C); // Orange accent
     } else {
-      progressColor = const Color(0xFF00E676); // Green accent
+      progressColor = const Color(0xFF34D399); // Green accent
     }
 
     return Column(
@@ -61,7 +61,7 @@ class CampCapacityCard extends StatelessWidget {
                     Text(
                       controller.leaderTitle,
                       style: const TextStyle(
-                        color: Color(0xFF8E9BAE),
+                        color: Color(0xFFB6C2D6),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
@@ -74,7 +74,7 @@ class CampCapacityCard extends StatelessWidget {
             Builder(builder: (context) {
               // Shows the real sync state instead of a fixed "OK".
               final synced = controller.isSynced;
-              final pillColor = synced ? const Color(0xFF00E676) : const Color(0xFFFF9F0A);
+              final pillColor = synced ? const Color(0xFF34D399) : const Color(0xFFFB923C);
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
@@ -107,9 +107,9 @@ class CampCapacityCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E293B)),
+            border: Border.all(color: const Color(0xFF1C2740)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +117,7 @@ class CampCapacityCard extends StatelessWidget {
               const Text(
                 'SHELTER CAPACITY OVERVIEW',
                 style: TextStyle(
-                  color: Color(0xFF7E8B9B),
+                  color: Color(0xFF8A98B0),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
@@ -139,7 +139,7 @@ class CampCapacityCard extends StatelessWidget {
                   Flexible(child: Text(
                     '/${controller.maxCapacity}',
                     style: const TextStyle(
-                      color: Color(0xFF63738A),
+                      color: Color(0xFF8A98B0),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -148,7 +148,7 @@ class CampCapacityCard extends StatelessWidget {
                   Flexible(child: Text(
                     'Beds Occupied - $occupancyPercentage%',
                     style: const TextStyle(
-                      color: Color(0xFF8E9BAE),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -171,7 +171,7 @@ class CampCapacityCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF1744),
+                  color: const Color(0xFFF87171),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -199,7 +199,7 @@ class CampCapacityCard extends StatelessWidget {
         const Text(
           'RAPID HEADCOUNT',
           style: TextStyle(
-            color: Color(0xFF7E8B9B),
+            color: Color(0xFF8A98B0),
             fontSize: 11,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
@@ -226,19 +226,19 @@ class CampCapacityCard extends StatelessWidget {
           child: OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               backgroundColor: const Color(0xFF23161A),
-              side: const BorderSide(color: Color(0xFFFF1744), width: 1.5),
+              side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => controller.toggleShelterStatus(),
             icon: Icon(
               Icons.warning_amber_rounded,
-              color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF1744),
+              color: controller.isShelterClosed ? Colors.grey : const Color(0xFFF87171),
               size: 18,
             ),
             label: Text(
               controller.isShelterClosed ? 'RE-OPEN SHELTER' : 'CLOSE SHELTER',
               style: TextStyle(
-                color: controller.isShelterClosed ? Colors.grey : const Color(0xFFFF1744),
+                color: controller.isShelterClosed ? Colors.grey : const Color(0xFFF87171),
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
                 letterSpacing: 0.8,
@@ -301,7 +301,7 @@ class CampCapacityCard extends StatelessWidget {
               child: Text(
                 item.quantity <= 0 ? 'EMPTY' : 'DEPLETED',
                 style: const TextStyle(
-                  color: Color(0xFFFF1744),
+                  color: Color(0xFFF87171),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
@@ -309,7 +309,7 @@ class CampCapacityCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Color(0xFF5E6D82), size: 18),
+            const Icon(Icons.chevron_right, color: Color(0xFF8A98B0), size: 18),
           ],
         ),
       ),

@@ -19,18 +19,18 @@ class SupplyItemTile extends StatelessWidget {
 
     switch (item.status) {
       case StockStatus.critical:
-        statusColor = const Color(0xFFFF1744);
-        borderColor = const Color(0xFFFF1744);
+        statusColor = const Color(0xFFF87171);
+        borderColor = const Color(0xFFF87171);
         badgeText = 'CRITICAL DEPLETED';
         break;
       case StockStatus.low:
-        statusColor = const Color(0xFFFF9F0A);
-        borderColor = const Color(0xFFFF9F0A);
+        statusColor = const Color(0xFFFB923C);
+        borderColor = const Color(0xFFFB923C);
         badgeText = 'LOW STOCK';
         break;
       case StockStatus.adequate:
-        statusColor = const Color(0xFF00E676);
-        borderColor = const Color(0xFF00E676);
+        statusColor = const Color(0xFF34D399);
+        borderColor = const Color(0xFF34D399);
         badgeText = 'ADEQUATE';
         break;
     }
@@ -39,7 +39,7 @@ class SupplyItemTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: borderColor, width: 1.5),
       ),

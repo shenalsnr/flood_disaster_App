@@ -18,11 +18,11 @@ class AddStockDialog extends StatefulWidget {
 }
 
 class _AddStockDialogState extends State<AddStockDialog> {
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF070B14);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _field = Color(0xFF0B1220);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
 
   static const List<String> _quickUnits = [
     'Packs',
@@ -302,7 +302,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
   InputDecoration _decoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+      hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
       filled: true,
       fillColor: _field,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

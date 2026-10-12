@@ -270,7 +270,7 @@ class _AlertDashboardScreenState extends State<AlertDashboardScreen> {
         if (compact)
           IconButton(
             tooltip: 'Broadcast zone alert',
-            icon: const Icon(Icons.cell_tower, color: Color(0xFFFF5252)),
+            icon: const Icon(Icons.cell_tower, color: Color(0xFFF87171)),
             onPressed: () => showBroadcastDialog(context),
           )
         else
@@ -517,8 +517,8 @@ class _Banner extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color(0xFF070B14).withValues(alpha: 0.92),
-                        const Color(0xFF070B14).withValues(alpha: 0.55),
+                        const Color(0xFF0B1220).withValues(alpha: 0.92),
+                        const Color(0xFF0B1220).withValues(alpha: 0.55),
                       ],
                     ),
                   ),

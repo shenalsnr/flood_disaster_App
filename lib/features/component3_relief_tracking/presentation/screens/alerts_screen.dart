@@ -17,7 +17,6 @@ class AlertsScreen extends StatefulWidget {
 class _AlertsScreenState extends State<AlertsScreen> {
   final ShelterReliefService _service = ShelterReliefService.instance;
   final FirestoreService _fs = FirestoreService.instance;
-  int _selectedFilter = 0;
 
   @override
   void initState() {

@@ -18,7 +18,7 @@ class EvacueeTile extends StatelessWidget {
 
     switch (evacuee.triage) {
       case TriagePriority.red:
-        badgeColor = const Color(0xFFFF5252);
+        badgeColor = const Color(0xFFF87171);
         badgeLabel = 'RED - IMMEDIATE CARE';
         break;
       case TriagePriority.yellow:
@@ -26,7 +26,7 @@ class EvacueeTile extends StatelessWidget {
         badgeLabel = 'YELLOW - ATTENTION';
         break;
       case TriagePriority.green:
-        badgeColor = const Color(0xFF69F0AE);
+        badgeColor = const Color(0xFF6EE7B7);
         badgeLabel = 'GREEN - STABLE';
         break;
     }
@@ -89,7 +89,7 @@ class EvacueeTile extends StatelessWidget {
                     value: TriagePriority.red,
                     child: Row(
                       children: [
-                        Icon(Icons.circle, color: Color(0xFFFF5252), size: 12),
+                        Icon(Icons.circle, color: Color(0xFFF87171), size: 12),
                         SizedBox(width: 8),
                         Text('Set Red (Critical Care)', style: TextStyle(color: Colors.white, fontSize: 13)),
                       ],
@@ -109,7 +109,7 @@ class EvacueeTile extends StatelessWidget {
                     value: TriagePriority.green,
                     child: Row(
                       children: [
-                        Icon(Icons.circle, color: Color(0xFF69F0AE), size: 12),
+                        Icon(Icons.circle, color: Color(0xFF6EE7B7), size: 12),
                         SizedBox(width: 8),
                         Text('Set Green (Stable)', style: TextStyle(color: Colors.white, fontSize: 13)),
                       ],
