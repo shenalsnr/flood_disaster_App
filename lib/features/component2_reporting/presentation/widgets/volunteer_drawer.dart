@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
 import '../../../component4_control_center/presentation/screens/responder_login_screen.dart';
 import '../screens/c2_admin_hazard_dashboard_screen.dart';
-import '../screens/offline_draft_management_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// Navigation Drawer for District Volunteer (Component 2: Hazard Reporting).
@@ -366,19 +365,7 @@ class VolunteerDrawer extends StatelessWidget {
                   );
                 },
               ),
-              _DrawerItem(
-                icon: Icons.storage_rounded,
-                title: 'Offline Drafts (SQLite)',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const OfflineDraftManagementScreen(),
-                    ),
-                  );
-                },
-              ),
+
 
               _DrawerItem(
                 icon: Icons.map_outlined,
