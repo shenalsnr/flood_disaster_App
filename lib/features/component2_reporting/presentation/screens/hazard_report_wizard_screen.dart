@@ -562,41 +562,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16),
-<<<<<<< HEAD
-              child: Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF34D399).withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.circle, color: Color(0xFF34D399), size: 7),
-                      SizedBox(width: 5),
-                      Text(
-                        'ONLINE',
-                        style: TextStyle(
-                          color: Color(0xFF34D399),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-=======
               child: OnlineStatusBadge(
                 fontSize: 10,
                 dotSize: 6,
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
->>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
               ),
             ),
           ],

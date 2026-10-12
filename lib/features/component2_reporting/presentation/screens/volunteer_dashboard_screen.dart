@@ -364,75 +364,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         ),
         actions: [
           const ThemeToggleButton(),
-<<<<<<< HEAD
-          IconButton(
-            tooltip: 'Offline Drafts & Queue (SQLite)',
-            icon: const Icon(Icons.storage_rounded,
-                color: Color(0xFFFB923C), size: 21),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OfflineDraftManagementScreen(),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          // Live Status Pill (ONLINE badge from Screenshot 1 & 2)
-          Padding(
-            padding: const EdgeInsets.only(right: 18),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF34D399).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ScaleTransition(
-                      scale: _pulseAnimation,
-                      child: Container(
-                        width: 7,
-                        height: 7,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF34D399),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF34D399),
-                              blurRadius: 6,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'ONLINE',
-                      style: TextStyle(
-                        color: Color(0xFF34D399),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-=======
           // Live Status Pill (Dynamic Online/Offline badge)
           const Padding(
             padding: EdgeInsets.only(right: 18),
             child: Center(
               child: OnlineStatusBadge(),
->>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
             ),
           ),
         ],
@@ -891,63 +827,6 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 HazardReportDetailsSheet.show(context, reportItem);
               },
             ),
-<<<<<<< HEAD
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: const LatLng(6.9271, 79.8612),
-                  width: 50,
-                  height: 50,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF87171).withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black45, blurRadius: 6),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.waves_rounded,
-                      color: Colors.white,
-                      size: 26,
-                    ),
-                  ),
-                ),
-                Marker(
-                  point: const LatLng(6.9380, 79.8780),
-                  width: 50,
-                  height: 50,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFBBF24).withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black45, blurRadius: 6),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.landscape_rounded,
-                      color: Colors.white,
-                      size: 26,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        )),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF131C2E).withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFF2B3A55)),
-=======
           );
         }
 
@@ -1009,7 +888,6 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     ),
                   ),
                 ),
->>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
               ),
             ),
           );
@@ -1029,18 +907,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                   initialZoom: 13.0,
                 ),
                 children: [
-<<<<<<< HEAD
-                  Icon(Icons.location_searching_rounded, color: Color(0xFF34D399), size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Active Volunteer Sector: Kelani Basin',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-=======
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.wesafe.flooddisaster',
->>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
                   ),
                   MarkerLayer(markers: markers),
                 ],
@@ -1060,9 +930,9 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                             horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
                           color:
-                              const Color(0xFF131B2B).withValues(alpha: 0.94),
+                              const Color(0xFF131C2E).withValues(alpha: 0.94),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFF334155)),
+                          border: Border.all(color: const Color(0xFF2B3A55)),
                           boxShadow: const [
                             BoxShadow(
                               color: Colors.black38,
@@ -1077,11 +947,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                               width: 10,
                               height: 10,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Color(0xFF00E676),
+                                    color: Color(0xFF34D399),
                                     blurRadius: 6,
                                     spreadRadius: 1,
                                   ),
@@ -1105,7 +975,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                   const Text(
                                     'Tap any pin for incident details',
                                     style: TextStyle(
-                                      color: Color(0xFF94A3B8),
+                                      color: Color(0xFFB6C2D6),
                                       fontSize: 11,
                                     ),
                                   ),
@@ -1122,9 +992,9 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     Container(
                       decoration: BoxDecoration(
                         color:
-                            const Color(0xFF131B2B).withValues(alpha: 0.94),
+                            const Color(0xFF131C2E).withValues(alpha: 0.94),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: const Color(0xFF2B3A55)),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black38,
@@ -1135,7 +1005,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.center_focus_strong_rounded,
-                            color: Color(0xFF40C4FF), size: 20),
+                            color: Color(0xFF38BDF8), size: 20),
                         tooltip: 'Focus Hazards',
                         onPressed: () => _fitAllHazards(hazardPoints),
                       ),
@@ -1146,9 +1016,9 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     Container(
                       decoration: BoxDecoration(
                         color:
-                            const Color(0xFF131B2B).withValues(alpha: 0.94),
+                            const Color(0xFF131C2E).withValues(alpha: 0.94),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: const Color(0xFF2B3A55)),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black38,
@@ -1159,7 +1029,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.my_location_rounded,
-                            color: Color(0xFF00E676), size: 20),
+                            color: Color(0xFF34D399), size: 20),
                         tooltip: 'My Location',
                         onPressed: _recenterLiveMapToUserLocation,
                       ),
@@ -1181,9 +1051,9 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color:
-                        const Color(0xFF131B2B).withValues(alpha: 0.94),
+                        const Color(0xFF131C2E).withValues(alpha: 0.94),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black38,
@@ -1196,13 +1066,13 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildMapLegendItem(Icons.waves_rounded,
-                          const Color(0xFFFF5252), 'Flood'),
+                          const Color(0xFFF87171), 'Flood'),
                       _buildMapLegendItem(Icons.landscape_rounded,
-                          const Color(0xFFFFB300), 'Landslide'),
+                          const Color(0xFFFBBF24), 'Landslide'),
                       _buildMapLegendItem(Icons.park_rounded,
-                          const Color(0xFF22C55E), 'Tree'),
+                          const Color(0xFF34D399), 'Tree'),
                       _buildMapLegendItem(Icons.do_not_disturb_on_rounded,
-                          const Color(0xFFFF5252), 'Blockage'),
+                          const Color(0xFFF87171), 'Blockage'),
                     ],
                   ),
                 ),
