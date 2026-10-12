@@ -28,6 +28,7 @@ class ReviewReportScreen extends StatefulWidget {
   final File? imageFile;
   final String note;
   final LatLng coordinates;
+  final String? locationName;
 
   const ReviewReportScreen({
     super.key,
@@ -36,6 +37,7 @@ class ReviewReportScreen extends StatefulWidget {
     this.imageFile,
     required this.note,
     required this.coordinates,
+    this.locationName,
   });
 
   @override
@@ -45,6 +47,14 @@ class ReviewReportScreen extends StatefulWidget {
 class _ReviewReportScreenState extends State<ReviewReportScreen> {
   bool _isSubmitting = false;
   late final DateTime _recordedTime;
+
+  String get _displayLocation {
+    final name = widget.locationName?.trim();
+    if (name != null && name.isNotEmpty) {
+      return name;
+    }
+    return 'Sector (${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E)';
+  }
 
   @override
   void initState() {
@@ -94,7 +104,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
       'localId': reportCode,
       'hazardType': widget.hazard,
       'severity': widget.severity,
-      'location': 'Kolonnawa, 6.9271° N, 79.8612° E',
+      'location': _displayLocation,
       'description': widget.note,
       'hasPhoto': widget.imageFile != null,
       'photoPath': widget.imageFile?.path ?? '',
@@ -185,7 +195,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
       id: reportCode,
       hazardType: widget.hazard,
       severity: widget.severity,
-      location: 'Kolonnawa, 6.9271° N, 79.8612° E',
+      location: _displayLocation,
       description: widget.note,
       hasPhoto: widget.imageFile != null,
       photoPath: widget.imageFile?.path,
@@ -468,11 +478,20 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Kolonnawa, ${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E',
+                            _displayLocation,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14.5,
                               fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'GPS: ${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E',
+                            style: const TextStyle(
+                              color: Color(0xFF8B9BB4),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
