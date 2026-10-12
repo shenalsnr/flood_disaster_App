@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' hide Path;
+import 'package:geolocator/geolocator.dart';
 
 import '../widgets/volunteer_drawer.dart';
 import '../widgets/hazard_report_details_sheet.dart';
 import 'hazard_report_wizard_screen.dart';
-import 'offline_draft_management_screen.dart';
+import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// Main Dashboard Screen for District Volunteer (Component 2: Ground Hazard Reporting).
@@ -35,11 +36,197 @@ String _displayStatus(Map<String, dynamic> data) {
   return data['status'] as String? ?? 'VERIFIED';
 }
 
-class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
-    with SingleTickerProviderStateMixin {
+class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   int _selectedTabIndex = 0;
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
+  final MapController _liveMapController = MapController();
+  LatLng? _currentUserLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialUserLocation();
+  }
+
+  Future<void> _fetchInitialUserLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        final pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 4),
+          ),
+        );
+        if (mounted) {
+          setState(() {
+            _currentUserLocation = LatLng(pos.latitude, pos.longitude);
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _recenterLiveMapToUserLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location permission is needed to find your location.'),
+              backgroundColor: Color(0xFFEF4444),
+            ),
+          );
+        }
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 6),
+        ),
+      );
+      final newLoc = LatLng(pos.latitude, pos.longitude);
+      setState(() {
+        _currentUserLocation = newLoc;
+      });
+      _liveMapController.move(newLoc, 15.0);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Centered to your GPS location'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('GPS Location error: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
+  }
+
+  void _fitAllHazards(List<LatLng> points) {
+    if (points.isEmpty) return;
+    if (points.length == 1) {
+      _liveMapController.move(points.first, 14.5);
+      return;
+    }
+    double minLat = points.first.latitude;
+    double maxLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLng = points.first.longitude;
+
+    for (var p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    final center = LatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2);
+    final latSpan = maxLat - minLat;
+    final lngSpan = maxLng - minLng;
+    final maxSpan = latSpan > lngSpan ? latSpan : lngSpan;
+
+    double zoom = 12.5;
+    if (maxSpan > 0.4) {
+      zoom = 9.5;
+    } else if (maxSpan > 0.2) {
+      zoom = 10.5;
+    } else if (maxSpan > 0.1) {
+      zoom = 11.2;
+    } else if (maxSpan > 0.05) {
+      zoom = 11.8;
+    }
+
+    _liveMapController.move(center, zoom);
+  }
+
+  Marker _buildHazardMarker({
+    required LatLng point,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Marker(
+      point: point,
+      width: 52,
+      height: 58,
+      alignment: Alignment.topCenter,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.55),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  ),
+                  const BoxShadow(
+                    color: Colors.black45,
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: Colors.white, size: 22),
+            ),
+            CustomPaint(
+              size: const Size(10, 7),
+              painter: _PinArrowPainter(color: color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapLegendItem(IconData icon, Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 13),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFFE2E8F0),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
 
   // Default initial reports matching Screenshot 1 exactly
   final List<HazardReportItem> _defaultReports = const [
@@ -73,23 +260,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-  }
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
 
   void _openHazardWizard() async {
     final result = await Navigator.push<bool>(
@@ -193,6 +364,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
         ),
         actions: [
           const ThemeToggleButton(),
+<<<<<<< HEAD
           IconButton(
             tooltip: 'Offline Drafts & Queue (SQLite)',
             icon: const Icon(Icons.storage_rounded,
@@ -254,6 +426,13 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                   ],
                 ),
               ),
+=======
+          // Live Status Pill (Dynamic Online/Offline badge)
+          const Padding(
+            padding: EdgeInsets.only(right: 18),
+            child: Center(
+              child: OnlineStatusBadge(),
+>>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
             ),
           ),
         ],
@@ -663,18 +842,56 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
   // TAB 2: LIVE MAP VIEW
   // ===========================================================================
   Widget _buildLiveMapTab() {
-    return Stack(
-      children: [
-        Unfiltered(child: FlutterMap(
-          options: const MapOptions(
-            initialCenter: LatLng(6.9271, 79.8612),
-            initialZoom: 13.0,
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.wesafe.flooddisaster',
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('hazard_reports')
+          .snapshots(),
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+        List<Marker> markers = [];
+        List<LatLng> hazardPoints = [];
+
+        for (final doc in docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final lat = (data['latitude'] as num?)?.toDouble();
+          final lng = (data['longitude'] as num?)?.toDouble();
+          if (lat == null || lng == null) continue;
+          if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
+
+          final point = LatLng(lat, lng);
+          hazardPoints.add(point);
+          final hazard = data['hazardType'] as String? ?? 'Hazard';
+          final icon = _iconForHazard(hazard);
+          final color = _colorForHazard(hazard);
+
+          markers.add(
+            _buildHazardMarker(
+              point: point,
+              icon: icon,
+              color: color,
+              onTap: () {
+                final reportItem = HazardReportItem(
+                  id: doc.id,
+                  title: data['severity'] != null
+                      ? '$hazard (${data['severity']})'
+                      : hazard,
+                  location: data['location'] as String? ??
+                      'Lat: ${lat.toStringAsFixed(4)}, Lng: ${lng.toStringAsFixed(4)}',
+                  timeAgo: 'Live Report',
+                  status: _displayStatus(data),
+                  hazardType: hazard,
+                  description: data['description'] as String? ??
+                      'Active ground hazard verified by district volunteer.',
+                  reporter: data['reporterName'] as String? ??
+                      'District Volunteer',
+                  icon: icon,
+                  iconColor: color,
+                  waterLevel: (data['waterDepth'] as num?)?.toDouble(),
+                );
+                HazardReportDetailsSheet.show(context, reportItem);
+              },
             ),
+<<<<<<< HEAD
             MarkerLayer(
               markers: [
                 Marker(
@@ -730,22 +947,270 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
                 color: const Color(0xFF131C2E).withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: const Color(0xFF2B3A55)),
+=======
+          );
+        }
+
+        // Fallback default sample markers if no valid reports in Firestore
+        if (markers.isEmpty) {
+          markers.add(
+            _buildHazardMarker(
+              point: const LatLng(6.9271, 79.8612),
+              icon: _defaultReports[0].icon,
+              color: _defaultReports[0].iconColor,
+              onTap: () => HazardReportDetailsSheet.show(
+                  context, _defaultReports[0]),
+            ),
+          );
+          markers.add(
+            _buildHazardMarker(
+              point: const LatLng(6.9380, 79.8780),
+              icon: _defaultReports[1].icon,
+              color: _defaultReports[1].iconColor,
+              onTap: () => HazardReportDetailsSheet.show(
+                  context, _defaultReports[1]),
+            ),
+          );
+          hazardPoints.add(const LatLng(6.9271, 79.8612));
+          hazardPoints.add(const LatLng(6.9380, 79.8780));
+        }
+
+        // Add current volunteer GPS position marker if available
+        if (_currentUserLocation != null) {
+          markers.add(
+            Marker(
+              point: _currentUserLocation!,
+              width: 50,
+              height: 50,
+              alignment: Alignment.center,
+              child: Tooltip(
+                message: 'Your Current GPS Position',
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF3B82F6),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black45,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+>>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+            ),
+          );
+        }
+
+        return Stack(
+          children: [
+            Unfiltered(
+              child: FlutterMap(
+                key: const ValueKey('live_hazard_flutter_map'),
+                mapController: _liveMapController,
+                options: MapOptions(
+                  initialCenter: _currentUserLocation ??
+                      (hazardPoints.isNotEmpty
+                          ? hazardPoints.first
+                          : const LatLng(6.9271, 79.8612)),
+                  initialZoom: 13.0,
+                ),
                 children: [
+<<<<<<< HEAD
                   Icon(Icons.location_searching_rounded, color: Color(0xFF34D399), size: 20),
                   SizedBox(width: 8),
                   Text(
                     'Active Volunteer Sector: Kelani Basin',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+=======
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.wesafe.flooddisaster',
+>>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
                   ),
+                  MarkerLayer(markers: markers),
                 ],
               ),
             ),
-          ),
-        ),
-      ],
+
+            // Top Status & Controls Header
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFF131B2B).withValues(alpha: 0.94),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFF334155)),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black38,
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF00E676),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFF00E676),
+                                    blurRadius: 6,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Active Hazards: ${docs.isNotEmpty ? docs.length : markers.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'Tap any pin for incident details',
+                                    style: TextStyle(
+                                      color: Color(0xFF94A3B8),
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Focus all hazards button
+                    Container(
+                      decoration: BoxDecoration(
+                        color:
+                            const Color(0xFF131B2B).withValues(alpha: 0.94),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF334155)),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black38,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.center_focus_strong_rounded,
+                            color: Color(0xFF40C4FF), size: 20),
+                        tooltip: 'Focus Hazards',
+                        onPressed: () => _fitAllHazards(hazardPoints),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Recenter GPS Location button
+                    Container(
+                      decoration: BoxDecoration(
+                        color:
+                            const Color(0xFF131B2B).withValues(alpha: 0.94),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF334155)),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black38,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.my_location_rounded,
+                            color: Color(0xFF00E676), size: 20),
+                        tooltip: 'My Location',
+                        onPressed: _recenterLiveMapToUserLocation,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom Legend Bar
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color:
+                        const Color(0xFF131B2B).withValues(alpha: 0.94),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF334155)),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black38,
+                        blurRadius: 8,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildMapLegendItem(Icons.waves_rounded,
+                          const Color(0xFFFF5252), 'Flood'),
+                      _buildMapLegendItem(Icons.landscape_rounded,
+                          const Color(0xFFFFB300), 'Landslide'),
+                      _buildMapLegendItem(Icons.park_rounded,
+                          const Color(0xFF22C55E), 'Tree'),
+                      _buildMapLegendItem(Icons.do_not_disturb_on_rounded,
+                          const Color(0xFFFF5252), 'Blockage'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1199,4 +1664,26 @@ class _RecentReportCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _PinArrowPainter extends CustomPainter {
+  final Color color;
+  const _PinArrowPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PinArrowPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

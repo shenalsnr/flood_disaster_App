@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/review_report_screen.dart';
 import '../../data/services/geocoding_service.dart';
+import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// 3-Step Wizard for Reporting Ground Hazards.
@@ -561,6 +562,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16),
+<<<<<<< HEAD
               child: Center(
                 child: Container(
                   padding:
@@ -589,6 +591,12 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     ],
                   ),
                 ),
+=======
+              child: OnlineStatusBadge(
+                fontSize: 10,
+                dotSize: 6,
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+>>>>>>> ecd1003cda984f13f4c58e583a36956a4df3ced9
               ),
             ),
           ],
