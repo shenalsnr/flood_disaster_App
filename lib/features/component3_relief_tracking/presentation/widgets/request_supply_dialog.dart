@@ -206,7 +206,7 @@ class _RequestSupplyDialogState extends State<RequestSupplyDialog> {
                     style: const TextStyle(color: Colors.white),
                     decoration: _decoration(
                       'e.g. 50',
-                      suffix: selected == null ? null : selected.unit,
+                      suffix: selected?.unit,
                     ),
                     validator: (v) {
                       final n = double.tryParse((v ?? '').trim());

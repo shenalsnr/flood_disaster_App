@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 enum EquipmentStatus {
   available,
   assigned,

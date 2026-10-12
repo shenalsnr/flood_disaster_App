@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import '../../data/services/firestore_service.dart';
 
 /// Shows the latest requests and alerts this camp has sent to the DMC,
@@ -37,9 +37,11 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
         final allMine = snapshot.data!.docs
-            .where((d) =>
-                d.data()['campId'] == widget.campId &&
-                d.data()['hiddenByCamp'] != true)
+            .where(
+              (d) =>
+                  d.data()['campId'] == widget.campId &&
+                  d.data()['hiddenByCamp'] != true,
+            )
             .toList();
         final mine = allMine.take(5).toList();
         if (mine.isEmpty) return const SizedBox.shrink();
@@ -50,6 +52,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+<<<<<<< HEAD
                 Flexible(child: Text(
                   'SENT TO DMC',
                   style: TextStyle(
@@ -57,14 +60,33 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
+=======
+                Flexible(
+                  child: Text(
+                    'SENT TO DMC',
+                    style: TextStyle(
+                      color: Color(0xFF7E8B9B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                    ),
+>>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                   ),
-                )),
+                ),
                 GestureDetector(
                   onTap: () => _confirmClear(allMine.map((d) => d.id).toList()),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+<<<<<<< HEAD
                       Icon(Icons.delete_sweep_outlined, color: Color(0xFFF87171), size: 16),
+=======
+                      Icon(
+                        Icons.delete_sweep_outlined,
+                        color: Color(0xFFFF5252),
+                        size: 16,
+                      ),
+>>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                       SizedBox(width: 4),
                       Text(
                         'CLEAR',
@@ -98,7 +120,11 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         ),
         title: const Text(
           'Clear this list?',
-          style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: const Text(
           'The requests are removed from this list only. The DMC keeps its '
@@ -108,12 +134,25 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
+<<<<<<< HEAD
             child: const Text('Cancel', style: TextStyle(color: Color(0xFFB6C2D6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
               backgroundColor: const Color(0xFFDC2626),
+=======
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF8E9BAE)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              backgroundColor: const Color(0xFFFF5252),
+>>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               foregroundColor: Colors.white,
             ),
             child: const Text('Clear'),
@@ -144,7 +183,8 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       final qty = data['quantityRequested'];
       final urgency = (data['urgency'] ?? '').toString();
       final qtyText = qty is num ? _trim(qty) : '';
-      detail = 'Request: need $qtyText $unit'.trim() +
+      detail =
+          'Request: need $qtyText $unit'.trim() +
           (urgency.isEmpty ? '' : ' • ${urgency.toUpperCase()}');
     } else if (trigger == 'auto') {
       detail = 'Auto alert: stock ran out';
@@ -152,7 +192,13 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
       detail = 'Urgent dispatch: stock ran out';
     }
 
+<<<<<<< HEAD
     final statusColor = resolved ? const Color(0xFF34D399) : const Color(0xFFFB923C);
+=======
+    final statusColor = resolved
+        ? const Color(0xFF00E676)
+        : const Color(0xFFFF9F0A);
+>>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -170,10 +216,24 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
               children: [
                 Text(
                   itemName,
-                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 3),
+<<<<<<< HEAD
                 Text(detail, style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11)),
+=======
+                Text(
+                  detail,
+                  style: const TextStyle(
+                    color: Color(0xFF8E9BAE),
+                    fontSize: 11,
+                  ),
+                ),
+>>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               ],
             ),
           ),
@@ -185,7 +245,11 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
             ),
             child: Text(
               resolved ? 'DONE' : 'PENDING',
-              style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

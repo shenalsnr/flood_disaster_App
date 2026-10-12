@@ -60,7 +60,10 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    backgroundColor: ShelterTheme.primaryActionOrange,
+                  ),
                   onPressed: isSaving
                       ? null
                       : () async {
@@ -105,9 +108,6 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                             }
                           }
                         },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ShelterTheme.primaryActionOrange,
-                  ),
                   child: isSaving
                       ? const SizedBox(
                           height: 16,
