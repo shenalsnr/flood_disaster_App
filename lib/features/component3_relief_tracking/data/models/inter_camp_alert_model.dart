@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 enum AlertType { request, dispatch, notification }
 
 enum AlertStatus { pending, accepted, declined, completed }

@@ -17,7 +17,6 @@ class AlertsScreen extends StatefulWidget {
 class _AlertsScreenState extends State<AlertsScreen> {
   final ShelterReliefService _service = ShelterReliefService.instance;
   final FirestoreService _fs = FirestoreService.instance;
-  int _selectedFilter = 0;
 
   @override
   void initState() {
@@ -405,7 +404,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    backgroundColor: ShelterTheme.statusCriticalRed,
+                  ),
                   onPressed: isSaving
                       ? null
                       : () async {
@@ -434,9 +436,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             }
                           }
                         },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ShelterTheme.statusCriticalRed,
-                  ),
                   child: isSaving
                       ? const SizedBox(
                           height: 16,
