@@ -57,8 +57,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   error == null ? const Color(0xFF34D399) : const Color(0xFFF87171),
 =======
               backgroundColor: error == null
-                  ? const Color(0xFF00E676)
-                  : const Color(0xFFFF5252),
+                  ? const Color(0xFF34D399)
+                  : const Color(0xFFF87171),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               duration: Duration(seconds: error == null ? 3 : 8),
               showCloseIcon: error != null,
@@ -91,7 +91,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
     final qtyText = qty == qty.roundToDouble()
         ? qty.round().toString()
         : qty.toString();
-    final color = queued ? const Color(0xFFFF9F0A) : const Color(0xFF00E676);
+    final color = queued ? const Color(0xFFFB923C) : const Color(0xFF34D399);
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
     return showDialog<void>(
@@ -128,7 +128,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
 =======
                     'It is now PENDING - the truck card on the Supplies page shows its status.',
-          style: const TextStyle(color: Color(0xFF8E9BAE), fontSize: 13),
+          style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
         ),
         actions: [
@@ -140,7 +140,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 =======
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(0, 44),
-              backgroundColor: const Color(0xFFFF5252),
+              backgroundColor: const Color(0xFFDC2626),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               foregroundColor: Colors.white,
             ),
@@ -158,7 +158,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
       backgroundColor: const Color(0xFF0B1220), // Dark Navy Background matching Figma
 =======
       backgroundColor: const Color(
-        0xFF070B14,
+        0xFF0B1220,
       ), // Dark Navy Background matching Figma
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
       body: SafeArea(
@@ -205,9 +205,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           unselectedItemColor: const Color(0xFF8A98B0),
 =======
           selectedItemColor: const Color(
-            0xFFFF5252,
+            0xFFF87171,
           ), // Active top accent highlight
-          unselectedItemColor: const Color(0xFF5E6D82),
+          unselectedItemColor: const Color(0xFF8A98B0),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
           selectedFontSize: 11,
           unselectedFontSize: 11,
@@ -358,7 +358,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   side: const BorderSide(color: Color(0xFFF87171)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
 =======
-                  side: const BorderSide(color: Color(0xFFFF5252)),
+                  side: const BorderSide(color: Color(0xFFF87171)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -373,7 +373,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.bold, fontSize: 12),
 =======
                   style: TextStyle(
-                    color: Color(0xFFFF5252),
+                    color: Color(0xFFF87171),
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -446,19 +446,19 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 'Depleted',
                 'Depleted (${_controller.inventoryItems.where((i) => i.status == StockStatus.critical).length})',
                 _controller.selectedSupplyFilter == 'Depleted',
-                outlineColor: const Color(0xFFFF1744),
+                outlineColor: const Color(0xFFF87171),
               ),
               _buildSupplyFilterChip(
                 'Low',
                 'Low (${_controller.inventoryItems.where((i) => i.status == StockStatus.low).length})',
                 _controller.selectedSupplyFilter == 'Low',
-                outlineColor: const Color(0xFFFF9F0A),
+                outlineColor: const Color(0xFFFB923C),
               ),
               _buildSupplyFilterChip(
                 'Adequate',
                 'Adequate (${_controller.inventoryItems.where((i) => i.status == StockStatus.adequate).length})',
                 _controller.selectedSupplyFilter == 'Adequate',
-                outlineColor: const Color(0xFF1E293B),
+                outlineColor: const Color(0xFF1C2740),
               ),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             ],
@@ -646,9 +646,9 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF1E293B)),
+              border: Border.all(color: const Color(0xFF1C2740)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -685,7 +685,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  color: Color(0xFF7E8B9B),
+                                  color: Color(0xFF8A98B0),
                                   fontSize: 11,
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                                 ),
@@ -721,7 +721,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   child: LinearProgressIndicator(
                     value: cardProgress,
                     minHeight: 6,
-                    backgroundColor: const Color(0xFF1E293B),
+                    backgroundColor: const Color(0xFF1C2740),
                     valueColor: AlwaysStoppedAnimation<Color>(accent),
                   ),
                 ),
@@ -779,7 +779,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                     content: Text(
                                       'Restock confirmed. Stock updated.',
                                     ),
-                                    backgroundColor: Color(0xFF00E676),
+                                    backgroundColor: Color(0xFF34D399),
                                     showCloseIcon: true,
                                   ),
                                 );
@@ -907,7 +907,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 =======
               color: isSelected
                   ? Colors.white
-                  : (outlineColor ?? const Color(0xFF1E293B)),
+                  : (outlineColor ?? const Color(0xFF1C2740)),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               width: 1.5,
             ),
@@ -983,19 +983,19 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 'All',
                 'All ${_controller.allAlerts.length}',
                 _controller.selectedAlertFilter == 'All',
-                activeColor: const Color(0xFFFF1744),
+                activeColor: const Color(0xFFF87171),
               ),
               _buildAlertFilterChip(
                 'Warnings',
                 'Warnings ${_controller.alertCount('broadcast')}',
                 _controller.selectedAlertFilter == 'Warnings',
-                activeColor: const Color(0xFFFF9F0A),
+                activeColor: const Color(0xFFFB923C),
               ),
               _buildAlertFilterChip(
                 'Incidents',
                 'Incidents ${_controller.alertCount('incident')}',
                 _controller.selectedAlertFilter == 'Incidents',
-                activeColor: const Color(0xFFFF6D00),
+                activeColor: const Color(0xFF38BDF8),
               ),
               _buildAlertFilterChip(
                 'Critical',
@@ -1024,7 +1024,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
           style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
 =======
           style: TextStyle(
-            color: Color(0xFF7E8B9B),
+            color: Color(0xFF8A98B0),
             fontSize: 11,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
@@ -1059,8 +1059,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                   ? const Color(0xFFFB923C)
                   : const Color(0xFF34D399);
 =======
-              ? const Color(0xFFFF9F0A)
-              : const Color(0xFF00E676);
+              ? const Color(0xFFFB923C)
+              : const Color(0xFF34D399);
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
           return Container(
@@ -1127,7 +1127,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                                     style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 10),
 =======
                                     style: const TextStyle(
-                                      color: Color(0xFF63738A),
+                                      color: Color(0xFF8A98B0),
                                       fontSize: 10,
                                     ),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
@@ -1145,7 +1145,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
 =======
                                   child: Icon(
                                     Icons.close,
-                                    color: Color(0xFF8E9BAE),
+                                    color: Color(0xFFB6C2D6),
                                     size: 18,
                                   ),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
@@ -1160,7 +1160,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                             style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
 =======
                             style: const TextStyle(
-                              color: Color(0xFF8E9BAE),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 11,
                             ),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
@@ -1195,8 +1195,8 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
             color: isSelected ? (activeColor ?? const Color(0xFF1C2740)) : const Color(0xFF131C2E),
 =======
             color: isSelected
-                ? (activeColor ?? const Color(0xFF1E293B))
-                : const Color(0xFF131B2B),
+                ? (activeColor ?? const Color(0xFF1C2740))
+                : const Color(0xFF131C2E),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFF1C2740)),
@@ -1280,7 +1280,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                       style: TextStyle(color: Color(0xFF34D399), fontSize: 10, fontWeight: FontWeight.bold),
 =======
                       style: TextStyle(
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1340,7 +1340,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
                 style: TextStyle(color: Color(0xFF8A98B0), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
 =======
                 style: TextStyle(
-                  color: Color(0xFF7E8B9B),
+                  color: Color(0xFF8A98B0),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
@@ -1368,14 +1368,14 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               _buildAccountRow(Icons.night_shelter_outlined, 'Assigned Shelters', _controller.campName, showArrow: false),
               const Divider(color: Color(0xFF1C2740), height: 16),
 =======
-              const Divider(color: Color(0xFF1E293B), height: 16),
+              const Divider(color: Color(0xFF1C2740), height: 16),
               _buildAccountRow(
                 Icons.night_shelter_outlined,
                 'Assigned Shelters',
                 _controller.campName,
                 showArrow: false,
               ),
-              const Divider(color: Color(0xFF1E293B), height: 16),
+              const Divider(color: Color(0xFF1C2740), height: 16),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               _buildAccountRow(
                 Icons.key_outlined,
@@ -1444,7 +1444,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 9, fontWeight: FontWeight.bold),
 =======
               style: const TextStyle(
-                color: Color(0xFF63738A),
+                color: Color(0xFF8A98B0),
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
@@ -1506,7 +1506,7 @@ class _CampDashboardScreenState extends State<CampDashboardScreen> {
               style: const TextStyle(color: Color(0xFF34D399), fontSize: 9, fontWeight: FontWeight.bold),
 =======
               style: const TextStyle(
-                color: Color(0xFF00E676),
+                color: Color(0xFF34D399),
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),

@@ -489,7 +489,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           Text(
                             'GPS: ${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E',
                             style: const TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),

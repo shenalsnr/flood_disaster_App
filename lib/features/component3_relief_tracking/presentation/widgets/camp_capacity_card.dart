@@ -102,8 +102,8 @@ class CampCapacityCard extends StatelessWidget {
                 // Shows the real sync state instead of a fixed "OK".
                 final synced = controller.isSynced;
                 final pillColor = synced
-                    ? const Color(0xFF00E676)
-                    : const Color(0xFFFF9F0A);
+                    ? const Color(0xFF34D399)
+                    : const Color(0xFFFB923C);
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -187,7 +187,7 @@ class CampCapacityCard extends StatelessWidget {
                     child: Text(
                       '/${controller.maxCapacity}',
                       style: const TextStyle(
-                        color: Color(0xFF63738A),
+                        color: Color(0xFF8A98B0),
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -207,7 +207,7 @@ class CampCapacityCard extends StatelessWidget {
                     child: Text(
                       'Beds Occupied - $occupancyPercentage%',
                       style: const TextStyle(
-                        color: Color(0xFF8E9BAE),
+                        color: Color(0xFFB6C2D6),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -316,7 +316,7 @@ class CampCapacityCard extends StatelessWidget {
               side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
 =======
-              side: const BorderSide(color: Color(0xFFFF1744), width: 1.5),
+              side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -330,7 +330,7 @@ class CampCapacityCard extends StatelessWidget {
 =======
               color: controller.isShelterClosed
                   ? Colors.grey
-                  : const Color(0xFFFF1744),
+                  : const Color(0xFFF87171),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               size: 18,
             ),
@@ -342,7 +342,7 @@ class CampCapacityCard extends StatelessWidget {
 =======
                 color: controller.isShelterClosed
                     ? Colors.grey
-                    : const Color(0xFFFF1744),
+                    : const Color(0xFFF87171),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
                 fontWeight: FontWeight.bold,
                 fontSize: 13,

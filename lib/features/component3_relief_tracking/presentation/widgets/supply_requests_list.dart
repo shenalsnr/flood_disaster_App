@@ -65,7 +65,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                   child: Text(
                     'SENT TO DMC',
                     style: TextStyle(
-                      color: Color(0xFF7E8B9B),
+                      color: Color(0xFF8A98B0),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
@@ -83,7 +83,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
 =======
                       Icon(
                         Icons.delete_sweep_outlined,
-                        color: Color(0xFFFF5252),
+                        color: Color(0xFFF87171),
                         size: 16,
                       ),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
@@ -144,14 +144,14 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
 =======
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Color(0xFF8E9BAE)),
+              style: TextStyle(color: Color(0xFFB6C2D6)),
             ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(0, 44),
-              backgroundColor: const Color(0xFFFF5252),
+              backgroundColor: const Color(0xFFDC2626),
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
               foregroundColor: Colors.white,
             ),
@@ -196,8 +196,8 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
     final statusColor = resolved ? const Color(0xFF34D399) : const Color(0xFFFB923C);
 =======
     final statusColor = resolved
-        ? const Color(0xFF00E676)
-        : const Color(0xFFFF9F0A);
+        ? const Color(0xFF34D399)
+        : const Color(0xFFFB923C);
 >>>>>>> 863631977ab7814f6565309ecdf6dbb695eb0808
 
     return Container(
@@ -229,7 +229,7 @@ class _SupplyRequestsListState extends State<SupplyRequestsList> {
                 Text(
                   detail,
                   style: const TextStyle(
-                    color: Color(0xFF8E9BAE),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 11,
                   ),
                 ),
