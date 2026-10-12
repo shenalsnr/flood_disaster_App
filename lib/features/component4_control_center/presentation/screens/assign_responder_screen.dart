@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import 'live_tracking_screen.dart';
@@ -35,10 +36,7 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     super.initState();
     _controller.addListener(_onStateChange);
     // Default to first available team sorted by ETA
-    _selectedTeam = _controller.sortedTeamsByEta.firstWhere(
-      (t) => t.isAvailable,
-      orElse: () => _controller.sortedTeamsByEta.first,
-    );
+    _selectedTeam = _pickDefaultTeam();
 
     _fadeController = AnimationController(
       vsync: this,
@@ -59,8 +57,37 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
     );
   }
 
+  static const EmergencyTeam _noTeam = EmergencyTeam(
+    id: '',
+    name: 'No unit selected',
+    status: 'NONE',
+    distance: '-',
+    eta: '-',
+    equipment: '-',
+    crewCount: 0,
+    leader: '-',
+    radioChannel: '-',
+    location: LatLng(7.8731, 80.7718),
+    vehicleType: '-',
+    callSign: '-',
+    phoneNumber: '',
+    fuelLevel: 0,
+  );
+
+  EmergencyTeam _pickDefaultTeam() {
+    final list = _controller.sortedTeamsByEta;
+    for (final t in list) {
+      if (t.isAvailable) return t;
+    }
+    return list.isEmpty ? _noTeam : list.first;
+  }
+
   void _onStateChange() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {
+      // Units arrive live from Firestore: pick one once they load.
+      if (_selectedTeam.id.isEmpty) _selectedTeam = _pickDefaultTeam();
+    });
   }
 
   @override
@@ -318,6 +345,18 @@ class _AssignResponderScreenState extends State<AssignResponderScreen>
                 ),
 
                 const SizedBox(height: 10),
+
+                if (_filteredTeams.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: Text(
+                        'No response units found.\nAdd units in Manage Units.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFF94A3B8)),
+                      ),
+                    ),
+                  ),
 
                 // Team Cards with staggered animation
                 ...List.generate(_filteredTeams.length, (index) {

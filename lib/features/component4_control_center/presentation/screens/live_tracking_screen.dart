@@ -126,11 +126,25 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
   }
 
   EmergencyTeam get _assignedTeam {
-    return widget.incident.assignedTeam ??
-        _controller.teams.firstWhere(
-          (t) => t.id == 'TEAM-01',
-          orElse: () => _controller.teams.first,
-        );
+    final assigned = widget.incident.assignedTeam;
+    if (assigned != null) return assigned;
+    // Nothing assigned yet: neutral placeholder, no sample unit.
+    return const EmergencyTeam(
+      id: '',
+      name: 'No unit assigned',
+      status: 'AVAILABLE',
+      distance: '-',
+      eta: '-',
+      equipment: '-',
+      crewCount: 0,
+      leader: '-',
+      radioChannel: '-',
+      location: LatLng(7.8731, 80.7718),
+      vehicleType: '-',
+      callSign: '-',
+      phoneNumber: '',
+      fuelLevel: 0,
+    );
   }
 
   // ---------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../widgets/c4_ui.dart';
 
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
@@ -488,7 +489,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF070B14),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ResponsiveBody(
+          maxWidth: 520,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -767,7 +770,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               const SizedBox(height: 20),
             ],
           ),
-        ),
+        )),
       ),
     );
   }

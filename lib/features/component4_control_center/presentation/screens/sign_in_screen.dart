@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/c4_ui.dart';
 
 import '../../data/models/responder_models.dart';
 import 'responder_login_screen.dart';
@@ -41,7 +42,9 @@ class _SignInScreenState extends State<SignInScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF070B14),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ResponsiveBody(
+          maxWidth: 520,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -312,7 +315,7 @@ class _SignInScreenState extends State<SignInScreen> {
               const SizedBox(height: 12),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
