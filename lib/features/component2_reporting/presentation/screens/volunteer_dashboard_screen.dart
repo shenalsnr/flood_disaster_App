@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import '../widgets/volunteer_drawer.dart';
 import '../widgets/hazard_report_details_sheet.dart';
 import 'hazard_report_wizard_screen.dart';
+import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
 /// Main Dashboard Screen for District Volunteer (Component 2: Ground Hazard Reporting).
@@ -34,11 +35,8 @@ String _displayStatus(Map<String, dynamic> data) {
   return data['status'] as String? ?? 'VERIFIED';
 }
 
-class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
-    with SingleTickerProviderStateMixin {
+class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   int _selectedTabIndex = 0;
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
 
   // Default initial reports matching Screenshot 1 exactly
   final List<HazardReportItem> _defaultReports = const [
@@ -72,23 +70,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-  }
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
 
   void _openHazardWizard() async {
     final result = await Navigator.push<bool>(
@@ -192,53 +174,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
         ),
         actions: [
           const ThemeToggleButton(),
-          // Live Status Pill (ONLINE badge from Screenshot 1 & 2)
-          Padding(
-            padding: const EdgeInsets.only(right: 18),
+          // Live Status Pill (Dynamic Online/Offline badge)
+          const Padding(
+            padding: EdgeInsets.only(right: 18),
             child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ScaleTransition(
-                      scale: _pulseAnimation,
-                      child: Container(
-                        width: 7,
-                        height: 7,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF00E676),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF00E676),
-                              blurRadius: 6,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'ONLINE',
-                      style: TextStyle(
-                        color: Color(0xFF00E676),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: OnlineStatusBadge(),
             ),
           ),
         ],
