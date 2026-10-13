@@ -4,6 +4,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/ration_item_model.dart';
 import '../../data/models/shelter_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Shelter Dashboard Screen - Primary interface for Camp Relief Leads
 class ShelterDashboardScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -58,7 +59,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
       backgroundColor: ShelterTheme.backgroundDeepNavy,
       body: SafeArea(
         child: activeShelter == null
-            ? const Center(child: Text("No shelters available.", style: TextStyle(color: Colors.white)))
+            ? Center(child: Text(tr('No shelters available.'), style: TextStyle(color: Colors.white)))
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -67,29 +68,29 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                     // TOP PROFILE ROW
                     Row(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           backgroundColor: ShelterTheme.surfaceLightNavy,
-                          child: Text('RS', style: TextStyle(color: Colors.white)),
+                          child: Text(tr('RS'), style: TextStyle(color: Colors.white)),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Dr. Rohan Silva', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                              Text('RELIEF TEAM LEAD | RM', style: TextStyle(fontSize: 10, color: ShelterTheme.textMuted)),
+                              Text(tr('Dr. Rohan Silva'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                              Text(tr('RELIEF TEAM LEAD | RM'), style: TextStyle(fontSize: 10, color: ShelterTheme.textMuted)),
                             ],
                           ),
                         ),
-                        Container(
+                        Flexible(child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.transparent,
                             border: Border.all(color: ShelterTheme.statusSafeGreen),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text('+ YES (SYNC OK)', style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
-                        ),
+                          child: Text(tr('+ YES (SYNC OK)'), style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                        )),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -104,13 +105,13 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('SHELTER CAPACITY OVERVIEW', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text(tr('SHELTER CAPACITY OVERVIEW'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
                           RichText(
                             text: TextSpan(
                               children: [
                                 TextSpan(text: '${activeShelter.occupiedBeds}/${activeShelter.totalBeds}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-                                TextSpan(text: ' Beds Occupied - ${activeShelter.occupancyPercentage}%', style: const TextStyle(fontSize: 14, color: ShelterTheme.textMuted)),
+                                TextSpan(text: tr(' Beds Occupied - {p0}%', {'p0': (activeShelter.occupancyPercentage).toString()}), style: const TextStyle(fontSize: 14, color: ShelterTheme.textMuted)),
                               ],
                             ),
                           ),
@@ -132,7 +133,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                                 color: ShelterTheme.statusCriticalRed,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Text('! CRITICAL CAPACITY', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                              child: Text(tr('! CRITICAL CAPACITY'), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                             ),
                         ],
                       ),
@@ -140,7 +141,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                     const SizedBox(height: 24),
                     
                     // RAPID HEADCOUNT
-                    const Text('RAPID HEADCOUNT', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text(tr('RAPID HEADCOUNT'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -157,7 +158,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                     OutlinedButton.icon(
                       onPressed: () => _service.toggleShelterStatus(activeShelter.id),
                       icon: Icon(activeShelter.isClosed ? Icons.lock_open : Icons.warning_amber, color: ShelterTheme.statusCriticalRed),
-                      label: Text(activeShelter.isClosed ? 'OPEN SHELTER' : 'CLOSE SHELTER', style: const TextStyle(color: ShelterTheme.statusCriticalRed, fontWeight: FontWeight.bold)),
+                      label: Text(activeShelter.isClosed ? tr('OPEN SHELTER') : tr('CLOSE SHELTER'), style: const TextStyle(color: ShelterTheme.statusCriticalRed, fontWeight: FontWeight.bold)),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: ShelterTheme.statusCriticalRed),
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -167,7 +168,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                     const SizedBox(height: 32),
                     
                     // SHORTAGE ALERTS
-                    const Text('SHORTAGE ALERTS', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text(tr('SHORTAGE ALERTS'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     ...shortages.map((item) {
                       final isDepleted = item.status == SupplyStatus.depleted;
@@ -181,22 +182,22 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Flexible(child: Text(item.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                            Container(
+                            Flexible(child: Text(tr(item.name), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                            Flexible(child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
                                 border: Border.all(color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                isDepleted ? 'EMPTY' : 'LOW STOCK',
+                                isDepleted ? tr('EMPTY') : tr('LOW STOCK'),
                                 style: TextStyle(
                                   color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
+                            )),
                           ],
                         ),
                       );
@@ -213,12 +214,12 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
         showUnselectedLabels: true,
         selectedFontSize: 10,
         unselectedFontSize: 10,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: 'Supplies'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: 'Alerts'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: 'Team'),
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: tr('Dashboard')),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: tr('Supplies')),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: tr('Alerts')),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: tr('Settings')),
+          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: tr('Team')),
         ],
         currentIndex: 0,
         onTap: (index) {
@@ -238,7 +239,7 @@ class _ShelterDashboardScreenState extends State<ShelterDashboardScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
-      child: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      child: Text(tr(label), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 }

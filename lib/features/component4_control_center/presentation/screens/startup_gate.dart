@@ -48,9 +48,9 @@ class _StartupGateState extends State<StartupGate> {
       builder: (context, snap) {
         if (snap.hasData) return snap.data!;
         return const Scaffold(
-          backgroundColor: Color(0xFF070B14),
+          backgroundColor: Color(0xFF0B1220),
           body: Center(
-            child: CircularProgressIndicator(color: Color(0xFFFF5252)),
+            child: CircularProgressIndicator(color: Color(0xFFF87171)),
           ),
         );
       },

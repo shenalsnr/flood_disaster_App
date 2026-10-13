@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class HazardReportItem {
   final String id;
   final String title;
@@ -49,10 +50,10 @@ class HazardReportDetailsSheet extends StatelessWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF131B2B),
+        color: Color(0xFF131C2E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         border: Border(
-          top: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          top: BorderSide(color: Color(0xFF1C2740), width: 1.5),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -95,7 +96,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      report.title,
+                      tr(report.title),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -106,48 +107,48 @@ class HazardReportDetailsSheet extends StatelessWidget {
                     Text(
                       '${report.location} • ${report.timeAgo}',
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: Color(0xFFB6C2D6),
                         fontSize: 13,
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: isVerified
-                      ? const Color(0xFF00E676).withValues(alpha: 0.15)
-                      : const Color(0xFFFFB300).withValues(alpha: 0.15),
+                      ? const Color(0xFF34D399).withValues(alpha: 0.15)
+                      : const Color(0xFFFBBF24).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isVerified
-                        ? const Color(0xFF00E676).withValues(alpha: 0.4)
-                        : const Color(0xFFFFB300).withValues(alpha: 0.4),
+                        ? const Color(0xFF34D399).withValues(alpha: 0.4)
+                        : const Color(0xFFFBBF24).withValues(alpha: 0.4),
                   ),
                 ),
                 child: Text(
-                  report.status,
+                  tr(report.status),
                   style: TextStyle(
                     color: isVerified
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFFFFB300),
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFFFBBF24),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
 
           const SizedBox(height: 22),
-          const Divider(color: Color(0xFF1E293B)),
+          const Divider(color: Color(0xFF1C2740)),
           const SizedBox(height: 14),
 
           // Ground details
-          const Text(
-            'Ground Hazard Assessment',
+          Text(
+            tr('Ground Hazard Assessment'),
             style: TextStyle(
               color: Colors.white70,
               fontSize: 13,
@@ -157,7 +158,7 @@ class HazardReportDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            report.description,
+            tr(report.description),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14.5,
@@ -174,16 +175,16 @@ class HazardReportDetailsSheet extends StatelessWidget {
             children: [
               _DetailChip(
                 icon: Icons.person_pin_circle_rounded,
-                label: 'Reporter: ${report.reporter}',
+                label: tr('Reporter: {p0}', {'p0': (report.reporter).toString()}),
               ),
               if (report.waterLevel != null)
                 _DetailChip(
                   icon: Icons.water_drop_rounded,
-                  label: 'Depth: ${report.waterLevel}m',
+                  label: tr('Depth: {p0}m', {'p0': (report.waterLevel).toString()}),
                 ),
-              const _DetailChip(
+              _DetailChip(
                 icon: Icons.satellite_alt_rounded,
-                label: 'GPS Tag: High Precision',
+                label: tr('GPS Tag: High Precision'),
               ),
             ],
           ),
@@ -196,16 +197,16 @@ class HazardReportDetailsSheet extends StatelessWidget {
             height: 50,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF38BDF8),
+                foregroundColor: const Color(0xFF06121F),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.check_circle_outline_rounded, size: 20),
-              label: const Text(
-                'Close Assessment',
+              label: Text(
+                tr('Close Assessment'),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
@@ -235,10 +236,10 @@ class _DetailChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF40C4FF)),
+          Icon(icon, size: 16, color: const Color(0xFF38BDF8)),
           const SizedBox(width: 6),
           Text(
-            label,
+            tr(label),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 12.5,

@@ -1,0 +1,159 @@
+=== lib\features\component4_control_center\presentation\screens\resolve_analysis_screen.dart (line 163)
+--- YOUR side (removed) ---
+                      tr('Lead Squad: {p0}', {'p0': (widget.incident.assignedTeam?.name ?? "No unit assigned").toString()}),
+--- INCOMING kept ---
+                      'Lead Squad: ${widget.incident.assignedTeam?.name ?? "No unit assigned"}',
+
+=== lib\features\component4_control_center\presentation\screens\resolve_analysis_screen.dart (line 348)
+--- YOUR side (removed) ---
+                            tr('Assigned: {p0}', {'p0': (incident.assignedTeam?.name ?? "No unit assigned").toString()}),
+--- INCOMING kept ---
+                            'Assigned: ${incident.assignedTeam?.name ?? "No unit assigned"}',
+
+=== lib\features\component4_control_center\presentation\screens\responder_login_screen.dart (line 4)
+--- YOUR side (removed) ---
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
+--- INCOMING kept ---
+
+
+=== lib\features\component4_control_center\presentation\screens\responder_profile_screen.dart (line 16)
+--- YOUR side (removed) ---
+import '../../../../core/localization/app_strings.dart';
+--- INCOMING kept ---
+
+
+=== lib\features\component4_control_center\presentation\screens\responder_profile_screen.dart (line 101)
+--- YOUR side (removed) ---
+      _snack(tr('Failed to update photo: {p0}', {'p0': (e).toString()}), error: true);
+--- INCOMING kept ---
+      _snack('Failed to update photo: $e', error: true);
+
+=== lib\features\component4_control_center\presentation\screens\responder_profile_screen.dart (line 119)
+--- YOUR side (removed) ---
+      _snack(tr('Photo removed'));
+    } catch (e) {
+      _snack(tr('Failed to remove photo: {p0}', {'p0': (e).toString()}), error: true);
+--- INCOMING kept ---
+      _snack('Photo removed');
+    } catch (e) {
+      _snack('Failed to remove photo: $e', error: true);
+
+=== lib\features\component4_control_center\presentation\screens\responder_profile_screen.dart (line 330)
+--- YOUR side (removed) ---
+                                  _snack(tr('Profile updated'));
+                                } catch (e) {
+                                  _snack(tr('Could not save: {p0}', {'p0': (e).toString()}), error: true);
+                                }
+                              },
+                              child: Text(tr('Save Changes'),
+--- INCOMING kept ---
+                                  _snack('Profile updated');
+                                } catch (e) {
+                                  _snack('Could not save: $e', error: true);
+                                }
+                              },
+                              child: const Text('Save Changes',
+
+=== lib\features\component4_control_center\presentation\screens\responder_profile_screen.dart (line 714)
+--- YOUR side (removed) ---
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 22),
+                    SizedBox(width: 10),
+                    Flexible(
+                      child: Text(tr('EDIT PROFILE'),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1C2740).withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: const ThemeToggleTile(activeColor: _green),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFF87171),
+                  side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
+                  backgroundColor:
+                      const Color(0xFFDC2626).withValues(alpha: 0.1),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.logout_rounded, size: 20),
+                label: Text(tr('Log Out'),
+                    style: TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w700)),
+--- INCOMING kept ---
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 22),
+                    SizedBox(width: 10),
+                    Flexible(
+                      child: Text('EDIT PROFILE',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B).withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: const ThemeToggleTile(activeColor: _green),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.redAccent,
+                  side: const BorderSide(color: Colors.redAccent),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                icon: const Icon(Icons.logout, size: 18),
+                label: const Text('SIGN OUT',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8)),
+
+=== lib\features\component4_control_center\presentation\screens\responder_register_screen.dart (line 2)
+--- YOUR side (removed) ---
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
+--- INCOMING kept ---
+

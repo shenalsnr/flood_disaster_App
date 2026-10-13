@@ -5,28 +5,29 @@ import 'package:flutter/material.dart';
 import '../../data/models/responder_models.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Shared design system for Component 4 (colours, responsive helpers,
 /// animations, photo widgets). Everything here uses only built-in Flutter
 /// widgets (LayoutBuilder, MediaQuery, NavigationBar/Rail, Hero, ...).
 class C4 {
-  static const bg = Color(0xFF070B14);
-  static const surface = Color(0xFF131B2B);
-  static const card = Color(0xFF1E293B);
-  static const border = Color(0xFF334155);
+  static const bg = Color(0xFF0B1220);
+  static const surface = Color(0xFF131C2E);
+  static const card = Color(0xFF1C2740);
+  static const border = Color(0xFF2B3A55);
   static const text = Color(0xFFF1F5F9);
-  static const muted = Color(0xFF94A3B8);
-  static const accent = Color(0xFFFF6D00);
-  static const blue = Color(0xFF40C4FF);
-  static const green = Color(0xFF00E676);
+  static const muted = Color(0xFFB6C2D6);
+  static const accent = Color(0xFF38BDF8);
+  static const blue = Color(0xFF38BDF8);
+  static const green = Color(0xFF34D399);
 
   static Color severity(IncidentSeverity s) {
     switch (s) {
       case IncidentSeverity.critical:
-        return const Color(0xFFFF5252);
+        return const Color(0xFFF87171);
       case IncidentSeverity.high:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFBBF24);
       case IncidentSeverity.medium:
-        return const Color(0xFFFACC15);
+        return const Color(0xFFFBBF24);
       case IncidentSeverity.low:
         return const Color(0xFF10B981);
     }
@@ -35,9 +36,9 @@ class C4 {
   static Color status(IncidentStatus s) {
     switch (s) {
       case IncidentStatus.incoming:
-        return const Color(0xFF94A3B8);
+        return const Color(0xFFB6C2D6);
       case IncidentStatus.dispatched:
-        return const Color(0xFF40C4FF);
+        return const Color(0xFF38BDF8);
       case IncidentStatus.onScene:
         return const Color(0xFFA78BFA);
       case IncidentStatus.resolved:
@@ -388,7 +389,7 @@ class C4Chip extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Text(
-            label,
+            tr(label),
             style: TextStyle(
               color: color,
               fontSize: 10,

@@ -218,6 +218,59 @@ class AdminUserService {
       .set({'password': password, 'updatedAt': FieldValue.serverTimestamp()},
           SetOptions(merge: true));
 
+  /// Reads one account document (null when it does not exist).
+  Future<Map<String, dynamic>?> getUser(String email) async {
+    final doc = await _users.doc(email.toLowerCase().trim()).get();
+    return doc.data();
+  }
+
+  /// Edits name, phone, NIC and (optionally) the sign-in email of an account.
+  /// The email is the document id, so changing it moves the account to a new
+  /// document (copy, then delete the old one) in one batch.
+  Future<void> updateDetails({
+    required String oldEmail,
+    required String fullName,
+    required String newEmail,
+    required String phone,
+    required String nic,
+    String? city,
+    String? district,
+    String? floodZone,
+  }) async {
+    final oldId = oldEmail.toLowerCase().trim();
+    final newId = newEmail.toLowerCase().trim();
+    final oldRef = _users.doc(oldId);
+    final snap = await oldRef.get();
+    if (!snap.exists) throw StateError('Account not found.');
+    final fields = <String, dynamic>{
+      'fullName': fullName.trim(),
+      'phoneNumber': phone.trim(),
+      'nic': nic.trim().toUpperCase(),
+      if (city != null) 'city': city.trim(),
+      if (district != null) 'district': district.trim(),
+      if (floodZone != null) 'floodZone': floodZone.trim(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (newId == oldId) {
+      await oldRef.set(fields, SetOptions(merge: true)).queued();
+      return;
+    }
+    final clash =
+        await _users.doc(newId).get(const GetOptions(source: Source.server));
+    if (clash.exists) {
+      throw StateError('An account with $newId already exists.');
+    }
+    final batch = FirebaseFirestore.instance.batch();
+    batch.set(_users.doc(newId), {
+      ...snap.data()!,
+      ...fields,
+      'email': newId,
+      'uid': newId,
+    });
+    batch.delete(oldRef);
+    await batch.commit();
+  }
+
   Future<void> deleteUser(String email) =>
       _users.doc(email.toLowerCase().trim()).delete();
 }

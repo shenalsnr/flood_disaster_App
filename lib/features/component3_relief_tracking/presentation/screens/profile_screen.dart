@@ -3,6 +3,7 @@ import '../../../../core/theme/appearance.dart';
 import '../../../../core/theme/shelter_theme.dart';
 import '../../data/services/firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // Role enum scoped to this profile screen.
 // Extend or replace with a shared user model when available.
 enum UserRole { leader, supplier, citizen }
@@ -57,9 +58,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: ShelterTheme.primaryActionOrange, size: 20),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Request a Supplier',
+                            tr('Request a Supplier'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 17,
@@ -70,13 +71,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Describe what supplies are needed and your camp location. This request will be broadcast to available suppliers.',
+                    Text(
+                      tr('Describe what supplies are needed and your camp location. This request will be broadcast to available suppliers.'),
                       style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, height: 1.5),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'REQUEST MESSAGE',
+                    Text(
+                      tr('REQUEST MESSAGE'),
                       style: TextStyle(
                         color: ShelterTheme.textMuted,
                         fontSize: 10,
@@ -90,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       maxLines: 4,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'e.g. Urgently need 200L drinking water and 50 trauma kits at Camp Niruya, Kolonnawa.',
+                        hintText: tr('e.g. Urgently need 200L drinking water and 50 trauma kits at Camp Niruya, Kolonnawa.'),
                         hintStyle: const TextStyle(color: ShelterTheme.textMuted, fontSize: 13),
                         filled: true,
                         fillColor: ShelterTheme.backgroundDeepNavy,
@@ -109,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         contentPadding: const EdgeInsets.all(14),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Please enter your supply request.';
+                        if (v == null || v.trim().isEmpty) return tr('Please enter your supply request.');
                         return null;
                       },
                     ),
@@ -131,8 +132,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   if (ctx.mounted) Navigator.of(ctx).pop();
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Supplier request sent and saved!'),
+                                      SnackBar(
+                                        content: Text(tr('Supplier request sent and saved!')),
                                         backgroundColor: ShelterTheme.statusSafeGreen,
                                       ),
                                     );
@@ -142,7 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Failed to send: $e'),
+                                        content: Text(tr('Failed to send: {p0}', {'p0': (e).toString()})),
                                         backgroundColor: ShelterTheme.statusCriticalRed,
                                       ),
                                     );
@@ -160,12 +161,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               )
                             : const Icon(Icons.send_rounded, size: 18),
                         label: Text(
-                          isSaving ? 'SENDING...' : 'SEND REQUEST',
+                          isSaving ? tr('SENDING...') : tr('SEND REQUEST'),
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ShelterTheme.primaryActionOrange,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06121F),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -193,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: ShelterTheme.backgroundDeepNavy,
         elevation: 0,
-        title: const Text('Settings', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(tr('Settings'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(icon: const Icon(Icons.settings, color: Colors.white), onPressed: () {}),
         ],
@@ -211,15 +212,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 40,
                     backgroundColor: ShelterTheme.surfaceLightNavy,
-                    child: Text('RS', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                    child: Text(tr('RS'), style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Dr. Rohan Silva', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(tr('Dr. Rohan Silva'), style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  const Text('Relief Team Lead - Camp Niruya', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
+                  Text(tr('Relief Team Lead - Camp Niruya'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -228,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       border: Border.all(color: ShelterTheme.statusSafeGreen),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text('+ ON DUTY', style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                    child: Text(tr('+ ON DUTY'), style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 24),
                   const Divider(color: ShelterTheme.surfaceLightNavy),
@@ -249,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ACCOUNT MENU
             Align(
               alignment: Alignment.centerLeft,
-              child: const Text('ACCOUNT', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+              child: Text(tr('ACCOUNT'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 12),
             Container(
@@ -263,7 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Divider(color: ShelterTheme.surfaceLightNavy, height: 1),
                   _buildMenuRow(Icons.apartment_outlined, 'Assigned Shelters', 'Camp Niruya, Camp Galen Ridge'),
                   const Divider(color: ShelterTheme.surfaceLightNavy, height: 1),
-                  _buildMenuRow(Icons.vpn_key_outlined, 'Role & Permissions', 'Relief Team Lead', badgeText: 'ADMIN'),
+                  _buildMenuRow(Icons.vpn_key_outlined, 'Role & Permissions', 'Relief Team Lead', badgeText: tr('ADMIN')),
                 ],
               ),
             ),
@@ -273,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
               Align(
                 alignment: Alignment.centerLeft,
-                child: const Text('ACTIONS', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                child: Text(tr('ACTIONS'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 12),
               GestureDetector(
@@ -299,12 +300,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: ShelterTheme.primaryActionOrange, size: 20),
                       ),
                       const SizedBox(width: 14),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Request Supplier',
+                              tr('Request Supplier'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -313,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             SizedBox(height: 2),
                             Text(
-                              'Broadcast a supply request to available suppliers',
+                              tr('Broadcast a supply request to available suppliers'),
                               style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12),
                             ),
                           ],
@@ -344,14 +345,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // LOGOUT BUTTON
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              height: 52,
+              child: OutlinedButton.icon(
                 onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ShelterTheme.statusCriticalRed,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFF87171),
+                  side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
+                  backgroundColor:
+                      const Color(0xFFDC2626).withValues(alpha: 0.1),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Log out', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                icon: const Icon(Icons.logout_rounded, size: 20),
+                label: Text(tr('Log Out'),
+                    style: TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w700)),
               ),
             ),
           ],
@@ -363,9 +371,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatColumn(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(tr(value), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 10)),
+        Text(tr(label), style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 10)),
       ],
     );
   }
@@ -380,8 +388,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Icon(icon, color: Colors.white, size: 20),
       ),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-      subtitle: Text(subtitle, style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
+      title: Text(tr(title), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+      subtitle: Text(tr(subtitle), style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -394,7 +402,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 border: Border.all(color: ShelterTheme.statusSafeGreen),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(badgeText, style: const TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+              child: Text(tr(badgeText), style: const TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 10, fontWeight: FontWeight.bold)),
             ),
           const Icon(Icons.chevron_right, color: ShelterTheme.textMuted),
         ],

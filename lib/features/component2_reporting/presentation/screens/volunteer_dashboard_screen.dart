@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart' hide Path;
-import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../widgets/volunteer_drawer.dart';
 import '../widgets/hazard_report_details_sheet.dart';
 import 'hazard_report_wizard_screen.dart';
-import '../../../../core/services/network_status_service.dart';
+import 'offline_draft_management_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Main Dashboard Screen for District Volunteer (Component 2: Ground Hazard Reporting).
 /// Features the Top App Bar from Screenshot 2, the Drawer from Screenshot 3,
 /// and the complete Main Dashboard from Screenshot 1 with full interactivity.
@@ -36,203 +36,17 @@ String _displayStatus(Map<String, dynamic> data) {
   return data['status'] as String? ?? 'VERIFIED';
 }
 
-class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
+class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen>
+    with SingleTickerProviderStateMixin {
   int _selectedTabIndex = 0;
-  final MapController _liveMapController = MapController();
-  LatLng? _currentUserLocation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchInitialUserLocation();
-  }
-
-  Future<void> _fetchInitialUserLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always) {
-        final pos = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.medium,
-            timeLimit: Duration(seconds: 4),
-          ),
-        );
-        if (mounted) {
-          setState(() {
-            _currentUserLocation = LatLng(pos.latitude, pos.longitude);
-          });
-        }
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _recenterLiveMapToUserLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permission is needed to find your location.'),
-              backgroundColor: Color(0xFFEF4444),
-            ),
-          );
-        }
-        return;
-      }
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 6),
-        ),
-      );
-      final newLoc = LatLng(pos.latitude, pos.longitude);
-      setState(() {
-        _currentUserLocation = newLoc;
-      });
-      _liveMapController.move(newLoc, 15.0);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Centered to your GPS location'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Color(0xFF10B981),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('GPS Location error: $e'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
-      }
-    }
-  }
-
-  void _fitAllHazards(List<LatLng> points) {
-    if (points.isEmpty) return;
-    if (points.length == 1) {
-      _liveMapController.move(points.first, 14.5);
-      return;
-    }
-    double minLat = points.first.latitude;
-    double maxLat = points.first.latitude;
-    double minLng = points.first.longitude;
-    double maxLng = points.first.longitude;
-
-    for (var p in points) {
-      if (p.latitude < minLat) minLat = p.latitude;
-      if (p.latitude > maxLat) maxLat = p.latitude;
-      if (p.longitude < minLng) minLng = p.longitude;
-      if (p.longitude > maxLng) maxLng = p.longitude;
-    }
-
-    final center = LatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2);
-    final latSpan = maxLat - minLat;
-    final lngSpan = maxLng - minLng;
-    final maxSpan = latSpan > lngSpan ? latSpan : lngSpan;
-
-    double zoom = 12.5;
-    if (maxSpan > 0.4) {
-      zoom = 9.5;
-    } else if (maxSpan > 0.2) {
-      zoom = 10.5;
-    } else if (maxSpan > 0.1) {
-      zoom = 11.2;
-    } else if (maxSpan > 0.05) {
-      zoom = 11.8;
-    }
-
-    _liveMapController.move(center, zoom);
-  }
-
-  Marker _buildHazardMarker({
-    required LatLng point,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Marker(
-      point: point,
-      width: 52,
-      height: 58,
-      alignment: Alignment.topCenter,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.55),
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                  ),
-                  const BoxShadow(
-                    color: Colors.black45,
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-            CustomPaint(
-              size: const Size(10, 7),
-              painter: _PinArrowPainter(color: color),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMapLegendItem(IconData icon, Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 13),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFFE2E8F0),
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   // Default initial reports matching Screenshot 1 exactly
-  final List<HazardReportItem> _defaultReports = const [
+  final List<HazardReportItem> _defaultReports = [
     HazardReportItem(
       id: 'rep-001',
-      title: 'Flood (Severe)',
+      title: tr('Flood (Severe)'),
       location: 'Kolonnawa Road',
       timeAgo: '10 mins ago',
       status: 'VERIFIED',
@@ -241,12 +55,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
           'Water level reached 1.2m over the culvert on Kolonnawa Road. High velocity flow towards low-lying settlements. Sandbags deployed.',
       reporter: 'Kapila Perera (Volunteer)',
       icon: Icons.waves_rounded,
-      iconColor: Color(0xFFFF5252),
+      iconColor: Color(0xFFF87171),
       waterLevel: 1.2,
     ),
     HazardReportItem(
       id: 'rep-002',
-      title: 'Landslide Warning',
+      title: tr('Landslide Warning'),
       location: 'Kandy Slope',
       timeAgo: '1 hour ago',
       status: 'PENDING',
@@ -255,12 +69,28 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
           'Active slope slippage detected along the upper hill cut. Minor mudflow over the lower access path. Verification team en route.',
       reporter: 'Kapila Perera (Volunteer)',
       icon: Icons.landscape_rounded,
-      iconColor: Color(0xFFFFB300),
+      iconColor: Color(0xFFFBBF24),
       waterLevel: null,
     ),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
 
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   void _openHazardWizard() async {
     final result = await Navigator.push<bool>(
@@ -295,25 +125,25 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   Color _colorForHazard(String hazard) {
     final lower = hazard.toLowerCase();
     if (lower.contains('tree')) {
-      return const Color(0xFF22C55E); // Green
+      return const Color(0xFF34D399); // Green
     } else if (lower.contains('flood')) {
-      return const Color(0xFFFF5252); // Red / Coral
+      return const Color(0xFFF87171); // Red / Coral
     } else if (lower.contains('landslide')) {
-      return const Color(0xFFFFB300); // Amber
+      return const Color(0xFFFBBF24); // Amber
     } else if (lower.contains('road') || lower.contains('blocked') || lower.contains('blockage')) {
-      return const Color(0xFFFF5252); // Red
+      return const Color(0xFFF87171); // Red
     } else if (lower.contains('building')) {
       return const Color(0xFFCBD5E1); // Slate / White
     } else if (lower.contains('bridge')) {
-      return const Color(0xFFFF9F0A); // Orange
+      return const Color(0xFFFB923C); // Orange
     }
-    return const Color(0xFFFFB300);
+    return const Color(0xFFFBBF24);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       drawer: VolunteerDrawer(
         onProfileTap: () => setState(() => _selectedTabIndex = 3),
         onReportsTap: () => setState(() => _selectedTabIndex = 1),
@@ -324,25 +154,25 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 26),
-            tooltip: 'Open Menu',
+            tooltip: tr('Open Menu'),
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         centerTitle: false,
         titleSpacing: 0,
-        title: Row(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.shield_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 24,
             ),
             const SizedBox(width: 8),
             RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -350,25 +180,81 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 ),
                 children: [
                   TextSpan(
-                    text: 'We',
+                    text: tr('We'),
                     style: TextStyle(color: Colors.white),
                   ),
                   TextSpan(
-                    text: 'Safe',
-                    style: TextStyle(color: Color(0xFF00E676)),
+                    text: tr('Safe'),
+                    style: TextStyle(color: Color(0xFF34D399)),
                   ),
                 ],
               ),
             ),
           ],
-        ),
+        )),
         actions: [
           const ThemeToggleButton(),
-          // Live Status Pill (Dynamic Online/Offline badge)
-          const Padding(
-            padding: EdgeInsets.only(right: 18),
+          IconButton(
+            tooltip: tr('Offline Drafts & Queue (SQLite)'),
+            icon: const Icon(Icons.storage_rounded,
+                color: Color(0xFFFB923C), size: 21),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OfflineDraftManagementScreen(),
+                ),
+              );
+              setState(() {});
+            },
+          ),
+          // Live Status Pill (ONLINE badge from Screenshot 1 & 2)
+          Padding(
+            padding: const EdgeInsets.only(right: 18),
             child: Center(
-              child: OnlineStatusBadge(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ScaleTransition(
+                      scale: _pulseAnimation,
+                      child: Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF34D399),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFF34D399),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      tr('ONLINE'),
+                      style: TextStyle(
+                        color: Color(0xFF34D399),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -390,7 +276,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         decoration: const BoxDecoration(
           color: Color(0xFF0A111E),
           border: Border(
-            top: BorderSide(color: Color(0xFF1E293B), width: 1),
+            top: BorderSide(color: Color(0xFF1C2740), width: 1),
           ),
         ),
         child: BottomNavigationBar(
@@ -399,8 +285,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFFFF6D00),
-          unselectedItemColor: const Color(0xFF64748B),
+          selectedItemColor: const Color(0xFF38BDF8),
+          unselectedItemColor: const Color(0xFF8A98B0),
           selectedLabelStyle: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -409,25 +295,25 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
-          items: const [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),
-              label: 'Home',
+              label: tr('Home'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment_outlined),
               activeIcon: Icon(Icons.assignment_rounded),
-              label: 'Reports',
+              label: tr('Reports'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.map_outlined),
               activeIcon: Icon(Icons.map_rounded),
-              label: 'Live Map',
+              label: tr('Live Map'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
               activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              label: tr('Profile'),
             ),
           ],
         ),
@@ -444,8 +330,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
 
     return SafeArea(
       child: RefreshIndicator(
-        color: const Color(0xFFFF6D00),
-        backgroundColor: const Color(0xFF070B14),
+        color: const Color(0xFF38BDF8),
+        backgroundColor: const Color(0xFF0B1220),
         onRefresh: () async {
           setState(() {});
         },
@@ -464,10 +350,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'District Volunteer',
+                        Text(
+                          tr('District Volunteer'),
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: Color(0xFFB6C2D6),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.2,
@@ -475,7 +361,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Hello, $userName',
+                          tr('Hello, {p0}', {'p0': (userName).toString()}),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -498,12 +384,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFF9F0A),
+                          color: const Color(0xFFFB923C),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF9F0A).withValues(alpha: 0.3),
+                            color: const Color(0xFFFB923C).withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 3),
                           ),
@@ -514,10 +400,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                           'assets/images/volunteer_avatar.png',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return const CircleAvatar(
-                              backgroundColor: Color(0xFFFF6D00),
+                            return CircleAvatar(
+                              backgroundColor: Color(0xFF38BDF8),
                               child: Text(
-                                'KP',
+                                tr('KP'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -542,12 +428,12 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                   color: const Color(0xFF1E1117), // Deep dark reddish/black
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFFF3B3B).withValues(alpha: 0.6),
+                    color: const Color(0xFFF87171).withValues(alpha: 0.6),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF3B3B).withValues(alpha: 0.12),
+                      color: const Color(0xFFF87171).withValues(alpha: 0.12),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -559,24 +445,24 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF3B3B).withValues(alpha: 0.15),
+                        color: const Color(0xFFF87171).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.warning_amber_rounded,
-                        color: Color(0xFFFF3B3B),
+                        color: Color(0xFFF87171),
                         size: 24,
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Kelani River Level: WARNING',
+                            tr('Kelani River Level: WARNING'),
                             style: TextStyle(
-                              color: Color(0xFFFF3B3B),
+                              color: Color(0xFFF87171),
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.2,
@@ -584,7 +470,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Minor flooding reported upstream in Hanwella.',
+                            tr('Minor flooding reported upstream in Hanwella.'),
                             style: TextStyle(
                               color: Color(0xFFE2E8F0),
                               fontSize: 13,
@@ -611,7 +497,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Flexible(child: Text(
-                    'My Recent Reports',
+                    tr('My Recent Reports'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -619,17 +505,17 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       letterSpacing: 0.2,
                     ),
                   )),
-                  GestureDetector(
+                  Flexible(child: GestureDetector(
                     onTap: () => setState(() => _selectedTabIndex = 1),
-                    child: const Text(
-                      'View All',
+                    child: Text(
+                      tr('View All'),
                       style: TextStyle(
-                        color: Color(0xFFFF8F5A),
+                        color: Color(0xFF7DD3FC),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -706,8 +592,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'All Incident Reports',
+            Text(
+              tr('All Incident Reports'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -715,9 +601,9 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Live reports submitted by you and the District Operations Unit.',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+            Text(
+              tr('Live reports submitted by you and the District Operations Unit.'),
+              style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -778,309 +664,89 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   // TAB 2: LIVE MAP VIEW
   // ===========================================================================
   Widget _buildLiveMapTab() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('hazard_reports')
-          .snapshots(),
-      builder: (context, snapshot) {
-        final docs = snapshot.data?.docs ?? [];
-        List<Marker> markers = [];
-        List<LatLng> hazardPoints = [];
-
-        for (final doc in docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          final lat = (data['latitude'] as num?)?.toDouble();
-          final lng = (data['longitude'] as num?)?.toDouble();
-          if (lat == null || lng == null) continue;
-          if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
-
-          final point = LatLng(lat, lng);
-          hazardPoints.add(point);
-          final hazard = data['hazardType'] as String? ?? 'Hazard';
-          final icon = _iconForHazard(hazard);
-          final color = _colorForHazard(hazard);
-
-          markers.add(
-            _buildHazardMarker(
-              point: point,
-              icon: icon,
-              color: color,
-              onTap: () {
-                final reportItem = HazardReportItem(
-                  id: doc.id,
-                  title: data['severity'] != null
-                      ? '$hazard (${data['severity']})'
-                      : hazard,
-                  location: data['location'] as String? ??
-                      'Lat: ${lat.toStringAsFixed(4)}, Lng: ${lng.toStringAsFixed(4)}',
-                  timeAgo: 'Live Report',
-                  status: _displayStatus(data),
-                  hazardType: hazard,
-                  description: data['description'] as String? ??
-                      'Active ground hazard verified by district volunteer.',
-                  reporter: data['reporterName'] as String? ??
-                      'District Volunteer',
-                  icon: icon,
-                  iconColor: color,
-                  waterLevel: (data['waterDepth'] as num?)?.toDouble(),
-                );
-                HazardReportDetailsSheet.show(context, reportItem);
-              },
+    return Stack(
+      children: [
+        Unfiltered(child: FlutterMap(
+          options: const MapOptions(
+            initialCenter: LatLng(6.9271, 79.8612),
+            initialZoom: 13.0,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.wesafe.flooddisaster',
             ),
-          );
-        }
-
-        // Fallback default sample markers if no valid reports in Firestore
-        if (markers.isEmpty) {
-          markers.add(
-            _buildHazardMarker(
-              point: const LatLng(6.9271, 79.8612),
-              icon: _defaultReports[0].icon,
-              color: _defaultReports[0].iconColor,
-              onTap: () => HazardReportDetailsSheet.show(
-                  context, _defaultReports[0]),
-            ),
-          );
-          markers.add(
-            _buildHazardMarker(
-              point: const LatLng(6.9380, 79.8780),
-              icon: _defaultReports[1].icon,
-              color: _defaultReports[1].iconColor,
-              onTap: () => HazardReportDetailsSheet.show(
-                  context, _defaultReports[1]),
-            ),
-          );
-          hazardPoints.add(const LatLng(6.9271, 79.8612));
-          hazardPoints.add(const LatLng(6.9380, 79.8780));
-        }
-
-        // Add current volunteer GPS position marker if available
-        if (_currentUserLocation != null) {
-          markers.add(
-            Marker(
-              point: _currentUserLocation!,
-              width: 50,
-              height: 50,
-              alignment: Alignment.center,
-              child: Tooltip(
-                message: 'Your Current GPS Position',
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF3B82F6),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black45,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: const LatLng(6.9271, 79.8612),
+                  width: 50,
+                  height: 50,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF87171).withValues(alpha: 0.9),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black45, blurRadius: 6),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.waves_rounded,
+                      color: Colors.white,
+                      size: 26,
                     ),
                   ),
                 ),
-              ),
-            ),
-          );
-        }
-
-        return Stack(
-          children: [
-            Unfiltered(
-              child: FlutterMap(
-                key: const ValueKey('live_hazard_flutter_map'),
-                mapController: _liveMapController,
-                options: MapOptions(
-                  initialCenter: _currentUserLocation ??
-                      (hazardPoints.isNotEmpty
-                          ? hazardPoints.first
-                          : const LatLng(6.9271, 79.8612)),
-                  initialZoom: 13.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.wesafe.flooddisaster',
+                Marker(
+                  point: const LatLng(6.9380, 79.8780),
+                  width: 50,
+                  height: 50,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFBBF24).withValues(alpha: 0.9),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black45, blurRadius: 6),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.landscape_rounded,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                   ),
-                  MarkerLayer(markers: markers),
+                ),
+              ],
+            ),
+          ],
+        )),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF131C2E).withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF2B3A55)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.location_searching_rounded, color: Color(0xFF34D399), size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    tr('Active Volunteer Sector: Kelani Basin'),
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
                 ],
               ),
             ),
-
-            // Top Status & Controls Header
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
-                        decoration: BoxDecoration(
-                          color:
-                              const Color(0xFF131B2B).withValues(alpha: 0.94),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFF334155)),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black38,
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF00E676),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0xFF00E676),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Active Hazards: ${docs.isNotEmpty ? docs.length : markers.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  const Text(
-                                    'Tap any pin for incident details',
-                                    style: TextStyle(
-                                      color: Color(0xFF94A3B8),
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // Focus all hazards button
-                    Container(
-                      decoration: BoxDecoration(
-                        color:
-                            const Color(0xFF131B2B).withValues(alpha: 0.94),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF334155)),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black38,
-                            blurRadius: 8,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.center_focus_strong_rounded,
-                            color: Color(0xFF40C4FF), size: 20),
-                        tooltip: 'Focus Hazards',
-                        onPressed: () => _fitAllHazards(hazardPoints),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-
-                    // Recenter GPS Location button
-                    Container(
-                      decoration: BoxDecoration(
-                        color:
-                            const Color(0xFF131B2B).withValues(alpha: 0.94),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF334155)),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black38,
-                            blurRadius: 8,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.my_location_rounded,
-                            color: Color(0xFF00E676), size: 20),
-                        tooltip: 'My Location',
-                        onPressed: _recenterLiveMapToUserLocation,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom Legend Bar
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: SafeArea(
-                top: false,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color:
-                        const Color(0xFF131B2B).withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF334155)),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black38,
-                        blurRadius: 8,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildMapLegendItem(Icons.waves_rounded,
-                          const Color(0xFFFF5252), 'Flood'),
-                      _buildMapLegendItem(Icons.landscape_rounded,
-                          const Color(0xFFFFB300), 'Landslide'),
-                      _buildMapLegendItem(Icons.park_rounded,
-                          const Color(0xFF22C55E), 'Tree'),
-                      _buildMapLegendItem(Icons.do_not_disturb_on_rounded,
-                          const Color(0xFFFF5252), 'Blockage'),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
@@ -1104,10 +770,10 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFFF9F0A), width: 3),
+                  border: Border.all(color: const Color(0xFFFB923C), width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF9F0A).withValues(alpha: 0.4),
+                      color: const Color(0xFFFB923C).withValues(alpha: 0.4),
                       blurRadius: 18,
                     ),
                   ],
@@ -1127,7 +793,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              userName,
+              tr(userName),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -1136,23 +802,23 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              userEmail,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+              tr(userEmail),
+              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 14),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                color: const Color(0xFF34D399).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.4),
                 ),
               ),
-              child: const Text(
-                'OFFICIAL DISTRICT VOLUNTEER',
+              child: Text(
+                tr('OFFICIAL DISTRICT VOLUNTEER'),
                 style: TextStyle(
-                  color: Color(0xFF00E676),
+                  color: Color(0xFF34D399),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
@@ -1164,11 +830,11 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             // Metrics row
             Row(
               children: [
-                _buildStatTile('24', 'Reports Sent', const Color(0xFFFF6D00)),
+                _buildStatTile('24', 'Reports Sent', const Color(0xFF38BDF8)),
                 const SizedBox(width: 12),
-                _buildStatTile('19', 'Verified', const Color(0xFF00E676)),
+                _buildStatTile('19', 'Verified', const Color(0xFF34D399)),
                 const SizedBox(width: 12),
-                _buildStatTile('100%', 'Sync Rate', const Color(0xFF40C4FF)),
+                _buildStatTile('100%', 'Sync Rate', const Color(0xFF38BDF8)),
               ],
             ),
 
@@ -1177,18 +843,18 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B),
+                color: const Color(0xFF131C2E),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                border: Border.all(color: const Color(0xFF1C2740)),
               ),
               child: Column(
                 children: [
                   _buildProfileRow('Badge ID', 'VOL-WP-2026-084'),
-                  const Divider(color: Color(0xFF1E293B), height: 24),
+                  const Divider(color: Color(0xFF1C2740), height: 24),
                   _buildProfileRow('Division', 'Kolonnawa / Colombo East'),
-                  const Divider(color: Color(0xFF1E293B), height: 24),
+                  const Divider(color: Color(0xFF1C2740), height: 24),
                   _buildProfileRow('Emergency Role', 'Flood Scout & Water Gauge'),
-                  const Divider(color: Color(0xFF1E293B), height: 24),
+                  const Divider(color: Color(0xFF1C2740), height: 24),
                   _buildProfileRow('Affiliation', 'DMC Community Network'),
                 ],
               ),
@@ -1204,14 +870,14 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF131B2B),
+          color: const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF1E293B)),
+          border: Border.all(color: const Color(0xFF1C2740)),
         ),
         child: Column(
           children: [
             Text(
-              count,
+              tr(count),
               style: TextStyle(
                 color: color,
                 fontSize: 22,
@@ -1220,8 +886,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              label,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11.5),
+              tr(label),
+              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11.5),
             ),
           ],
         ),
@@ -1233,8 +899,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(child: Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5))),
-        Flexible(child: Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5))),
+        Flexible(child: Text(tr(label), style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13.5))),
+        Flexible(child: Text(tr(value), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5))),
       ],
     );
   }
@@ -1292,9 +958,9 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [
-                Color(0xFFFFB300), // Rich amber gold
+                Color(0xFFFBBF24), // Rich amber gold
                 Color(0xFFFF8F00), // Vibrant amber
-                Color(0xFFFF6D00), // Deep energetic orange
+                Color(0xFF38BDF8), // Deep energetic orange
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -1302,7 +968,7 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF6D00).withValues(alpha: 0.42),
+                color: const Color(0xFF38BDF8).withValues(alpha: 0.42),
                 blurRadius: 30,
                 offset: const Offset(0, 14),
                 spreadRadius: -2,
@@ -1375,8 +1041,8 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
               const SizedBox(height: 20),
 
               // Title: "REPORT HAZARD"
-              const Text(
-                'REPORT HAZARD',
+              Text(
+                tr('REPORT HAZARD'),
                 style: TextStyle(
                   color: Color(0xFF140D07), // Deep dark bold text
                   fontSize: 24,
@@ -1388,8 +1054,8 @@ class _ReportHazardHeroCardState extends State<_ReportHazardHeroCard>
               const SizedBox(height: 6),
 
               // Subtitle: "Tap to report in 3 simple steps"
-              const Text(
-                'Tap to report in 3 simple steps',
+              Text(
+                tr('Tap to report in 3 simple steps'),
                 style: TextStyle(
                   color: Color(0xFF3E230B),
                   fontSize: 14.5,
@@ -1428,7 +1094,7 @@ class _RecentReportCard extends StatelessWidget {
         color: const Color(0xFF111B2E), // Dark navy card
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C2740),
           width: 1,
         ),
         boxShadow: [
@@ -1475,7 +1141,7 @@ class _RecentReportCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        report.title,
+                        tr(report.title),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -1488,7 +1154,7 @@ class _RecentReportCard extends StatelessWidget {
                       Text(
                         '${report.location} • ${report.timeAgo}',
                         style: const TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                         ),
@@ -1502,31 +1168,31 @@ class _RecentReportCard extends StatelessWidget {
                 const SizedBox(width: 10),
 
                 // Status Chip: VERIFIED or PENDING
-                Container(
+                Flexible(child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: isVerified
-                        ? const Color(0xFF00E676).withValues(alpha: 0.12)
-                        : const Color(0xFFFFB300).withValues(alpha: 0.12),
+                        ? const Color(0xFF34D399).withValues(alpha: 0.12)
+                        : const Color(0xFFFBBF24).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color: isVerified
-                          ? const Color(0xFF00E676).withValues(alpha: 0.3)
-                          : const Color(0xFFFFB300).withValues(alpha: 0.3),
+                          ? const Color(0xFF34D399).withValues(alpha: 0.3)
+                          : const Color(0xFFFBBF24).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
                     report.status.toUpperCase(),
                     style: TextStyle(
                       color: isVerified
-                          ? const Color(0xFF00E676)
-                          : const Color(0xFFFFB300),
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFFFBBF24),
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
                     ),
                   ),
-                ),
+                )),
               ],
             ),
           ),
@@ -1534,26 +1200,4 @@ class _RecentReportCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PinArrowPainter extends CustomPainter {
-  final Color color;
-  const _PinArrowPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _PinArrowPainter oldDelegate) =>
-      oldDelegate.color != color;
 }

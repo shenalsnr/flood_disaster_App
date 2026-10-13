@@ -9,6 +9,7 @@ import 'package:flood_disaster/features/component2_reporting/data/services/offli
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/offline_draft_management_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Component 2: Hazard Community Reporter - Admin Dashboard
 /// Implements full Hazard Report Management CRUD:
 /// - CREATE: Submit new hazard reports (+ New Report button & Quick Create form)
@@ -58,19 +59,19 @@ class _C2AdminHazardDashboardScreenState
 
   Color _colorForHazard(String hazard) {
     final lower = hazard.toLowerCase();
-    if (lower.contains('flood')) return const Color(0xFF40C4FF);
-    if (lower.contains('landslide')) return const Color(0xFFFFB300);
-    if (lower.contains('tree')) return const Color(0xFF22C55E);
-    return const Color(0xFFFF5252);
+    if (lower.contains('flood')) return const Color(0xFF38BDF8);
+    if (lower.contains('landslide')) return const Color(0xFFFBBF24);
+    if (lower.contains('tree')) return const Color(0xFF34D399);
+    return const Color(0xFFF87171);
   }
 
   Color _colorForSeverity(String severity) {
     final upper = severity.toUpperCase();
     if (upper.contains('CRITICAL') || upper.contains('HIGH')) {
-      return const Color(0xFFFF3B3B);
+      return const Color(0xFFF87171);
     }
-    if (upper.contains('MEDIUM')) return const Color(0xFFFF9F0A);
-    return const Color(0xFF00E676);
+    if (upper.contains('MEDIUM')) return const Color(0xFFFB923C);
+    return const Color(0xFF34D399);
   }
 
   // ===========================================================================
@@ -91,7 +92,7 @@ class _C2AdminHazardDashboardScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -121,12 +122,12 @@ class _C2AdminHazardDashboardScreenState
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.add_circle_rounded, color: Color(0xFFFF9F0A), size: 24),
+                      Icon(Icons.add_circle_rounded, color: Color(0xFFFB923C), size: 24),
                       SizedBox(width: 10),
                       Flexible(child: Text(
-                        'Admin: Create Hazard Report',
+                        tr('Admin: Create Hazard Report'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -138,8 +139,8 @@ class _C2AdminHazardDashboardScreenState
                   const SizedBox(height: 18),
 
                   // Hazard Type Dropdown
-                  const Text('HAZARD TYPE',
-                      style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text(tr('HAZARD TYPE'),
+                      style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -155,7 +156,7 @@ class _C2AdminHazardDashboardScreenState
                         isExpanded: true,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         items: ['Flash Flood', 'Landslide', 'Fallen Tree', 'Road Blocked']
-                            .map((h) => DropdownMenuItem(value: h, child: Text(h)))
+                            .map((h) => DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis)))
                             .toList(),
                         onChanged: (val) {
                           if (val != null) setModalState(() => hazardType = val);
@@ -166,8 +167,8 @@ class _C2AdminHazardDashboardScreenState
                   const SizedBox(height: 14),
 
                   // Severity Dropdown
-                  const Text('SEVERITY LEVEL',
-                      style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text(tr('SEVERITY LEVEL'),
+                      style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -183,7 +184,7 @@ class _C2AdminHazardDashboardScreenState
                         isExpanded: true,
                         style: TextStyle(color: _colorForSeverity(severity), fontWeight: FontWeight.bold),
                         items: ['LOW SEVERITY', 'MEDIUM SEVERITY', 'HIGH / CRITICAL']
-                            .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                            .map((s) => DropdownMenuItem(value: s, child: Text(tr(s), maxLines: 1, overflow: TextOverflow.ellipsis)))
                             .toList(),
                         onChanged: (val) {
                           if (val != null) setModalState(() => severity = val);
@@ -194,8 +195,8 @@ class _C2AdminHazardDashboardScreenState
                   const SizedBox(height: 14),
 
                   // Location
-                  const Text('LOCATION / SECTOR',
-                      style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text(tr('LOCATION / SECTOR'),
+                      style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: locationCtrl,
@@ -209,8 +210,8 @@ class _C2AdminHazardDashboardScreenState
                   const SizedBox(height: 14),
 
                   // Description
-                  const Text('HAZARD DESCRIPTION',
-                      style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text(tr('HAZARD DESCRIPTION'),
+                      style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: descCtrl,
@@ -230,7 +231,7 @@ class _C2AdminHazardDashboardScreenState
                     height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF9F0A),
+                        backgroundColor: const Color(0xFFFB923C),
                         foregroundColor: const Color(0xFF140D07),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
@@ -258,12 +259,12 @@ class _C2AdminHazardDashboardScreenState
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Created and published new $hazardType report!'),
-                            backgroundColor: const Color(0xFF00E676),
+                            content: Text(tr('Created and published new {p0} report!', {'p0': (hazardType).toString()})),
+                            backgroundColor: const Color(0xFF34D399),
                           ),
                         );
                       },
-                      child: const Text('BROADCAST HAZARD REPORT',
+                      child: Text(tr('BROADCAST HAZARD REPORT'),
                           style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5)),
                     ),
                   ),
@@ -342,7 +343,7 @@ class _C2AdminHazardDashboardScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        hazard,
+                        tr(hazard),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -351,13 +352,13 @@ class _C2AdminHazardDashboardScreenState
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        timeStr,
-                        style: const TextStyle(color: Color(0xFF8B9BB4), fontSize: 12),
+                        tr(timeStr),
+                        style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 12),
                       ),
                     ],
                   ),
                 ),
-                Container(
+                Flexible(child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: _colorForSeverity(severity).withValues(alpha: 0.15),
@@ -365,14 +366,14 @@ class _C2AdminHazardDashboardScreenState
                     border: Border.all(color: _colorForSeverity(severity).withValues(alpha: 0.4)),
                   ),
                   child: Text(
-                    severity,
+                    tr(severity),
                     style: TextStyle(
                       color: _colorForSeverity(severity),
                       fontSize: 10.5,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
+                )),
               ],
             ),
 
@@ -417,7 +418,7 @@ class _C2AdminHazardDashboardScreenState
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF152238),
-                      foregroundColor: const Color(0xFF40C4FF),
+                      foregroundColor: const Color(0xFF38BDF8),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -425,7 +426,7 @@ class _C2AdminHazardDashboardScreenState
                       ),
                     ),
                     icon: const Icon(Icons.edit_rounded, size: 18),
-                    label: const Text('EDIT (UPDATE)', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(tr('EDIT (UPDATE)'), style: TextStyle(fontWeight: FontWeight.bold)),
                     onPressed: () {
                       Navigator.pop(ctx);
                       _openUpdateReportModal(doc);
@@ -437,7 +438,7 @@ class _C2AdminHazardDashboardScreenState
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2A1218),
-                      foregroundColor: const Color(0xFFFF5252),
+                      foregroundColor: const Color(0xFFF87171),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -445,7 +446,7 @@ class _C2AdminHazardDashboardScreenState
                       ),
                     ),
                     icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                    label: const Text('DELETE', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(tr('DELETE'), style: TextStyle(fontWeight: FontWeight.bold)),
                     onPressed: () {
                       Navigator.pop(ctx);
                       _confirmDeleteReport(doc.id, hazard, location);
@@ -475,7 +476,7 @@ class _C2AdminHazardDashboardScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -503,12 +504,12 @@ class _C2AdminHazardDashboardScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.edit_note_rounded, color: Color(0xFF40C4FF), size: 26),
+                    Icon(Icons.edit_note_rounded, color: Color(0xFF38BDF8), size: 26),
                     SizedBox(width: 10),
                     Flexible(child: Text(
-                      'Update Hazard Report',
+                      tr('Update Hazard Report'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -520,8 +521,8 @@ class _C2AdminHazardDashboardScreenState
                 const SizedBox(height: 18),
 
                 // Hazard Type
-                const Text('HAZARD TYPE',
-                    style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(tr('HAZARD TYPE'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -537,7 +538,7 @@ class _C2AdminHazardDashboardScreenState
                       isExpanded: true,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       items: ['Flash Flood', 'Landslide', 'Fallen Tree', 'Road Blocked']
-                          .map((h) => DropdownMenuItem(value: h, child: Text(h)))
+                          .map((h) => DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setModalState(() => hazardType = val);
@@ -548,8 +549,8 @@ class _C2AdminHazardDashboardScreenState
                 const SizedBox(height: 14),
 
                 // Severity
-                const Text('SEVERITY LEVEL',
-                    style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(tr('SEVERITY LEVEL'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -565,7 +566,7 @@ class _C2AdminHazardDashboardScreenState
                       isExpanded: true,
                       style: TextStyle(color: _colorForSeverity(severity), fontWeight: FontWeight.bold),
                       items: ['LOW SEVERITY', 'MEDIUM SEVERITY', 'HIGH / CRITICAL']
-                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                          .map((s) => DropdownMenuItem(value: s, child: Text(tr(s), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setModalState(() => severity = val);
@@ -576,8 +577,8 @@ class _C2AdminHazardDashboardScreenState
                 const SizedBox(height: 14),
 
                 // Status
-                const Text('REPORT STATUS',
-                    style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(tr('REPORT STATUS'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -591,9 +592,9 @@ class _C2AdminHazardDashboardScreenState
                       value: status,
                       dropdownColor: const Color(0xFF162032),
                       isExpanded: true,
-                      style: const TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Color(0xFF34D399), fontWeight: FontWeight.bold),
                       items: ['VERIFIED', 'PENDING REVIEW', 'RESOLVED', 'REJECTED']
-                          .map((st) => DropdownMenuItem(value: st, child: Text(st)))
+                          .map((st) => DropdownMenuItem(value: st, child: Text(tr(st), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setModalState(() => status = val);
@@ -604,8 +605,8 @@ class _C2AdminHazardDashboardScreenState
                 const SizedBox(height: 14),
 
                 // Location
-                const Text('LOCATION',
-                    style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(tr('LOCATION'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: locationCtrl,
@@ -619,8 +620,8 @@ class _C2AdminHazardDashboardScreenState
                 const SizedBox(height: 14),
 
                 // Description
-                const Text('DESCRIPTION / NOTE',
-                    style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(tr('DESCRIPTION / NOTE'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: descCtrl,
@@ -640,7 +641,7 @@ class _C2AdminHazardDashboardScreenState
                   height: 52,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00E676),
+                      backgroundColor: const Color(0xFF34D399),
                       foregroundColor: const Color(0xFF060B14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -658,13 +659,13 @@ class _C2AdminHazardDashboardScreenState
                       Navigator.pop(ctx);
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Hazard report updated successfully!'),
-                          backgroundColor: Color(0xFF00E676),
+                        SnackBar(
+                          content: Text(tr('Hazard report updated successfully!')),
+                          backgroundColor: Color(0xFF34D399),
                         ),
                       );
                     },
-                    child: const Text('SAVE CHANGES', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+                    child: Text(tr('SAVE CHANGES'), style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
                   ),
                 ),
               ],
@@ -682,30 +683,30 @@ class _C2AdminHazardDashboardScreenState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF334155)),
+          side: const BorderSide(color: Color(0xFF2B3A55)),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Color(0xFFFF5252), size: 26),
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFF87171), size: 26),
             SizedBox(width: 10),
-            Flexible(child: Text('Confirm Deletion', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+            Flexible(child: Text(tr('Confirm Deletion'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
           ],
         ),
         content: Text(
-          'Are you sure you want to permanently delete the "$hazard" report at "$location"?\n\nThis action cannot be undone.',
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14, height: 1.4),
+          tr('Are you sure you want to permanently delete the "{p0}" report at "{p1}"?\n\nThis action cannot be undone.', {'p0': (hazard).toString(), 'p1': (location).toString()}),
+          style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 14, height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text(tr('Cancel'), style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFFFF5252),
+              backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -716,21 +717,21 @@ class _C2AdminHazardDashboardScreenState
                 await FirebaseFirestore.instance.collection('hazard_reports').doc(docId).delete();
                 if (mounted) {
                   scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('Hazard report permanently deleted.'),
-                      backgroundColor: Color(0xFFFF5252),
+                    SnackBar(
+                      content: Text(tr('Hazard report permanently deleted.')),
+                      backgroundColor: Color(0xFFDC2626),
                     ),
                   );
                 }
               } catch (e) {
                 if (mounted) {
                   scaffoldMessenger.showSnackBar(
-                    SnackBar(content: Text('Delete failed: $e'), backgroundColor: Colors.red),
+                    SnackBar(content: Text(tr('Delete failed: {p0}', {'p0': (e).toString()})), backgroundColor: Colors.red),
                   );
                 }
               }
             },
-            child: const Text('Delete Report', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(tr('Delete Report'), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -741,15 +742,15 @@ class _C2AdminHazardDashboardScreenState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: const Color(0xFF8B9BB4), size: 18),
+        Icon(icon, color: const Color(0xFFB6C2D6), size: 18),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: Color(0xFF8B9BB4), fontSize: 11.5, fontWeight: FontWeight.w600)),
+              Text(tr(label), style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11.5, fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
-              Text(value, style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.3)),
+              Text(tr(value), style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.3)),
             ],
           ),
         ),
@@ -783,24 +784,24 @@ class _C2AdminHazardDashboardScreenState
               ),
             ),
           ),
-          title: const Column(
+          title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hazard Operations Console',
+                tr('Hazard Operations Console'),
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
               ),
               Text(
-                'Component 2 • Hazard Report Management (CRUD)',
-                style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 11, fontWeight: FontWeight.w500),
+                tr('Component 2 • Hazard Report Management (CRUD)'),
+                style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11, fontWeight: FontWeight.w500),
               ),
             ],
-          ),
+          )),
           actions: [
             const ThemeToggleButton(),
             IconButton(
-              tooltip: 'Offline & Draft Reports (SQLite)',
-              icon: const Icon(Icons.storage_rounded, color: Color(0xFFFF9F0A)),
+              tooltip: tr('Offline & Draft Reports (SQLite)'),
+              icon: const Icon(Icons.storage_rounded, color: Color(0xFFFB923C)),
               onPressed: () async {
                 await Navigator.push(
                   context,
@@ -814,8 +815,8 @@ class _C2AdminHazardDashboardScreenState
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: IconButton(
-                tooltip: 'Refresh & Auto-Sync',
-                icon: const Icon(Icons.refresh_rounded, color: Color(0xFF40C4FF)),
+                tooltip: tr('Refresh & Auto-Sync'),
+                icon: const Icon(Icons.refresh_rounded, color: Color(0xFF38BDF8)),
                 onPressed: () {
                   OfflineReportService.instance.autoSyncPendingReports();
                   setState(() {});
@@ -842,19 +843,19 @@ class _C2AdminHazardDashboardScreenState
                 onChanged: (val) => setState(() => _searchQuery = val.toLowerCase().trim()),
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'Search by hazard, location or notes...',
-                  hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF8B9BB4), size: 20),
+                  hintText: tr('Search by hazard, location or notes...'),
+                  hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
+                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFB6C2D6), size: 20),
                   filled: true,
-                  fillColor: const Color(0xFF131B2B),
+                  fillColor: const Color(0xFF131C2E),
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                    borderSide: const BorderSide(color: Color(0xFF1C2740)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                    borderSide: const BorderSide(color: Color(0xFF1C2740)),
                   ),
                 ),
               ),
@@ -873,18 +874,18 @@ class _C2AdminHazardDashboardScreenState
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      label: Text(tab),
+                      label: Text(tr(tab)),
                       selected: isSelected,
                       onSelected: (_) => setState(() => _selectedFilter = tab),
-                      backgroundColor: const Color(0xFF070B14),
-                      selectedColor: const Color(0xFFFF9F0A).withValues(alpha: 0.2),
+                      backgroundColor: const Color(0xFF0B1220),
+                      selectedColor: const Color(0xFFFB923C).withValues(alpha: 0.2),
                       labelStyle: TextStyle(
-                        color: isSelected ? const Color(0xFFFF9F0A) : const Color(0xFF8B9BB4),
+                        color: isSelected ? const Color(0xFFFB923C) : const Color(0xFFB6C2D6),
                         fontSize: 11.5,
                         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                       ),
                       side: BorderSide(
-                        color: isSelected ? const Color(0xFFFF9F0A) : const Color(0xFF1E293B),
+                        color: isSelected ? const Color(0xFFFB923C) : const Color(0xFF1C2740),
                       ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -904,7 +905,7 @@ class _C2AdminHazardDashboardScreenState
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(color: Color(0xFFFF9F0A)),
+                      child: CircularProgressIndicator(color: Color(0xFFFB923C)),
                     );
                   }
 
@@ -944,18 +945,18 @@ class _C2AdminHazardDashboardScreenState
                         children: [
                           Icon(Icons.inbox_rounded, color: Colors.white.withValues(alpha: 0.2), size: 64),
                           const SizedBox(height: 12),
-                          const Text(
-                            'No matching hazard reports found',
-                            style: TextStyle(color: Color(0xFF8B9BB4), fontSize: 15),
+                          Text(
+                            tr('No matching hazard reports found'),
+                            style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 15),
                           ),
                           const SizedBox(height: 14),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF9F0A),
+                              backgroundColor: const Color(0xFFFB923C),
                               foregroundColor: const Color(0xFF140D07),
                             ),
                             icon: const Icon(Icons.add),
-                            label: const Text('Create New Report'),
+                            label: Text(tr('Create New Report')),
                             onPressed: _openCreateReportModal,
                           ),
                         ],
@@ -982,9 +983,9 @@ class _C2AdminHazardDashboardScreenState
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF131B2B),
+                          color: const Color(0xFF131C2E),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFF1E293B)),
+                          border: Border.all(color: const Color(0xFF1C2740)),
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -1021,7 +1022,7 @@ class _C2AdminHazardDashboardScreenState
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                hazard,
+                                                tr(hazard),
                                                 style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 16,
@@ -1030,20 +1031,20 @@ class _C2AdminHazardDashboardScreenState
                                               ),
                                             ),
                                             Flexible(child: Text(
-                                              timeStr,
-                                              style: const TextStyle(color: Color(0xFF8B9BB4), fontSize: 11),
+                                              tr(timeStr),
+                                              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
                                             )),
                                           ],
                                         ),
                                         const SizedBox(height: 3),
                                         Text(
-                                          location,
-                                          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12.5),
+                                          tr(location),
+                                          style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 12.5),
                                         ),
                                         if (desc.isNotEmpty) ...[
                                           const SizedBox(height: 4),
                                           Text(
-                                            desc,
+                                            tr(desc),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
@@ -1054,37 +1055,37 @@ class _C2AdminHazardDashboardScreenState
                                         // Badges: Severity + Status
                                         Row(
                                           children: [
-                                            Container(
+                                            Flexible(child: Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                               decoration: BoxDecoration(
                                                 color: _colorForSeverity(severity).withValues(alpha: 0.15),
                                                 borderRadius: BorderRadius.circular(6),
                                               ),
                                               child: Text(
-                                                severity,
+                                                tr(severity),
                                                 style: TextStyle(
                                                   color: _colorForSeverity(severity),
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ),
+                                            )),
                                             const SizedBox(width: 8),
-                                            Container(
+                                            Flexible(child: Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                                color: const Color(0xFF34D399).withValues(alpha: 0.15),
                                                 borderRadius: BorderRadius.circular(6),
                                               ),
                                               child: Text(
-                                                status,
+                                                tr(status),
                                                 style: const TextStyle(
-                                                  color: Color(0xFF00E676),
+                                                  color: Color(0xFF34D399),
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ),
+                                            )),
                                           ],
                                         ),
                                       ],
@@ -1093,7 +1094,7 @@ class _C2AdminHazardDashboardScreenState
 
                                   // Quick Edit & Delete icons
                                   PopupMenuButton<String>(
-                                    icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF8B9BB4), size: 20),
+                                    icon: const Icon(Icons.more_vert_rounded, color: Color(0xFFB6C2D6), size: 20),
                                     color: const Color(0xFF162032),
                                     onSelected: (action) {
                                       if (action == 'view') {
@@ -1105,33 +1106,36 @@ class _C2AdminHazardDashboardScreenState
                                       }
                                     },
                                     itemBuilder: (_) => [
-                                      const PopupMenuItem(
+                                      PopupMenuItem(
                                         value: 'view',
                                         child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(Icons.visibility_rounded, color: Colors.white70, size: 18),
                                             SizedBox(width: 8),
-                                            Text('Inspect (Read)', style: TextStyle(color: Colors.white)),
+                                            Flexible(child: Text(tr('Inspect (Read)'), style: TextStyle(color: Colors.white))),
                                           ],
                                         ),
                                       ),
-                                      const PopupMenuItem(
+                                      PopupMenuItem(
                                         value: 'edit',
                                         child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.edit_rounded, color: Color(0xFF40C4FF), size: 18),
+                                            Icon(Icons.edit_rounded, color: Color(0xFF38BDF8), size: 18),
                                             SizedBox(width: 8),
-                                            Text('Edit (Update)', style: TextStyle(color: Colors.white)),
+                                            Flexible(child: Text(tr('Edit (Update)'), style: TextStyle(color: Colors.white))),
                                           ],
                                         ),
                                       ),
-                                      const PopupMenuItem(
+                                      PopupMenuItem(
                                         value: 'delete',
                                         child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.delete_outline_rounded, color: Color(0xFFFF5252), size: 18),
+                                            Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171), size: 18),
                                             SizedBox(width: 8),
-                                            Text('Delete', style: TextStyle(color: Color(0xFFFF5252))),
+                                            Flexible(child: Text(tr('Delete'), style: TextStyle(color: Color(0xFFF87171)))),
                                           ],
                                         ),
                                       ),
@@ -1154,11 +1158,11 @@ class _C2AdminHazardDashboardScreenState
 
       // ── Floating Action Button: + CREATE REPORT ───────────────────────────
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFF9F0A),
+        backgroundColor: const Color(0xFFFB923C),
         foregroundColor: const Color(0xFF140D07),
         icon: const Icon(Icons.add_rounded, size: 22),
-        label: const Text(
-          'CREATE REPORT',
+        label: Text(
+          tr('CREATE REPORT'),
           style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
         onPressed: _openCreateReportModal,
@@ -1187,20 +1191,20 @@ class _C2AdminHazardDashboardScreenState
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E293B)),
+            border: Border.all(color: const Color(0xFF1C2740)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMiniMetric('$total', 'Total', const Color(0xFF40C4FF)),
-              Container(width: 1, height: 30, color: const Color(0xFF1E293B)),
-              _buildMiniMetric('$critical', 'Critical', const Color(0xFFFF3B3B)),
-              Container(width: 1, height: 30, color: const Color(0xFF1E293B)),
-              _buildMiniMetric('$verified', 'Verified', const Color(0xFF00E676)),
-              Container(width: 1, height: 30, color: const Color(0xFF1E293B)),
-              _buildMiniMetric('$offlinePending', 'Offline Q', const Color(0xFFFF9F0A)),
+              _buildMiniMetric('$total', 'Total', const Color(0xFF38BDF8)),
+              Container(width: 1, height: 30, color: const Color(0xFF1C2740)),
+              _buildMiniMetric('$critical', 'Critical', const Color(0xFFF87171)),
+              Container(width: 1, height: 30, color: const Color(0xFF1C2740)),
+              _buildMiniMetric('$verified', 'Verified', const Color(0xFF34D399)),
+              Container(width: 1, height: 30, color: const Color(0xFF1C2740)),
+              _buildMiniMetric('$offlinePending', 'Offline Q', const Color(0xFFFB923C)),
             ],
           ),
         );
@@ -1235,15 +1239,15 @@ class _C2AdminHazardDashboardScreenState
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF1E293B),
-                  const Color(0xFF131B2B),
+                  const Color(0xFF1C2740),
+                  const Color(0xFF131C2E),
                 ],
               ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: pending > 0
-                    ? const Color(0xFFFF9F0A).withValues(alpha: 0.5)
-                    : const Color(0xFF334155),
+                    ? const Color(0xFFFB923C).withValues(alpha: 0.5)
+                    : const Color(0xFF2B3A55),
                 width: 1.2,
               ),
             ),
@@ -1252,12 +1256,12 @@ class _C2AdminHazardDashboardScreenState
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.15),
+                    color: const Color(0xFFFB923C).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.storage_rounded,
-                    color: Color(0xFFFF9F0A),
+                    color: Color(0xFFFB923C),
                     size: 18,
                   ),
                 ),
@@ -1269,7 +1273,7 @@ class _C2AdminHazardDashboardScreenState
                       Row(
                         children: [
                           Flexible(child: Text(
-                            'Offline Drafts & Queue (SQLite)',
+                            tr('Offline Drafts & Queue (SQLite)'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.5,
@@ -1282,11 +1286,11 @@ class _C2AdminHazardDashboardScreenState
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 1.5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFF9F0A),
+                                color: const Color(0xFFFB923C),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                '$pending PENDING',
+                                tr('{p0} PENDING', {'p0': (pending).toString()}),
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 8.5,
@@ -1299,42 +1303,42 @@ class _C2AdminHazardDashboardScreenState
                       ),
                       const SizedBox(height: 1),
                       Text(
-                        '$pending queued for cloud sync • $drafts saved drafts • SQLite Active',
+                        tr('{p0} queued for cloud sync • {p1} saved drafts • SQLite Active', {'p0': (pending).toString(), 'p1': (drafts).toString()}),
                         style: const TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 10.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Container(
+                Flexible(child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF40C4FF).withValues(alpha: 0.12),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFF40C4FF).withValues(alpha: 0.3),
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
-                      Text(
-                        'MANAGE',
+                      Flexible(child: Text(
+                        tr('MANAGE'),
                         style: TextStyle(
-                          color: Color(0xFF40C4FF),
+                          color: Color(0xFF38BDF8),
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
                         ),
-                      ),
+                      )),
                       SizedBox(width: 3),
                       Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xFF40C4FF), size: 10),
+                          color: Color(0xFF38BDF8), size: 10),
                     ],
                   ),
-                ),
+                )),
               ],
             ),
           ),
@@ -1347,13 +1351,13 @@ class _C2AdminHazardDashboardScreenState
     return Column(
       children: [
         Text(
-          count,
+          tr(count),
           style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 2),
         Text(
-          label,
-          style: const TextStyle(color: Color(0xFF8B9BB4), fontSize: 10.5, fontWeight: FontWeight.w600),
+          tr(label),
+          style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 10.5, fontWeight: FontWeight.w600),
         ),
       ],
     );

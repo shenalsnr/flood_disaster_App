@@ -4,6 +4,7 @@ import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
 import 'alert_dashboard_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class ResolveAnalysisScreen extends StatefulWidget {
   final IncidentReport incident;
 
@@ -101,21 +102,21 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
       builder: (ctx) => ScaleTransition(
         scale: _checkmarkAnimation,
         child: AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.verified, color: Color(0xFF00E676), size: 28),
+                child: const Icon(Icons.verified, color: Color(0xFF34D399), size: 28),
               ),
               const SizedBox(width: 10),
               Flexible(child: Text(
-                'Incident Resolved',
+                tr('Incident Resolved'),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -129,39 +130,39 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Incident #${widget.incident.shortId} has been formally closed and marked resolved in National DMC database.',
+                tr('Incident #{p0} has been formally closed and marked resolved in National DMC database.', {'p0': (widget.incident.shortId).toString()}),
                 style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF2B3A55)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'RESOLUTION OUTCOME: $_resolutionType',
+                      tr('RESOLUTION OUTCOME: {p0}', {'p0': (_resolutionType).toString()}),
                       style: const TextStyle(
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Evacuated to Shelter: $_evacuatedCount Citizens',
+                      tr('Evacuated to Shelter: {p0} Citizens', {'p0': (_evacuatedCount).toString()}),
                       style:
                           const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Lead Squad: ${widget.incident.assignedTeam?.name ?? "No unit assigned"}',
+                      tr('Lead Squad: {p0}', {'p0': (widget.incident.assignedTeam?.name ?? "No unit assigned").toString()}),
                       style: const TextStyle(
-                          color: Color(0xFF94A3B8), fontSize: 11),
+                          color: Color(0xFFB6C2D6), fontSize: 11),
                     ),
                   ],
                 ),
@@ -171,8 +172,8 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF38BDF8),
+                foregroundColor: const Color(0xFF06121F),
               ),
               onPressed: () {
                 Navigator.of(ctx).pop();
@@ -183,7 +184,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   (route) => false,
                 );
               },
-              child: const Text('RETURN TO TRIAGE DASHBOARD'),
+              child: Text(tr('RETURN TO TRIAGE DASHBOARD')),
             ),
           ],
         ),
@@ -196,27 +197,27 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
     final incident = widget.incident;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Close & Resolve Incident',
+              tr('Close & Resolve Incident'),
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(
-              'CRUD: Delete • Formal Incident Closure',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+              tr('CRUD: Delete • Formal Incident Closure'),
+              style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
-        ),
+        )),
       ),
       body: SafeArea(
         child: FadeTransition(
@@ -235,7 +236,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                     gradient: LinearGradient(
                       colors: [
                         const Color(0xFF10B981).withValues(alpha: 0.06),
-                        const Color(0xFF131B2B),
+                        const Color(0xFF131C2E),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -258,30 +259,30 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
+                          Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF40C4FF).withValues(alpha: 0.1),
+                                  color: const Color(0xFF38BDF8).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.assignment, color: Color(0xFF40C4FF), size: 16),
+                                child: const Icon(Icons.assignment, color: Color(0xFF38BDF8), size: 16),
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                              Flexible(child: Text(
                                 '#${incident.shortId}',
                                 style: const TextStyle(
-                                  color: Color(0xFF40C4FF),
+                                  color: Color(0xFF38BDF8),
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.0,
                                   fontFamily: 'monospace',
                                 ),
-                              ),
+                              )),
                             ],
-                          ),
-                          Container(
+                          )),
+                          Flexible(child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
@@ -291,13 +292,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 color: const Color(0xFF10B981).withValues(alpha: 0.5),
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.check_circle, color: Color(0xFF10B981), size: 12),
                                 SizedBox(width: 4),
                                 Text(
-                                  'READY TO RESOLVE',
+                                  tr('READY TO RESOLVE'),
                                   style: TextStyle(
                                     color: Color(0xFF10B981),
                                     fontSize: 10,
@@ -306,12 +307,12 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 ),
                               ],
                             ),
-                          ),
+                          )),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        incident.title,
+                        tr(incident.title),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -321,13 +322,13 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.location_on, color: Color(0xFFFF6D00), size: 14),
+                          const Icon(Icons.location_on, color: Color(0xFF38BDF8), size: 14),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              incident.location,
+                              tr(incident.location),
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 12,
                               ),
                             ),
@@ -337,12 +338,12 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.groups_rounded, color: Color(0xFF64748B), size: 14),
+                          const Icon(Icons.groups_rounded, color: Color(0xFF8A98B0), size: 14),
                           const SizedBox(width: 4),
                           Flexible(child: Text(
-                            'Assigned: ${incident.assignedTeam?.name ?? "No unit assigned"}',
+                            tr('Assigned: {p0}', {'p0': (incident.assignedTeam?.name ?? "No unit assigned").toString()}),
                             style: const TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                             ),
                           )),
@@ -359,21 +360,21 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _resolutionType,
-                      dropdownColor: const Color(0xFF1E293B),
+                      dropdownColor: const Color(0xFF1C2740),
                       isExpanded: true,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
-                      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF64748B)),
+                      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF8A98B0)),
                       items: _resolutionOptions.map((opt) {
                         IconData icon;
                         switch (opt) {
@@ -396,9 +397,9 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                           value: opt,
                           child: Row(
                             children: [
-                              Icon(icon, color: const Color(0xFF40C4FF), size: 16),
+                              Icon(icon, color: const Color(0xFF38BDF8), size: 16),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(opt)),
+                              Expanded(child: Text(tr(opt))),
                             ],
                           ),
                         );
@@ -417,29 +418,29 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
+                    border: Border.all(color: const Color(0xFF1C2740)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.1),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.people_alt_rounded, color: Color(0xFF00E676), size: 20),
+                            child: const Icon(Icons.people_alt_rounded, color: Color(0xFF34D399), size: 20),
                           ),
                           const SizedBox(width: 12),
-                          const Column(
+                          Flexible(child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Evacuated Citizens',
+                                tr('Evacuated Citizens'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 13,
@@ -447,26 +448,26 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                                 ),
                               ),
                               Text(
-                                'Transferred to safe zone shelter',
+                                tr('Transferred to safe zone shelter'),
                                 style: TextStyle(
-                                  color: Color(0xFF64748B),
+                                  color: Color(0xFF8A98B0),
                                   fontSize: 11,
                                 ),
                               ),
                             ],
-                          ),
+                          )),
                         ],
-                      ),
-                      Container(
+                      )),
+                      Flexible(child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
+                          color: const Color(0xFF1C2740),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Row(
+                        child: Row(mainAxisSize: MainAxisSize.min, 
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove_circle_outline,
-                                  color: Color(0xFFFF6D00), size: 22),
+                                  color: Color(0xFF38BDF8), size: 22),
                               onPressed: () {
                                 if (_evacuatedCount > 0) {
                                   setState(() => _evacuatedCount--);
@@ -489,14 +490,14 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                             ),
                             IconButton(
                               icon: const Icon(Icons.add_circle_outline,
-                                  color: Color(0xFFFF6D00), size: 22),
+                                  color: Color(0xFF38BDF8), size: 22),
                               onPressed: () {
                                 setState(() => _evacuatedCount++);
                               },
                             ),
                           ],
                         ),
-                      ),
+                      )),
                     ],
                   ),
                 ),
@@ -511,21 +512,21 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF131B2B),
-                    hintText: 'Enter formal dispatch resolution notes...',
+                    fillColor: const Color(0xFF131C2E),
+                    hintText: tr('Enter formal dispatch resolution notes...'),
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+                          const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
                     ),
                   ),
                 ),
@@ -536,38 +537,38 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 _buildSectionTitle('MANDATORY RESOLUTION CHECKLIST'),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
+                    border: Border.all(color: const Color(0xFF1C2740)),
                   ),
                   child: Column(
                     children: [
                       _buildChecklistTile(
-                        title: 'All affected citizens in sector accounted for',
+                        title: tr('All affected citizens in sector accounted for'),
                         icon: Icons.people_outline,
                         value: _checklistNotified,
                         onChanged: (v) =>
                             setState(() => _checklistNotified = v ?? false),
                       ),
-                      const Divider(color: Color(0xFF1E293B), height: 1),
+                      const Divider(color: Color(0xFF1C2740), height: 1),
                       _buildChecklistTile(
-                        title: 'Area secured by local municipal / DMC teams',
+                        title: tr('Area secured by local municipal / DMC teams'),
                         icon: Icons.security,
                         value: _checklistAreaSecured,
                         onChanged: (v) =>
                             setState(() => _checklistAreaSecured = v ?? false),
                       ),
-                      const Divider(color: Color(0xFF1E293B), height: 1),
+                      const Divider(color: Color(0xFF1C2740), height: 1),
                       _buildChecklistTile(
-                        title: 'Structural integrity of drain / road evaluated',
+                        title: tr('Structural integrity of drain / road evaluated'),
                         icon: Icons.engineering,
                         value: _checklistStructuralEvaluated,
                         onChanged: (v) => setState(
                             () => _checklistStructuralEvaluated = v ?? false),
                       ),
-                      const Divider(color: Color(0xFF1E293B), height: 1),
+                      const Divider(color: Color(0xFF1C2740), height: 1),
                       _buildChecklistTile(
-                        title: 'Relief camp notified of arriving evacuees',
+                        title: tr('Relief camp notified of arriving evacuees'),
                         icon: Icons.night_shelter,
                         value: _checklistCampNotified,
                         onChanged: (v) =>
@@ -587,21 +588,21 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00E676).withValues(alpha: 0.1),
+                            color: const Color(0xFF34D399).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.3),
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.check_circle, color: Color(0xFF00E676), size: 14),
+                              Icon(Icons.check_circle, color: Color(0xFF34D399), size: 14),
                               SizedBox(width: 6),
                               Text(
-                                'All protocol checks complete',
+                                tr('All protocol checks complete'),
                                 style: TextStyle(
-                                  color: Color(0xFF00E676),
+                                  color: Color(0xFF34D399),
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -618,14 +619,14 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                 // Final Action Button with loading state
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00E676),
+                    backgroundColor: const Color(0xFF34D399),
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 6,
-                    shadowColor: const Color(0xFF00E676).withValues(alpha: 0.4),
+                    shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
                   ),
                   icon: _isSubmitting
                       ? const SizedBox(
@@ -639,8 +640,8 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
                       : const Icon(Icons.check_circle_rounded, size: 22),
                   label: Text(
                     _isSubmitting
-                        ? 'SUBMITTING RESOLUTION...'
-                        : 'MARK INCIDENT AS RESOLVED',
+                        ? tr('SUBMITTING RESOLUTION...')
+                        : tr('MARK INCIDENT AS RESOLVED'),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
@@ -663,9 +664,9 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
-        title,
+        tr(title),
         style: const TextStyle(
-          color: Color(0xFF94A3B8),
+          color: Color(0xFFB6C2D6),
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -688,7 +689,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
           children: [
             Checkbox(
               value: value,
-              activeColor: const Color(0xFF00E676),
+              activeColor: const Color(0xFF34D399),
               checkColor: Colors.black,
               onChanged: onChanged,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -696,15 +697,15 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
             ),
             Icon(
               icon,
-              color: value ? const Color(0xFF00E676) : const Color(0xFF475569),
+              color: value ? const Color(0xFF34D399) : const Color(0xFF475569),
               size: 16,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                title,
+                tr(title),
                 style: TextStyle(
-                  color: value ? Colors.white : const Color(0xFF64748B),
+                  color: value ? Colors.white : const Color(0xFF8A98B0),
                   fontSize: 12,
                   fontWeight: value ? FontWeight.w600 : FontWeight.normal,
                   decoration: value ? TextDecoration.none : null,
@@ -712,7 +713,7 @@ class _ResolveAnalysisScreenState extends State<ResolveAnalysisScreen>
               ),
             ),
             if (value)
-              const Icon(Icons.check_circle, color: Color(0xFF00E676), size: 16),
+              const Icon(Icons.check_circle, color: Color(0xFF34D399), size: 16),
           ],
         ),
       ),

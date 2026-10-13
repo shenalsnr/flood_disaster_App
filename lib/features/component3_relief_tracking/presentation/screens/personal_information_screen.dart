@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +10,7 @@ import '../../../component4_control_center/presentation/controllers/responder_co
 import '../../data/services/camp_leader_profile_service.dart';
 import '../widgets/leader_avatar.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Personal Information (opened from Settings): shows the logged-in
 /// camp leader's details and lets them add / change / remove their photo and
 /// edit their name, phone number and assigned area.
@@ -20,13 +22,14 @@ class PersonalInformationScreen extends StatefulWidget {
 }
 
 class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
+  static const Color _bg = Color(0xFF0B1220);
+  static const Color _card = Color(0xFF1C2740);
+  static const Color _field = Color(0xFF1C2740);
+  static const Color _border = Color(0xFF2B3A55);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFF34D399);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _danger = Color(0xFFF87171);
 
   final ResponderController _auth = ResponderController();
 
@@ -89,18 +92,18 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
             const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined, color: Colors.white),
-              title: const Text('Take a photo', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Take a photo'), style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(ctx, 'camera'),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined, color: Colors.white),
-              title: const Text('Choose from gallery', style: TextStyle(color: Colors.white)),
+              title: Text(tr('Choose from gallery'), style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(ctx, 'gallery'),
             ),
             if (hasPhoto)
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Color(0xFFFF1744)),
-                title: const Text('Remove photo', style: TextStyle(color: Color(0xFFFF1744))),
+                leading: const Icon(Icons.delete_outline, color: _danger),
+                title: Text(tr('Remove photo'), style: TextStyle(color: _danger)),
                 onTap: () => Navigator.pop(ctx, 'remove'),
               ),
           ],
@@ -127,7 +130,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       final bytes = await picked.readAsBytes();
       await _savePhoto('data:image/jpeg;base64,${base64Encode(bytes)}');
     } catch (e) {
-      _showMessage('Could not get the photo: $e', error: true);
+      _showMessage(tr('Could not get the photo: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -143,7 +146,7 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
           .timeout(const Duration(seconds: 8), onTimeout: () {});
       _showMessage(photoUrl.isEmpty ? 'Photo removed.' : 'Photo saved.');
     } catch (e) {
-      _showMessage('Could not save the photo: $e', error: true);
+      _showMessage(tr('Could not save the photo: {p0}', {'p0': (e).toString()}), error: true);
     } finally {
       if (mounted) setState(() => _photoBusy = false);
     }
@@ -173,9 +176,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
       ).timeout(const Duration(seconds: 8), onTimeout: () {});
       if (!mounted) return;
       setState(() => _editing = false);
-      _showMessage('Details saved.');
+      _showMessage(tr('Details saved.'));
     } catch (e) {
-      _showMessage('Could not save: $e', error: true);
+      _showMessage(tr('Could not save: {p0}', {'p0': (e).toString()}), error: true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -190,8 +193,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(text),
-        backgroundColor: error ? const Color(0xFFFF1744) : _green,
+        content: Text(tr(text)),
+        backgroundColor: error ? const Color(0xFFDC2626) : _card,
         showCloseIcon: true,
       ),
     );
@@ -204,31 +207,42 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   Widget build(BuildContext context) {
     final user = _user;
     return Scaffold(
-      backgroundColor: _bg,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1424),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Personal Information',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        title: Text(
+          tr('Personal Information'),
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
         ),
         actions: [
           if (user != null && !_editing)
             TextButton.icon(
               onPressed: () => setState(() => _editing = true),
               icon: const Icon(Icons.edit_outlined, color: _accent, size: 18),
-              label: const Text('Edit',
+              label: Text(tr('Edit'),
                   style: TextStyle(color: _accent, fontWeight: FontWeight.bold)),
             ),
         ],
       ),
-      body: SafeArea(
-        child: user == null
-            ? const Center(
-                child: Text('No user is logged in.', style: TextStyle(color: _muted)),
-              )
-            : _buildBody(user),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-0.8, -0.6),
+            radius: 1.5,
+            colors: [Color(0xFF112240), _bg],
+          ),
+        ),
+        child: SafeArea(
+          child: user == null
+              ? Center(
+                  child: Text(tr('No user is logged in.'), style: TextStyle(color: _muted)),
+                )
+              : _buildBody(user),
+        ),
       ),
     );
   }
@@ -241,7 +255,29 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         Center(
           child: Stack(
             children: [
-              LeaderAvatar(name: user.fullName, photoUrl: user.photoUrl, size: 104),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF34D399), Color(0xFF00BFA5)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _accent.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: LeaderAvatar(
+                      name: user.fullName, photoUrl: user.photoUrl, size: 104),
+                ),
+              ),
               if (_photoBusy)
                 const Positioned.fill(
                   child: Center(child: CircularProgressIndicator(color: _accent)),
@@ -254,11 +290,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _accent,
+                      color: _card,
                       shape: BoxShape.circle,
-                      border: Border.all(color: _bg, width: 3),
+                      border: Border.all(color: _accent, width: 2),
                     ),
-                    child: const Icon(Icons.photo_camera, color: Colors.white, size: 16),
+                    child: const Icon(Icons.camera_alt_rounded, color: _accent, size: 16),
                   ),
                 ),
               ),
@@ -270,28 +306,40 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
           child: TextButton(
             onPressed: _photoBusy ? null : _choosePhotoSource,
             child: Text(
-              (user.photoUrl ?? '').isEmpty ? 'Add photo' : 'Change photo',
+              (user.photoUrl ?? '').isEmpty ? tr('Add photo') : tr('Change photo'),
               style: const TextStyle(color: _accent, fontWeight: FontWeight.bold),
             ),
           ),
         ),
         const SizedBox(height: 4),
         Center(
-          child: Text(
-            user.roleTitle,
-            style: const TextStyle(
-                color: _muted, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: _accent.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _accent.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              tr(user.roleTitle),
+              style: const TextStyle(
+                  color: _accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+            ),
           ),
         ),
         const SizedBox(height: 18),
 
         // Details
-        Container(
-          padding: const EdgeInsets.all(16),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: _card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _border),
+            color: _card.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Form(
             key: _formKey,
@@ -306,11 +354,11 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         textCapitalization: TextCapitalization.words,
                         decoration: _decoration('Your name'),
                         validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'Enter your name' : null,
+                            v == null || v.trim().isEmpty ? tr('Enter your name') : null,
                       )
                     : _value(user.fullName),
                 const SizedBox(height: 16),
-                _label('Email', help: _editing ? 'Cannot be changed' : null),
+                _label('Email', help: _editing ? tr('Cannot be changed') : null),
                 _value(user.email),
                 const SizedBox(height: 16),
                 _label('Phone number'),
@@ -322,16 +370,16 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                         decoration: _decoration('e.g. 077 123 4567'),
                         validator: (v) {
                           final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
-                          return digits.length < 9 ? 'Enter a valid phone number' : null;
+                          return digits.length < 9 ? tr('Enter a valid phone number') : null;
                         },
                       )
                     : _value(user.phoneNumber),
                 const SizedBox(height: 16),
-                _label('NIC', help: _editing ? 'Cannot be changed' : null),
+                _label('NIC', help: _editing ? tr('Cannot be changed') : null),
                 _value(user.nic),
                 const SizedBox(height: 16),
                 _label('Assigned camp / area',
-                    help: _editing ? 'Set by the administrator' : null),
+                    help: _editing ? tr('Set by the administrator') : null),
                 _value(user.floodZone),
                 if (_editing) ...[
                   const SizedBox(height: 22),
@@ -340,13 +388,13 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                     children: [
                       TextButton(
                         onPressed: _saving ? null : _cancelEdit,
-                        child: const Text('Cancel', style: TextStyle(color: _muted)),
+                        child: Text(tr('Cancel'), style: TextStyle(color: _muted)),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                           backgroundColor: _accent,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06121F),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
@@ -356,10 +404,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                                 width: 16,
                                 height: 16,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
+                                    strokeWidth: 2, color: Color(0xFF06121F)),
                               )
                             : const Icon(Icons.check, size: 16),
-                        label: Text(_saving ? 'SAVING...' : 'SAVE',
+                        label: Text(_saving ? tr('SAVING...') : tr('SAVE'),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                     ],
@@ -367,6 +415,8 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                 ],
               ],
             ),
+          ),
+        ),
           ),
         ),
       ],
@@ -377,12 +427,12 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(
           children: [
-            Flexible(child: Text(text,
+            Flexible(child: Text(text.toUpperCase(),
                 style: const TextStyle(
-                    color: _muted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.6))),
+                    color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0))),
             if (help != null) ...[
               const SizedBox(width: 8),
-              Text(help, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 10)),
+              Text(tr(help), style: const TextStyle(color: _muted, fontSize: 10)),
             ],
           ],
         ),
@@ -390,12 +440,12 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
 
   Widget _value(String text) => Text(
         text.isEmpty ? '-' : text,
-        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
       );
 
   InputDecoration _decoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+        hintStyle: const TextStyle(color: _muted, fontSize: 13),
         filled: true,
         fillColor: _field,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

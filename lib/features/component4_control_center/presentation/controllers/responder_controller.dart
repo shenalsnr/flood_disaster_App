@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/localization/translation_service.dart';
 import '../../data/models/responder_models.dart';
 
 /// Component 4 controller.
@@ -734,7 +735,23 @@ class ResponderController extends ChangeNotifier {
     String? areaName,
     List<double>? bbox,
   }) async {
+    // Official warnings are translated ONCE here (English / Sinhala / Tamil)
+    // so every citizen reads them in their own language, even offline.
+    final fullText = title.trim().isEmpty ? message : '$title - $message';
+    Map<String, String> tl = const {};
+    try {
+      tl = await TranslationService.instance
+          .translateAll(fullText)
+          .timeout(const Duration(seconds: 8));
+    } catch (_) {
+      // No key / no internet: citizens see the original text.
+    }
     await _warnings.add({
+      if (TranslationService.instance.isConfigured && tl.isNotEmpty) ...{
+        'description_en': tl['en'],
+        'description_si': tl['si'],
+        'description_ta': tl['ta'],
+      },
       'district': district.trim().isEmpty ? 'All' : district.trim(),
       'city': city.trim().isEmpty ? 'All' : city.trim(),
       'locationZone': zone,
@@ -743,7 +760,7 @@ class ResponderController extends ChangeNotifier {
       'rainfallMm': 0.0,
       'windSpeedKmh': 0.0,
       'severity': severity,
-      'description': title.trim().isEmpty ? message : '$title - $message',
+      'description': fullText,
       'issuedTimestamp': FieldValue.serverTimestamp(),
       // extra fields for the map-based broadcast (ignored by Component 1)
       'centerLat': center?.latitude,
@@ -758,6 +775,21 @@ class ResponderController extends ChangeNotifier {
 
   /// UPDATE a broadcast.
   Future<void> updateBroadcast(String id, Map<String, dynamic> data) async {
+    // Text was edited -> refresh the stored translations too.
+    final newDesc = data['description'];
+    if (newDesc is String && TranslationService.instance.isConfigured) {
+      try {
+        final tl = await TranslationService.instance
+            .translateAll(newDesc)
+            .timeout(const Duration(seconds: 8));
+        data = {
+          ...data,
+          'description_en': tl['en'],
+          'description_si': tl['si'],
+          'description_ta': tl['ta'],
+        };
+      } catch (_) {}
+    }
     await _warnings.doc(id).update({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),

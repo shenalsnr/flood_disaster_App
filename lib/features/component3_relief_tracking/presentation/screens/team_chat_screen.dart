@@ -3,6 +3,7 @@ import '../../../../core/theme/shelter_theme.dart';
 import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/chat_message_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class TeamChatScreen extends StatefulWidget {
   const TeamChatScreen({super.key});
 
@@ -69,13 +70,13 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
             child: const Icon(Icons.group, color: Colors.white, size: 18),
           ),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text('Community Chat', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-            Text('12 online - Inter-Camp Comms', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
+          children: [
+            Text(tr('Community Chat'), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(tr('12 online - Inter-Camp Comms'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12)),
           ],
-        ),
+        )),
         actions: [
           IconButton(icon: const Icon(Icons.more_vert, color: Colors.white), onPressed: () {}),
         ],
@@ -93,9 +94,9 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('PINNED', style: TextStyle(color: ShelterTheme.primaryActionOrange, fontSize: 10, fontWeight: FontWeight.bold)),
-                      Text('Coordination channel for Camp Leaders only.', style: TextStyle(color: Colors.white, fontSize: 12)),
+                    children: [
+                      Text(tr('PINNED'), style: TextStyle(color: ShelterTheme.primaryActionOrange, fontSize: 10, fontWeight: FontWeight.bold)),
+                      Text(tr('Coordination channel for Camp Leaders only.'), style: TextStyle(color: Colors.white, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -109,9 +110,9 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
               itemCount: messages.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.only(bottom: 16),
-                    child: Center(child: Text('TODAY', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold))),
+                    child: Center(child: Text(tr('TODAY'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold))),
                   );
                 }
                 final msg = messages[index - 1];
@@ -147,8 +148,8 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
                     child: TextField(
                       controller: _msgCtrl,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Message the team...',
+                      decoration: InputDecoration(
+                        hintText: tr('Message the team...'),
                         hintStyle: TextStyle(color: ShelterTheme.textMuted),
                         border: InputBorder.none,
                       ),
@@ -192,7 +193,7 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
               if (!isMe)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4, left: 4),
-                  child: Text(sender, style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                  child: Text(tr(sender), style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -208,14 +209,14 @@ class _TeamChatScreenState extends State<TeamChatScreen> {
                     color: isMe ? ShelterTheme.primaryActionOrange.withValues(alpha: 0.5) : ShelterTheme.surfaceLightNavy,
                   ),
                 ),
-                child: Text(message, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                child: Text(tr(message), style: const TextStyle(color: Colors.white, fontSize: 14)),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 4, right: 4),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(time, style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 10)),
+                    Text(tr(time), style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 10)),
                     if (isMe) ...[
                       const SizedBox(width: 4),
                       const Icon(Icons.done_all, color: ShelterTheme.statusSafeGreen, size: 12),

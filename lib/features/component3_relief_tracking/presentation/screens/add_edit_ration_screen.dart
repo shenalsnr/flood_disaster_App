@@ -4,6 +4,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/ration_item_model.dart';
 import 'dart:math';
 
+import '../../../../core/localization/app_strings.dart';
 /// Screen to create or edit a supply/ration item.
 class AddEditRationScreen extends StatefulWidget {
   final RationItemModel? existingItem;
@@ -58,7 +59,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
 
   void _save() {
     if (_nameCtrl.text.isEmpty || _selectedCategory == 'Select a category') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill required fields')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Please fill required fields'))));
       return;
     }
 
@@ -97,7 +98,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('ADD SUPPLY ITEM', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+        title: Text(tr('ADD SUPPLY ITEM'), style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         centerTitle: true,
         actions: [
           TextButton(
@@ -112,7 +113,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
                 _status = SupplyStatus.adequate;
               });
             },
-            child: const Text('Reset', style: TextStyle(color: ShelterTheme.textMuted)),
+            child: Text(tr('Reset'), style: TextStyle(color: ShelterTheme.textMuted)),
           ),
         ],
       ),
@@ -124,14 +125,14 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Add a new item to the Ration & Medical Log. It will appear in the shelter inventory once saved.',
+                  Text(
+                    tr('Add a new item to the Ration & Medical Log. It will appear in the shelter inventory once saved.'),
                     style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12),
                   ),
                   const SizedBox(height: 24),
                   
                   // ITEM DETAILS
-                  const Text('ITEM DETAILS', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                  Text(tr('ITEM DETAILS'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   _buildTextField('Item name *', 'e.g. Infant Formula Milk Powder', _nameCtrl),
                   const SizedBox(height: 16),
@@ -146,7 +147,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Quantity *', style: TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
+                            Text(tr('Quantity *'), style: TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
                             const SizedBox(height: 8),
                             Container(
                               height: 50,
@@ -186,9 +187,9 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
                   const SizedBox(height: 32),
                   
                   // STATUS & LOCATION
-                  const Text('STATUS & LOCATION', style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                  Text(tr('STATUS & LOCATION'), style: TextStyle(color: ShelterTheme.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
-                  const Text('Stock Status', style: TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
+                  Text(tr('Stock Status'), style: TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -223,13 +224,13 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Add Item', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: Text(tr('Add Item'), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.white, fontSize: 14)),
+                  child: Text(tr('Cancel'), style: TextStyle(color: Colors.white, fontSize: 14)),
                 ),
                 const SizedBox(height: 8),
               ],
@@ -244,7 +245,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
+        Text(tr(label), style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
         const SizedBox(height: 8),
         TextField(
           controller: ctrl,
@@ -273,7 +274,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
+        Text(tr(label), style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontSize: 12)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -288,7 +289,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
               isExpanded: true,
               dropdownColor: ShelterTheme.surfaceDarkNavy,
               style: const TextStyle(color: Colors.white),
-              items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              items: items.map((e) => DropdownMenuItem(value: e, child: Text(tr(e), maxLines: 1, overflow: TextOverflow.ellipsis))).toList(),
               onChanged: onChanged,
             ),
           ),
@@ -316,7 +317,7 @@ class _AddEditRationScreenState extends State<AddEditRationScreen> {
               const SizedBox(width: 4),
             ],
             Flexible(child: Text(
-              label,
+              tr(label),
               style: TextStyle(
                 color: isSelected ? color : ShelterTheme.textMuted,
                 fontSize: 10,

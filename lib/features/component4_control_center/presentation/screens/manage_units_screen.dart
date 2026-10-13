@@ -5,6 +5,7 @@ import '../../data/models/responder_models.dart';
 import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Response units - full CRUD (Create / Read / Update / Delete) backed by the
 /// Firestore `responseUnits` collection.
 class ManageUnitsScreen extends StatefulWidget {
@@ -38,17 +39,17 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       case 'AVAILABLE':
         return const Color(0xFF10B981);
       case 'EN ROUTE':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFBBF24);
       case 'ON SCENE':
-        return const Color(0xFFFF5252);
+        return const Color(0xFFF87171);
       default:
-        return const Color(0xFF64748B);
+        return const Color(0xFF8A98B0);
     }
   }
 
   void _snack(String m, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(m),
+      content: Text(tr(m)),
       backgroundColor: error ? Colors.orange : const Color(0xFF10B981),
     ));
   }
@@ -74,13 +75,13 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
 
     InputDecoration deco(String l) => InputDecoration(
           labelText: l,
-          labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+          labelStyle: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 12),
           filled: true,
-          fillColor: const Color(0xFF131B2B),
+          fillColor: const Color(0xFF131C2E),
           isDense: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF334155)),
+            borderSide: const BorderSide(color: Color(0xFF2B3A55)),
           ),
         );
 
@@ -96,7 +97,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
             style: const TextStyle(color: Colors.white, fontSize: 13),
             decoration: deco(l),
             validator: required
-                ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
+                ? (v) => (v == null || v.trim().isEmpty) ? tr('Required') : null
                 : null,
           ),
         );
@@ -105,8 +106,8 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: Text(isEdit ? 'Edit response unit' : 'Add response unit',
+          backgroundColor: const Color(0xFF1C2740),
+          title: Text(isEdit ? tr('Edit response unit') : tr('Add response unit'),
               style: const TextStyle(color: Colors.white, fontSize: 16)),
           content: SizedBox(
             width: (MediaQuery.sizeOf(ctx).width - 96).clamp(240.0, 400.0).toDouble(),
@@ -131,12 +132,13 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                     ]),
                     field(eta, 'ETA (minutes)', number: true),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: status,
-                      dropdownColor: const Color(0xFF1E293B),
+                      dropdownColor: const Color(0xFF1C2740),
                       decoration: deco('Status'),
                       style: const TextStyle(color: Colors.white, fontSize: 13),
                       items: const ['AVAILABLE', 'EN ROUTE', 'ON SCENE', 'OFF DUTY']
-                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                          .map((s) => DropdownMenuItem(value: s, child: Text(tr(s), maxLines: 1, overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (v) => setS(() => status = v ?? status),
                     ),
@@ -148,7 +150,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCEL',
+              child: Text(tr('CANCEL'),
                   style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
@@ -156,7 +158,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
               onPressed: () {
                 if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
               },
-              child: Text(isEdit ? 'SAVE' : 'ADD UNIT'),
+              child: Text(isEdit ? tr('SAVE') : tr('ADD UNIT')),
             ),
           ],
         ),
@@ -193,13 +195,13 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
     try {
       if (isEdit) {
         await _c.updateUnit(team);
-        _snack('Unit updated');
+        _snack(tr('Unit updated'));
       } else {
         await _c.addUnit(team);
-        _snack('Unit added');
+        _snack(tr('Unit added'));
       }
     } catch (e) {
-      _snack('Save failed: $e', error: true);
+      _snack(tr('Save failed: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -207,19 +209,19 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text('Delete unit?',
+        backgroundColor: const Color(0xFF1C2740),
+        title: Text(tr('Delete unit?'),
             style: TextStyle(color: Colors.white)),
-        content: Text('${t.name} (${t.callSign}) will be removed permanently.',
+        content: Text(tr('{p0} ({p1}) will be removed permanently.', {'p0': (t.name).toString(), 'p1': (t.callSign).toString()}),
             style: const TextStyle(color: Color(0xFFCBD5E1))),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCEL')),
+              child: Text(tr('CANCEL'))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('DELETE'),
+            child: Text(tr('DELETE')),
           ),
         ],
       ),
@@ -230,10 +232,10 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       if (err != null) {
         _snack(err, error: true);
       } else {
-        _snack('Unit deleted');
+        _snack(tr('Unit deleted'));
       }
     } catch (e) {
-      _snack('Delete failed: $e', error: true);
+      _snack(tr('Delete failed: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -241,23 +243,23 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
   Widget build(BuildContext context) {
     final units = _c.sortedTeamsByEta;
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         foregroundColor: Colors.white,
-        title: const Text('Response Units',
+        title: Text(tr('Response Units'),
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFF6D00),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFF38BDF8),
+        foregroundColor: const Color(0xFF06121F),
         onPressed: () => _openForm(),
         icon: const Icon(Icons.add),
-        label: const Text('ADD UNIT'),
+        label: Text(tr('ADD UNIT')),
       ),
       body: units.isEmpty
-          ? const Center(
-              child: Text('No response units yet.',
+          ? Center(
+              child: Text(tr('No response units yet.'),
                   style: TextStyle(color: Colors.white54)))
           : GridView.builder(
               padding: EdgeInsets.fromLTRB(
@@ -279,9 +281,9 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                   child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,20 +302,20 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(t.name,
+                            Text(tr(t.name),
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14)),
                             const SizedBox(height: 2),
                             Text(
-                                '${t.callSign} • ${t.vehicleType} • crew ${t.crewCount}',
+                                tr('{p0} • {p1} • crew {p2}', {'p0': (t.callSign).toString(), 'p1': (t.vehicleType).toString(), 'p2': (t.crewCount).toString()}),
                                 style: const TextStyle(
-                                    color: Color(0xFF94A3B8), fontSize: 11)),
+                                    color: Color(0xFFB6C2D6), fontSize: 11)),
                             if (t.leader.isNotEmpty)
-                              Text('Leader: ${t.leader}',
+                              Text(tr('Leader: {p0}', {'p0': (t.leader).toString()}),
                                   style: const TextStyle(
-                                      color: Color(0xFF94A3B8), fontSize: 11)),
+                                      color: Color(0xFFB6C2D6), fontSize: 11)),
                             const SizedBox(height: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -322,7 +324,7 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                                 color: color.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Text(t.status,
+                              child: Text(tr(t.status),
                                   style: TextStyle(
                                       color: color,
                                       fontSize: 10,
@@ -332,15 +334,15 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Edit',
+                        tooltip: tr('Edit'),
                         icon: const Icon(Icons.edit_outlined,
-                            color: Color(0xFF40C4FF)),
+                            color: Color(0xFF38BDF8)),
                         onPressed: () => _openForm(t),
                       ),
                       IconButton(
-                        tooltip: 'Delete',
+                        tooltip: tr('Delete'),
                         icon: const Icon(Icons.delete_outline,
-                            color: Colors.redAccent),
+                            color: Color(0xFFF87171)),
                         onPressed: () => _confirmDelete(t),
                       ),
                     ],

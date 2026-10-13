@@ -6,6 +6,7 @@ import 'alerts_screen.dart';
 import 'profile_screen.dart';
 import 'team_chat_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class ShelterMainLayout extends StatefulWidget {
   const ShelterMainLayout({super.key});
 
@@ -46,12 +47,12 @@ class _ShelterMainLayoutState extends State<ShelterMainLayout> {
             _currentIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: 'Supplies'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: 'Alerts'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: 'Team'),
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: tr('Dashboard')),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), label: tr('Supplies')),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: tr('Alerts')),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: tr('Settings')),
+          BottomNavigationBarItem(icon: Icon(Icons.group_outlined), label: tr('Team')),
         ],
       ),
     );

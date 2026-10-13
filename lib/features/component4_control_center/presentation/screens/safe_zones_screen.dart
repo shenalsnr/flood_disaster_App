@@ -11,13 +11,14 @@ import '../../../component1_evacuation/services/safe_zone_service.dart';
 import '../../data/services/admin_user_service.dart';
 import '../../../../core/theme/appearance.dart';
 
-const Color _bg = Color(0xFF131B2B);
-const Color _card = Color(0xFF131B2B);
-const Color _border = Color(0xFF1E293B);
-const Color _muted = Color(0xFF8E9BAE);
-const Color _accent = Color(0xFFFF5252);
-const Color _green = Color(0xFF00E676);
-const Color _orange = Color(0xFFFF9F0A);
+import '../../../../core/localization/app_strings.dart';
+const Color _bg = Color(0xFF131C2E);
+const Color _card = Color(0xFF131C2E);
+const Color _border = Color(0xFF1C2740);
+const Color _muted = Color(0xFFB6C2D6);
+const Color _accent = Color(0xFFF87171);
+const Color _green = Color(0xFF34D399);
+const Color _orange = Color(0xFFFB923C);
 
 /// A camp leader account the administrator can assign to a safe zone.
 class _Leader {
@@ -94,7 +95,7 @@ class SafeZonesScreen extends StatelessWidget {
     );
     if (saved != null) {
       messenger.showSnackBar(SnackBar(
-          content: Text(saved), backgroundColor: _green, showCloseIcon: true));
+          content: Text(tr(saved)), backgroundColor: _green, showCloseIcon: true));
     }
   }
 
@@ -110,20 +111,19 @@ class SafeZonesScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _card,
-        title: const Text('Delete safe zone?',
+        title: Text(tr('Delete safe zone?'),
             style: TextStyle(color: Colors.white)),
         content: Text(
-          '"${zone.name}" will disappear from the citizens\' Safe Route map.'
-          '${assigned.isEmpty ? '' : '\n\nLeaders assigned to it will be left without a camp.'}',
+          tr('"{p0}" will disappear from the citizens\' Safe Route map.{p1}', {'p0': (zone.name).toString(), 'p1': (assigned.isEmpty ? '' : '\n\nLeaders assigned to it will be left without a camp.').toString()}),
           style: const TextStyle(color: _muted),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(tr('Cancel'))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Delete', style: TextStyle(color: _accent))),
+              child: Text(tr('Delete'), style: TextStyle(color: _accent))),
         ],
       ),
     );
@@ -136,11 +136,11 @@ class SafeZonesScreen extends StatelessWidget {
     } on TimeoutException {
       // Saved on this phone, it will sync when the connection is back.
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not delete: $e')));
+      messenger.showSnackBar(SnackBar(content: Text(tr('Could not delete: {p0}', {'p0': (e).toString()}))));
       return;
     }
     messenger.showSnackBar(
-        SnackBar(content: Text('${zone.name} deleted'), showCloseIcon: true));
+        SnackBar(content: Text(tr('{p0} deleted', {'p0': (zone.name).toString()})), showCloseIcon: true));
   }
 
   @override
@@ -157,7 +157,7 @@ class SafeZonesScreen extends StatelessWidget {
               backgroundColor: _bg,
               appBar: AppBar(
                 backgroundColor: _bg,
-                title: const Text('Safe Zones',
+                title: Text(tr('Safe Zones'),
                     style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               floatingActionButton: FloatingActionButton.extended(
@@ -165,7 +165,7 @@ class SafeZonesScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
                 onPressed: () => _openEditor(context, null, zones),
                 icon: const Icon(Icons.add_location_alt_outlined),
-                label: const Text('ADD SAFE ZONE',
+                label: Text(tr('ADD SAFE ZONE'),
                     style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               body: Builder(builder: (context) {
@@ -174,8 +174,7 @@ class SafeZonesScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
-                        'Could not load safe zones. Check the Firestore rules '
-                        'for "camps" and "campStatus".\n${snap.error}',
+                        tr('Could not load safe zones. Check the Firestore rules for "camps" and "campStatus".\n{p0}', {'p0': (snap.error).toString()}),
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: _muted),
                       ),
@@ -187,11 +186,11 @@ class SafeZonesScreen extends StatelessWidget {
                       child: CircularProgressIndicator(color: _accent));
                 }
                 if (zones.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.all(24),
                       child: Text(
-                        'No safe zones yet.\nTap ADD SAFE ZONE to place one on the map.',
+                        tr('No safe zones yet.\nTap ADD SAFE ZONE to place one on the map.'),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: _muted),
                       ),
@@ -272,32 +271,32 @@ class _ZoneCard extends StatelessWidget {
                     color: zone.hasLocation ? _green : _muted, size: 22),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(zone.name,
+                  child: Text(tr(zone.name),
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.bold)),
                 ),
-                Container(
+                Flexible(child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: stateColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(zone.stateLabel,
+                  child: Text(tr(zone.stateLabel),
                       style: TextStyle(
                           color: stateColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold)),
-                ),
+                )),
                 PopupMenuButton<String>(
                   color: _card,
                   iconColor: _muted,
                   onSelected: (v) => v == 'edit' ? onEdit() : onDelete(),
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'edit', child: Text(tr('Edit'))),
+                    PopupMenuItem(value: 'delete', child: Text(tr('Delete'))),
                   ],
                 ),
               ],
@@ -314,20 +313,20 @@ class _ZoneCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              '${zone.occupied} / ${zone.capacity} people  -  ${zone.fillPercent}% full',
+              tr('{p0} / {p1} people  -  {p2}% full', {'p0': (zone.occupied).toString(), 'p1': (zone.capacity).toString(), 'p2': (zone.fillPercent).toString()}),
               style: const TextStyle(color: _muted, fontSize: 12),
             ),
             const SizedBox(height: 4),
             Text(
               leaderNames.isEmpty
-                  ? 'No camp leader assigned'
-                  : 'Leader: ${leaderNames.join(', ')}',
+                  ? tr('No camp leader assigned')
+                  : tr('Leader: {p0}', {'p0': (leaderNames.join(', ')).toString()}),
               style: const TextStyle(color: _muted, fontSize: 12),
             ),
             if (!zone.hasLocation) ...[
               const SizedBox(height: 6),
-              const Text(
-                'Location not set - citizens cannot see this shelter yet. Tap to place it on the map.',
+              Text(
+                tr('Location not set - citizens cannot see this shelter yet. Tap to place it on the map.'),
                 style: TextStyle(color: _orange, fontSize: 12),
               ),
             ],
@@ -447,7 +446,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
       if (!mounted) return;
       setState(() {
         _results = r;
-        _searchMsg = r.isEmpty ? 'No place found. Try another name.' : null;
+        _searchMsg = r.isEmpty ? tr('No place found. Try another name.') : null;
       });
     } catch (_) {
       if (!mounted) return;
@@ -477,21 +476,21 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
     final name = _name.text.trim();
     final cap = int.tryParse(_capacity.text.trim()) ?? 0;
     if (name.isEmpty) {
-      setState(() => _error = 'Enter the safe zone name.');
+      setState(() => _error = tr('Enter the safe zone name.'));
       return;
     }
     if (cap <= 0) {
-      setState(() => _error = 'Enter the capacity (number of people).');
+      setState(() => _error = tr('Enter the capacity (number of people).'));
       return;
     }
     if (_point == null) {
-      setState(() => _error = 'Search a place or tap the map to place it.');
+      setState(() => _error = tr('Search a place or tap the map to place it.'));
       return;
     }
     final id = AdminUserService.campIdFromName(name);
     if (!_isEdit && widget.existingIds.contains(id)) {
       setState(() => _error =
-          '"$name" already exists. Open it from the list to edit it.');
+          tr('"{p0}" already exists. Open it from the list to edit it.', {'p0': (name).toString()}));
       return;
     }
 
@@ -514,7 +513,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = 'Could not save: $e';
+        _error = tr('Could not save: {p0}', {'p0': (e).toString()});
       });
       return;
     }
@@ -529,7 +528,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
         hintText: hint,
         suffixIcon: suffix,
         labelStyle: const TextStyle(color: _muted),
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82)),
+        hintStyle: const TextStyle(color: Color(0xFF8A98B0)),
         filled: true,
         fillColor: _card,
         enabledBorder: OutlineInputBorder(
@@ -549,7 +548,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
       backgroundColor: _bg,
       appBar: AppBar(
         backgroundColor: _bg,
-        title: Text(_isEdit ? 'Edit safe zone' : 'Add safe zone',
+        title: Text(_isEdit ? tr('Edit safe zone') : tr('Add safe zone'),
             style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Column(
@@ -591,7 +590,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                   style: const TextStyle(color: Colors.white),
                   decoration: _dec(
                     'Search a place',
-                    hint: 'e.g. Rathnapura Central College',
+                    hint: tr('e.g. Rathnapura Central College'),
                     suffix: _searching
                         ? const Padding(
                             padding: EdgeInsets.all(12),
@@ -699,12 +698,12 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                             dense: true,
                             leading: const Icon(Icons.place_outlined,
                                 color: _accent, size: 20),
-                            title: Text(r.name,
+                            title: Text(tr(r.name),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                     color: Colors.white, fontSize: 13)),
-                            subtitle: Text(r.label,
+                            subtitle: Text(tr(r.label),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -721,7 +720,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
           if (_error != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(_error!,
+              child: Text(tr(_error!),
                   style: const TextStyle(color: _accent, fontSize: 12)),
             ),
           Padding(
@@ -743,7 +742,7 @@ class _SafeZoneEditorState extends State<_SafeZoneEditor> {
                         height: 20,
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
-                    : Text(_isEdit ? 'SAVE CHANGES' : 'ADD SAFE ZONE',
+                    : Text(_isEdit ? tr('SAVE CHANGES') : tr('ADD SAFE ZONE'),
                         style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),

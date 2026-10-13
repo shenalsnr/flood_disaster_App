@@ -11,6 +11,7 @@ import 'safe_zones_screen.dart';
 import '../../../../core/services/email_service.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Administrator panel: create staff accounts with a role, see staff and
 /// citizens in separate lists, enable / disable and delete accounts.
 class AdminPanelScreen extends StatefulWidget {
@@ -21,13 +22,13 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
-  static const Color _orange = Color(0xFFFF9F0A);
+  static const Color _bg = Color(0xFF131C2E);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _orange = Color(0xFFFB923C);
 
   final _service = AdminUserService.instance;
   String _filter = 'all'; // 'all' or a role key
@@ -71,8 +72,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   void _toast(String msg, {bool error = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: error ? Colors.redAccent : const Color(0xFF1E293B),
+      content: Text(tr(msg)),
+      backgroundColor: error ? Color(0xFFDC2626) : const Color(0xFF1C2740),
     ));
   }
 
@@ -81,13 +82,13 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       await action().timeout(const Duration(seconds: 10));
       _toast(okMsg);
     } catch (e) {
-      _toast('Could not complete: $e', error: true);
+      _toast(tr('Could not complete: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
   Future<void> _toggle(_UserRow u, bool active) async {
     if (u.email == _myEmail && !active) {
-      _toast('You cannot disable your own account.', error: true);
+      _toast(tr('You cannot disable your own account.'), error: true);
       return;
     }
     await _run(() => _service.setActive(u.email, active),
@@ -96,34 +97,68 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   Future<void> _delete(_UserRow u) async {
     if (u.email == _myEmail) {
-      _toast('You cannot delete your own account.', error: true);
+      _toast(tr('You cannot delete your own account.'), error: true);
       return;
     }
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _card,
-        title: const Text('Delete account?',
+        title: Text(tr('Delete account?'),
             style: TextStyle(color: Colors.white)),
         content: Text(
-          '${u.name} (${u.email}) will be removed permanently and can no '
-          'longer sign in. To keep the account but block sign-in, use the '
-          'switch to disable it instead.',
+          tr('{p0} ({p1}) will be removed permanently and can no longer sign in. To keep the account but block sign-in, use the switch to disable it instead.', {'p0': (u.name).toString(), 'p1': (u.email).toString()}),
           style: const TextStyle(color: _muted),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel', style: TextStyle(color: _muted))),
+              child: Text(tr('Cancel'), style: TextStyle(color: _muted))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('DELETE', style: TextStyle(color: _accent))),
+              child: Text(tr('DELETE'), style: TextStyle(color: _accent))),
         ],
       ),
     );
     if (ok == true) {
       await _run(() => _service.deleteUser(u.email), '${u.name} deleted');
     }
+  }
+
+  Future<void> _editDetails(_UserRow u) async {
+    Map<String, dynamic>? data;
+    try {
+      data = await _service.getUser(u.email).timeout(const Duration(seconds: 10));
+    } catch (e) {
+      _toast(tr('Could not load the account: {p0}', {'p0': (e).toString()}), error: true);
+      return;
+    }
+    if (!mounted) return;
+    final res = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => _EditDetailsDialog(
+        name: (data?['fullName'] as String?) ?? u.name,
+        email: u.email,
+        phone: (data?['phoneNumber'] as String?) ?? '',
+        nic: (data?['nic'] as String?) ?? '',
+      ),
+    );
+    if (res == null) return;
+    final newEmail = (res['email'] ?? u.email).toLowerCase().trim();
+    if (u.email == _myEmail && newEmail != u.email) {
+      _toast(tr('You cannot change your own sign-in email here.'), error: true);
+      return;
+    }
+    await _run(
+      () => _service.updateDetails(
+        oldEmail: u.email,
+        fullName: res['name'] ?? u.name,
+        newEmail: newEmail,
+        phone: res['phone'] ?? '',
+        nic: res['nic'] ?? '',
+      ),
+      'Details updated',
+    );
   }
 
   Future<void> _changeRole(_UserRow u) async {
@@ -135,7 +170,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
           backgroundColor: _card,
-          title: Text('Role for ${u.name}',
+          title: Text(tr('Role for {p0}', {'p0': (u.name).toString()}),
               style: const TextStyle(color: Colors.white, fontSize: 16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -147,7 +182,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 leading: Icon(
                     sel ? Icons.radio_button_checked : Icons.radio_button_off,
                     color: sel ? _accent : _muted),
-                title: Text(e.value,
+                title: Text(tr(e.value),
                     style: const TextStyle(color: Colors.white, fontSize: 13)),
                 onTap: () => setS(() => role = e.key),
               );
@@ -156,17 +191,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel', style: TextStyle(color: _muted))),
+                child: Text(tr('Cancel'), style: TextStyle(color: _muted))),
             TextButton(
                 onPressed: () => Navigator.pop(ctx, role),
-                child: const Text('SAVE', style: TextStyle(color: _accent))),
+                child: Text(tr('SAVE'), style: TextStyle(color: _accent))),
           ],
         ),
       ),
     );
     if (picked != null && picked != u.role) {
       if (u.email == _myEmail && picked != 'admin') {
-        _toast('You cannot remove your own admin role.', error: true);
+        _toast(tr('You cannot remove your own admin role.'), error: true);
         return;
       }
       await _run(() => _service.changeRole(u.email, picked),
@@ -186,7 +221,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
           backgroundColor: _card,
-          title: Text('Camp for ${u.name}',
+          title: Text(tr('Camp for {p0}', {'p0': (u.name).toString()}),
               style: const TextStyle(color: Colors.white, fontSize: 16)),
           content: SingleChildScrollView(
             child: Column(
@@ -205,10 +240,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   },
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                    'Leaders in the same camp share its supplies and '
-                    'requests. The change applies the next time the leader '
-                    'signs in.',
+                Text(
+                    tr('Leaders in the same camp share its supplies and requests. The change applies the next time the leader signs in.'),
                     style: TextStyle(color: _muted, fontSize: 11)),
               ],
             ),
@@ -216,10 +249,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel', style: TextStyle(color: _muted))),
+                child: Text(tr('Cancel'), style: TextStyle(color: _muted))),
             TextButton(
                 onPressed: chosen == null ? null : () => Navigator.pop(ctx, chosen),
-                child: const Text('SAVE', style: TextStyle(color: _accent))),
+                child: Text(tr('SAVE'), style: TextStyle(color: _accent))),
           ],
         ),
       ),
@@ -234,7 +267,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
+      builder: (_) => AlertDialog(
         backgroundColor: _card,
         content: Row(children: [
           SizedBox(
@@ -242,7 +275,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2, color: _accent)),
           SizedBox(width: 16),
-          Flexible(child: Text('Checking connection…', style: TextStyle(color: Colors.white))),
+          Flexible(child: Text(tr('Checking connection…'), style: TextStyle(color: Colors.white))),
         ]),
       ),
     );
@@ -253,16 +286,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _card,
-        title: const Text('Database connection',
+        title: Text(tr('Database connection'),
             style: TextStyle(color: Colors.white, fontSize: 16)),
         content: SingleChildScrollView(
-          child: Text(msg,
+          child: Text(tr(msg),
               style: const TextStyle(color: _muted, fontSize: 13, height: 1.4)),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Close', style: TextStyle(color: _accent))),
+              child: Text(tr('Close'), style: TextStyle(color: _accent))),
         ],
       ),
     );
@@ -290,7 +323,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     );
     if (pw == null) return;
     if (pw.length < 6) {
-      _toast('Password must be at least 6 characters.', error: true);
+      _toast(tr('Password must be at least 6 characters.'), error: true);
       return;
     }
     await _run(() => _service.resetPassword(u.email, pw),
@@ -307,7 +340,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       ),
     );
     if (created == null) return;
-    _toast('Staff account created');
+    _toast(tr('Staff account created'));
     final email = created['email'] ?? '';
     final name = created['name'] ?? '';
     final role = AdminUserService.roleLabel(created['role'] ?? '');
@@ -322,20 +355,19 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         password: password,
       );
       if (err == null) {
-        _toast('Account details emailed to $email');
+        _toast(tr('Account details emailed to {p0}', {'p0': (email).toString()}));
       } else if (mounted) {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Email was not sent'),
+            title: Text(tr('Email was not sent')),
             content: SingleChildScrollView(
               child: SelectableText(
-                  'The account was created, but the email failed.\n\n$err\n\n'
-                  'Password for $email: $password'),
+                  tr('The account was created, but the email failed.\n\n{p0}\n\nPassword for {p1}: {p2}', {'p0': (err).toString(), 'p1': (email).toString(), 'p2': (password).toString()})),
             ),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+                  onPressed: () => Navigator.pop(ctx), child: Text(tr('OK'))),
             ],
           ),
         );
@@ -349,7 +381,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         camp: camp,
         password: password,
       );
-      if (!ok) _toast('Could not open an email app. Give the password manually.');
+      if (!ok) _toast(tr('Could not open an email app. Give the password manually.'));
     }
   }
 
@@ -361,7 +393,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   static InputDecoration _decoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+        hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
         filled: true,
         fillColor: _bg,
         contentPadding:
@@ -388,10 +420,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       appBar: AppBar(
         backgroundColor: _bg,
         titleSpacing: 0,
-        title: const FittedBox(
+        title: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text('Admin Panel',
+          child: Text(tr('Admin Panel'),
               style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         actions: [
@@ -400,23 +432,23 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           // menu so nothing gets cut off.
           if (MediaQuery.sizeOf(context).width >= 460) ...[
             IconButton(
-              tooltip: 'Check database connection',
+              tooltip: tr('Check database connection'),
               icon: const Icon(Icons.wifi_find_outlined),
               onPressed: _checkConnection,
             ),
             IconButton(
-              tooltip: 'Safe zones',
+              tooltip: tr('Safe zones'),
               icon: const Icon(Icons.add_location_alt_outlined),
               onPressed: _openSafeZones,
             ),
             IconButton(
-              tooltip: 'Manage camps',
+              tooltip: tr('Manage camps'),
               icon: const Icon(Icons.holiday_village_outlined),
               onPressed: _manageCamps,
             ),
           ] else
             PopupMenuButton<String>(
-              tooltip: 'More',
+              tooltip: tr('More'),
               color: _card,
               icon: const Icon(Icons.more_vert),
               onSelected: (v) {
@@ -424,14 +456,14 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 if (v == 'zones') _openSafeZones();
                 if (v == 'camps') _manageCamps();
               },
-              itemBuilder: (_) => const [
+              itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'db',
                   child: ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.wifi_find_outlined, color: Colors.white),
-                    title: Text('Check connection',
+                    title: Text(tr('Check connection'),
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
@@ -442,7 +474,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.add_location_alt_outlined,
                         color: Colors.white),
-                    title: Text('Safe zones',
+                    title: Text(tr('Safe zones'),
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
@@ -453,7 +485,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.holiday_village_outlined,
                         color: Colors.white),
-                    title: Text('Manage camps',
+                    title: Text(tr('Manage camps'),
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
@@ -466,7 +498,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         foregroundColor: Colors.white,
         onPressed: _addStaff,
         icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('ADD STAFF',
+        label: Text(tr('ADD STAFF'),
             style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -477,8 +509,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'Could not load users. Check Firestore rules for the '
-                  '"users" collection.\n${snap.error}',
+                  tr('Could not load users. Check Firestore rules for the "users" collection.\n{p0}', {'p0': (snap.error).toString()}),
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: _muted),
                 ),
@@ -547,7 +578,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         backgroundColor: _card,
         selectedColor: _accent.withValues(alpha: 0.2),
         side: BorderSide(color: sel ? _accent : _border),
-        label: Text(label,
+        label: Text(tr(label),
             style: TextStyle(
                 color: sel ? _accent : Colors.white,
                 fontSize: 11,
@@ -562,7 +593,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(28),
-          child: Text(empty,
+          child: Text(tr(empty),
               textAlign: TextAlign.center,
               style: const TextStyle(color: _muted)),
         ),
@@ -589,7 +620,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         children: [
           CircleAvatar(
             backgroundColor: _accent.withValues(alpha: 0.18),
-            child: Text(u.initial,
+            child: Text(tr(u.initial),
                 style: const TextStyle(
                     color: _accent, fontWeight: FontWeight.bold)),
           ),
@@ -598,7 +629,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(isMe ? '${u.name} (you)' : u.name,
+                Text(isMe ? tr('{p0} (you)', {'p0': (u.name).toString()}) : u.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -606,7 +637,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         fontWeight: FontWeight.bold,
                         fontSize: 14)),
                 const SizedBox(height: 2),
-                Text(u.email,
+                Text(tr(u.email),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: _muted, fontSize: 12)),
@@ -624,7 +655,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               ],
             ),
           ),
-          Column(
+          Flexible(child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Switch(
@@ -636,34 +667,39 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 color: _card,
                 icon: const Icon(Icons.more_horiz, color: _muted),
                 onSelected: (v) {
+                  if (v == 'edit') _editDetails(u);
                   if (v == 'role') _changeRole(u);
                   if (v == 'area') _changeArea(u);
                   if (v == 'pw') _resetPassword(u);
                   if (v == 'del') _delete(u);
                 },
                 itemBuilder: (_) => [
+                  PopupMenuItem(
+                      value: 'edit',
+                      child: Text(tr('Edit details'),
+                          style: TextStyle(color: Colors.white))),
                   if (isStaff)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                         value: 'role',
-                        child: Text('Change role',
+                        child: Text(tr('Change role'),
                             style: TextStyle(color: Colors.white))),
                   if (u.role == 'campLeader')
-                    const PopupMenuItem(
+                    PopupMenuItem(
                         value: 'area',
-                        child: Text('Change camp',
+                        child: Text(tr('Change camp'),
                             style: TextStyle(color: Colors.white))),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                       value: 'pw',
-                      child: Text('Reset password',
+                      child: Text(tr('Reset password'),
                           style: TextStyle(color: Colors.white))),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                       value: 'del',
-                      child: Text('Delete account',
+                      child: Text(tr('Delete account'),
                           style: TextStyle(color: _accent))),
                 ],
               ),
             ],
-          ),
+          )),
         ],
       ),
     );
@@ -675,7 +711,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           color: color.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Text(text,
+        child: Text(tr(text),
             style: TextStyle(
                 color: color, fontSize: 10, fontWeight: FontWeight.bold)),
       );
@@ -721,9 +757,9 @@ class _AddStaffDialog extends StatefulWidget {
 }
 
 class _AddStaffDialogState extends State<_AddStaffDialog> {
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
 
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
@@ -772,7 +808,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_role == 'campLeader' && _camp == null) {
-      setState(() => _error = 'Choose the camp this leader is assigned to.');
+      setState(() => _error = tr('Choose the camp this leader is assigned to.'));
       return;
     }
     setState(() {
@@ -808,7 +844,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
     } catch (e) {
       setState(() {
         _saving = false;
-        _error = 'Could not create the account: $e';
+        _error = tr('Could not create the account: {p0}', {'p0': (e).toString()});
       });
     }
   }
@@ -830,15 +866,14 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Add Staff Account',
+                Text(tr('Add Staff Account'),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                const Text(
-                    'The person signs in with this email and password and '
-                    'lands on the dashboard for the role you pick.',
+                Text(
+                    tr('The person signs in with this email and password and lands on the dashboard for the role you pick.'),
                     style: TextStyle(color: _muted, fontSize: 12)),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -847,7 +882,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   textCapitalization: TextCapitalization.words,
                   decoration: dec('Full name'),
                   validator: (v) =>
-                      (v ?? '').trim().isEmpty ? 'Enter the name' : null,
+                      (v ?? '').trim().isEmpty ? tr('Enter the name') : null,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
@@ -887,7 +922,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   },
                 ),
                 const SizedBox(height: 14),
-                const Text('Role',
+                Text(tr('Role'),
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -901,11 +936,11 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                     return ChoiceChip(
                       showCheckmark: false,
                       selected: sel,
-                      backgroundColor: const Color(0xFF070B14),
+                      backgroundColor: const Color(0xFF0B1220),
                       selectedColor: _accent.withValues(alpha: 0.2),
                       side: BorderSide(
-                          color: sel ? _accent : const Color(0xFF1E293B)),
-                      label: Text(e.value,
+                          color: sel ? _accent : const Color(0xFF1C2740)),
+                      label: Text(tr(e.value),
                           style: TextStyle(
                               color: sel ? _accent : Colors.white,
                               fontSize: 11,
@@ -916,7 +951,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                 ),
                 if (_role == 'campLeader') ...[
                   const SizedBox(height: 14),
-                  const Text('Assigned camp',
+                  Text(tr('Assigned camp'),
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -940,7 +975,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   style: const TextStyle(color: Colors.white),
                   decoration: dec('Temporary password').copyWith(
                     suffixIcon: IconButton(
-                      tooltip: 'Generate',
+                      tooltip: tr('Generate'),
                       icon: const Icon(Icons.refresh, color: _muted),
                       onPressed: () => setState(() => _password.text =
                           _AdminPanelScreenState._generatePassword()),
@@ -951,13 +986,13 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                       : null,
                 ),
                 const SizedBox(height: 4),
-                const Text('Give this password to the staff member.',
+                Text(tr('Give this password to the staff member.'),
                     style: TextStyle(color: _muted, fontSize: 11)),
                 if (_error != null) ...[
                   const SizedBox(height: 10),
-                  Text(_error!,
+                  Text(tr(_error!),
                       style: const TextStyle(
-                          color: Colors.redAccent, fontSize: 12)),
+                          color: Color(0xFFF87171), fontSize: 12)),
                 ],
                 const SizedBox(height: 16),
                 Row(
@@ -965,9 +1000,9 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   children: [
                     TextButton(
                       onPressed:
-                          _saving ? null : () => Navigator.pop(context, false),
+                          _saving ? null : () => Navigator.pop(context),
                       child:
-                          const Text('Cancel', style: TextStyle(color: _muted)),
+                          Text(tr('Cancel'), style: TextStyle(color: _muted)),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
@@ -981,7 +1016,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                               height: 16,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: Colors.white))
-                          : const Text('CREATE ACCOUNT'),
+                          : Text(tr('CREATE ACCOUNT')),
                     ),
                   ],
                 ),
@@ -1016,7 +1051,7 @@ class _CampPicker extends StatelessWidget {
     final picked = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       builder: (_) => _CampSheet(camps: camps, value: value, newKey: _newKey),
     );
     if (picked == null) return;
@@ -1045,7 +1080,7 @@ class _CampPicker extends StatelessWidget {
     }
     if (problem != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(problem),
+        content: Text(tr(problem)),
         backgroundColor: Colors.orange.shade800,
         duration: const Duration(seconds: 5),
       ));
@@ -1060,23 +1095,23 @@ class _CampPicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF131B2B),
+          color: const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF1E293B)),
+          border: Border.all(color: const Color(0xFF1C2740)),
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
-                value ?? 'Choose a camp',
+                value ?? tr('Choose a camp'),
                 style: TextStyle(
                     color: value == null
-                        ? const Color(0xFF5E6D82)
+                        ? const Color(0xFF8A98B0)
                         : Colors.white,
                     fontSize: value == null ? 13 : 14),
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Color(0xFF8E9BAE)),
+            const Icon(Icons.arrow_drop_down, color: Color(0xFFB6C2D6)),
           ],
         ),
       ),
@@ -1113,8 +1148,8 @@ class _AddCampDialogState extends State<_AddCampDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF070B14),
-      title: Text(widget.title,
+      backgroundColor: const Color(0xFF0B1220),
+      title: Text(tr(widget.title),
           style: const TextStyle(color: Colors.white, fontSize: 16)),
       content: TextField(
         controller: _ctrl,
@@ -1126,12 +1161,119 @@ class _AddCampDialogState extends State<_AddCampDialog> {
       actions: [
         TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF8E9BAE)))),
+            child: Text(tr('Cancel'),
+                style: TextStyle(color: Color(0xFFB6C2D6)))),
         TextButton(
             onPressed: () => Navigator.pop(context, _ctrl.text.trim()),
-            child: Text(widget.confirm,
-                style: const TextStyle(color: Color(0xFFFF5252)))),
+            child: Text(tr(widget.confirm),
+                style: const TextStyle(color: Color(0xFFF87171)))),
+      ],
+    );
+  }
+}
+
+/// Edit name, email, phone and NIC of an account.
+class _EditDetailsDialog extends StatefulWidget {
+  final String name;
+  final String email;
+  final String phone;
+  final String nic;
+  const _EditDetailsDialog({
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.nic,
+  });
+
+  @override
+  State<_EditDetailsDialog> createState() => _EditDetailsDialogState();
+}
+
+class _EditDetailsDialogState extends State<_EditDetailsDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _name = TextEditingController(text: widget.name);
+  late final _email = TextEditingController(text: widget.email);
+  late final _phone = TextEditingController(text: widget.phone);
+  late final _nic = TextEditingController(text: widget.nic);
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _email.dispose();
+    _phone.dispose();
+    _nic.dispose();
+    super.dispose();
+  }
+
+  Widget _field(String label, TextEditingController c,
+      {TextInputType? type, String? Function(String?)? validator}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: c,
+        keyboardType: type,
+        validator: validator,
+        style: const TextStyle(color: Colors.white),
+        decoration: _AdminPanelScreenState._decoration(label),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFF0B1220),
+      title: Text(tr('Edit details'),
+          style: TextStyle(color: Colors.white, fontSize: 16)),
+      content: SizedBox(
+        width: (MediaQuery.sizeOf(context).width - 96).clamp(240.0, 400.0).toDouble(),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _field('Full name', _name,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Enter a name'
+                        : null),
+                _field('Email (sign-in)', _email,
+                    type: TextInputType.emailAddress,
+                    validator: (v) {
+                      final t = (v ?? '').trim();
+                      return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)
+                          ? null
+                          : 'Enter a valid email';
+                    }),
+                _field('Phone number', _phone,
+                    type: TextInputType.phone,
+                    validator: (v) {
+                      final d = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                      return d.length < 9 ? tr('Enter a valid phone number') : null;
+                    }),
+                _field('NIC', _nic),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(tr('Cancel'),
+                style: TextStyle(color: Color(0xFFB6C2D6)))),
+        TextButton(
+            onPressed: () {
+              if (!_formKey.currentState!.validate()) return;
+              Navigator.pop(context, {
+                'name': _name.text.trim(),
+                'email': _email.text.trim(),
+                'phone': _phone.text.trim(),
+                'nic': _nic.text.trim(),
+              });
+            },
+            child: Text(tr('SAVE'),
+                style: TextStyle(color: Color(0xFFF87171)))),
       ],
     );
   }
@@ -1159,8 +1301,8 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF070B14),
-      title: Text('New password for ${widget.name}',
+      backgroundColor: const Color(0xFF0B1220),
+      title: Text(tr('New password for {p0}', {'p0': (widget.name).toString()}),
           style: const TextStyle(color: Colors.white, fontSize: 16)),
       content: TextField(
         controller: _ctrl,
@@ -1171,12 +1313,12 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
       actions: [
         TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF8E9BAE)))),
+            child: Text(tr('Cancel'),
+                style: TextStyle(color: Color(0xFFB6C2D6)))),
         TextButton(
             onPressed: () => Navigator.pop(context, _ctrl.text.trim()),
-            child: const Text('SAVE',
-                style: TextStyle(color: Color(0xFFFF5252)))),
+            child: Text(tr('SAVE'),
+                style: TextStyle(color: Color(0xFFF87171)))),
       ],
     );
   }
@@ -1209,21 +1351,21 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
   }
 
   Widget _subtitle(String camp, SafeZone? z) {
-    const muted = Color(0xFF8E9BAE);
+    const muted = Color(0xFFB6C2D6);
     final n = _leadersOf(camp).length;
     final located = z != null && z.hasLocation;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (n > 0)
-          Text('$n camp leader(s)',
+          Text(tr('{p0} camp leader(s)', {'p0': (n).toString()}),
               style: const TextStyle(color: muted, fontSize: 11)),
         Text(
           located
-              ? 'On citizen map - ${z.occupied}/${z.capacity} (${z.stateLabel})'
-              : 'Not on the map yet - tap the pin to place it',
+              ? tr('On citizen map - {p0}/{p1} ({p2})', {'p0': (z.occupied).toString(), 'p1': (z.capacity).toString(), 'p2': (z.stateLabel).toString()})
+              : tr('Not on the map yet - tap the pin to place it'),
           style: TextStyle(
-              color: located ? const Color(0xFF00E676) : const Color(0xFFFF9F0A),
+              color: located ? const Color(0xFF34D399) : const Color(0xFFFB923C),
               fontSize: 11),
         ),
       ],
@@ -1234,19 +1376,19 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
-        title: Text(title,
+        backgroundColor: const Color(0xFF0B1220),
+        title: Text(tr(title),
             style: const TextStyle(color: Colors.white, fontSize: 16)),
-        content: Text(body, style: const TextStyle(color: Color(0xFF8E9BAE))),
+        content: Text(tr(body), style: const TextStyle(color: Color(0xFFB6C2D6))),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel',
-                  style: TextStyle(color: Color(0xFF8E9BAE)))),
+              child: Text(tr('Cancel'),
+                  style: TextStyle(color: Color(0xFFB6C2D6)))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text(action,
-                  style: const TextStyle(color: Color(0xFFFF5252)))),
+              child: Text(tr(action),
+                  style: const TextStyle(color: Color(0xFFF87171)))),
         ],
       ),
     );
@@ -1257,7 +1399,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
     final newName = await showDialog<String>(
       context: context,
       builder: (_) => _AddCampDialog(
-          initial: name, title: 'Rename camp', confirm: 'SAVE'),
+          initial: name, title: tr('Rename camp'), confirm: 'SAVE'),
     );
     if (newName == null || newName.isEmpty || newName == name) return;
     final leaders = _leadersOf(name);
@@ -1276,9 +1418,9 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
           .renameCamp(name, newName,
               leaderEmails: leaders.map((l) => l.email).toList())
           .timeout(const Duration(seconds: 10));
-      widget.toast('Renamed to $newName');
+      widget.toast(tr('Renamed to {p0}', {'p0': (newName).toString()}));
     } catch (e) {
-      widget.toast('Could not rename the camp: $e', error: true);
+      widget.toast(tr('Could not rename the camp: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -1298,20 +1440,20 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
           .deleteCamp(name,
               unassignEmails: leaders.map((l) => l.email).toList())
           .timeout(const Duration(seconds: 10));
-      widget.toast('$name removed');
+      widget.toast(tr('{p0} removed', {'p0': (name).toString()}));
     } catch (e) {
-      widget.toast('Could not remove the camp: $e', error: true);
+      widget.toast(tr('Could not remove the camp: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const card = Color(0xFF131B2B);
-    const muted = Color(0xFF8E9BAE);
-    const accent = Color(0xFFFF5252);
+    const card = Color(0xFF131C2E);
+    const muted = Color(0xFFB6C2D6);
+    const accent = Color(0xFFF87171);
     return AlertDialog(
       backgroundColor: card,
-      title: const Text('Manage camps',
+      title: Text(tr('Manage camps'),
           style: TextStyle(color: Colors.white, fontSize: 16)),
       content: SizedBox(
         width: (MediaQuery.sizeOf(context).width - 96).clamp(240.0, 360.0).toDouble(),
@@ -1339,9 +1481,9 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
               children: [
                 Flexible(
                   child: names.isEmpty
-                      ? const Padding(
+                      ? Padding(
                           padding: EdgeInsets.all(16),
-                          child: Text('No camps yet. Add one from the Safe zones page.',
+                          child: Text(tr('No camps yet. Add one from the Safe zones page.'),
                               style: TextStyle(color: muted, fontSize: 13)),
                         )
                       : ListView(
@@ -1355,7 +1497,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
                                     Icons.holiday_village_outlined,
                                     color: muted,
                                     size: 20),
-                                title: Text(c,
+                                title: Text(tr(c),
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 13)),
                                 subtitle: _subtitle(c, zones[_id(c)]),
@@ -1366,30 +1508,30 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
                                       visualDensity: VisualDensity.compact,
                                       tooltip: (zones[_id(c)]?.hasLocation ??
                                               false)
-                                          ? 'Edit safe zone'
-                                          : 'Place on map',
+                                          ? tr('Edit safe zone')
+                                          : tr('Place on map'),
                                       icon: Icon(
                                         (zones[_id(c)]?.hasLocation ?? false)
                                             ? Icons.location_on
                                             : Icons.add_location_alt_outlined,
                                         color: (zones[_id(c)]?.hasLocation ??
                                                 false)
-                                            ? const Color(0xFF00E676)
-                                            : const Color(0xFFFF9F0A),
+                                            ? const Color(0xFF34D399)
+                                            : const Color(0xFFFB923C),
                                         size: 20,
                                       ),
                                       onPressed: () => _editZone(c),
                                     ),
                                     IconButton(
                                       visualDensity: VisualDensity.compact,
-                                      tooltip: 'Rename',
+                                      tooltip: tr('Rename'),
                                       icon: const Icon(Icons.edit_outlined,
                                           color: muted, size: 20),
                                       onPressed: () => _rename(c),
                                     ),
                                     IconButton(
                                       visualDensity: VisualDensity.compact,
-                                      tooltip: 'Remove',
+                                      tooltip: tr('Remove'),
                                       icon: const Icon(Icons.delete_outline,
                                           color: accent, size: 20),
                                       onPressed: () => _remove(c),
@@ -1410,7 +1552,7 @@ class _ManageCampsDialogState extends State<_ManageCampsDialog> {
       actions: [
         TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: muted))),
+            child: Text(tr('Close'), style: TextStyle(color: muted))),
       ],
     );
   }
@@ -1443,8 +1585,8 @@ class _CampSheetState extends State<_CampSheet> {
 
   @override
   Widget build(BuildContext context) {
-    const accent = Color(0xFFFF5252);
-    const muted = Color(0xFF8E9BAE);
+    const accent = Color(0xFFF87171);
+    const muted = Color(0xFFB6C2D6);
     final q = _q.trim().toLowerCase();
     final shown = widget.camps
         .where((c) => q.isEmpty || c.toLowerCase().contains(q))
@@ -1458,11 +1600,11 @@ class _CampSheetState extends State<_CampSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Choose a camp',
+                  child: Text(tr('Choose a camp'),
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -1498,8 +1640,8 @@ class _CampSheetState extends State<_CampSheet> {
                         padding: const EdgeInsets.all(20),
                         child: Text(
                             widget.camps.isEmpty
-                                ? 'No safe zones yet. Add one first: Admin Panel > Manage camps.'
-                                : 'No camp matches your search.',
+                                ? tr('No safe zones yet. Add one first: Admin Panel > Manage camps.')
+                                : tr('No camp matches your search.'),
                             style: const TextStyle(color: muted, fontSize: 13)),
                       )
                     : ListView(
@@ -1512,7 +1654,7 @@ class _CampSheetState extends State<_CampSheet> {
                                       ? Icons.radio_button_checked
                                       : Icons.radio_button_off,
                                   color: c == widget.value ? accent : muted),
-                              title: Text(c,
+                              title: Text(tr(c),
                                   style: const TextStyle(color: Colors.white)),
                               onTap: () => Navigator.pop(context, c),
                             ),

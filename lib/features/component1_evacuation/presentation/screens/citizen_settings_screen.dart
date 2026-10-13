@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class CitizenSettingsScreen extends StatefulWidget {
   const CitizenSettingsScreen({super.key});
 
@@ -13,9 +14,9 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
 
   void _clearCache() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Offline map cache cleared successfully.'),
-        backgroundColor: Color(0xFF00E676),
+      SnackBar(
+        content: Text(tr('Offline map cache cleared successfully.')),
+        backgroundColor: Color(0xFF34D399),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -24,12 +25,12 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
-        title: const Text(
-          'Settings',
+        title: Text(
+          tr('Settings'),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -39,13 +40,13 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
         children: [
           _buildSectionHeader('Notifications'),
           SwitchListTile(
-            activeThumbColor: const Color(0xFF00E676),
-            title: const Text(
-              'Push Notifications',
+            activeThumbColor: const Color(0xFF34D399),
+            title: Text(
+              tr('Push Notifications'),
               style: TextStyle(color: Colors.white),
             ),
-            subtitle: const Text(
-              'Receive alerts for your registered zone',
+            subtitle: Text(
+              tr('Receive alerts for your registered zone'),
               style: TextStyle(color: Colors.white54),
             ),
             value: _pushNotifications,
@@ -58,12 +59,12 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
 
           _buildSectionHeader('Storage & Offline'),
           ListTile(
-            title: const Text(
-              'Clear Offline Map Cache',
+            title: Text(
+              tr('Clear Offline Map Cache'),
               style: TextStyle(color: Colors.white),
             ),
-            subtitle: const Text(
-              'Free up space by removing downloaded maps',
+            subtitle: Text(
+              tr('Free up space by removing downloaded maps'),
               style: TextStyle(color: Colors.white54),
             ),
             trailing: const Icon(Icons.delete_outline, color: Colors.white54),
@@ -85,7 +86,7 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
       child: Text(
         title.toUpperCase(),
         style: const TextStyle(
-          color: Color(0xFF00E676),
+          color: Color(0xFF34D399),
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,

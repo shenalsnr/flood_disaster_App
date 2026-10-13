@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class DispatcherSplitView extends StatelessWidget {
   const DispatcherSplitView({super.key});
 
@@ -9,21 +10,21 @@ class DispatcherSplitView extends StatelessWidget {
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text(
-          'Emergency Dispatch Station',
+        title: Text(
+          tr('Emergency Dispatch Station'),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: Colors.redAccent,
+              backgroundColor: Color(0xFFDC2626),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             icon: const Icon(Icons.cell_tower, size: 18),
-            label: const Text('BROADCAST ZONE ALERT'),
+            label: Text(tr('BROADCAST ZONE ALERT')),
             onPressed: () => _openBroadcastDialog(context),
           ),
           const SizedBox(width: 12),
@@ -37,8 +38,8 @@ class DispatcherSplitView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(12),
               children: [
-                const Text(
-                  'INCOMING CITIZEN HAZARDS',
+                Text(
+                  tr('INCOMING CITIZEN HAZARDS'),
                   style: TextStyle(
                     color: Colors.white70,
                     fontWeight: FontWeight.bold,
@@ -48,21 +49,21 @@ class DispatcherSplitView extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 _buildIncidentCard(
-                  title: 'Sudden Mudslide',
+                  title: tr('Sudden Mudslide'),
                   location: 'Kiriella - GN Div 4',
                   severity: 'LIFE THREATENING',
-                  severityColor: Colors.redAccent,
+                  severityColor: Color(0xFFF87171),
                   isVerified: true,
                 ),
                 _buildIncidentCard(
-                  title: 'Culvert Blocked / Water 3ft',
+                  title: tr('Culvert Blocked / Water 3ft'),
                   location: 'Main St Bridge',
                   severity: 'MODERATE',
                   severityColor: Colors.orangeAccent,
                   isVerified: false,
                 ),
                 _buildIncidentCard(
-                  title: 'Fallen Electric Pole',
+                  title: tr('Fallen Electric Pole'),
                   location: 'Hospital Road',
                   severity: 'HIGH',
                   severityColor: Colors.amber,
@@ -80,7 +81,7 @@ class DispatcherSplitView extends StatelessWidget {
             flex: 4,
             child: Container(
               color: const Color(0xFF181818),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -91,7 +92,7 @@ class DispatcherSplitView extends StatelessWidget {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      'Live Multi-Agency Coordinate Feed',
+                      tr('Live Multi-Agency Coordinate Feed'),
                       style: TextStyle(color: Colors.white54),
                     ),
                   ],
@@ -132,7 +133,7 @@ class DispatcherSplitView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    severity,
+                    tr(severity),
                     style: TextStyle(
                       color: severityColor,
                       fontSize: 10,
@@ -141,24 +142,24 @@ class DispatcherSplitView extends StatelessWidget {
                   ),
                 ),
                 if (isVerified)
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.verified, color: Colors.blueAccent, size: 14),
                       SizedBox(width: 4),
-                      Text(
-                        'Verified by GN',
+                      Flexible(child: Text(
+                        tr('Verified by GN'),
                         style: TextStyle(
                           color: Colors.blueAccent,
                           fontSize: 11,
                         ),
-                      ),
+                      )),
                     ],
                   ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              title,
+              tr(title),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -166,7 +167,7 @@ class DispatcherSplitView extends StatelessWidget {
               ),
             ),
             Text(
-              location,
+              tr(location),
               style: const TextStyle(color: Colors.white60, fontSize: 12),
             ),
           ],
@@ -180,27 +181,27 @@ class DispatcherSplitView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text(
-          'Broadcast Targeted Evacuation Alert',
+        title: Text(
+          tr('Broadcast Targeted Evacuation Alert'),
           style: TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Select zone radius to dispatch early warning sirens and push notifications to all citizen devices.',
+        content: Text(
+          tr('Select zone radius to dispatch early warning sirens and push notifications to all citizen devices.'),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              tr('Cancel'),
               style: TextStyle(color: Colors.white54),
             ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'BROADCAST NOW',
+            child: Text(
+              tr('BROADCAST NOW'),
               style: TextStyle(color: Colors.white),
             ),
           ),

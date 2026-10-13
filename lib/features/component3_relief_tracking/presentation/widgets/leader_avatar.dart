@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Round avatar for the logged-in camp leader: shows the profile photo when
 /// there is one (stored as a base64 data URL or a web link), otherwise the
 /// leader's initials.
@@ -61,7 +62,7 @@ class _LeaderAvatarState extends State<LeaderAvatar> {
       alignment: Alignment.center,
       color: const Color(0xFF1F2C46),
       child: Text(
-        _initials,
+        tr(_initials),
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,

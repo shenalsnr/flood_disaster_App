@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'theme_controller.dart';
 
+import '../localization/app_strings.dart';
+import '../localization/language_button.dart';
 /// Light mode is produced from the app's dark design by inverting lightness
 /// while keeping the hues (invert + 180 degree hue rotation). It applies to
 /// every screen, dialog and sheet in one place, so all components follow the
@@ -58,7 +60,7 @@ class ThemeToggleTile extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   const ThemeToggleTile({
     super.key,
-    this.activeColor = const Color(0xFF00E676),
+    this.activeColor = const Color(0xFF34D399),
     this.contentPadding,
   });
 
@@ -77,12 +79,12 @@ class ThemeToggleTile extends StatelessWidget {
             color: activeColor,
           ),
           activeThumbColor: activeColor,
-          title: const Text(
-            'Light mode',
+          title: Text(
+            tr('Light mode'),
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
           ),
           subtitle: Text(
-            light ? 'Light theme is on' : 'Dark theme is on (saves battery)',
+            light ? tr('Light theme is on') : tr('Dark theme is on (saves battery)'),
             style: const TextStyle(color: Colors.white54, fontSize: 12),
           ),
           value: light,
@@ -105,14 +107,23 @@ class ThemeToggleButton extends StatelessWidget {
       listenable: ThemeController.instance,
       builder: (context, _) {
         final light = ThemeController.instance.isLight;
-        return IconButton(
-          tooltip: light ? 'Switch to dark mode' : 'Switch to light mode',
-          icon: Icon(
-            light ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-            color: color ?? Colors.white,
-            size: 22,
-          ),
-          onPressed: () => ThemeController.instance.setLight(!light),
+        // Language chip (English / සිං / த) + Dark / Light button, together
+        // on the first page of every component.
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            LanguageButton(),
+            const SizedBox(width: 2),
+            IconButton(
+              tooltip: light ? tr('Switch to dark mode') : tr('Switch to light mode'),
+              icon: Icon(
+                light ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                color: color ?? Colors.white,
+                size: 22,
+              ),
+              onPressed: () => ThemeController.instance.setLight(!light),
+            ),
+          ],
         );
       },
     );

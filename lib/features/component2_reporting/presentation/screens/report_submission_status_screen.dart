@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/hazard_report_wizard_screen.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/offline_draft_management_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Screen displayed after submitting a hazard report.
 /// Matches the two user screenshots:
 /// - Online state: "Report Submitted!" with green check badge & Report ID (#FLD-2847).
@@ -41,16 +42,16 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                       children: [
-                        Text(
+                        Flexible(child: Text(
                           '9:41',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
-                        ),
+                        )),
                         const SizedBox(width: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -64,17 +65,17 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isOnline
-                                  ? const Color(0xFF00E676).withValues(alpha: 0.6)
-                                  : const Color(0xFFFF9F0A).withValues(alpha: 0.5),
+                                  ? const Color(0xFF34D399).withValues(alpha: 0.6)
+                                  : const Color(0xFFFB923C).withValues(alpha: 0.5),
                               width: 1.0,
                             ),
                           ),
                           child: Text(
-                            isOnline ? 'ONLINE' : 'OFFLINE QUEUE',
+                            isOnline ? tr('ONLINE') : tr('OFFLINE QUEUE'),
                             style: TextStyle(
                               color: isOnline
-                                  ? const Color(0xFF00E676)
-                                  : const Color(0xFFFF9F0A),
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFFFB923C),
                               fontSize: 10.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.6,
@@ -82,8 +83,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
-                    const Row(
+                    )),
+                    Flexible(child: const Row(mainAxisSize: MainAxisSize.min, 
                       children: [
                         Icon(Icons.signal_cellular_alt_rounded,
                             color: Colors.white, size: 16),
@@ -93,7 +94,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         Icon(Icons.battery_full_rounded,
                             color: Colors.white, size: 17),
                       ],
-                    ),
+                    )),
                   ],
                 ),
               ),
@@ -115,7 +116,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
 
                       // Screen Title
                       Text(
-                        isOnline ? 'Report Submitted!' : 'Report Saved.',
+                        isOnline ? tr('Report Submitted!') : tr('Report Saved.'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 27,
@@ -137,23 +138,23 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                             color: const Color(0xFF22160A),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: const Color(0xFFFF9F0A).withValues(alpha: 0.35),
+                              color: const Color(0xFFFB923C).withValues(alpha: 0.35),
                               width: 1.2,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.wifi_off_rounded,
-                                color: Color(0xFFFF9F0A),
+                                color: Color(0xFFFB923C),
                                 size: 15,
                               ),
                               SizedBox(width: 7),
                               Text(
-                                'NO SIGNAL DETECTED',
+                                tr('NO SIGNAL DETECTED'),
                                 style: TextStyle(
-                                  color: Color(0xFFFF9F0A),
+                                  color: Color(0xFFFB923C),
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.7,
@@ -171,10 +172,10 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(
                           isOnline
-                              ? 'Your ${hazard.toLowerCase()} report has been sent to Sri Lanka Disaster Management Centre (DMC) for verification.'
-                              : 'Your report is safely stored offline. It will upload automatically as soon as your device reconnects to a signal.',
+                              ? tr('Your {p0} report has been sent to Sri Lanka Disaster Management Centre (DMC) for verification.', {'p0': (hazard.toLowerCase()).toString()})
+                              : tr('Your report is safely stored offline. It will upload automatically as soon as your device reconnects to a signal.'),
                           style: const TextStyle(
-                            color: Color(0xFF8B9BB4),
+                            color: Color(0xFFB6C2D6),
                             fontSize: 14.5,
                             height: 1.45,
                             fontWeight: FontWeight.w400,
@@ -195,10 +196,10 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           isOnline
-                              ? 'Responders and emergency services have been notified of this critical hazard.'
-                              : 'Do not worry. Your hazard details are locked in with the precise GPS timestamp.',
+                              ? tr('Responders and emergency services have been notified of this critical hazard.')
+                              : tr('Do not worry. Your hazard details are locked in with the precise GPS timestamp.'),
                           style: const TextStyle(
-                            color: Color(0xFF70809A),
+                            color: Color(0xFF8A98B0),
                             fontSize: 13,
                             height: 1.45,
                             fontWeight: FontWeight.w400,
@@ -224,10 +225,10 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                       height: 56,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF9F0A),
+                          backgroundColor: const Color(0xFFFB923C),
                           foregroundColor: const Color(0xFF140D07),
                           elevation: 4,
-                          shadowColor: const Color(0xFFFF9F0A).withValues(alpha: 0.35),
+                          shadowColor: const Color(0xFFFB923C).withValues(alpha: 0.35),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -242,8 +243,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                             (route) => route.isFirst,
                           );
                         },
-                        child: const Text(
-                          'SUBMIT ANOTHER REPORT',
+                        child: Text(
+                          tr('SUBMIT ANOTHER REPORT'),
                           style: TextStyle(
                             fontSize: 15.5,
                             fontWeight: FontWeight.w900,
@@ -265,8 +266,8 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         // Pop all the way back to the volunteer dashboard
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
-                      child: const Text(
-                        'Back to Home',
+                      child: Text(
+                        tr('Back to Home'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -291,7 +292,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
       width: 88,
       height: 88,
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         shape: BoxShape.circle,
         border: Border.all(
           color: const Color(0xFF1A2A3E),
@@ -299,7 +300,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00E676).withValues(alpha: 0.12),
+            color: const Color(0xFF34D399).withValues(alpha: 0.12),
             blurRadius: 32,
             spreadRadius: 8,
           ),
@@ -312,14 +313,14 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: const Color(0xFF00E676),
+              color: const Color(0xFF34D399),
               width: 2.2,
             ),
           ),
           child: const Center(
             child: Icon(
               Icons.check_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 26,
             ),
           ),
@@ -342,7 +343,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFF9F0A).withValues(alpha: 0.12),
+            color: const Color(0xFFFB923C).withValues(alpha: 0.12),
             blurRadius: 32,
             spreadRadius: 8,
           ),
@@ -351,7 +352,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
       child: const Center(
         child: Icon(
           Icons.dns_rounded,
-          color: Color(0xFFFF9F0A),
+          color: Color(0xFFFB923C),
           size: 40,
         ),
       ),
@@ -364,19 +365,19 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C2740),
           width: 1.2,
         ),
       ),
       child: Column(
         children: [
-          const Text(
-            'REPORT ID',
+          Text(
+            tr('REPORT ID'),
             style: TextStyle(
-              color: Color(0xFF8B9BB4),
+              color: Color(0xFFB6C2D6),
               fontSize: 11.5,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
@@ -384,9 +385,9 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            reportId,
+            tr(reportId),
             style: const TextStyle(
-              color: Color(0xFFFF9F0A),
+              color: Color(0xFFFB923C),
               fontSize: 21,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.5,
@@ -403,10 +404,10 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFFF9F0A).withValues(alpha: 0.4),
+          color: const Color(0xFFFB923C).withValues(alpha: 0.4),
           width: 1.2,
         ),
       ),
@@ -440,7 +441,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                   child: const Center(
                     child: Icon(
                       Icons.storage_rounded,
-                      color: Color(0xFFFF9F0A),
+                      color: Color(0xFFFB923C),
                       size: 24,
                     ),
                   ),
@@ -451,7 +452,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '$pendingCount Report${pendingCount > 1 ? 's' : ''} Saved (SQLite)',
+                        tr('{p0} Report{p1} Saved (SQLite)', {'p0': (pendingCount).toString(), 'p1': (pendingCount > 1 ? 's' : '').toString()}),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -459,10 +460,10 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      const Text(
-                        'Saved permanently • Tap to manage drafts',
+                      Text(
+                        tr('Saved permanently • Tap to manage drafts'),
                         style: TextStyle(
-                          color: Color(0xFF8B9BB4),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                         ),
@@ -472,7 +473,7 @@ class ReportSubmissionStatusScreen extends StatelessWidget {
                 ),
                 const Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: Color(0xFFFF9F0A),
+                  color: Color(0xFFFB923C),
                   size: 14,
                 ),
               ],

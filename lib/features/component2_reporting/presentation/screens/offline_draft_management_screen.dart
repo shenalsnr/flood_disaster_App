@@ -5,6 +5,7 @@ import '../../data/models/offline_hazard_report.dart';
 import '../../data/services/offline_hazard_database.dart';
 import '../../data/services/offline_report_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Screen for managing Offline & Draft Hazard Reports with complete SQLite CRUD:
 /// - CREATE: Save reports as offline drafts when disconnected from the internet
 /// - READ: Real-time inspection of all stored drafts with filter tabs & search
@@ -84,31 +85,31 @@ class _OfflineDraftManagementScreenState
 
   Color _colorForHazard(String hazard) {
     final lower = hazard.toLowerCase();
-    if (lower.contains('flood')) return const Color(0xFF40C4FF);
-    if (lower.contains('landslide')) return const Color(0xFFFFB300);
-    if (lower.contains('tree')) return const Color(0xFF22C55E);
-    return const Color(0xFFFF5252);
+    if (lower.contains('flood')) return const Color(0xFF38BDF8);
+    if (lower.contains('landslide')) return const Color(0xFFFBBF24);
+    if (lower.contains('tree')) return const Color(0xFF34D399);
+    return const Color(0xFFF87171);
   }
 
   Color _colorForSeverity(String severity) {
     final upper = severity.toUpperCase();
     if (upper.contains('CRITICAL') || upper.contains('HIGH')) {
-      return const Color(0xFFFF3B3B);
+      return const Color(0xFFF87171);
     }
-    if (upper.contains('MEDIUM')) return const Color(0xFFFF9F0A);
-    return const Color(0xFF00E676);
+    if (upper.contains('MEDIUM')) return const Color(0xFFFB923C);
+    return const Color(0xFF34D399);
   }
 
   Color _colorForStatus(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING_SYNC':
-        return const Color(0xFFFF9F0A);
+        return const Color(0xFFFB923C);
       case 'DRAFT':
-        return const Color(0xFF40C4FF);
+        return const Color(0xFF38BDF8);
       case 'SYNCED':
-        return const Color(0xFF00E676);
+        return const Color(0xFF34D399);
       default:
-        return const Color(0xFF94A3B8);
+        return const Color(0xFFB6C2D6);
     }
   }
 
@@ -129,7 +130,7 @@ class _OfflineDraftManagementScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -151,50 +152,50 @@ class _OfflineDraftManagementScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
                               Icons.post_add_rounded,
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                               size: 22,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Text(
-                            'Save Offline Draft (SQLite)',
+                          Flexible(child: Text(
+                            tr('Save Offline Draft (SQLite)'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                             ),
-                          ),
+                          )),
                         ],
-                      ),
+                      )),
                       IconButton(
                         icon: const Icon(Icons.close_rounded,
-                            color: Color(0xFF64748B)),
+                            color: Color(0xFF8A98B0)),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'This report will be saved permanently in SQLite storage on this device, accessible without any internet signal.',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                  Text(
+                    tr('This report will be saved permanently in SQLite storage on this device, accessible without any internet signal.'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 12),
                   ),
                   const SizedBox(height: 20),
 
                   // Hazard Type Dropdown
-                  const Text(
-                    'HAZARD CATEGORY',
+                  Text(
+                    tr('HAZARD CATEGORY'),
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.6,
@@ -204,15 +205,15 @@ class _OfflineDraftManagementScreenState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF1C2740),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFF2B3A55)),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: hazardType,
                         isExpanded: true,
-                        dropdownColor: const Color(0xFF1E293B),
+                        dropdownColor: const Color(0xFF1C2740),
                         style: const TextStyle(
                             color: Colors.white, fontWeight: FontWeight.w600),
                         items: [
@@ -221,7 +222,7 @@ class _OfflineDraftManagementScreenState
                           'Fallen Tree Obstruction',
                           'Road Inundation',
                         ].map((h) {
-                          return DropdownMenuItem(value: h, child: Text(h));
+                          return DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -240,10 +241,10 @@ class _OfflineDraftManagementScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'SEVERITY',
+                            Text(
+                              tr('SEVERITY'),
                               style: TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.6,
@@ -253,16 +254,16 @@ class _OfflineDraftManagementScreenState
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E293B),
+                                color: const Color(0xFF1C2740),
                                 borderRadius: BorderRadius.circular(12),
                                 border:
-                                    Border.all(color: const Color(0xFF334155)),
+                                    Border.all(color: const Color(0xFF2B3A55)),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   value: severity,
                                   isExpanded: true,
-                                  dropdownColor: const Color(0xFF1E293B),
+                                  dropdownColor: const Color(0xFF1C2740),
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600),
@@ -272,7 +273,7 @@ class _OfflineDraftManagementScreenState
                                     'LOW',
                                   ].map((s) {
                                     return DropdownMenuItem(
-                                        value: s, child: Text(s));
+                                        value: s, child: Text(tr(s)));
                                   }).toList(),
                                   onChanged: (val) {
                                     if (val != null) {
@@ -290,10 +291,10 @@ class _OfflineDraftManagementScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'STORAGE INTENT',
+                            Text(
+                              tr('STORAGE INTENT'),
                               style: TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.6,
@@ -303,26 +304,26 @@ class _OfflineDraftManagementScreenState
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E293B),
+                                color: const Color(0xFF1C2740),
                                 borderRadius: BorderRadius.circular(12),
                                 border:
-                                    Border.all(color: const Color(0xFF334155)),
+                                    Border.all(color: const Color(0xFF2B3A55)),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   value: status,
                                   isExpanded: true,
-                                  dropdownColor: const Color(0xFF1E293B),
+                                  dropdownColor: const Color(0xFF1C2740),
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600),
                                   items: [
                                     DropdownMenuItem(
                                         value: 'PENDING_SYNC',
-                                        child: Text('Auto-Sync Queue')),
+                                        child: Text(tr('Auto-Sync Queue'))),
                                     DropdownMenuItem(
                                         value: 'DRAFT',
-                                        child: Text('Local Draft Only')),
+                                        child: Text(tr('Local Draft Only'))),
                                   ],
                                   onChanged: (val) {
                                     if (val != null) {
@@ -340,10 +341,10 @@ class _OfflineDraftManagementScreenState
                   const SizedBox(height: 14),
 
                   // Location
-                  const Text(
-                    'LOCATION / SECTOR',
+                  Text(
+                    tr('LOCATION / SECTOR'),
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.6,
@@ -355,28 +356,28 @@ class _OfflineDraftManagementScreenState
                     style: const TextStyle(color: Colors.white, fontSize: 13.5),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF1E293B),
+                      fillColor: const Color(0xFF1C2740),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 12),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? 'Required' : null,
+                        v == null || v.isEmpty ? tr('Required') : null,
                   ),
                   const SizedBox(height: 14),
 
                   // Description
-                  const Text(
-                    'SITUATION OBSERVATION / NOTE',
+                  Text(
+                    tr('SITUATION OBSERVATION / NOTE'),
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.6,
@@ -389,19 +390,19 @@ class _OfflineDraftManagementScreenState
                     style: const TextStyle(color: Colors.white, fontSize: 13),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF1E293B),
+                      fillColor: const Color(0xFF1C2740),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       contentPadding: const EdgeInsets.all(14),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? 'Required' : null,
+                        v == null || v.isEmpty ? tr('Required') : null,
                   ),
                   const SizedBox(height: 22),
 
@@ -411,7 +412,7 @@ class _OfflineDraftManagementScreenState
                     height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00E676),
+                        backgroundColor: const Color(0xFF34D399),
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -419,8 +420,8 @@ class _OfflineDraftManagementScreenState
                         elevation: 0,
                       ),
                       icon: const Icon(Icons.save_rounded, size: 20),
-                      label: const Text(
-                        'SAVE TO SQLITE STORAGE',
+                      label: Text(
+                        tr('SAVE TO SQLITE STORAGE'),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -454,15 +455,15 @@ class _OfflineDraftManagementScreenState
 
                         messenger.showSnackBar(
                           SnackBar(
-                            backgroundColor: const Color(0xFF070B14),
+                            backgroundColor: const Color(0xFF0B1220),
                             behavior: SnackBarBehavior.floating,
                             content: Row(
                               children: [
                                 const Icon(Icons.check_circle_rounded,
-                                    color: Color(0xFF00E676), size: 20),
+                                    color: Color(0xFF34D399), size: 20),
                                 const SizedBox(width: 10),
                                 Flexible(child: Text(
-                                  'Offline draft $reportId saved in SQLite storage!',
+                                  tr('Offline draft {p0} saved in SQLite storage!', {'p0': (reportId).toString()}),
                                   style: const TextStyle(color: Colors.white),
                                 )),
                               ],
@@ -495,7 +496,7 @@ class _OfflineDraftManagementScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -517,26 +518,26 @@ class _OfflineDraftManagementScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                              color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
                               Icons.edit_note_rounded,
-                              color: Color(0xFF40C4FF),
+                              color: Color(0xFF38BDF8),
                               size: 22,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Column(
+                          Flexible(child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Edit Offline Draft',
+                              Text(
+                                tr('Edit Offline Draft'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -544,20 +545,20 @@ class _OfflineDraftManagementScreenState
                                 ),
                               ),
                               Text(
-                                report.id,
+                                tr(report.id),
                                 style: const TextStyle(
-                                  color: Color(0xFFFF9F0A),
+                                  color: Color(0xFFFB923C),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
-                          ),
+                          )),
                         ],
-                      ),
+                      )),
                       IconButton(
                         icon: const Icon(Icons.close_rounded,
-                            color: Color(0xFF64748B)),
+                            color: Color(0xFF8A98B0)),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
@@ -565,10 +566,10 @@ class _OfflineDraftManagementScreenState
                   const SizedBox(height: 18),
 
                   // Hazard Type
-                  const Text(
-                    'HAZARD TYPE',
+                  Text(
+                    tr('HAZARD TYPE'),
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.6,
@@ -578,9 +579,9 @@ class _OfflineDraftManagementScreenState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF1C2740),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFF2B3A55)),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
@@ -593,7 +594,7 @@ class _OfflineDraftManagementScreenState
                             ? hazardType
                             : 'Flash Flood',
                         isExpanded: true,
-                        dropdownColor: const Color(0xFF1E293B),
+                        dropdownColor: const Color(0xFF1C2740),
                         style: const TextStyle(
                             color: Colors.white, fontWeight: FontWeight.w600),
                         items: [
@@ -602,7 +603,7 @@ class _OfflineDraftManagementScreenState
                           'Fallen Tree Obstruction',
                           'Road Inundation',
                         ].map((h) {
-                          return DropdownMenuItem(value: h, child: Text(h));
+                          return DropdownMenuItem(value: h, child: Text(tr(h), maxLines: 1, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -621,10 +622,10 @@ class _OfflineDraftManagementScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'SEVERITY',
+                            Text(
+                              tr('SEVERITY'),
                               style: TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.6,
@@ -634,10 +635,10 @@ class _OfflineDraftManagementScreenState
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E293B),
+                                color: const Color(0xFF1C2740),
                                 borderRadius: BorderRadius.circular(12),
                                 border:
-                                    Border.all(color: const Color(0xFF334155)),
+                                    Border.all(color: const Color(0xFF2B3A55)),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
@@ -646,7 +647,7 @@ class _OfflineDraftManagementScreenState
                                       ? severity
                                       : 'MEDIUM',
                                   isExpanded: true,
-                                  dropdownColor: const Color(0xFF1E293B),
+                                  dropdownColor: const Color(0xFF1C2740),
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600),
@@ -656,7 +657,7 @@ class _OfflineDraftManagementScreenState
                                     'LOW',
                                   ].map((s) {
                                     return DropdownMenuItem(
-                                        value: s, child: Text(s));
+                                        value: s, child: Text(tr(s)));
                                   }).toList(),
                                   onChanged: (val) {
                                     if (val != null) {
@@ -674,10 +675,10 @@ class _OfflineDraftManagementScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'QUEUE STATUS',
+                            Text(
+                              tr('QUEUE STATUS'),
                               style: TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.6,
@@ -687,28 +688,28 @@ class _OfflineDraftManagementScreenState
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E293B),
+                                color: const Color(0xFF1C2740),
                                 borderRadius: BorderRadius.circular(12),
                                 border:
-                                    Border.all(color: const Color(0xFF334155)),
+                                    Border.all(color: const Color(0xFF2B3A55)),
                               ),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   value: status,
                                   isExpanded: true,
-                                  dropdownColor: const Color(0xFF1E293B),
+                                  dropdownColor: const Color(0xFF1C2740),
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600),
                                   items: [
                                     DropdownMenuItem(
                                         value: 'PENDING_SYNC',
-                                        child: Text('Auto-Sync')),
+                                        child: Text(tr('Auto-Sync'))),
                                     DropdownMenuItem(
-                                        value: 'DRAFT', child: Text('Draft')),
+                                        value: 'DRAFT', child: Text(tr('Draft'))),
                                     DropdownMenuItem(
                                         value: 'SYNCED',
-                                        child: Text('Synced')),
+                                        child: Text(tr('Synced'))),
                                   ],
                                   onChanged: (val) {
                                     if (val != null) {
@@ -726,10 +727,10 @@ class _OfflineDraftManagementScreenState
                   const SizedBox(height: 14),
 
                   // Location
-                  const Text(
-                    'LOCATION',
+                  Text(
+                    tr('LOCATION'),
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.6,
@@ -741,28 +742,28 @@ class _OfflineDraftManagementScreenState
                     style: const TextStyle(color: Colors.white, fontSize: 13),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF1E293B),
+                      fillColor: const Color(0xFF1C2740),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 12),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? 'Required' : null,
+                        v == null || v.isEmpty ? tr('Required') : null,
                   ),
                   const SizedBox(height: 14),
 
                   // Description
-                  const Text(
-                    'DESCRIPTION NOTE',
+                  Text(
+                    tr('DESCRIPTION NOTE'),
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFFB6C2D6),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.6,
@@ -775,19 +776,19 @@ class _OfflineDraftManagementScreenState
                     style: const TextStyle(color: Colors.white, fontSize: 13),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF1E293B),
+                      fillColor: const Color(0xFF1C2740),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF334155)),
+                        borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                       ),
                       contentPadding: const EdgeInsets.all(14),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? 'Required' : null,
+                        v == null || v.isEmpty ? tr('Required') : null,
                   ),
                   const SizedBox(height: 20),
 
@@ -797,7 +798,7 @@ class _OfflineDraftManagementScreenState
                     height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF40C4FF),
+                        backgroundColor: const Color(0xFF38BDF8),
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -805,8 +806,8 @@ class _OfflineDraftManagementScreenState
                         elevation: 0,
                       ),
                       icon: const Icon(Icons.check_circle_rounded, size: 20),
-                      label: const Text(
-                        'UPDATE SQLITE DRAFT',
+                      label: Text(
+                        tr('UPDATE SQLITE DRAFT'),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -834,10 +835,10 @@ class _OfflineDraftManagementScreenState
 
                         messenger.showSnackBar(
                           SnackBar(
-                            backgroundColor: const Color(0xFF070B14),
+                            backgroundColor: const Color(0xFF0B1220),
                             behavior: SnackBarBehavior.floating,
                             content: Text(
-                              'Draft ${report.id} updated successfully!',
+                              tr('Draft {p0} updated successfully!', {'p0': (report.id).toString()}),
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
@@ -861,28 +862,28 @@ class _OfflineDraftManagementScreenState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF1E293B)),
+          side: const BorderSide(color: Color(0xFF1C2740)),
         ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFF3B3B).withValues(alpha: 0.15),
+                color: const Color(0xFFF87171).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
                 Icons.delete_forever_rounded,
-                color: Color(0xFFFF3B3B),
+                color: Color(0xFFF87171),
                 size: 22,
               ),
             ),
             const SizedBox(width: 12),
             Flexible(child: Text(
-              'Delete Draft?',
+              tr('Delete Draft?'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
@@ -892,18 +893,18 @@ class _OfflineDraftManagementScreenState
           ],
         ),
         content: Text(
-          'Are you sure you want to delete draft "${report.id}" (${report.hazardType})? This record will be permanently wiped from local SQLite storage.',
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5),
+          tr('Are you sure you want to delete draft "{p0}" ({p1})? This record will be permanently wiped from local SQLite storage.', {'p0': (report.id).toString(), 'p1': (report.hazardType).toString()}),
+          style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 13.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('CANCEL',
-                style: TextStyle(color: Color(0xFF64748B))),
+            child: Text(tr('CANCEL'),
+                style: TextStyle(color: Color(0xFF8A98B0))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFFFF3B3B),
+              backgroundColor: const Color(0xFFF87171),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -917,16 +918,16 @@ class _OfflineDraftManagementScreenState
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  backgroundColor: const Color(0xFF070B14),
+                  backgroundColor: const Color(0xFF0B1220),
                   behavior: SnackBarBehavior.floating,
                   content: Text(
-                    'Draft ${report.id} removed from SQLite.',
+                    tr('Draft {p0} removed from SQLite.', {'p0': (report.id).toString()}),
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
               );
             },
-            child: const Text('DELETE'),
+            child: Text(tr('DELETE')),
           ),
         ],
       ),
@@ -939,11 +940,11 @@ class _OfflineDraftManagementScreenState
     if (!online) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: Color(0xFF7F1D1D),
           behavior: SnackBarBehavior.floating,
           content: Text(
-            'Cannot sync: No active internet connection detected.',
+            tr('Cannot sync: No active internet connection detected.'),
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -966,8 +967,8 @@ class _OfflineDraftManagementScreenState
           behavior: SnackBarBehavior.floating,
           content: Text(
             success
-                ? 'Report ${report.id} uploaded to Disaster Operations Room!'
-                : 'Failed to sync report. Kept safely in SQLite.',
+                ? tr('Report {p0} uploaded to Disaster Operations Room!', {'p0': (report.id).toString()})
+                : tr('Failed to sync report. Kept safely in SQLite.'),
             style: const TextStyle(color: Colors.white),
           ),
         ),
@@ -988,12 +989,12 @@ class _OfflineDraftManagementScreenState
         SnackBar(
           backgroundColor: count > 0
               ? const Color(0xFF064E3B)
-              : const Color(0xFF1E293B),
+              : const Color(0xFF1C2740),
           behavior: SnackBarBehavior.floating,
           content: Text(
             count > 0
-                ? '$count reports successfully synchronized to Cloud!'
-                : 'No internet connection or no pending reports to sync.',
+                ? tr('{p0} reports successfully synchronized to Cloud!', {'p0': (count).toString()})
+                : tr('No internet connection or no pending reports to sync.'),
             style: const TextStyle(color: Colors.white),
           ),
         ),
@@ -1009,20 +1010,20 @@ class _OfflineDraftManagementScreenState
     return Scaffold(
       backgroundColor: const Color(0xFF070E1B),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Offline & Draft Reports',
+            Text(
+              tr('Offline & Draft Reports'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w900,
                 fontSize: 17,
               ),
             ),
-            Row(
+            Row(mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 7,
@@ -1030,19 +1031,19 @@ class _OfflineDraftManagementScreenState
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _isOnline
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFFFF9F0A),
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFFFB923C),
                   ),
                 ),
                 const SizedBox(width: 6),
                 Flexible(child: Text(
                   _isOnline
-                      ? 'ONLINE • Ready to Sync'
-                      : 'OFFLINE • SQLite Storage Active',
+                      ? tr('ONLINE • Ready to Sync')
+                      : tr('OFFLINE • SQLite Storage Active'),
                   style: TextStyle(
                     color: _isOnline
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFFFF9F0A),
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFFFB923C),
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -1051,7 +1052,7 @@ class _OfflineDraftManagementScreenState
               ],
             ),
           ],
-        ),
+        )),
         actions: [
           if (_isSyncing)
             const Center(
@@ -1062,19 +1063,19 @@ class _OfflineDraftManagementScreenState
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                   ),
                 ),
               ),
             )
           else
             IconButton(
-              tooltip: 'Sync All Pending Now',
-              icon: const Icon(Icons.sync_rounded, color: Color(0xFF00E676)),
+              tooltip: tr('Sync All Pending Now'),
+              icon: const Icon(Icons.sync_rounded, color: Color(0xFF34D399)),
               onPressed: _syncAllPending,
             ),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: tr('Refresh'),
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             onPressed: () {
               _checkNetwork();
@@ -1084,11 +1085,11 @@ class _OfflineDraftManagementScreenState
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF00E676),
+        backgroundColor: const Color(0xFF34D399),
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add_rounded, size: 22),
-        label: const Text(
-          'NEW DRAFT',
+        label: Text(
+          tr('NEW DRAFT'),
           style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
         onPressed: _openCreateDraftModal,
@@ -1099,31 +1100,31 @@ class _OfflineDraftManagementScreenState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: const BoxDecoration(
-              color: Color(0xFF131B2B),
+              color: Color(0xFF131C2E),
               border: Border(
-                bottom: BorderSide(color: Color(0xFF1E293B), width: 1.2),
+                bottom: BorderSide(color: Color(0xFF1C2740), width: 1.2),
               ),
             ),
             child: Row(
               children: [
                 _buildStatBadge(
-                  label: 'TOTAL SAVED',
+                  label: tr('TOTAL SAVED'),
                   count: _totalCount,
                   color: Colors.white,
                   icon: Icons.storage_rounded,
                 ),
                 const SizedBox(width: 8),
                 _buildStatBadge(
-                  label: 'PENDING SYNC',
+                  label: tr('PENDING SYNC'),
                   count: _pendingCount,
-                  color: const Color(0xFFFF9F0A),
+                  color: const Color(0xFFFB923C),
                   icon: Icons.cloud_upload_outlined,
                 ),
                 const SizedBox(width: 8),
                 _buildStatBadge(
-                  label: 'DRAFTS',
+                  label: tr('DRAFTS'),
                   count: _draftCount,
-                  color: const Color(0xFF40C4FF),
+                  color: const Color(0xFF38BDF8),
                   icon: Icons.edit_note_rounded,
                 ),
               ],
@@ -1150,7 +1151,7 @@ class _OfflineDraftManagementScreenState
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF00E676),
+                      color: Color(0xFF34D399),
                     ),
                   )
                 : _reports.isEmpty
@@ -1160,7 +1161,7 @@ class _OfflineDraftManagementScreenState
                           await _checkNetwork();
                           await _loadData();
                         },
-                        color: const Color(0xFF00E676),
+                        color: const Color(0xFF34D399),
                         child: ListView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 90),
                           itemCount: _reports.length,
@@ -1185,7 +1186,7 @@ class _OfflineDraftManagementScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C2740),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
@@ -1208,9 +1209,9 @@ class _OfflineDraftManagementScreenState
             ),
             const SizedBox(height: 3),
             Text(
-              label,
+              tr(label),
               style: const TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 9.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.4,
@@ -1227,19 +1228,19 @@ class _OfflineDraftManagementScreenState
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: ChoiceChip(
-        label: Text(label),
+        label: Text(tr(label)),
         selected: isSelected,
-        selectedColor: const Color(0xFF00E676),
-        backgroundColor: const Color(0xFF1E293B),
+        selectedColor: const Color(0xFF34D399),
+        backgroundColor: const Color(0xFF1C2740),
         labelStyle: TextStyle(
-          color: isSelected ? Colors.black : const Color(0xFF94A3B8),
+          color: isSelected ? Colors.black : const Color(0xFFB6C2D6),
           fontSize: 12,
           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
         ),
         side: BorderSide(
           color: isSelected
-              ? const Color(0xFF00E676)
-              : const Color(0xFF334155),
+              ? const Color(0xFF34D399)
+              : const Color(0xFF2B3A55),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onSelected: (val) {
@@ -1260,19 +1261,19 @@ class _OfflineDraftManagementScreenState
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF1C2740),
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF334155)),
+              border: Border.all(color: const Color(0xFF2B3A55)),
             ),
             child: const Icon(
               Icons.storage_rounded,
-              color: Color(0xFF64748B),
+              color: Color(0xFF8A98B0),
               size: 40,
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No Offline Drafts Found',
+          Text(
+            tr('No Offline Drafts Found'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -1280,10 +1281,10 @@ class _OfflineDraftManagementScreenState
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Tap "+ NEW DRAFT" below to create an offline report\nstored securely in SQLite database.',
+          Text(
+            tr('Tap "+ NEW DRAFT" below to create an offline report\nstored securely in SQLite database.'),
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12.5),
+            style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 12.5),
           ),
         ],
       ),
@@ -1300,12 +1301,12 @@ class _OfflineDraftManagementScreenState
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: report.status == 'PENDING_SYNC'
-              ? const Color(0xFFFF9F0A).withValues(alpha: 0.4)
-              : const Color(0xFF1E293B),
+              ? const Color(0xFFFB923C).withValues(alpha: 0.4)
+              : const Color(0xFF1C2740),
           width: 1.2,
         ),
       ),
@@ -1344,7 +1345,7 @@ class _OfflineDraftManagementScreenState
                         Row(
                           children: [
                             Flexible(child: Text(
-                              report.hazardType,
+                              tr(report.hazardType),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
@@ -1353,9 +1354,9 @@ class _OfflineDraftManagementScreenState
                             )),
                             const SizedBox(width: 8),
                             Flexible(child: Text(
-                              report.id,
+                              tr(report.id),
                               style: const TextStyle(
-                                color: Color(0xFFFF9F0A),
+                                color: Color(0xFFFB923C),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -1366,15 +1367,15 @@ class _OfflineDraftManagementScreenState
                         Row(
                           children: [
                             const Icon(Icons.location_on_rounded,
-                                color: Color(0xFF64748B), size: 12),
+                                color: Color(0xFF8A98B0), size: 12),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                report.location,
+                                tr(report.location),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: Color(0xFFB6C2D6),
                                   fontSize: 11.5,
                                 ),
                               ),
@@ -1385,7 +1386,7 @@ class _OfflineDraftManagementScreenState
                     ),
                   ),
                   // Status Badge
-                  Container(
+                  Flexible(child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -1405,14 +1406,14 @@ class _OfflineDraftManagementScreenState
                         letterSpacing: 0.4,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 
               if (report.description.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 Text(
-                  report.description,
+                  tr(report.description),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -1424,14 +1425,14 @@ class _OfflineDraftManagementScreenState
               ],
 
               const SizedBox(height: 12),
-              const Divider(color: Color(0xFF1E293B), height: 1),
+              const Divider(color: Color(0xFF1C2740), height: 1),
               const SizedBox(height: 10),
 
               // Bottom Actions: Severity, Time, Edit & Delete Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -1441,7 +1442,7 @@ class _OfflineDraftManagementScreenState
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          report.severity,
+                          tr(report.severity),
                           style: TextStyle(
                             color: sevColor,
                             fontSize: 10,
@@ -1450,38 +1451,38 @@ class _OfflineDraftManagementScreenState
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        timeStr,
+                      Flexible(child: Text(
+                        tr(timeStr),
                         style: const TextStyle(
-                          color: Color(0xFF64748B),
+                          color: Color(0xFF8A98B0),
                           fontSize: 11,
                         ),
-                      ),
+                      )),
                     ],
-                  ),
-                  Row(
+                  )),
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       if (report.status != 'SYNCED')
                         IconButton(
-                          tooltip: 'Sync Now',
+                          tooltip: tr('Sync Now'),
                           icon: const Icon(Icons.cloud_upload_outlined,
-                              color: Color(0xFF00E676), size: 19),
+                              color: Color(0xFF34D399), size: 19),
                           onPressed: () => _syncSingleDraft(report),
                         ),
                       IconButton(
-                        tooltip: 'Edit Draft',
+                        tooltip: tr('Edit Draft'),
                         icon: const Icon(Icons.edit_outlined,
-                            color: Color(0xFF40C4FF), size: 19),
+                            color: Color(0xFF38BDF8), size: 19),
                         onPressed: () => _openEditDraftModal(report),
                       ),
                       IconButton(
-                        tooltip: 'Delete Draft',
+                        tooltip: tr('Delete Draft'),
                         icon: const Icon(Icons.delete_outline_rounded,
-                            color: Color(0xFFFF5252), size: 19),
+                            color: Color(0xFFF87171), size: 19),
                         onPressed: () => _confirmDeleteDraft(report),
                       ),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ],

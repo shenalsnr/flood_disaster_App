@@ -7,6 +7,7 @@ import '../controllers/responder_controller.dart';
 import 'resolve_analysis_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class LiveTrackingScreen extends StatefulWidget {
   final IncidentReport incident;
 
@@ -190,8 +191,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           _controller.updateDispatchStatus(widget.incident, newStatus);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Dispatch status changed to $newStatus!'),
-              backgroundColor: const Color(0xFF00E676),
+              content: Text(tr('Dispatch status changed to {p0}!', {'p0': (newStatus).toString()})),
+              backgroundColor: const Color(0xFF34D399),
             ),
           );
         },
@@ -212,8 +213,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'Team Reassigned! ${newTeam.name} (${newTeam.callSign}) is now EN ROUTE.'),
-              backgroundColor: const Color(0xFF40C4FF),
+                  tr('Team Reassigned! {p0} ({p1}) is now EN ROUTE.', {'p0': (newTeam.name).toString(), 'p1': (newTeam.callSign).toString()})),
+              backgroundColor: const Color(0xFF38BDF8),
             ),
           );
         },
@@ -241,26 +242,26 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFFF5252), width: 1.5),
+            side: const BorderSide(color: Color(0xFFF87171), width: 1.5),
           ),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5252).withValues(alpha: 0.2),
+                  color: const Color(0xFFF87171).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.cancel_rounded,
-                    color: Color(0xFFFF5252), size: 22),
+                    color: Color(0xFFF87171), size: 22),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Cancel Active Dispatch',
+                  tr('Cancel Active Dispatch'),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -278,20 +279,20 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFFF5252).withValues(alpha: 0.3),
+                      color: const Color(0xFFF87171).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.warning_amber_rounded,
-                          color: Color(0xFFFF5252), size: 18),
+                          color: Color(0xFFF87171), size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Cancelling dispatch will recall ${_assignedTeam.name} and mark the squad AVAILABLE. Incident #${widget.incident.id} returns to PENDING TRIAGE.',
+                          tr('Cancelling dispatch will recall {p0} and mark the squad AVAILABLE. Incident #{p1} returns to PENDING TRIAGE.', {'p0': (_assignedTeam.name).toString(), 'p1': (widget.incident.id).toString()}),
                           style: const TextStyle(
                             color: Color(0xFFCBD5E1),
                             fontSize: 11,
@@ -303,10 +304,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'SELECT CANCELLATION REASON:',
+                Text(
+                  tr('SELECT CANCELLATION REASON:'),
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
@@ -316,20 +317,20 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131B2B),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: selectedReason,
-                      dropdownColor: const Color(0xFF131B2B),
+                      dropdownColor: const Color(0xFF131C2E),
                       isExpanded: true,
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       items: cancellationReasons.map((r) {
                         return DropdownMenuItem(
                           value: r,
-                          child: Text(r, overflow: TextOverflow.ellipsis),
+                          child: Text(tr(r), overflow: TextOverflow.ellipsis),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -341,10 +342,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'OPERATOR AUDIT REMARKS:',
+                Text(
+                  tr('OPERATOR AUDIT REMARKS:'),
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: Color(0xFFB6C2D6),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
@@ -356,13 +357,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   maxLines: 2,
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                   decoration: InputDecoration(
-                    hintText: 'Enter optional operator notes...',
+                    hintText: tr('Enter optional operator notes...'),
                     hintStyle: const TextStyle(color: Color(0xFF475569)),
                     filled: true,
-                    fillColor: const Color(0xFF131B2B),
+                    fillColor: const Color(0xFF131C2E),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                     ),
                   ),
                 ),
@@ -372,12 +373,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('DISMISS',
+              child: Text(tr('DISMISS'),
                   style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                backgroundColor: const Color(0xFFFF5252),
+                backgroundColor: const Color(0xFFDC2626),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -398,20 +399,20 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: const Color(0xFF070B14),
+                    backgroundColor: const Color(0xFF0B1220),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: Color(0xFFFF5252)),
+                      side: const BorderSide(color: Color(0xFFF87171)),
                     ),
                     content: Row(
                       children: [
                         const Icon(Icons.info_outline,
-                            color: Color(0xFFFF5252), size: 18),
+                            color: Color(0xFFF87171), size: 18),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Dispatch Cancelled. ${_assignedTeam.name} is now AVAILABLE on station grid.',
+                            tr('Dispatch Cancelled. {p0} is now AVAILABLE on station grid.', {'p0': (_assignedTeam.name).toString()}),
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 12),
                           ),
@@ -421,8 +422,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   ),
                 );
               },
-              child: const Text(
-                'CONFIRM CANCELLATION',
+              child: Text(
+                tr('CONFIRM CANCELLATION'),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
               ),
             ),
@@ -438,40 +439,40 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
     final isOnScene = _dispatchStatus == 'ON SCENE';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Row(mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF40C4FF).withValues(alpha: 0.2),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFF40C4FF), width: 0.8),
+                    border: Border.all(color: const Color(0xFF38BDF8), width: 0.8),
                   ),
                   child: const Text(
                     'M4-07',
                     style: TextStyle(
-                      color: Color(0xFF40C4FF),
+                      color: Color(0xFF38BDF8),
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Flexible(
+                Flexible(
                   child: Text(
-                    'Live Tracking Map',
+                    tr('Live Tracking Map'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -484,13 +485,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               ],
             ),
             Text(
-              '${team.name} ➔ Incident #${widget.incident.id}',
+              tr('{p0} ➔ Incident #{p1}', {'p0': (team.name).toString(), 'p1': (widget.incident.id).toString()}),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+              style: const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
             ),
           ],
-        ),
+        )),
         actions: [
           // Dynamic Status Badge (EN ROUTE / ON SCENE)
           Container(
@@ -498,39 +499,40 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
             decoration: BoxDecoration(
               color: isOnScene
-                  ? const Color(0xFF40C4FF).withValues(alpha: 0.2)
-                  : const Color(0xFF00E676).withValues(alpha: 0.2),
+                  ? const Color(0xFF38BDF8).withValues(alpha: 0.2)
+                  : const Color(0xFF34D399).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isOnScene
-                    ? const Color(0xFF40C4FF)
-                    : const Color(0xFF00E676),
+                    ? const Color(0xFF38BDF8)
+                    : const Color(0xFF34D399),
               ),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 6,
                   height: 6,
                   decoration: BoxDecoration(
                     color: isOnScene
-                        ? const Color(0xFF40C4FF)
-                        : const Color(0xFF00E676),
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFF34D399),
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  _dispatchStatus,
+                Flexible(child: Text(
+                  tr(_dispatchStatus),
                   style: TextStyle(
                     color: isOnScene
-                        ? const Color(0xFF40C4FF)
-                        : const Color(0xFF00E676),
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFF34D399),
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.6,
                   ),
-                ),
+                )),
               ],
             ),
           ),
@@ -544,7 +546,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             options: MapOptions(
               initialCenter: _squadLocation,
               initialZoom: 14.2,
-              backgroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF0B1220),
             ),
             children: [
               TileLayer(
@@ -557,7 +559,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                 polylines: [
                   Polyline(
                     points: _routePoints,
-                    color: const Color(0xFF40C4FF),
+                    color: const Color(0xFF38BDF8),
                     strokeWidth: 4.5,
                   ),
                 ],
@@ -581,7 +583,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF00E676)
+                                color: const Color(0xFF34D399)
                                     .withValues(alpha: 0.4),
                                 width: 2,
                               ),
@@ -624,12 +626,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       child: Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF5252),
+                          color: const Color(0xFFF87171),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFF5252)
+                              color: const Color(0xFFF87171)
                                   .withValues(alpha: 0.6),
                               blurRadius: 14,
                             ),
@@ -649,23 +651,27 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
           Positioned(
             top: 12,
             left: 14,
-            child: Container(
+            right: 70,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B).withValues(alpha: 0.9),
+                color: const Color(0xFF131C2E).withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                border: Border.all(color: const Color(0xFF1C2740)),
                 boxShadow: const [
                   BoxShadow(color: Colors.black45, blurRadius: 6),
                 ],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.explore_rounded,
-                      color: Color(0xFF40C4FF), size: 14),
+                      color: Color(0xFF38BDF8), size: 14),
                   const SizedBox(width: 6),
                   Flexible(child: Text(
-                    'HDG: 042° NE • GPS: ${_squadLocation.latitude.toStringAsFixed(3)}°N, ${_squadLocation.longitude.toStringAsFixed(3)}°E',
+                    tr('HDG: 042° NE • GPS: {p0}°N, {p1}°E', {'p0': (_squadLocation.latitude.toStringAsFixed(3)).toString(), 'p1': (_squadLocation.longitude.toStringAsFixed(3)).toString()}),
                     style: const TextStyle(
                       color: Color(0xFFCBD5E1),
                       fontSize: 10,
@@ -675,6 +681,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   )),
                 ],
               ),
+            ),
             ),
           ),
 
@@ -686,18 +693,18 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
               children: [
                 FloatingActionButton.small(
                   heroTag: 'center_squad',
-                  backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: const Color(0xFF40C4FF),
-                  tooltip: 'Center on Response Squad',
+                  backgroundColor: const Color(0xFF1C2740),
+                  foregroundColor: const Color(0xFF38BDF8),
+                  tooltip: tr('Center on Response Squad'),
                   onPressed: () => _mapController.move(_squadLocation, 14.5),
                   child: const Icon(Icons.navigation_rounded),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton.small(
                   heroTag: 'center_incident',
-                  backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: const Color(0xFFFF5252),
-                  tooltip: 'Center on Incident',
+                  backgroundColor: const Color(0xFF1C2740),
+                  foregroundColor: const Color(0xFFF87171),
+                  tooltip: tr('Center on Incident'),
                   onPressed: () => _mapController.move(_incidentLocation, 14.5),
                   child: const Icon(Icons.crisis_alert_rounded),
                 ),
@@ -713,9 +720,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B),
+                color: const Color(0xFF131C2E),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+                border: Border.all(color: const Color(0xFF1C2740), width: 1.5),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black87,
@@ -738,7 +745,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                             Row(
                               children: [
                                 Flexible(child: Text(
-                                  team.name,
+                                  tr(team.name),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -746,30 +753,30 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                                   ),
                                 )),
                                 const SizedBox(width: 6),
-                                Container(
+                                Flexible(child: Container(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF40C4FF)
+                                    color: const Color(0xFF38BDF8)
                                         .withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    team.callSign,
+                                    tr(team.callSign),
                                     style: const TextStyle(
-                                      color: Color(0xFF40C4FF),
+                                      color: Color(0xFF38BDF8),
                                       fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
+                                )),
                               ],
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '${team.leader} • Radio ${team.radioChannel}',
+                              tr('{p0} • Radio {p1}', {'p0': (team.leader).toString(), 'p1': (team.radioChannel).toString()}),
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 11,
                               ),
                             ),
@@ -777,43 +784,43 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         ),
                       ),
                       // READ: "ETA 4 MINS" CARD
-                      Container(
+                      Flexible(child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF131B2B),
+                          color: const Color(0xFF131C2E),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: isOnScene
-                                ? const Color(0xFF40C4FF)
-                                : const Color(0xFF00E676),
+                                ? const Color(0xFF38BDF8)
+                                : const Color(0xFF34D399),
                             width: 1.5,
                           ),
                         ),
                         child: Column(
                           children: [
                             Text(
-                              isOnScene ? 'ON SCENE' : 'ETA $_minutesLeft MINS',
+                              isOnScene ? tr('ON SCENE') : tr('ETA {p0} MINS', {'p0': (_minutesLeft).toString()}),
                               style: TextStyle(
                                 color: isOnScene
-                                    ? const Color(0xFF40C4FF)
-                                    : const Color(0xFF00E676),
+                                    ? const Color(0xFF38BDF8)
+                                    : const Color(0xFF34D399),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
                             Text(
                               isOnScene
-                                  ? 'Stationed'
-                                  : '$_kmLeft km • ${_speedKmh.toInt()} km/h',
+                                  ? tr('Stationed')
+                                  : tr('{p0} km • {p1} km/h', {'p0': (_kmLeft).toString(), 'p1': (_speedKmh.toInt()).toString()}),
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Color(0xFFB6C2D6),
                                 fontSize: 10,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      )),
                     ],
                   ),
 
@@ -823,22 +830,22 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                         children: [
                           const Icon(Icons.water,
-                              color: Color(0xFF40C4FF), size: 12),
+                              color: Color(0xFF38BDF8), size: 12),
                           const SizedBox(width: 4),
-                          Text(
-                            'Water Level on Route: ${widget.incident.waterDepth}',
+                          Flexible(child: Text(
+                            tr('Water Level on Route: {p0}', {'p0': (widget.incident.waterDepth).toString()}),
                             style: const TextStyle(
-                                color: Color(0xFF94A3B8), fontSize: 10),
-                          ),
+                                color: Color(0xFFB6C2D6), fontSize: 10),
+                          )),
                         ],
-                      ),
+                      )),
                       Flexible(child: Text(
-                        '${(_routeProgress * 100).toInt()}% En Route',
+                        tr('{p0}% En Route', {'p0': ((_routeProgress * 100).toInt()).toString()}),
                         style: const TextStyle(
-                          color: Color(0xFF40C4FF),
+                          color: Color(0xFF38BDF8),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -850,11 +857,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: _routeProgress,
-                      backgroundColor: const Color(0xFF1E293B),
+                      backgroundColor: const Color(0xFF1C2740),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isOnScene
-                            ? const Color(0xFF40C4FF)
-                            : const Color(0xFFFF6D00),
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF38BDF8),
                       ),
                       minHeight: 6,
                     ),
@@ -869,16 +876,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Expanded(
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF40C4FF),
-                            side: const BorderSide(color: Color(0xFF40C4FF)),
+                            foregroundColor: const Color(0xFF38BDF8),
+                            side: const BorderSide(color: Color(0xFF38BDF8)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           icon: const Icon(Icons.radio_rounded, size: 16),
-                          label: const Text(
-                            'CONTACT TEAM',
+                          label: Text(
+                            tr('CONTACT TEAM'),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -893,16 +900,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                       Expanded(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6D00),
-                            foregroundColor: Colors.white,
+                            backgroundColor: const Color(0xFF38BDF8),
+                            foregroundColor: const Color(0xFF06121F),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           icon: const Icon(Icons.sync_rounded, size: 16),
-                          label: const Text(
-                            'UPDATE DISPATCH',
+                          label: Text(
+                            tr('UPDATE DISPATCH'),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -927,14 +934,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.cancel_outlined,
-                              color: const Color(0xFFFF5252)
+                              color: const Color(0xFFF87171)
                                   .withValues(alpha: 0.8),
                               size: 14),
                           const SizedBox(width: 6),
                           Flexible(child: Text(
-                            'CANCEL DISPATCH (STAND DOWN / REASSIGN)',
+                            tr('CANCEL DISPATCH (STAND DOWN / REASSIGN)'),
                             style: TextStyle(
-                              color: const Color(0xFFFF5252)
+                              color: const Color(0xFFF87171)
                                   .withValues(alpha: 0.9),
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -992,9 +999,9 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF131B2B),
+        color: Color(0xFF131C2E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFF40C4FF), width: 2)),
+        border: Border(top: BorderSide(color: Color(0xFF38BDF8), width: 2)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1014,13 +1021,13 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           const SizedBox(height: 14),
           Row(
             children: [
-              const Icon(Icons.radio_rounded, color: Color(0xFF40C4FF), size: 24),
+              const Icon(Icons.radio_rounded, color: Color(0xFF38BDF8), size: 24),
               const SizedBox(width: 10),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Radio Comms: ${widget.team.radioChannel}',
+                    tr('Radio Comms: {p0}', {'p0': (widget.team.radioChannel).toString()}),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -1028,28 +1035,28 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                     ),
                   ),
                   Text(
-                    '${widget.team.name} • Lead: ${widget.team.leader}',
+                    tr('{p0} • Lead: {p1}', {'p0': (widget.team.name).toString(), 'p1': (widget.team.leader).toString()}),
                     style:
-                        const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                        const TextStyle(color: Color(0xFFB6C2D6), fontSize: 11),
                   ),
                 ],
               )),
               const SizedBox(width: 8),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text(
-                  'ENC-98%',
+                child: Text(
+                  tr('ENC-98%'),
                   style: TextStyle(
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 18),
@@ -1058,12 +1065,12 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF070B14),
+              color: const Color(0xFF0B1220),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: _isTalking
-                    ? const Color(0xFF00E676)
-                    : const Color(0xFF1E293B),
+                    ? const Color(0xFF34D399)
+                    : const Color(0xFF1C2740),
               ),
             ),
             child: Column(
@@ -1081,8 +1088,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                       height: height,
                       decoration: BoxDecoration(
                         color: _isTalking
-                            ? const Color(0xFF00E676)
-                            : const Color(0xFF334155),
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFF2B3A55),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     );
@@ -1091,12 +1098,12 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                 const SizedBox(height: 12),
                 Text(
                   _isTalking
-                    ? 'TRANSMITTING VOICE AUDIO (PTT ACTIVE)...'
-                    : 'CHANNEL STANDBY • HOLD BUTTON TO TALK',
+                    ? tr('TRANSMITTING VOICE AUDIO (PTT ACTIVE)...')
+                    : tr('CHANNEL STANDBY • HOLD BUTTON TO TALK'),
                   style: TextStyle(
                     color: _isTalking
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFF64748B),
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFF8A98B0),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.6,
@@ -1118,13 +1125,13 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 color: _isTalking
-                    ? const Color(0xFF00E676)
+                    ? const Color(0xFF34D399)
                     : const Color(0xFF0284C7),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: _isTalking
-                        ? const Color(0xFF00E676).withValues(alpha: 0.4)
+                        ? const Color(0xFF34D399).withValues(alpha: 0.4)
                         : const Color(0xFF0284C7).withValues(alpha: 0.3),
                     blurRadius: 10,
                   ),
@@ -1139,7 +1146,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
                   ),
                   const SizedBox(width: 8),
                   Flexible(child: Text(
-                    _isTalking ? 'RELEASE TO END TRANSMISSION' : 'PUSH TO TALK (PTT)',
+                    _isTalking ? tr('RELEASE TO END TRANSMISSION') : tr('PUSH TO TALK (PTT)'),
                     style: TextStyle(
                       color: _isTalking ? Colors.black : Colors.white,
                       fontSize: 13,
@@ -1157,8 +1164,8 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
           // Direct Phone Call Option
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF40C4FF),
-              side: const BorderSide(color: Color(0xFF40C4FF)),
+              foregroundColor: const Color(0xFF38BDF8),
+              side: const BorderSide(color: Color(0xFF38BDF8)),
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -1166,7 +1173,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
             ),
             icon: const Icon(Icons.phone_rounded, size: 16),
             label: Text(
-              'CALL COMMANDER PHONE (${widget.team.phoneNumber})',
+              tr('CALL COMMANDER PHONE ({p0})', {'p0': (widget.team.phoneNumber).toString()}),
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
             ),
             onPressed: () {
@@ -1174,7 +1181,7 @@ class _TacticalCommsSheetState extends State<_TacticalCommsSheet>
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      'Dialing ${widget.team.leader} at ${widget.team.phoneNumber}...'),
+                      tr('Dialing {p0} at {p1}...', {'p0': (widget.team.leader).toString(), 'p1': (widget.team.phoneNumber).toString()})),
                   backgroundColor: const Color(0xFF0284C7),
                 ),
               );
@@ -1244,18 +1251,18 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+            side: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.swap_horiz_rounded, color: Color(0xFFFF6D00), size: 24),
+              Icon(Icons.swap_horiz_rounded, color: Color(0xFF38BDF8), size: 24),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Confirm Team Reassignment',
+                  tr('Confirm Team Reassignment'),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -1270,19 +1277,19 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Reassign from ${widget.currentTeam.name} to ${newTeam.name}?',
+                tr('Reassign from {p0} to {p1}?', {'p0': (widget.currentTeam.name).toString(), 'p1': (newTeam.name).toString()}),
                 style: const TextStyle(color: Colors.white, fontSize: 13),
               ),
               const SizedBox(height: 6),
               Text(
-                '${widget.currentTeam.name} will be marked AVAILABLE again.',
-                style: const TextStyle(color: Color(0xFF00E676), fontSize: 11),
+                tr('{p0} will be marked AVAILABLE again.', {'p0': (widget.currentTeam.name).toString()}),
+                style: const TextStyle(color: Color(0xFF34D399), fontSize: 11),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'REASSIGNMENT REASON:',
+              Text(
+                tr('REASSIGNMENT REASON:'),
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1291,18 +1298,18 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF2B3A55)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: reassignReason,
-                    dropdownColor: const Color(0xFF131B2B),
+                    dropdownColor: const Color(0xFF131C2E),
                     isExpanded: true,
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                     items: reasons.map((r) {
-                      return DropdownMenuItem(value: r, child: Text(r));
+                      return DropdownMenuItem(value: r, child: Text(tr(r), maxLines: 1, overflow: TextOverflow.ellipsis));
                     }).toList(),
                     onChanged: (v) {
                       if (v != null) setDlgState(() => reassignReason = v);
@@ -1315,19 +1322,19 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
+              child: Text(tr('CANCEL'), style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-                backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF38BDF8),
+                foregroundColor: const Color(0xFF06121F),
               ),
               onPressed: () {
                 Navigator.of(ctx).pop();
                 Navigator.of(context).pop(); // close update sheet
                 widget.onTeamReassigned(newTeam, reassignReason);
               },
-              child: const Text('REASSIGN SQUAD'),
+              child: Text(tr('REASSIGN SQUAD')),
             ),
           ],
         ),
@@ -1339,9 +1346,9 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF131B2B),
+        color: Color(0xFF131C2E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFFFF6D00), width: 2)),
+        border: Border(top: BorderSide(color: Color(0xFF38BDF8), width: 2)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -1370,7 +1377,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: Text(
-                'UPDATE DISPATCH MISSION',
+                tr('UPDATE DISPATCH MISSION'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -1397,19 +1404,19 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                       border: Border(
                         bottom: BorderSide(
                           color: _activeTab == 0
-                              ? const Color(0xFFFF6D00)
+                              ? const Color(0xFF38BDF8)
                               : Colors.transparent,
                           width: 2,
                         ),
                       ),
                     ),
                     child: Text(
-                      'STATUS & NOTES',
+                      tr('STATUS & NOTES'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: _activeTab == 0
-                            ? const Color(0xFFFF6D00)
-                            : const Color(0xFF64748B),
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF8A98B0),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1426,19 +1433,19 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                       border: Border(
                         bottom: BorderSide(
                           color: _activeTab == 1
-                              ? const Color(0xFFFF6D00)
+                              ? const Color(0xFF38BDF8)
                               : Colors.transparent,
                           width: 2,
                         ),
                       ),
                     ),
                     child: Text(
-                      'TEAM PICKER AGAIN (REASSIGN)',
+                      tr('TEAM PICKER AGAIN (REASSIGN)'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: _activeTab == 1
-                            ? const Color(0xFFFF6D00)
-                            : const Color(0xFF64748B),
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF8A98B0),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1453,10 +1460,10 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
 
           if (_activeTab == 0) ...[
             // Status Badge Selection
-            const Text(
-              'UPDATE MISSION STAGE (STATUS BADGE):',
+            Text(
+              tr('UPDATE MISSION STAGE (STATUS BADGE):'),
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -1469,7 +1476,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     'EN ROUTE',
                     Icons.directions_boat_rounded,
                     _selectedStatus == 'EN ROUTE',
-                    const Color(0xFF00E676),
+                    const Color(0xFF34D399),
                     () => setState(() => _selectedStatus = 'EN ROUTE'),
                   ),
                 ),
@@ -1479,7 +1486,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     'ON SCENE',
                     Icons.pin_drop_rounded,
                     _selectedStatus == 'ON SCENE',
-                    const Color(0xFF40C4FF),
+                    const Color(0xFF38BDF8),
                     () => setState(() => _selectedStatus = 'ON SCENE'),
                   ),
                 ),
@@ -1489,10 +1496,10 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             const SizedBox(height: 14),
 
             // Tactical Notes
-            const Text(
-              'UPDATE TACTICAL DISPATCH NOTES:',
+            Text(
+              tr('UPDATE TACTICAL DISPATCH NOTES:'),
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -1504,12 +1511,12 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
               style: const TextStyle(color: Colors.white, fontSize: 12),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF131B2B),
-                hintText: 'Enter mission briefing updates...',
+                fillColor: const Color(0xFF131C2E),
+                hintText: tr('Enter mission briefing updates...'),
                 hintStyle: const TextStyle(color: Color(0xFF475569)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  borderSide: const BorderSide(color: Color(0xFF2B3A55)),
                 ),
               ),
             ),
@@ -1519,8 +1526,8 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             // Save Status & Notes Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF38BDF8),
+                foregroundColor: const Color(0xFF06121F),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -1531,7 +1538,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                 widget.onStatusChanged(_selectedStatus);
                 Navigator.of(context).pop();
               },
-              child: const Text('SAVE DISPATCH UPDATES',
+              child: Text(tr('SAVE DISPATCH UPDATES'),
                   style: TextStyle(fontWeight: FontWeight.bold)),
             ),
 
@@ -1540,15 +1547,15 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             // Resolve incident shortcut
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF00E676),
-                side: const BorderSide(color: Color(0xFF00E676)),
+                foregroundColor: const Color(0xFF34D399),
+                side: const BorderSide(color: Color(0xFF34D399)),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               icon: const Icon(Icons.check_circle_outline, size: 16),
-              label: const Text('CLOSE & PROCEED TO RESOLVE INCIDENT (M4-08)'),
+              label: Text(tr('CLOSE & PROCEED TO RESOLVE INCIDENT (M4-08)')),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
@@ -1561,10 +1568,10 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
             ),
           ] else ...[
             // Tab 1: TEAM PICKER AGAIN
-            const Text(
-              'SELECT A DIFFERENT AVAILABLE RESPONSE TEAM:',
+            Text(
+              tr('SELECT A DIFFERENT AVAILABLE RESPONSE TEAM:'),
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFFB6C2D6),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -1583,11 +1590,11 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF131B2B),
+                      color: const Color(0xFF131C2E),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: team.isAvailable
-                            ? const Color(0xFF334155)
+                            ? const Color(0xFF2B3A55)
                             : Colors.white10,
                       ),
                     ),
@@ -1598,7 +1605,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                               ? Icons.directions_boat
                               : Icons.local_shipping,
                           color: team.isAvailable
-                              ? const Color(0xFF40C4FF)
+                              ? const Color(0xFF38BDF8)
                               : Colors.white24,
                           size: 20,
                         ),
@@ -1608,7 +1615,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                team.name,
+                                tr(team.name),
                                 style: TextStyle(
                                   color: team.isAvailable
                                       ? Colors.white
@@ -1618,9 +1625,9 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                                 ),
                               ),
                               Text(
-                                'ETA: ${team.eta} • ${team.vehicleType}',
+                                tr('ETA: {p0} • {p1}', {'p0': (team.eta).toString(), 'p1': (team.vehicleType).toString()}),
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
+                                  color: Color(0xFFB6C2D6),
                                   fontSize: 10,
                                 ),
                               ),
@@ -1630,7 +1637,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                             backgroundColor: team.isAvailable
-                                ? const Color(0xFFFF6D00)
+                                ? const Color(0xFF38BDF8)
                                 : Colors.white12,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
@@ -1640,7 +1647,7 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
                           onPressed: team.isAvailable
                               ? () => _showReassignConfirmDialog(team)
                               : null,
-                          child: const Text('REASSIGN'),
+                          child: Text(tr('REASSIGN')),
                         ),
                       ],
                     ),
@@ -1669,10 +1676,10 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? activeColor.withValues(alpha: 0.2)
-              : const Color(0xFF131B2B),
+              : const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? activeColor : const Color(0xFF334155),
+            color: isSelected ? activeColor : const Color(0xFF2B3A55),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -1680,13 +1687,13 @@ class _UpdateDispatchSheetState extends State<_UpdateDispatchSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon,
-                color: isSelected ? activeColor : const Color(0xFF64748B),
+                color: isSelected ? activeColor : const Color(0xFF8A98B0),
                 size: 16),
             const SizedBox(width: 6),
             Flexible(child: Text(
-              label,
+              tr(label),
               style: TextStyle(
-                color: isSelected ? activeColor : const Color(0xFF94A3B8),
+                color: isSelected ? activeColor : const Color(0xFFB6C2D6),
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),

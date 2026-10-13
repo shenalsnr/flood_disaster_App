@@ -5,17 +5,16 @@ import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/review_report_screen.dart';
-import '../../data/services/geocoding_service.dart';
-import '../../../../core/services/network_status_service.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// 3-Step Wizard for Reporting Ground Hazards.
 /// - Step 1: 4 hazard tiles (Flash Flood, Landslide, Fallen Tree, Road Blocked).
 ///   Tapping ANY of the 4 tiles immediately advances to "Choose Severity" (NO Next button!).
 /// - Step 2: "Choose Severity" matching Screenshot 2 (Low, Medium, High / Critical).
 ///   Tapping any severity immediately advances to Step 3.
 /// - Step 3: "Confirm Details" matching Screenshot 3:
-///   Map with GPS LOCKED, auto-detected address, "ADD PHOTO (RECOMMENDED)",
+///   Map with GPS LOCKED, Kolonnawa Basin coords, "ADD PHOTO (RECOMMENDED)",
 ///   "Record Voice Memo / Add Pre-defined Note", and "REVIEW REPORT" button.
 class HazardReportWizardScreen extends StatefulWidget {
   const HazardReportWizardScreen({super.key});
@@ -38,41 +37,11 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   bool _isLoadingLocation = false;
   bool _hasGpsLock = false;
   final MapController _mapController = MapController();
-  final TextEditingController _locationController =
-      TextEditingController(text: 'Locating current address...');
-  bool _isLoadingAddress = false;
 
   @override
   void initState() {
     super.initState();
     _fetchCurrentLocation();
-  }
-
-  @override
-  void dispose() {
-    _locationController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _updateLocationWithCoords(LatLng coords, {required bool isGps}) async {
-    if (!mounted) return;
-    setState(() {
-      _hazardCoords = coords;
-      _hasGpsLock = isGps;
-      _isLoadingAddress = true;
-    });
-
-    final address = await GeocodingService.reverseGeocode(
-      coords.latitude,
-      coords.longitude,
-    );
-
-    if (mounted) {
-      setState(() {
-        _locationController.text = address;
-        _isLoadingAddress = false;
-      });
-    }
   }
 
   Future<void> _fetchCurrentLocation() async {
@@ -82,15 +51,14 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enable GPS / Location Services.'),
+            SnackBar(
+              content: Text(tr('Please enable GPS / Location Services.')),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 2),
             ),
           );
         }
         setState(() => _isLoadingLocation = false);
-        await _updateLocationWithCoords(_hazardCoords, isGps: false);
         return;
       }
 
@@ -100,22 +68,20 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Location permission denied. Using fallback GPS.'),
+              SnackBar(
+                content: Text(tr('Location permission denied. Using fallback GPS.')),
                 backgroundColor: Colors.orange,
                 duration: Duration(seconds: 2),
               ),
             );
           }
           setState(() => _isLoadingLocation = false);
-          await _updateLocationWithCoords(_hazardCoords, isGps: false);
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
         setState(() => _isLoadingLocation = false);
-        await _updateLocationWithCoords(_hazardCoords, isGps: false);
         return;
       }
 
@@ -126,17 +92,18 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         ),
       );
 
-      final newCoords = LatLng(position.latitude, position.longitude);
       if (mounted) {
-        setState(() => _isLoadingLocation = false);
-        _mapController.move(newCoords, 14.0);
-        await _updateLocationWithCoords(newCoords, isGps: true);
+        setState(() {
+          _hazardCoords = LatLng(position.latitude, position.longitude);
+          _hasGpsLock = true;
+          _isLoadingLocation = false;
+        });
+        _mapController.move(_hazardCoords, 14.0);
       }
     } catch (e) {
       debugPrint('Error getting location: $e');
       if (mounted) {
         setState(() => _isLoadingLocation = false);
-        await _updateLocationWithCoords(_hazardCoords, isGps: false);
       }
     }
   }
@@ -146,22 +113,22 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     {
       'title': 'Flash Flood',
       'icon': Icons.water_drop_rounded,
-      'color': Color(0xFF40C4FF), // Light Blue
+      'color': Color(0xFF38BDF8), // Light Blue
     },
     {
       'title': 'Landslide',
       'icon': Icons.landscape_rounded,
-      'color': Color(0xFFFFB300), // Golden Amber
+      'color': Color(0xFFFBBF24), // Golden Amber
     },
     {
       'title': 'Fallen Tree',
       'icon': Icons.park_rounded,
-      'color': Color(0xFF22C55E), // Green
+      'color': Color(0xFF34D399), // Green
     },
     {
       'title': 'Road Blocked',
       'icon': Icons.do_not_disturb_on_rounded,
-      'color': Color(0xFFFF5252), // Red
+      'color': Color(0xFFF87171), // Red
     },
   ];
 
@@ -171,21 +138,21 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
       'title': 'LOW SEVERITY',
       'description':
           'Minor water accumulation. No immediate threat. Safe to proceed with caution.',
-      'color': Color(0xFF00E676), // Green
+      'color': Color(0xFF34D399), // Green
       'hasBorder': false,
     },
     {
       'title': 'MEDIUM SEVERITY',
       'description':
           'Water reaching yard / waist level. Roads partially blocked.',
-      'color': Color(0xFFFF9F0A), // Amber / Orange
+      'color': Color(0xFFFB923C), // Amber / Orange
       'hasBorder': false,
     },
     {
       'title': 'HIGH / CRITICAL',
       'description':
           'Life-threatening. Homes flooded. Urgent rescue or boat needed.',
-      'color': Color(0xFFFF3B3B), // Red
+      'color': Color(0xFFF87171), // Red
       'hasBorder': true,
     },
   ];
@@ -231,7 +198,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     for (var h in _hazards) {
       if (h['title'] == hazard) return h['color'] as Color;
     }
-    return const Color(0xFF40C4FF);
+    return const Color(0xFF38BDF8);
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -257,11 +224,11 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
                   Flexible(child: Text(source == ImageSource.camera
-                      ? 'Photo evidence captured & GPS tagged.'
-                      : 'Gallery photo selected & attached.')),
+                      ? tr('Photo evidence captured & GPS tagged.')
+                      : tr('Gallery photo selected & attached.'))),
                 ],
               ),
-              backgroundColor: const Color(0xFF00E676),
+              backgroundColor: const Color(0xFF34D399),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               duration: const Duration(seconds: 2),
@@ -274,8 +241,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to access image: $e'),
-            backgroundColor: Colors.redAccent,
+            content: Text(tr('Failed to access image: {p0}', {'p0': (e).toString()})),
+            backgroundColor: Color(0xFFDC2626),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -286,7 +253,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
   void _showAddPhotoSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -307,8 +274,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Attach Photo Evidence',
+            Text(
+              tr('Attach Photo Evidence'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -321,13 +288,13 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF9F0A).withValues(alpha: 0.15),
+                  color: const Color(0xFFFB923C).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.camera_alt_rounded, color: Color(0xFFFF9F0A)),
+                child: const Icon(Icons.camera_alt_rounded, color: Color(0xFFFB923C)),
               ),
-              title: const Text('Capture with Camera', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Auto-tags timestamp & GPS coordinates', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              title: Text(tr('Capture with Camera'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              subtitle: Text(tr('Auto-tags timestamp & GPS coordinates'), style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.camera);
@@ -338,13 +305,13 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.photo_library_rounded, color: Color(0xFF40C4FF)),
+                child: const Icon(Icons.photo_library_rounded, color: Color(0xFF38BDF8)),
               ),
-              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Upload field image from device', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              title: Text(tr('Choose from Gallery'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              subtitle: Text(tr('Upload field image from device'), style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.gallery);
@@ -357,13 +324,13 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.redAccent.withValues(alpha: 0.15),
+                    color: Color(0xFFF87171).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                  child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171)),
                 ),
-                title: const Text('Remove Attached Photo', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
-                subtitle: const Text('Clear the currently attached image', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                title: Text(tr('Remove Attached Photo'), style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.w600)),
+                subtitle: Text(tr('Clear the currently attached image'), style: TextStyle(color: Colors.white54, fontSize: 12)),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() {
@@ -390,7 +357,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -411,8 +378,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Select Pre-defined Rapid Note',
+            Text(
+              tr('Select Pre-defined Rapid Note'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -427,17 +394,17 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _selectedNote == note
-                          ? const Color(0xFFFF9F0A)
+                          ? const Color(0xFFFB923C)
                           : const Color(0xFF223454),
                     ),
                   ),
                   child: ListTile(
                     title: Text(
-                      note,
+                      tr(note),
                       style: const TextStyle(color: Colors.white, fontSize: 13.5),
                     ),
                     trailing: _selectedNote == note
-                        ? const Icon(Icons.check_circle_rounded, color: Color(0xFFFF9F0A), size: 20)
+                        ? const Icon(Icons.check_circle_rounded, color: Color(0xFFFB923C), size: 20)
                         : null,
                     onTap: () {
                       setState(() => _selectedNote = note);
@@ -477,8 +444,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            'Report Ground Hazard',
+          title: Text(
+            tr('Report Ground Hazard'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -492,7 +459,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               child: FractionallySizedBox(
                 widthFactor: 0.33,
                 child: ColoredBox(
-                  color: Color(0xFFFF6D00),
+                  color: Color(0xFF38BDF8),
                   child: SizedBox(height: 3),
                 ),
               ),
@@ -534,14 +501,14 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ),
           ),
           titleSpacing: 8,
-          title: Column(
+          title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'STEP ${_currentStep + 1} OF 3',
+                tr('STEP {p0} OF 3', {'p0': (_currentStep + 1).toString()}),
                 style: const TextStyle(
-                  color: Color(0xFF8B9BB4),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.0,
@@ -549,7 +516,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               ),
               const SizedBox(height: 1),
               Text(
-                _currentStep == 1 ? 'Choose Severity' : 'Confirm Details',
+                _currentStep == 1 ? tr('Choose Severity') : tr('Confirm Details'),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -558,14 +525,38 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
               ),
             ],
-          ),
+          )),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: OnlineStatusBadge(
-                fontSize: 10,
-                dotSize: 6,
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFF34D399).withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, color: Color(0xFF34D399), size: 7),
+                      SizedBox(width: 5),
+                      Text(
+                        tr('ONLINE'),
+                        style: TextStyle(
+                          color: Color(0xFF34D399),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -599,28 +590,28 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                'Step 1 of 3',
+            children: [
+              Flexible(child: Text(
+                tr('Step 1 of 3'),
                 style: TextStyle(
-                  color: Color(0xFFFF6D00),
+                  color: Color(0xFF38BDF8),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
-              ),
-              Text(
-                'Select Hazard',
+              )),
+              Flexible(child: Text(
+                tr('Select Hazard'),
                 style: TextStyle(
-                  color: Color(0xFF8B9BB4),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'What hazard are you reporting?',
+          Text(
+            tr('What hazard are you reporting?'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -629,10 +620,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Tap the hazard category that best reflects the current ground reality.',
+          Text(
+            tr('Tap the hazard category that best reflects the current ground reality.'),
             style: TextStyle(
-              color: Color(0xFF94A3B8),
+              color: Color(0xFFB6C2D6),
               fontSize: 14,
               height: 1.4,
             ),
@@ -683,10 +674,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF131B2B),
+              color: const Color(0xFF131C2E),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFF1E293B),
+                color: const Color(0xFF1C2740),
                 width: 1.2,
               ),
             ),
@@ -716,17 +707,17 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Selected Hazard',
+                      Text(
+                        tr('Selected Hazard'),
                         style: TextStyle(
-                          color: Color(0xFF8B9BB4),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 11.5,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _selectedHazard,
+                        tr(_selectedHazard),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -738,9 +729,9 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => _currentStep = 0),
-                  child: const Text(
-                    'Change',
-                    style: TextStyle(color: Color(0xFFFF8F5A), fontSize: 13),
+                  child: Text(
+                    tr('Change'),
+                    style: TextStyle(color: Color(0xFF7DD3FC), fontSize: 13),
                   ),
                 ),
               ],
@@ -801,8 +792,11 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     options: MapOptions(
                       initialCenter: _hazardCoords,
                       initialZoom: 14.0,
-                      onTap: (tapPosition, point) =>
-                          _updateLocationWithCoords(point, isGps: false),
+                      onTap: (tapPosition, point) {
+                        setState(() {
+                          _hazardCoords = point;
+                        });
+                      },
                     ),
                     children: [
                       TileLayer(
@@ -827,13 +821,13 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                   width: 44,
                                   height: 44,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.28),
+                                    color: const Color(0xFFFB923C).withValues(alpha: 0.28),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
                                 const Icon(
                                   Icons.location_on_rounded,
-                                  color: Color(0xFFFF9F0A),
+                                  color: Color(0xFFFB923C),
                                   size: 34,
                                 ),
                                 const Positioned(
@@ -865,8 +859,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: _hasGpsLock
-                                ? const Color(0xFF00E676).withValues(alpha: 0.8)
-                                : const Color(0xFFFF9F0A).withValues(alpha: 0.8),
+                                ? const Color(0xFF34D399).withValues(alpha: 0.8)
+                                : const Color(0xFFFB923C).withValues(alpha: 0.8),
                             width: 1.2,
                           ),
                         ),
@@ -878,19 +872,19 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                   ? Icons.check_circle_outline_rounded
                                   : Icons.gps_fixed_rounded,
                               color: _hasGpsLock
-                                  ? const Color(0xFF00E676)
-                                  : const Color(0xFFFF9F0A),
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFFFB923C),
                               size: 16,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               _isLoadingLocation
-                                  ? 'LOCATING...'
+                                  ? tr('LOCATING...')
                                   : (_hasGpsLock ? 'GPS LOCKED' : 'LOCK GPS'),
                               style: TextStyle(
                                 color: _hasGpsLock
-                                    ? const Color(0xFF00E676)
-                                    : const Color(0xFFFF9F0A),
+                                    ? const Color(0xFF34D399)
+                                    : const Color(0xFFFB923C),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.8,
@@ -924,12 +918,12 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Color(0xFF00E676),
+                                  color: Color(0xFF34D399),
                                 ),
                               )
                             : const Icon(
                                 Icons.my_location_rounded,
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 size: 18,
                               ),
                       ),
@@ -942,98 +936,23 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
 
           const SizedBox(height: 14),
 
-          // Location Title & Editable Address Field
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF131D2E),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFF1E2D4A),
-                width: 1.2,
-              ),
+          // Location Title & Coordinates
+          Text(
+            tr('Kolonnawa Basin, Kelani River Area'),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_rounded,
-                      color: Color(0xFFFF9F0A),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'DETECTED LOCATION / ADDRESS',
-                      style: TextStyle(
-                        color: Color(0xFF8B9BB4),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (_isLoadingAddress)
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFFFF9F0A),
-                        ),
-                      )
-                    else
-                      const Icon(
-                        Icons.edit_rounded,
-                        color: Color(0xFF8B9BB4),
-                        size: 15,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _locationController,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                    border: InputBorder.none,
-                    hintText: 'Enter location name or landmark...',
-                    hintStyle: TextStyle(
-                      color: Color(0xFF5A6E85),
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Coordinates: ${_hazardCoords.latitude.toStringAsFixed(4)}° N, ${_hazardCoords.longitude.toStringAsFixed(4)}° E',
-                        style: const TextStyle(
-                          color: Color(0xFF8B9BB4),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      '● Tap map to change pin',
-                      style: TextStyle(
-                        color: Color(0xFF00E676),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            tr('Coordinates: {p0}° N, {p1}° E (±4 meters)', {'p0': (_hazardCoords.latitude.toStringAsFixed(4)).toString(), 'p1': (_hazardCoords.longitude.toStringAsFixed(4)).toString()}),
+            style: const TextStyle(
+              color: Color(0xFFB6C2D6),
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
             ),
           ),
 
@@ -1061,7 +980,7 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(2),
                               decoration: const BoxDecoration(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -1086,16 +1005,16 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                     child: Center(
                       child: Icon(
                         _photoAttached ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
-                        color: _photoAttached ? const Color(0xFF00E676) : const Color(0xFFFF9F0A),
+                        color: _photoAttached ? const Color(0xFF34D399) : const Color(0xFFFB923C),
                         size: 26,
                       ),
                     ),
                   ),
             title: (_imageFile != null || _photoAttached)
-                ? 'PHOTO EVIDENCE ATTACHED'
-                : 'ADD PHOTO (RECOMMENDED)',
+                ? tr('PHOTO EVIDENCE ATTACHED')
+                : tr('ADD PHOTO (RECOMMENDED)'),
             subtitle: _imageFile != null
-                ? 'Tap to change or remove photo'
+                ? tr('Tap to change or remove photo')
                 : (_photoAttached
                     ? 'GPS & timestamp locked with photo'
                     : 'Tap to open camera & secure evidence'),
@@ -1120,13 +1039,13 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
               child: const Center(
                 child: Icon(
                   Icons.mic_none_rounded,
-                  color: Color(0xFF8B9BB4),
+                  color: Color(0xFFB6C2D6),
                   size: 24,
                 ),
               ),
             ),
-            title: 'Record Voice Memo / Add Pre-defined Note',
-            subtitle: '(Optional) Tap to choose rapid ground note',
+            title: tr('Record Voice Memo / Add Pre-defined Note'),
+            subtitle: tr('(Optional) Tap to choose rapid ground note'),
           ),
 
           const SizedBox(height: 28),
@@ -1137,10 +1056,10 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
             height: 56,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF9F0A), // Vibrant Orange
+                backgroundColor: const Color(0xFFFB923C), // Vibrant Orange
                 foregroundColor: const Color(0xFF140D07),
                 elevation: 4,
-                shadowColor: const Color(0xFFFF9F0A).withValues(alpha: 0.45),
+                shadowColor: const Color(0xFFFB923C).withValues(alpha: 0.45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -1155,7 +1074,6 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                       imageFile: _imageFile,
                       note: _selectedNote,
                       coordinates: _hazardCoords,
-                      locationName: _locationController.text.trim(),
                     ),
                   ),
                 );
@@ -1163,8 +1081,8 @@ class _HazardReportWizardScreenState extends State<HazardReportWizardScreen> {
                   Navigator.pop(context, true);
                 }
               },
-              child: const Text(
-                'REVIEW REPORT',
+              child: Text(
+                tr('REVIEW REPORT'),
                 style: TextStyle(
                   fontSize: 16.5,
                   fontWeight: FontWeight.w900,
@@ -1207,16 +1125,16 @@ class _Step1HazardCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: const Color(0xFF131B2B), // Deep slate navy
+          color: const Color(0xFF131C2E), // Deep slate navy
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? const Color(0xFF00B0FF) : const Color(0xFF1E293B),
+            color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF1C2740),
             width: isSelected ? 2.0 : 1.2,
           ),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: const Color(0xFF00B0FF).withValues(alpha: 0.25),
+                color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               )
@@ -1234,7 +1152,7 @@ class _Step1HazardCard extends StatelessWidget {
             Icon(icon, size: 48, color: color),
             const SizedBox(height: 14),
             Text(
-              title,
+              tr(title),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
@@ -1275,12 +1193,12 @@ class _SeverityCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: (hasBorder || isSelected)
               ? color.withValues(alpha: 0.8)
-              : const Color(0xFF1E293B),
+              : const Color(0xFF1C2740),
           width: (hasBorder || isSelected) ? 1.4 : 1.0,
         ),
         boxShadow: [
@@ -1322,7 +1240,7 @@ class _SeverityCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        tr(title),
                         style: TextStyle(
                           color: color,
                           fontSize: 14,
@@ -1332,7 +1250,7 @@ class _SeverityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        description,
+                        tr(description),
                         style: const TextStyle(
                           color: Color(0xFFC9D3E2),
                           fontSize: 13,
@@ -1372,10 +1290,10 @@ class _ConfirmActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C2740),
           width: 1.2,
         ),
       ),
@@ -1395,7 +1313,7 @@ class _ConfirmActionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        tr(title),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14.5,
@@ -1404,9 +1322,9 @@ class _ConfirmActionCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        subtitle,
+                        tr(subtitle),
                         style: const TextStyle(
-                          color: Color(0xFF8B9BB4),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 12.5,
                         ),
                       ),

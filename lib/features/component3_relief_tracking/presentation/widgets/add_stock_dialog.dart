@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/relief_item_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Form to add a new item to the camp's supply log.
 ///
 /// Every field has a plain-language label, a hint and, where it helps, a
@@ -18,11 +19,11 @@ class AddStockDialog extends StatefulWidget {
 }
 
 class _AddStockDialogState extends State<AddStockDialog> {
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF070B14);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _field = Color(0xFF0B1220);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
 
   static const List<String> _quickUnits = [
     'Packs',
@@ -140,18 +141,17 @@ class _AddStockDialogState extends State<AddStockDialog> {
                       child: const Icon(Icons.add_box_outlined, color: _accent),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Add Item to Supplies',
+                        tr('Add Item to Supplies'),
                         style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Add something your camp has in stock so you can track it. '
-                  'The app will warn you when it runs low.',
+                Text(
+                  tr('Add something your camp has in stock so you can track it. The app will warn you when it runs low.'),
                   style: TextStyle(color: _muted, fontSize: 12),
                 ),
                 const SizedBox(height: 18),
@@ -164,7 +164,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
                   textCapitalization: TextCapitalization.sentences,
                   decoration: _decoration('e.g. Drinking water, Rice, Paracetamol'),
                   validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Type the name of the item' : null,
+                      v == null || v.trim().isEmpty ? tr('Type the name of the item') : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -213,8 +213,8 @@ class _AddStockDialogState extends State<AddStockDialog> {
                         decoration: _decoration('Amount, e.g. 120'),
                         validator: (v) {
                           final n = double.tryParse((v ?? '').trim());
-                          if (n == null) return 'Enter a number';
-                          if (n < 0) return 'Cannot be negative';
+                          if (n == null) return tr('Enter a number');
+                          if (n < 0) return tr('Cannot be negative');
                           return null;
                         },
                       ),
@@ -226,7 +226,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
                         style: const TextStyle(color: Colors.white),
                         decoration: _decoration('Unit, e.g. Packs'),
                         validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'Enter a unit' : null,
+                            v == null || v.trim().isEmpty ? tr('Enter a unit') : null,
                       ),
                     ),
                   ],
@@ -240,7 +240,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
                       visualDensity: VisualDensity.compact,
                       backgroundColor: _field,
                       side: const BorderSide(color: _border),
-                      label: Text(u, style: const TextStyle(color: _muted, fontSize: 11)),
+                      label: Text(tr(u), style: const TextStyle(color: _muted, fontSize: 11)),
                       onPressed: () => setState(() => _unitController.text = u),
                     );
                   }).toList(),
@@ -254,7 +254,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: _muted)),
+                      child: Text(tr('Cancel'), style: TextStyle(color: _muted)),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
@@ -267,8 +267,8 @@ class _AddStockDialogState extends State<AddStockDialog> {
                       ),
                       onPressed: _submit,
                       icon: const Icon(Icons.check, size: 16),
-                      label: const Text(
-                        'ADD ITEM',
+                      label: Text(
+                        tr('ADD ITEM'),
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ),
@@ -289,11 +289,11 @@ class _AddStockDialogState extends State<AddStockDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            text,
+            tr(text),
             style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
           ),
           if (help != null)
-            Text(help, style: const TextStyle(color: _muted, fontSize: 11)),
+            Text(tr(help), style: const TextStyle(color: _muted, fontSize: 11)),
         ],
       ),
     );
@@ -302,7 +302,7 @@ class _AddStockDialogState extends State<AddStockDialog> {
   InputDecoration _decoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+      hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
       filled: true,
       fillColor: _field,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
