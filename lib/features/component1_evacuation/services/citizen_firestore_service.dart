@@ -102,6 +102,16 @@ class CitizenFirestoreService {
         .update({'isPacked': !currentStatus});
   }
 
+  /// Update: Edit the item's name
+  Future<void> updateChecklistItem(String docId, String newName) async {
+    await _db
+        .collection('users')
+        .doc(currentUserId)
+        .collection('checklist')
+        .doc(docId)
+        .update({'itemName': newName});
+  }
+
   /// Delete: Remove the item's document
   Future<void> deleteChecklistItem(String docId) async {
     await _db
