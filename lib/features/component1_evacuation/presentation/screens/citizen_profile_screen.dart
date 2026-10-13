@@ -2,11 +2,11 @@ import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../../../core/theme/appearance.dart';
+import 'citizen_settings_screen.dart';
 
 class CitizenProfileScreen extends StatefulWidget {
   const CitizenProfileScreen({super.key});
@@ -208,6 +208,16 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
         elevation: 0,
         title: const Text('My Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            tooltip: 'Settings & Preferences',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CitizenSettingsScreen()),
+            ),
+          ),
+        ],
       ),
       body: Container(
         width: double.infinity,
@@ -490,6 +500,9 @@ class _ProfileRow extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
             ],
           ),

@@ -37,7 +37,7 @@ class WarningAlert {
   // ── Firestore → Model ──────────────────────────────────────────────────────
 
   factory WarningAlert.fromDoc(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = (doc.data() as Map<String, dynamic>?) ?? {};
     return WarningAlert(
       id: doc.id,
       district: data['district'] as String? ?? 'All',

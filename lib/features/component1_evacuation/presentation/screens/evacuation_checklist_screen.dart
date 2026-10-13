@@ -224,44 +224,52 @@ class _PremiumProgressHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isComplete ? 'Ready for Evacuation' : 'Packing Progress',
-                    style: TextStyle(
-                      color: isComplete ? const Color(0xFF00E676) : Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isComplete ? 'Ready for Evacuation' : 'Packing Progress',
+                      style: TextStyle(
+                        color: isComplete ? const Color(0xFF00E676) : Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$packedCount of $total items packed',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: 4),
+                    Text(
+                      '$packedCount of $total items packed',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isComplete
-                      ? const Color(0xFF00E676).withValues(alpha: 0.15)
-                      : const Color(0xFF40C4FF).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  ],
                 ),
-                child: Text(
-                  '$pct%',
-                  style: TextStyle(
+              ),
+              const SizedBox(width: 8),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
                     color: isComplete
-                        ? const Color(0xFF00E676)
-                        : const Color(0xFF40C4FF),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
+                        ? const Color(0xFF00E676).withValues(alpha: 0.15)
+                        : const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$pct%',
+                    style: TextStyle(
+                      color: isComplete
+                          ? const Color(0xFF00E676)
+                          : const Color(0xFF40C4FF),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),

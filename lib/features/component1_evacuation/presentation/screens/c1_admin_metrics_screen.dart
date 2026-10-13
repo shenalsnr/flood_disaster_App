@@ -982,6 +982,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           _buildSeverityBadge(alert.severity, severityColor),
@@ -1020,43 +1022,52 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 bottom: Radius.circular(14),
               ),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildMetricChip(
-                  icon: Icons.water_rounded,
-                  label: 'Water',
-                  value: '${alert.waterLevelMeters.toStringAsFixed(2)}m',
-                  color: const Color(0xFF42A5F5),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _buildMetricChip(
+                      icon: Icons.water_rounded,
+                      label: 'Water',
+                      value: '${alert.waterLevelMeters.toStringAsFixed(2)}m',
+                      color: const Color(0xFF42A5F5),
+                    ),
+                    _buildMetricChip(
+                      icon: Icons.grain_rounded,
+                      label: 'Rain',
+                      value: '${alert.rainfallMm.toStringAsFixed(1)}mm',
+                      color: const Color(0xFF26C6DA),
+                    ),
+                    _buildMetricChip(
+                      icon: Icons.air_rounded,
+                      label: 'Wind',
+                      value: '${alert.windSpeedKmh.toStringAsFixed(1)}kph',
+                      color: const Color(0xFFB39DDB),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 6),
-                _buildMetricChip(
-                  icon: Icons.grain_rounded,
-                  label: 'Rain',
-                  value: '${alert.rainfallMm.toStringAsFixed(1)}mm',
-                  color: const Color(0xFF26C6DA),
-                ),
-                const SizedBox(width: 6),
-                _buildMetricChip(
-                  icon: Icons.air_rounded,
-                  label: 'Wind',
-                  value: '${alert.windSpeedKmh.toStringAsFixed(1)}kph',
-                  color: const Color(0xFFB39DDB),
-                ),
-                const Spacer(),
-                // Edit button
-                _buildCardIconBtn(
-                  icon: Icons.edit_rounded,
-                  color: const Color(0xFFFFC107),
-                  tooltip: 'Edit',
-                  onTap: () => _populateFormForEdit(alert),
-                ),
-                const SizedBox(width: 6),
-                // Resolve button
-                _buildCardIconBtn(
-                  icon: Icons.check_circle_outline_rounded,
-                  color: const Color(0xFF00E676),
-                  tooltip: 'Resolve',
-                  onTap: () => _resolveWarning(alert.id),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Edit button
+                    _buildCardIconBtn(
+                      icon: Icons.edit_rounded,
+                      color: const Color(0xFFFFC107),
+                      tooltip: 'Edit',
+                      onTap: () => _populateFormForEdit(alert),
+                    ),
+                    const SizedBox(width: 6),
+                    // Resolve button
+                    _buildCardIconBtn(
+                      icon: Icons.check_circle_outline_rounded,
+                      color: const Color(0xFF00E676),
+                      tooltip: 'Resolve',
+                      onTap: () => _resolveWarning(alert.id),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -20,10 +20,19 @@ class NotificationService {
   static final GlobalKey<ScaffoldMessengerState> messengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
+  // Global Key for navigator to route from notification bar taps
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
+  bool _channelsRegistered = false;
+
   /// Initializes the local notifications plugin for Android & iOS.
   Future<void> initialize() async {
-    if (_isInitialized) return;
-
+    if (_isInitialized) {
+      await registerChannels();
+      return;
+    }
+    _isInitialized = true;
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -38,15 +47,65 @@ class NotificationService {
       },
     );
 
-    // Request Android 13+ permission
-    final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin != null) {
-      await androidPlugin.requestNotificationsPermission();
-    }
+    await registerChannels();
 
     _isInitialized = true;
-    debugPrint('NotificationService initialized successfully.');
+    debugPrint('NotificationService initialized successfully with channels.');
+  }
+
+  /// Registers high-priority notification channels with Android OS.
+  Future<void> registerChannels() async {
+    if (_channelsRegistered) return;
+    try {
+      final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        await androidPlugin.requestNotificationsPermission();
+
+        const disasterChannel = AndroidNotificationChannel(
+          'c1_disaster_warnings',
+          'Disaster Early Warnings',
+          description:
+              'Real-time flood, rain, and evacuation warnings for citizens.',
+          importance: Importance.max,
+          playSound: true,
+          enableVibration: true,
+          enableLights: true,
+          showBadge: true,
+        );
+
+        const broadcastChannel = AndroidNotificationChannel(
+          'c4_broadcast_alerts',
+          'Control Center Alerts',
+          description: 'Warnings broadcast by the Disaster Control Center.',
+          importance: Importance.max,
+          playSound: true,
+          enableVibration: true,
+          enableLights: true,
+          showBadge: true,
+        );
+
+        const syncChannel = AndroidNotificationChannel(
+          'hazard_auto_sync_channel',
+          'Hazard Auto-Sync',
+          description:
+              'Alerts when offline hazard reports are auto-submitted to cloud.',
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+          enableLights: true,
+          showBadge: true,
+        );
+
+        await androidPlugin.createNotificationChannel(disasterChannel);
+        await androidPlugin.createNotificationChannel(broadcastChannel);
+        await androidPlugin.createNotificationChannel(syncChannel);
+        _channelsRegistered = true;
+        debugPrint('Registered all notification channels in Android OS.');
+      }
+    } catch (e) {
+      debugPrint('Error registering notification channels: $e');
+    }
   }
 
   /// Displays both a native system notification and an in-app banner
@@ -140,6 +199,177 @@ class NotificationService {
     } catch (e) {
       debugPrint('Broadcast notification failed: $e');
     }
+  }
+
+  /// Sound + system notification + in-app alert for live disaster warnings (Component 1).
+  Future<void> showDisasterWarningNotification({
+    required int id,
+    required String title,
+    required String body,
+    required String severity,
+  }) async {
+    final isCritical = severity.toLowerCase() == 'critical';
+    final alertColor = isCritical ? const Color(0xFFFF1744) : const Color(0xFFFF9F0A);
+    final safeId = id & 0x7FFFFFFF;
+
+    await registerChannels();
+
+    try {
+      HapticFeedback.heavyImpact();
+      SystemSound.play(SystemSoundType.alert);
+    } catch (_) {}
+
+    try {
+      final androidDetails = AndroidNotificationDetails(
+        'c1_disaster_warnings',
+        'Disaster Early Warnings',
+        channelDescription:
+            'Real-time flood, rain, and evacuation warnings for citizens.',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        enableLights: true,
+        ticker: title,
+        channelShowBadge: true,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.alarm,
+        color: alertColor,
+        ledColor: alertColor,
+        ledOnMs: 1000,
+        ledOffMs: 500,
+        styleInformation: BigTextStyleInformation(
+          body,
+          contentTitle: title,
+          summaryText: '🚨 Disaster Early Warning',
+        ),
+      );
+
+      await _localNotifications.show(
+        id: safeId,
+        title: title,
+        body: body,
+        notificationDetails: NotificationDetails(android: androidDetails),
+        payload: 'c1_warning',
+      );
+      debugPrint('Posted notification to phone notification bar: $title');
+    } catch (e) {
+      debugPrint('Disaster warning notification failed: $e');
+    }
+
+    _showInAppDisasterBanner(
+      title: title,
+      body: body,
+      severity: severity,
+    );
+  }
+
+  /// Sends a test emergency disaster alert directly to the phone notification bar.
+  Future<void> showTestWarningNotification({
+    String severity = 'Critical',
+    String district = 'Galle',
+  }) async {
+    await showDisasterWarningNotification(
+      id: 99901,
+      title: '🚨 $severity Alert: Rising Flood Waters in $district',
+      body:
+          'Dangerous water levels detected (3.8m). Evacuation routes active. Tap to view safe shelter routing.',
+      severity: severity,
+    );
+  }
+
+  /// Displays an in-app tactical floating warning banner.
+  void _showInAppDisasterBanner({
+    required String title,
+    required String body,
+    required String severity,
+  }) {
+    final messenger = messengerKey.currentState;
+    if (messenger == null) return;
+
+    final isCritical = severity.toLowerCase() == 'critical';
+    final accentColor = isCritical ? const Color(0xFFFF1744) : const Color(0xFFFF9F0A);
+
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(top: 14, left: 14, right: 14, bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        backgroundColor: const Color(0xFF131B2B),
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: accentColor, width: 1.5),
+        ),
+        duration: const Duration(seconds: 6),
+        content: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.warning_amber_rounded,
+                color: accentColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          severity.toUpperCase(),
+                          style: TextStyle(
+                            color: accentColor,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    body,
+                    style: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Displays an in-app banner at the top of the current screen.

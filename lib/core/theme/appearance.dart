@@ -97,7 +97,17 @@ class ThemeToggleTile extends StatelessWidget {
 /// Small Dark / Light button for app bars and headers of every dashboard.
 class ThemeToggleButton extends StatelessWidget {
   final Color? color;
-  const ThemeToggleButton({super.key, this.color});
+  final VisualDensity? visualDensity;
+  final BoxConstraints? constraints;
+  final EdgeInsetsGeometry? padding;
+
+  const ThemeToggleButton({
+    super.key,
+    this.color,
+    this.visualDensity,
+    this.constraints,
+    this.padding,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +116,9 @@ class ThemeToggleButton extends StatelessWidget {
       builder: (context, _) {
         final light = ThemeController.instance.isLight;
         return IconButton(
+          visualDensity: visualDensity,
+          constraints: constraints,
+          padding: padding,
           tooltip: light ? 'Switch to dark mode' : 'Switch to light mode',
           icon: Icon(
             light ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
