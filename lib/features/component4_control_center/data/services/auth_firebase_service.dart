@@ -1,3 +1,4 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/responder_models.dart';
@@ -11,48 +12,36 @@ class AuthFirebaseService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Local fallback cache pre-seeded with demo roles and syncing live with Firestore
+  // Local cache (bootstrap administrators only); real accounts come from Firestore
   final Map<String, Map<String, dynamic>> _offlineFallbackCache = {
-    'n.perera@dispatched.gov.lk': {
-      'uid': 'n.perera@dispatched.gov.lk',
-      'fullName': 'Nadeeka Perera',
-      'email': 'n.perera@dispatched.gov.lk',
-      'phoneNumber': '+94 77 482 1029',
-      'nic': '982341092V',
-      'floodZone': 'Colombo Sector 4 (Low-Lying Area)',
-      'role': 'responder',
-      'password': 'Disaster@2026',
+    // Bootstrap administrator: always able to sign in so the first staff
+    // accounts can be created. Change this password before real use.
+    'admin@wesafe.gov.lk': {
+      'uid': 'admin@wesafe.gov.lk',
+      'fullName': 'System Administrator',
+      'email': 'admin@wesafe.gov.lk',
+      'phoneNumber': '',
+      'nic': '',
+      'floodZone': 'National Control',
+      'role': 'admin',
+      'password': 'Admin@2026',
     },
-    'chamara.d@gmail.com': {
-      'uid': 'chamara.d@gmail.com',
-      'fullName': 'Chamara Dissanayake',
-      'email': 'chamara.d@gmail.com',
-      'phoneNumber': '+94 71 234 5678',
-      'nic': '982341092V',
-      'floodZone': 'Colombo Low-Lying Area (Kelani Bank Zone)',
-      'role': 'citizen',
-      'password': 'Secure@1234',
+    // Second bootstrap administrator (demo / coursework login).
+    'admin@gmail.com': {
+      'uid': 'admin@gmail.com',
+      'fullName': 'Administrator',
+      'email': 'admin@gmail.com',
+      'phoneNumber': '',
+      'nic': '',
+      'floodZone': 'National Control',
+      'role': 'admin',
+      'password': 'admin123',
     },
-    'volunteer.kapila@dmc.org': {
-      'uid': 'volunteer.kapila@dmc.org',
-      'fullName': 'Kapila Wijesinghe',
-      'email': 'volunteer.kapila@dmc.org',
-      'phoneNumber': '+94 70 331 4455',
-      'nic': '891234567V',
-      'floodZone': 'Colombo Sector 2 (Outer Ring)',
-      'role': 'volunteer',
-      'password': 'Report@2026',
-    },
-    'leader.rohan@relief.gov.lk': {
-      'uid': 'leader.rohan@relief.gov.lk',
-      'fullName': 'Rohan Gunasekara',
-      'email': 'leader.rohan@relief.gov.lk',
-      'phoneNumber': '+94 77 901 2345',
-      'nic': '751234567V',
-      'floodZone': 'Kelani Basin Camp 01',
-      'role': 'campLeader',
-      'password': 'Camp@2026',
-    },
+  };
+
+  static const Set<String> _bootstrapAdmins = {
+    'admin@wesafe.gov.lk',
+    'admin@gmail.com',
   };
 
   /// Save new user registration details to Cloud Firestore & in-memory cache
@@ -61,11 +50,11 @@ class AuthFirebaseService {
     required String email,
     required String phoneNumber,
     required String nic,
-    String district = '',
-    String city = '',
     required String floodZone,
     required String password,
     required String role,
+    String district = '',
+    String city = '',
   }) async {
     final cleanEmail = email.toLowerCase().trim();
 
@@ -75,9 +64,9 @@ class AuthFirebaseService {
       'email': cleanEmail,
       'phoneNumber': phoneNumber.trim(),
       'nic': nic.trim(),
+      'floodZone': floodZone.trim(),
       'district': district.trim(),
       'city': city.trim(),
-      'floodZone': floodZone.trim(),
       'role': role,
       'password': password,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -108,8 +97,6 @@ class AuthFirebaseService {
       email: cleanEmail,
       phoneNumber: phoneNumber.trim(),
       nic: nic.trim(),
-      district: district.trim(),
-      city: city.trim(),
       floodZone: floodZone.trim(),
       role: role,
     );
@@ -123,9 +110,11 @@ class AuthFirebaseService {
     final cleanEmail = email.toLowerCase().trim();
 
     Map<String, dynamic>? data;
+    var firestoreReachable = false;
 
     try {
       final doc = await _firestore.collection('users').doc(cleanEmail).get();
+      firestoreReachable = true;
       if (doc.exists && doc.data() != null) {
         data = doc.data()!;
         _offlineFallbackCache[cleanEmail] = data; // Keep cache in sync
@@ -135,12 +124,22 @@ class AuthFirebaseService {
       debugPrint('⚠️ Firestore read warning: $e. Using local cache.');
     }
 
-    // Check offline fallback cache if Firestore document wasn't fetched
-    data ??= _offlineFallbackCache[cleanEmail];
+    // Local cache is only used when Firestore could not be reached (offline),
+    // or for the bootstrap admin. This way an account the admin deleted
+    // from Firestore can no longer sign in.
+    if (data == null &&
+        (!firestoreReachable || _bootstrapAdmins.contains(cleanEmail))) {
+      data = _offlineFallbackCache[cleanEmail];
+    }
 
     if (data == null) {
       throw Exception(
           'No account found with this email ($cleanEmail). Please complete registration first.');
+    }
+
+    if (data['isActive'] == false) {
+      throw Exception(
+          'This account has been disabled by the administrator. Please contact your administrator.');
     }
 
     final storedPassword = data['password'] as String? ?? '';
@@ -149,6 +148,33 @@ class AuthFirebaseService {
     }
 
     debugPrint('✅ User "$cleanEmail" authenticated successfully');
+    return UserProfile.fromMap(data, cleanEmail);
+  }
+
+  /// Loads an existing account without a password (used to restore a
+  /// remembered sign-in). Throws when the account is missing or disabled.
+  Future<UserProfile> loadUserByEmail(String email) async {
+    final cleanEmail = email.toLowerCase().trim();
+    Map<String, dynamic>? data;
+    var reachable = false;
+    try {
+      final doc = await _firestore.collection('users').doc(cleanEmail).get();
+      reachable = true;
+      if (doc.exists && doc.data() != null) {
+        data = doc.data()!;
+        _offlineFallbackCache[cleanEmail] = data;
+      }
+    } catch (e) {
+      debugPrint('loadUserByEmail read warning: $e');
+    }
+    if (data == null &&
+        (!reachable || _bootstrapAdmins.contains(cleanEmail))) {
+      data = _offlineFallbackCache[cleanEmail];
+    }
+    if (data == null) throw Exception('Account not found.');
+    if (data['isActive'] == false) {
+      throw Exception('This account has been disabled by the administrator.');
+    }
     return UserProfile.fromMap(data, cleanEmail);
   }
 
@@ -167,7 +193,7 @@ class AuthFirebaseService {
       await _firestore.collection('users').doc(cleanEmail).update({
         'password': newPassword,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+      }).queued();
       debugPrint('✅ Cloud Firestore: Password for "$cleanEmail" updated in database');
     } catch (e) {
       debugPrint('⚠️ Firestore password update warning: $e');
@@ -189,7 +215,7 @@ class AuthFirebaseService {
       await _firestore.collection('users').doc(cleanEmail).set({
         'photoUrl': photoUrl,
         'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).queued();
       debugPrint('✅ Cloud Firestore: Profile photo updated for "$cleanEmail"');
     } catch (e) {
       debugPrint('⚠️ Firestore update photo warning: $e');

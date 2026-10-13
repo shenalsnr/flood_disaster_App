@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../widgets/c4_ui.dart';
 import '../../data/models/responder_models.dart';
 import '../../data/services/auth_firebase_service.dart';
 import '../controllers/responder_controller.dart';
 import 'responder_login_screen.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
 
 class ResponderRegisterScreen extends StatefulWidget {
   const ResponderRegisterScreen({super.key});
@@ -74,10 +77,10 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!_agreedToAlerts) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-              'Please accept the flood early warning agreement to proceed.'),
-          backgroundColor: Colors.redAccent,
+              tr('reg_accept')),
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
       return;
@@ -116,17 +119,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.cloud_done_rounded, color: Color(0xFF00E676)),
+              const Icon(Icons.cloud_done_rounded, color: Color(0xFF34D399)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Saved to Firebase Firestore! Log in as ${_nameController.text}.',
+                  tr('reg_saved', {'name': _nameController.text}),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -145,8 +148,8 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Firebase Registration Error: $e'),
-          backgroundColor: Colors.redAccent,
+          content: Text(tr('reg_error', {'err': e.toString()})),
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
     }
@@ -157,9 +160,11 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     final isCustomSector = _selectedSector == 'Other (Type Custom Flood Zone)';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ResponsiveBody(
+          maxWidth: 560,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Form(
             key: _formKey,
@@ -188,7 +193,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           color: const Color(0xFF151E32),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF1E293B),
+                            color: const Color(0xFF1C2740),
                             width: 1,
                           ),
                         ),
@@ -200,15 +205,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Text(
-                      'Citizen Registration',
+                    Flexible(child: Text(
+                      tr('citizen_reg'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.3,
                       ),
-                    ),
+                    )),
+                    const SizedBox(width: 10),
+                    LanguageButton(),
                   ],
                 ),
 
@@ -217,10 +224,10 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 // Top Info Card with Green Accent Bar
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF1C2740),
                       width: 1,
                     ),
                   ),
@@ -248,13 +255,13 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                     child: const Center(
                                       child: Icon(
                                         Icons.flood,
-                                        color: Color(0xFFFF6D00),
+                                        color: Color(0xFF38BDF8),
                                         size: 28,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 14),
-                                  const Expanded(
+                                  Expanded(
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -262,7 +269,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Early Warning Civilian Account',
+                                          tr('civilian_acct'),
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 14,
@@ -271,9 +278,9 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                         ),
                                         SizedBox(height: 3),
                                         Text(
-                                          'Flood & Disaster Preparedness Network',
+                                          tr('network'),
                                           style: TextStyle(
-                                            color: Color(0xFF94A3B8),
+                                            color: Color(0xFFB6C2D6),
                                             fontSize: 11,
                                           ),
                                         ),
@@ -287,7 +294,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           Container(
                             width: 6,
                             decoration: const BoxDecoration(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                             ),
                           ),
                         ],
@@ -299,32 +306,32 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 const SizedBox(height: 22),
 
                 // Field 1: FULL NAME
-                _buildFieldLabel('FULL NAME'),
+                _buildFieldLabel(tr('full_name')),
                 TextFormField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   decoration: _buildInputDecoration(
-                    hint: 'Enter your full name',
+                    hint: tr('enter_full_name'),
                     icon: Icons.person,
                   ),
                   validator: (v) =>
-                      v == null || v.isEmpty ? 'Please enter your name' : null,
+                      v == null || v.isEmpty ? tr('enter_name_err') : null,
                 ),
 
                 const SizedBox(height: 16),
 
                 // Field 2: EMAIL ADDRESS
-                _buildFieldLabel('EMAIL ADDRESS'),
+                _buildFieldLabel(tr('email_address')),
                 TextFormField(
                   controller: _emailController,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   keyboardType: TextInputType.emailAddress,
                   decoration: _buildInputDecoration(
-                    hint: 'name@example.com',
+                    hint: tr('name@example.com'),
                     icon: Icons.email,
                   ),
                   validator: (v) => v == null || !v.contains('@')
-                      ? 'Please enter a valid email address'
+                      ? tr('valid_email_err')
                       : null,
                 ),
 
@@ -339,18 +346,18 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('PHONE NUMBER'),
+                          _buildFieldLabel(tr('phone')),
                           TextFormField(
                             controller: _phoneController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             keyboardType: TextInputType.phone,
                             decoration: _buildInputDecoration(
-                              hint: '+94 7X XXX XXXX',
+                              hint: tr('+94 7X XXX XXXX'),
                               icon: Icons.phone,
                             ),
                             validator: (v) => v == null || v.isEmpty
-                                ? 'Enter phone number'
+                                ? tr('enter_phone')
                                 : null,
                           ),
                         ],
@@ -362,17 +369,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('NATIONAL ID (NIC)'),
+                          _buildFieldLabel(tr('nic')),
                           TextFormField(
                             controller: _nicController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             decoration: _buildInputDecoration(
-                              hint: 'e.g. 982341092V',
+                              hint: tr('e.g. 982341092V'),
                               icon: Icons.badge_outlined,
                             ),
                             validator: (v) =>
-                                v == null || v.isEmpty ? 'Enter NIC' : null,
+                                v == null || v.isEmpty ? tr('enter_nic') : null,
                           ),
                         ],
                       ),
@@ -390,17 +397,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('DISTRICT'),
+                          _buildFieldLabel(tr('district')),
                           TextFormField(
                             controller: _districtController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             decoration: _buildInputDecoration(
-                              hint: 'Enter district',
+                              hint: tr('enter_district'),
                               icon: Icons.map_outlined,
                             ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Enter district'
+                                ? tr('enter_district')
                                 : null,
                           ),
                         ],
@@ -411,17 +418,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('CITY'),
+                          _buildFieldLabel(tr('city')),
                           TextFormField(
                             controller: _cityController,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 13),
                             decoration: _buildInputDecoration(
-                              hint: 'Enter city',
+                              hint: tr('enter_city'),
                               icon: Icons.location_city_outlined,
                             ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Enter city'
+                                ? tr('enter_city')
                                 : null,
                           ),
                         ],
@@ -433,23 +440,23 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 const SizedBox(height: 16),
 
                 // Field 5: RESIDENTIAL FLOOD ZONE / SECTOR Dropdown
-                _buildFieldLabel('RESIDENTIAL FLOOD ZONE / SECTOR'),
+                _buildFieldLabel(tr('flood_zone_label')),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
+                    color: const Color(0xFF131C2E),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF1E293B)),
+                    border: Border.all(color: const Color(0xFF1C2740)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _selectedSector,
-                      dropdownColor: const Color(0xFF1E293B),
+                      dropdownColor: const Color(0xFF1C2740),
                       isExpanded: true,
                       icon: const Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFFFF6D00),
+                        color: Color(0xFF38BDF8),
                         size: 24,
                       ),
                       style: const TextStyle(
@@ -468,15 +475,15 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                                 const Padding(
                                   padding: EdgeInsets.only(right: 8),
                                   child: Icon(Icons.edit_note,
-                                      color: Color(0xFFFF6D00), size: 18),
+                                      color: Color(0xFF38BDF8), size: 18),
                                 ),
                               Expanded(
                                 child: Text(
-                                  sector,
+                                  tr(sector),
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: isOther
-                                        ? const Color(0xFFFF9100)
+                                        ? const Color(0xFFFB923C)
                                         : Colors.white,
                                     fontWeight: isOther
                                         ? FontWeight.bold
@@ -509,7 +516,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       color: const Color(0xFF111C33),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.6),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.6),
                         width: 1.2,
                       ),
                     ),
@@ -519,18 +526,18 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         Row(
                           children: [
                             const Icon(Icons.edit_location_alt_outlined,
-                                color: Color(0xFFFF6D00), size: 18),
+                                color: Color(0xFF38BDF8), size: 18),
                             const SizedBox(width: 8),
-                            Text(
-                              'TYPE YOUR CUSTOM FLOOD ZONE / AREA',
+                            Flexible(child: Text(
+                              tr('custom_zone_label'),
                               style: TextStyle(
-                                color: const Color(0xFFFF6D00)
+                                color: const Color(0xFF38BDF8)
                                     .withValues(alpha: 0.9),
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
                               ),
-                            ),
+                            )),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -540,32 +547,32 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                               color: Colors.white, fontSize: 13),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: const Color(0xFF0F172A),
+                            fillColor: const Color(0xFF131C2E),
                             hintText:
-                                'e.g. Wellampitiya GN Div 5 / Sedawatta Lowland',
+                                tr('custom_zone_hint'),
                             hintStyle: const TextStyle(
-                                color: Color(0xFF64748B), fontSize: 12),
+                                color: Color(0xFF8A98B0), fontSize: 12),
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide:
-                                  const BorderSide(color: Color(0xFF1E293B)),
+                                  const BorderSide(color: Color(0xFF1C2740)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide:
-                                  const BorderSide(color: Color(0xFF1E293B)),
+                                  const BorderSide(color: Color(0xFF1C2740)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: const BorderSide(
-                                  color: Color(0xFFFF6D00), width: 1.5),
+                                  color: Color(0xFF38BDF8), width: 1.5),
                             ),
                           ),
                           validator: (v) {
                             if (isCustomSector && (v == null || v.isEmpty)) {
-                              return 'Please specify your custom flood zone';
+                              return tr('custom_zone_err');
                             }
                             return null;
                           },
@@ -578,7 +585,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 const SizedBox(height: 16),
 
                 // Field 6: PASSWORD
-                _buildFieldLabel('PASSWORD'),
+                _buildFieldLabel(tr('password')),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -591,7 +598,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: const Color(0xFF94A3B8),
+                        color: const Color(0xFFB6C2D6),
                         size: 20,
                       ),
                       onPressed: () {
@@ -600,13 +607,13 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                     ),
                   ),
                   validator: (v) =>
-                      v == null || v.length < 6 ? 'Password too short' : null,
+                      v == null || v.length < 6 ? tr('pw_short') : null,
                 ),
 
                 const SizedBox(height: 16),
 
                 // Field 7: CONFIRM PASSWORD
-                _buildFieldLabel('CONFIRM PASSWORD'),
+                _buildFieldLabel(tr('confirm_pw')),
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
@@ -619,7 +626,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                         _obscureConfirmPassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: const Color(0xFF94A3B8),
+                        color: const Color(0xFFB6C2D6),
                         size: 20,
                       ),
                       onPressed: () {
@@ -630,7 +637,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                   ),
                   validator: (v) {
                     if (v != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return tr('pw_mismatch');
                     }
                     return null;
                   },
@@ -658,11 +665,11 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'I agree to receive SMS & push emergency flood alerts for my residential sector and consent to location-based early warning broadcasts.',
+                        tr('agree_sms'),
                         style: TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 12,
                           height: 1.4,
                         ),
@@ -679,7 +686,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.35),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
                         blurRadius: 18,
                         offset: const Offset(0, 6),
                       ),
@@ -705,17 +712,17 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'COMPLETE REGISTRATION',
+                              Flexible(child: Text(
+                                tr('complete_reg'),
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.8,
                                 ),
-                              ),
+                              )),
                               SizedBox(width: 8),
                               Icon(Icons.shield, size: 18, color: Colors.white),
                             ],
@@ -729,11 +736,11 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Already have an account? ',
-                      style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                    ),
-                    GestureDetector(
+                    Flexible(child: Text(
+                      tr('have_acct'),
+                      style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
+                    )),
+                    Flexible(child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
@@ -741,15 +748,15 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
                           ),
                         );
                       },
-                      child: const Text(
-                        'Log In here',
+                      child: Text(
+                        tr('login_here'),
                         style: TextStyle(
-                          color: Color(0xFFFF6D00),
+                          color: Color(0xFF38BDF8),
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
+                    )),
                   ],
                 ),
 
@@ -757,7 +764,7 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
               ],
             ),
           ),
-        ),
+        )),
       ),
     );
   }
@@ -766,9 +773,9 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
-        label,
+        tr(label),
         style: const TextStyle(
-          color: Color(0xFF94A3B8),
+          color: Color(0xFFB6C2D6),
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -784,23 +791,23 @@ class _ResponderRegisterScreenState extends State<ResponderRegisterScreen> {
   }) {
     return InputDecoration(
       filled: true,
-      fillColor: const Color(0xFF0F172A),
+      fillColor: const Color(0xFF131C2E),
       hintText: hint,
       hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 13),
-      prefixIcon: Icon(icon, color: const Color(0xFFFF6D00), size: 20),
+      prefixIcon: Icon(icon, color: const Color(0xFF38BDF8), size: 20),
       suffixIcon: suffix,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1E293B)),
+        borderSide: const BorderSide(color: Color(0xFF1C2740)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1E293B)),
+        borderSide: const BorderSide(color: Color(0xFF1C2740)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
       ),
     );
   }

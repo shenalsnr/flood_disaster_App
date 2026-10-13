@@ -42,15 +42,20 @@ extension UserRoleExtension on UserRole {
 class EmergencyTeam {
   final String id;
   final String name;
-  final String status; // Available, En Route, On Mission
+  final String status; // AVAILABLE, EN ROUTE, ON SCENE, ON MISSION
   final String distance;
   final String eta;
+  final int etaMinutes;
   final String equipment;
   final int crewCount;
   final String leader;
   final String radioChannel;
   final LatLng location;
   final double speedKmh;
+  final String vehicleType;
+  final String callSign;
+  final String phoneNumber;
+  final int fuelLevel;
 
   const EmergencyTeam({
     required this.id,
@@ -58,15 +63,102 @@ class EmergencyTeam {
     required this.status,
     required this.distance,
     required this.eta,
+    this.etaMinutes = 4,
     required this.equipment,
     required this.crewCount,
     required this.leader,
     required this.radioChannel,
     required this.location,
     this.speedKmh = 24.0,
+    this.vehicleType = 'Rescue Vehicle',
+    this.callSign = '-',
+    this.phoneNumber = '',
+    this.fuelLevel = 100,
   });
 
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'status': status,
+        'distance': distance,
+        'eta': eta,
+        'etaMinutes': etaMinutes,
+        'equipment': equipment,
+        'crewCount': crewCount,
+        'leader': leader,
+        'radioChannel': radioChannel,
+        'lat': location.latitude,
+        'lng': location.longitude,
+        'speedKmh': speedKmh,
+        'vehicleType': vehicleType,
+        'callSign': callSign,
+        'phoneNumber': phoneNumber,
+        'fuelLevel': fuelLevel,
+      };
+
+  factory EmergencyTeam.fromMap(String id, Map<String, dynamic> m) {
+    double d(dynamic v, double f) => v is num ? v.toDouble() : f;
+    int i(dynamic v, int f) => v is num ? v.toInt() : f;
+    return EmergencyTeam(
+      id: id,
+      name: m['name'] as String? ?? id,
+      status: m['status'] as String? ?? 'AVAILABLE',
+      distance: m['distance'] as String? ?? '-',
+      eta: m['eta'] as String? ?? '-',
+      etaMinutes: i(m['etaMinutes'], 10),
+      equipment: m['equipment'] as String? ?? '',
+      crewCount: i(m['crewCount'], 1),
+      leader: m['leader'] as String? ?? '',
+      radioChannel: m['radioChannel'] as String? ?? '',
+      location: LatLng(d(m['lat'], 6.9271), d(m['lng'], 79.8612)),
+      speedKmh: d(m['speedKmh'], 24.0),
+      vehicleType: m['vehicleType'] as String? ?? 'Rescue Vehicle',
+      callSign: m['callSign'] as String? ?? id,
+      phoneNumber: m['phoneNumber'] as String? ?? '',
+      fuelLevel: i(m['fuelLevel'], 100),
+    );
+  }
+
   bool get isAvailable => status == 'AVAILABLE';
+  bool get isEnRoute => status == 'EN ROUTE';
+  bool get isOnScene => status == 'ON SCENE';
+
+  EmergencyTeam copyWith({
+    String? id,
+    String? name,
+    String? status,
+    String? distance,
+    String? eta,
+    int? etaMinutes,
+    String? equipment,
+    int? crewCount,
+    String? leader,
+    String? radioChannel,
+    LatLng? location,
+    double? speedKmh,
+    String? vehicleType,
+    String? callSign,
+    String? phoneNumber,
+    int? fuelLevel,
+  }) {
+    return EmergencyTeam(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      status: status ?? this.status,
+      distance: distance ?? this.distance,
+      eta: eta ?? this.eta,
+      etaMinutes: etaMinutes ?? this.etaMinutes,
+      equipment: equipment ?? this.equipment,
+      crewCount: crewCount ?? this.crewCount,
+      leader: leader ?? this.leader,
+      radioChannel: radioChannel ?? this.radioChannel,
+      location: location ?? this.location,
+      speedKmh: speedKmh ?? this.speedKmh,
+      vehicleType: vehicleType ?? this.vehicleType,
+      callSign: callSign ?? this.callSign,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      fuelLevel: fuelLevel ?? this.fuelLevel,
+    );
+  }
 }
 
 class IncidentReport {
@@ -82,12 +174,21 @@ class IncidentReport {
   final String reporterName;
   final String reporterPhone;
   final bool isVerified;
-  final String timeAgo;
+  final String _timeAgo;
+  final String? localId;
+  final String reporterEmail;
+  final String? photoUrl;
+  DateTime? createdAt;
+  bool archived;
   IncidentStatus status;
   EmergencyTeam? assignedTeam;
   String? resolutionNotes;
   String? resolutionType;
   int evacuatedCount;
+  String? dispatchNotes;
+  String? priorityLevel;
+  String? cancellationReason;
+  DateTime? dispatchedAt;
 
   IncidentReport({
     required this.id,
@@ -102,13 +203,56 @@ class IncidentReport {
     required this.reporterName,
     required this.reporterPhone,
     required this.isVerified,
-    required this.timeAgo,
+    String timeAgo = '',
+    this.localId,
+    this.reporterEmail = '',
+    this.photoUrl,
+    this.createdAt,
+    this.archived = false,
     this.status = IncidentStatus.incoming,
     this.assignedTeam,
     this.resolutionNotes,
     this.resolutionType,
     this.evacuatedCount = 0,
-  });
+    this.dispatchNotes,
+    this.priorityLevel,
+    this.cancellationReason,
+    this.dispatchedAt,
+  }) : _timeAgo = timeAgo;
+
+  /// Short readable id for UI (report code if present, else trimmed doc id).
+  String get shortId {
+    final l = localId;
+    if (l != null && l.isNotEmpty) return l;
+    return id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+  }
+
+  bool get isPlaceholder => id == 'NONE';
+
+  /// Live "x mins ago" text computed from [createdAt] (falls back to text).
+  String get timeAgo {
+    final c = createdAt;
+    if (c == null) return _timeAgo.isEmpty ? 'Just now' : _timeAgo;
+    final diff = DateTime.now().difference(c);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} Mins Ago';
+    if (diff.inHours < 24) return '${diff.inHours} Hrs Ago';
+    return '${diff.inDays} Days Ago';
+  }
+
+  /// Sort weight: lower = more urgent (FR10).
+  int get severityRank {
+    switch (severity) {
+      case IncidentSeverity.critical:
+        return 0;
+      case IncidentSeverity.high:
+        return 1;
+      case IncidentSeverity.medium:
+        return 2;
+      case IncidentSeverity.low:
+        return 3;
+    }
+  }
 
   String get severityLabel {
     switch (severity) {

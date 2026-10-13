@@ -8,25 +8,25 @@ class ShelterTheme {
   // ----------------------------------------
   
   /// Deep Navy / True Black
-  static const Color backgroundDeepNavy = Color(0xFF0B132B);
+  static const Color backgroundDeepNavy = Color(0xFF131C2E);
   
   /// Dark Navy for cards and general surfaces
-  static const Color surfaceDarkNavy = Color(0xFF1C2541);
+  static const Color surfaceDarkNavy = Color(0xFF131C2E);
   
   /// Lighter Navy for elevated surfaces or active states
-  static const Color surfaceLightNavy = Color(0xFF273456);
+  static const Color surfaceLightNavy = Color(0xFF1C2740);
 
   /// Primary Action Color (High visibility)
-  static const Color primaryActionOrange = Color(0xFFFF6B35);
+  static const Color primaryActionOrange = Color(0xFF38BDF8);
 
   // Status Colors
-  static const Color statusSafeGreen = Color(0xFF06D6A0);
-  static const Color statusWarningYellow = Color(0xFFFFD166);
-  static const Color statusCriticalRed = Color(0xFFEF476F);
+  static const Color statusSafeGreen = Color(0xFF34D399);
+  static const Color statusWarningYellow = Color(0xFFFBBF24);
+  static const Color statusCriticalRed = Color(0xFFF87171);
 
   // Text Colors
-  static const Color textHighContrastWhite = Color(0xFFF8F9FA);
-  static const Color textMuted = Color(0xFF90A4AE);
+  static const Color textHighContrastWhite = Color(0xFFFFFFFF);
+  static const Color textMuted = Color(0xFFB6C2D6);
 
   // ----------------------------------------
   // ThemeData Getter
@@ -47,7 +47,7 @@ class ShelterTheme {
         secondary: statusSafeGreen,
         surface: surfaceDarkNavy,
         error: statusCriticalRed,
-        onPrimary: textHighContrastWhite,
+        onPrimary: Color(0xFF06121F),
         onSecondary: backgroundDeepNavy, // contrast against bright green
         onSurface: textHighContrastWhite,
         onError: textHighContrastWhite,
@@ -94,7 +94,7 @@ class ShelterTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryActionOrange,
-          foregroundColor: textHighContrastWhite,
+          foregroundColor: Color(0xFF06121F),
           minimumSize: const Size(double.infinity, 52), // Wet-touch friendly target
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -111,7 +111,7 @@ class ShelterTheme {
       // Floating Action Button Theme
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: primaryActionOrange,
-        foregroundColor: textHighContrastWhite,
+        foregroundColor: Color(0xFF06121F),
         elevation: 4,
       ),
 

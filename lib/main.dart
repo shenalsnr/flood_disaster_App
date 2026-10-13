@@ -1,72 +1,79 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'features/component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
 
+import 'core/localization/language_controller.dart';
+import 'core/responsive/screen_fit.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
+import 'core/services/notification_service.dart';
+import 'core/services/offline_sync.dart';
+import 'features/splash/presentation/screens/splash_screen.dart';
 import 'firebase_options.dart';
-import 'features/component4_control_center/presentation/screens/responder_register_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => debugPrint('Firebase initialized successfully'))
       .catchError((e) => debugPrint('Firebase init error: $e'));
 
-  // Force dark status bar icons to match the dark theme
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
+  // Keep data on the phone and sync it when the internet returns.
+  OfflineSync.init();
 
-  // Removed the blocking connection_test query so the app can boot up immediately!
+  // Initialize Notifications
+  await NotificationService.instance.initialize();
+
+  // Load the saved Dark / Light choice (also sets the status bar colours).
+  await ThemeController.instance.load();
+
+  // Load the saved language (English / Sinhala / Tamil).
+  await LanguageController.instance.load();
 
   runApp(const WeSafeApp());
 }
 
-class WeSafeApp extends StatelessWidget {
+class WeSafeApp extends StatefulWidget {
   const WeSafeApp({super.key});
+
+  @override
+  State<WeSafeApp> createState() => _WeSafeAppState();
+}
+
+class _WeSafeAppState extends State<WeSafeApp> {
+  @override
+  void initState() {
+    super.initState();
+    LanguageController.instance.addListener(_onLanguageChanged);
+  }
+
+  @override
+  void dispose() {
+    LanguageController.instance.removeListener(_onLanguageChanged);
+    super.dispose();
+  }
+
+  /// Language changed: rebuild every screen that is already open so all the
+  /// text switches at once (navigation is not reset).
+  void _onLanguageChanged() {
+    void rebuild(Element e) {
+      e.markNeedsBuild();
+      e.visitChildren(rebuild);
+    }
+
+    (context as Element).visitChildren(rebuild);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: NotificationService.navigatorKey,
+      scaffoldMessengerKey: NotificationService.messengerKey,
       debugShowCheckedModeBanner: false,
       title: 'WeSafe — Flood Relief & Early Warning',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00E676),
-          secondary: Color(0xFF40C4FF),
-          surface: Color(0xFF1A1A1A),
-          error: Color(0xFFFF5252),
-        ),
-        fontFamily: 'Roboto',
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF121212),
-          elevation: 0,
-          titleTextStyle: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-          iconTheme: IconThemeData(color: Colors.white),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00E676),
-            foregroundColor: Colors.black,
-            textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-          ),
-        ),
-      ),
-      home: const ResponderRegisterScreen(),
+      theme: AppTheme.dark,
+      builder: ScreenFit.appBuilder,
+      home: const SplashScreen(),
     );
   }
 }

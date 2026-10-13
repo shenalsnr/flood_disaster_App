@@ -4,6 +4,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/ration_item_model.dart';
 import 'relief_truck_tracking_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Screen to escalate urgent supply dispatch to the DMC.
 class UrgentDispatchScreen extends StatelessWidget {
   const UrgentDispatchScreen({super.key});
@@ -23,7 +24,7 @@ class UrgentDispatchScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Urgent DMC Dispatch'),
+        title: Text(tr('Urgent DMC Dispatch')),
         backgroundColor: ShelterTheme.backgroundDeepNavy,
       ),
       body: Padding(
@@ -39,12 +40,12 @@ class UrgentDispatchScreen extends StatelessWidget {
                 border: Border.all(color: ShelterTheme.statusCriticalRed, width: 2),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Column(
+              child: Column(
                 children: [
                   Icon(Icons.warning_amber_rounded, color: ShelterTheme.statusCriticalRed, size: 48),
                   SizedBox(height: 12),
                   Text(
-                    'DMC TRIAGE NOTIFICATION',
+                    tr('DMC TRIAGE NOTIFICATION'),
                     style: TextStyle(
                       color: ShelterTheme.statusCriticalRed,
                       fontWeight: FontWeight.bold,
@@ -54,7 +55,7 @@ class UrgentDispatchScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Confirming this dispatch will immediately notify the Disaster Management Centre (DMC) for an emergency convoy override.',
+                    tr('Confirming this dispatch will immediately notify the Disaster Management Centre (DMC) for an emergency convoy override.'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: ShelterTheme.textHighContrastWhite,
@@ -67,8 +68,8 @@ class UrgentDispatchScreen extends StatelessWidget {
             const SizedBox(height: 24),
             
             // DEPLETED ITEMS LIST
-            const Text(
-              'Critical Shortages for Resupply:',
+            Text(
+              tr('Critical Shortages for Resupply:'),
               style: TextStyle(
                 color: ShelterTheme.textHighContrastWhite,
                 fontSize: 16,
@@ -78,9 +79,9 @@ class UrgentDispatchScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Expanded(
               child: urgentItems.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'No urgent shortages detected.',
+                        tr('No urgent shortages detected.'),
                         style: TextStyle(color: ShelterTheme.statusSafeGreen, fontSize: 16),
                       ),
                     )
@@ -97,15 +98,15 @@ class UrgentDispatchScreen extends StatelessWidget {
                               color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
                             ),
                             title: Text(
-                              item.name,
+                              tr(item.name),
                               style: const TextStyle(
                                 color: ShelterTheme.textHighContrastWhite,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text('Current Stock: ${item.quantity} ${item.unit}', style: const TextStyle(color: ShelterTheme.textMuted)),
+                            subtitle: Text(tr('Current Stock: {p0} {p1}', {'p0': (item.quantity).toString(), 'p1': (item.unit).toString()}), style: const TextStyle(color: ShelterTheme.textMuted)),
                             trailing: Text(
-                              isDepleted ? 'DEPLETED' : 'LOW',
+                              isDepleted ? tr('DEPLETED') : tr('LOW'),
                               style: TextStyle(
                                 color: isDepleted ? ShelterTheme.statusCriticalRed : ShelterTheme.statusWarningYellow,
                                 fontWeight: FontWeight.bold,
@@ -130,8 +131,8 @@ class UrgentDispatchScreen extends StatelessWidget {
                 backgroundColor: ShelterTheme.statusCriticalRed,
                 padding: const EdgeInsets.symmetric(vertical: 18),
               ),
-              child: const Text(
-                'CONFIRM & DISPATCH TO DMC',
+              child: Text(
+                tr('CONFIRM & DISPATCH TO DMC'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),

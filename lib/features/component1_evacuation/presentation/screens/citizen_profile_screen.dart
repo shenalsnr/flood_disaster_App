@@ -1,8 +1,14 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
+import '../../../../core/theme/appearance.dart';
+import 'citizen_settings_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class CitizenProfileScreen extends StatefulWidget {
   const CitizenProfileScreen({super.key});
 
@@ -12,6 +18,71 @@ class CitizenProfileScreen extends StatefulWidget {
 
 class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isUploadingAvatar = false;
+
+  Future<void> _pickAndUploadImage(String email, ImageSource source) async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 70,
+        maxWidth: 800,
+      );
+      if (picked == null) return;
+
+      setState(() => _isUploadingAvatar = true);
+
+      // readAsBytes() works on both Web and Mobile platforms
+      final fileBytes = await picked.readAsBytes();
+      // Bypass Firebase Storage completely by converting to Base64
+      final base64String = base64Encode(fileBytes);
+
+      await _firestore.collection('users').doc(email).set(
+        {'photoUrl': base64String},
+        SetOptions(merge: true),
+      ).queued();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('Failed to upload image: {p0}', {'p0': (e).toString()}))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
+  }
+
+  void _showImageSourceDialog(String email) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1C2740),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded, color: Colors.white),
+              title: Text(tr('Take Photo'), style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAndUploadImage(email, ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: Colors.white),
+              title: Text(tr('Choose from Gallery'), style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAndUploadImage(email, ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _editProfile(Map<String, dynamic> currentData, String email) {
     final nameCtrl = TextEditingController(text: currentData['fullName'] ?? currentData['name']);
@@ -34,7 +105,7 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF0F172A).withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF334155)),
+                border: Border.all(color: const Color(0xFF2B3A55)),
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -42,8 +113,8 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Edit Profile',
+                    Text(
+                      tr('Edit Profile'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -69,12 +140,12 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+                          child: Text(tr('Cancel'), style: TextStyle(color: Colors.white70)),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00E676),
+                          style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
+                            backgroundColor: const Color(0xFF34D399),
                             foregroundColor: Colors.black,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -88,10 +159,10 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                               'city': cityCtrl.text,
                               'district': districtCtrl.text,
                               'floodZone': zoneCtrl.text,
-                            }, SetOptions(merge: true));
+                            }, SetOptions(merge: true)).queued();
                             if (ctx.mounted) Navigator.pop(ctx);
                           },
-                          child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(tr('Save Changes'), style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -112,16 +183,16 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: const Color(0xFF00E676).withValues(alpha: 0.7)),
+        prefixIcon: Icon(icon, color: const Color(0xFF34D399).withValues(alpha: 0.7)),
         filled: true,
-        fillColor: const Color(0xFF1E293B).withValues(alpha: 0.5),
+        fillColor: const Color(0xFF1C2740).withValues(alpha: 0.5),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.transparent),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF00E676)),
+          borderSide: const BorderSide(color: Color(0xFF34D399)),
         ),
       ),
     );
@@ -136,8 +207,18 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('My Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+        title: Text(tr('My Profile'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            tooltip: 'Settings & Preferences',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CitizenSettingsScreen()),
+            ),
+          ),
+        ],
       ),
       body: Container(
         width: double.infinity,
@@ -146,17 +227,17 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: userEmail == null
-            ? const Center(child: Text('Not logged in.', style: TextStyle(color: Colors.white)))
+            ? Center(child: Text(tr('Not logged in.'), style: TextStyle(color: Colors.white)))
             : SafeArea(
                 child: StreamBuilder<DocumentSnapshot>(
                   stream: _firestore.collection('users').doc(userEmail).snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Color(0xFF00E676)));
+                      return const Center(child: CircularProgressIndicator(color: Color(0xFF34D399)));
                     }
 
                     final data = snapshot.data?.data() as Map<String, dynamic>? ?? {};
@@ -175,39 +256,88 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Premium Avatar
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF00E676).withValues(alpha: 0.3),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 8),
+                          GestureDetector(
+                            onTap: () => _showImageSourceDialog(emailStr),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF34D399), Color(0xFF00BFA5)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
+                                        blurRadius: 20,
+                                        spreadRadius: 2,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xFF0B1220),
+                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: data['photoUrl'] != null && data['photoUrl'].toString().isNotEmpty
+                                          ? (data['photoUrl'].toString().startsWith('http') 
+                                              ? Unfiltered(child: Image.network(
+                                                  data['photoUrl'],
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF34D399)),
+                                                ))
+                                              : Unfiltered(child: Image.memory(
+                                                  base64Decode(data['photoUrl']),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, size: 60, color: Color(0xFF34D399)),
+                                                )))
+                                          : const Icon(Icons.person_rounded, size: 60, color: Color(0xFF34D399)),
+                                    ),
+                                  ),
+                                ),
+                                if (_isUploadingAvatar)
+                                  Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(alpha: 0.5),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(color: Color(0xFF34D399)),
+                                    ),
+                                  ),
+                                // Edit Badge
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1C2740),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: const Color(0xFF34D399), width: 2),
+                                    ),
+                                    child: const Icon(Icons.camera_alt_rounded, color: Color(0xFF34D399), size: 18),
+                                  ),
                                 ),
                               ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFF070B14),
-                                ),
-                                child: const Icon(Icons.person_rounded, size: 60, color: Color(0xFF00E676)),
-                              ),
                             ),
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            displayName,
+                            tr(displayName),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -219,14 +349,14 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.3)),
+                              border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.3)),
                             ),
-                            child: const Text(
-                              'AFFECTED CITIZEN',
+                            child: Text(
+                              tr('AFFECTED CITIZEN'),
                               style: TextStyle(
-                                color: Color(0xFF00E676),
+                                color: Color(0xFF34D399),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.2,
@@ -243,43 +373,43 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(24),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E293B).withValues(alpha: 0.4),
+                                  color: const Color(0xFF1C2740).withValues(alpha: 0.4),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                                 ),
                                 child: Column(
                                   children: [
-                                    _ProfileRow(icon: Icons.badge_outlined, label: 'Full Name', value: displayName),
+                                    _ProfileRow(icon: Icons.badge_outlined, label: tr('Full Name'), value: displayName),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.email_outlined, label: 'Email Address', value: emailStr),
+                                    _ProfileRow(icon: Icons.email_outlined, label: tr('Email Address'), value: emailStr),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.phone_outlined, label: 'Phone Number', value: phone),
+                                    _ProfileRow(icon: Icons.phone_outlined, label: tr('Phone Number'), value: phone),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.credit_card_outlined, label: 'NIC Number', value: nic),
+                                    _ProfileRow(icon: Icons.credit_card_outlined, label: tr('NIC Number'), value: nic),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.location_city_outlined, label: 'City', value: city),
+                                    _ProfileRow(icon: Icons.location_city_outlined, label: tr('City'), value: city),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.map_outlined, label: 'District', value: district),
+                                    _ProfileRow(icon: Icons.map_outlined, label: tr('District'), value: district),
                                     const Padding(
                                       padding: EdgeInsets.symmetric(vertical: 12),
                                       child: Divider(color: Colors.white10, height: 1),
                                     ),
-                                    _ProfileRow(icon: Icons.location_on_outlined, label: 'Sector / Zone', value: zone),
+                                    _ProfileRow(icon: Icons.location_on_outlined, label: tr('Sector / Zone'), value: zone),
                                   ],
                                 ),
                               ),
@@ -295,25 +425,25 @@ class _CitizenProfileScreenState extends State<CitizenProfileScreen> {
                             child: ElevatedButton(
                               onPressed: () => _editProfile(data, userEmail),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00E676),
+                                backgroundColor: const Color(0xFF34D399),
                                 foregroundColor: Colors.black,
                                 elevation: 8,
-                                shadowColor: const Color(0xFF00E676).withValues(alpha: 0.4),
+                                shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.edit_rounded, size: 22),
                                   SizedBox(width: 10),
-                                  Text(
-                                    'EDIT PROFILE',
+                                  Flexible(child: Text(
+                                    tr('EDIT PROFILE'),
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 1.0,
                                     ),
-                                  ),
+                                  )),
                                 ],
                               ),
                             ),
@@ -344,10 +474,10 @@ class _ProfileRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF00E676).withValues(alpha: 0.1),
+            color: const Color(0xFF34D399).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF00E676), size: 24),
+          child: Icon(icon, color: const Color(0xFF34D399), size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -365,12 +495,15 @@ class _ProfileRow extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                value,
+                tr(value),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
             ],
           ),

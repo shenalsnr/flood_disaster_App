@@ -1,11 +1,17 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../component4_control_center/presentation/controllers/responder_controller.dart';
 
 class CitizenFirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   // Uses actual logged-in user ID, falls back to 'mock_user_123' if testing without login
-  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? 'mock_user_123';
+  String get currentUserId =>
+      ResponderController().currentUser?.email ??
+      FirebaseAuth.instance.currentUser?.uid ??
+      'mock_user_123';
 
   // ===========================================================================
   // 3. Citizen Profile & Safe Arrival Status
@@ -17,7 +23,7 @@ class CitizenFirestoreService {
       'name': name,
       'evacuationStatus': 'Pending',
       'createdAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    }, SetOptions(merge: true)).queued();
   }
 
   /// Read: Fetch the citizen's profile details
@@ -25,12 +31,33 @@ class CitizenFirestoreService {
     return _db.collection('users').doc(currentUserId).snapshots();
   }
 
-  /// Update: "Mark as Safe" function that updates the evacuationStatus field
-  Future<void> markAsSafe() async {
-    await _db.collection('users').doc(currentUserId).update({
+  /// Update: "Mark as Safe" function that updates the evacuationStatus field and safe zone location
+  Future<void> markAsSafe({
+    String? safeZoneName,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final Map<String, dynamic> data = {
       'evacuationStatus': 'Safe',
+      'checkInTimestamp': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    };
+    if (safeZoneName != null) data['currentSafeZone'] = safeZoneName;
+    if (latitude != null) data['safeLatitude'] = latitude;
+    if (longitude != null) data['safeLongitude'] = longitude;
+
+    await _db.collection('users').doc(currentUserId).set(
+      data,
+      SetOptions(merge: true),
+    ).queued();
+  }
+
+  /// Reset: Reset check-in status back to Pending when updating status
+  Future<void> resetCheckInStatus() async {
+    await _db.collection('users').doc(currentUserId).set({
+      'evacuationStatus': 'Pending',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true)).queued();
   }
 
   /// Delete: Delete the user's profile document
@@ -49,10 +76,10 @@ class CitizenFirestoreService {
         .doc(currentUserId)
         .collection('checklist')
         .add({
-      'itemName': itemName,
-      'isPacked': false,
-      'addedAt': FieldValue.serverTimestamp(),
-    });
+          'itemName': itemName,
+          'isPacked': false,
+          'addedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   /// Read: Fetch checklist items in real-time
@@ -75,6 +102,16 @@ class CitizenFirestoreService {
         .update({'isPacked': !currentStatus});
   }
 
+  /// Update: Edit the item's name
+  Future<void> updateChecklistItem(String docId, String newName) async {
+    await _db
+        .collection('users')
+        .doc(currentUserId)
+        .collection('checklist')
+        .doc(docId)
+        .update({'itemName': newName});
+  }
+
   /// Delete: Remove the item's document
   Future<void> deleteChecklistItem(String docId) async {
     await _db
@@ -91,15 +128,13 @@ class CitizenFirestoreService {
 
   /// Create: Add a new contact to the contacts sub-collection
   Future<void> addEmergencyContact(String name, String phoneNumber) async {
-    await _db
-        .collection('users')
-        .doc(currentUserId)
-        .collection('contacts')
-        .add({
-      'name': name,
-      'phoneNumber': phoneNumber,
-      'addedAt': FieldValue.serverTimestamp(),
-    });
+    await _db.collection('users').doc(currentUserId).collection('contacts').add(
+      {
+        'name': name,
+        'phoneNumber': phoneNumber,
+        'addedAt': FieldValue.serverTimestamp(),
+      },
+    ).queued();
   }
 
   /// Read: Fetch the contacts in real-time
@@ -113,16 +148,17 @@ class CitizenFirestoreService {
   }
 
   /// Update: Update the phoneNumber or name of a specific contact
-  Future<void> updateEmergencyContact(String docId, String newName, String newPhone) async {
+  Future<void> updateEmergencyContact(
+    String docId,
+    String newName,
+    String newPhone,
+  ) async {
     await _db
         .collection('users')
         .doc(currentUserId)
         .collection('contacts')
         .doc(docId)
-        .update({
-      'name': newName,
-      'phoneNumber': newPhone,
-    });
+        .update({'name': newName, 'phoneNumber': newPhone});
   }
 
   /// Delete: Delete the contact document

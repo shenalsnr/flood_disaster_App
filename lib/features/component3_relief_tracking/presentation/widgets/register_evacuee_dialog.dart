@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/evacuee_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class RegisterEvacueeDialog extends StatefulWidget {
   final Function(EvacueeModel evacuee) onEvacueeRegistered;
 
@@ -77,14 +78,14 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                       child: const Icon(Icons.person_add_alt_1_outlined, color: Colors.greenAccent),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      'Register Evacuee',
+                    Flexible(child: Text(
+                      tr('Register Evacuee'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -94,7 +95,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
                   decoration: _inputDecoration('Full Name', Icons.person_outline),
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter full name' : null,
+                  validator: (val) => val == null || val.isEmpty ? tr('Please enter full name') : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -107,18 +108,18 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
                         decoration: _inputDecoration('Age', Icons.cake_outlined),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        validator: (val) => val == null || val.isEmpty ? tr('Required') : null,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: DropdownButtonFormField<String>(
+                      child: DropdownButtonFormField<String>(isExpanded: true, 
                         initialValue: _selectedGender,
                         dropdownColor: const Color(0xFF2C2C2C),
                         style: const TextStyle(color: Colors.white),
                         decoration: _inputDecoration('Gender', Icons.wc),
                         items: ['Female', 'Male', 'Other'].map((g) {
-                          return DropdownMenuItem(value: g, child: Text(g));
+                          return DropdownMenuItem(value: g, child: Text(tr(g), maxLines: 1, overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _selectedGender = val);
@@ -130,18 +131,18 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                 const SizedBox(height: 12),
 
                 // Triage Tag Selector
-                const Text(
-                  'Triage Priority Tag:',
+                Text(
+                  tr('Triage Priority Tag:'),
                   style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    _buildTriageChip(TriagePriority.green, 'Green (Stable)', const Color(0xFF69F0AE)),
+                    _buildTriageChip(TriagePriority.green, 'Green (Stable)', const Color(0xFF6EE7B7)),
                     const SizedBox(width: 6),
                     _buildTriageChip(TriagePriority.yellow, 'Yellow (Care)', const Color(0xFFFFAB40)),
                     const SizedBox(width: 6),
-                    _buildTriageChip(TriagePriority.red, 'Red (Urgent)', const Color(0xFFFF5252)),
+                    _buildTriageChip(TriagePriority.red, 'Red (Urgent)', const Color(0xFFF87171)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -169,18 +170,19 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                      child: Text(tr('Cancel'), style: TextStyle(color: Colors.white54)),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                         backgroundColor: Colors.greenAccent,
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: _submit,
                       icon: const Icon(Icons.check),
-                      label: const Text('CHECK-IN EVACUEE', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(tr('CHECK-IN EVACUEE'), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -209,7 +211,7 @@ class _RegisterEvacueeDialogState extends State<RegisterEvacueeDialog> {
           ),
           child: Center(
             child: Text(
-              label,
+              tr(label),
               style: TextStyle(
                 color: isSelected ? color : Colors.white70,
                 fontSize: 10,

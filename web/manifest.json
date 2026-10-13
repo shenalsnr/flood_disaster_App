@@ -1,6 +1,6 @@
 {
-    "name": "flood_disaster",
-    "short_name": "flood_disaster",
+    "name": "WeSafe",
+    "short_name": "WeSafe",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/shelter_theme.dart';
 import '../../data/models/truck_model.dart';
 import '../../data/services/firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class ReliefTruckTrackingScreen extends StatefulWidget {
   const ReliefTruckTrackingScreen({super.key});
 
@@ -61,8 +61,8 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Add Truck',
+                      Text(
+                        tr('Add Truck'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -131,7 +131,7 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          'Failed to save truck: $e',
+                                          tr('Failed to save truck: {p0}', {'p0': (e).toString()}),
                                         ),
                                         backgroundColor:
                                             ShelterTheme.statusCriticalRed,
@@ -155,8 +155,8 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'SAVE TRUCK',
+                            : Text(
+                                tr('SAVE TRUCK'),
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                       ),
@@ -192,7 +192,7 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
           ),
         ),
         validator: required
-            ? (v) => v!.trim().isEmpty ? 'Required' : null
+            ? (v) => v!.trim().isEmpty ? tr('Required') : null
             : null,
       ),
     );
@@ -202,12 +202,12 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Live Fleet Tracking'),
+        title: Text(tr('Live Fleet Tracking')),
         backgroundColor: ShelterTheme.backgroundDeepNavy,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add Truck',
+            tooltip: tr('Add Truck'),
             onPressed: _showAddTruckModal,
           ),
         ],
@@ -227,16 +227,16 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error: ${snapshot.error}',
+                tr('Error: {p0}', {'p0': (snapshot.error).toString()}),
                 style: const TextStyle(color: ShelterTheme.statusCriticalRed),
               ),
             );
           }
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'No active trucks in fleet.',
+                tr('No active trucks in fleet.'),
                 style: TextStyle(color: ShelterTheme.textMuted),
               ),
             );
@@ -273,14 +273,14 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Truck ${data['vehicleNumber'] ?? ''}',
+                          Flexible(child: Text(
+                            tr('Truck {p0}', {'p0': (data['vehicleNumber'] ?? '').toString()}),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: ShelterTheme.textHighContrastWhite,
                             ),
-                          ),
+                          )),
                           Icon(Icons.local_shipping, color: statusColor),
                         ],
                       ),
@@ -332,8 +332,8 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
                         ),
                       ],
                       const SizedBox(height: 8),
-                      const Text(
-                        'Driver info shown only via dispatch alert (not in general fleet view).',
+                      Text(
+                        tr('Driver info shown only via dispatch alert (not in general fleet view).'),
                         style: TextStyle(
                           color: ShelterTheme.textMuted,
                           fontSize: 11,
@@ -389,7 +389,7 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
     return OutlinedButton(
       onPressed: () => _fs.updateTruck(docId, {'status': statusValue}),
       style: OutlinedButton.styleFrom(side: BorderSide(color: color)),
-      child: Text(label, style: TextStyle(color: color, fontSize: 11)),
+      child: Text(tr(label), style: TextStyle(color: color, fontSize: 11)),
     );
   }
 
@@ -397,13 +397,13 @@ class _ReliefTruckTrackingScreenState extends State<ReliefTruckTrackingScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
+        Flexible(child: Text(
+          tr(label),
           style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 13),
-        ),
+        )),
         Expanded(
           child: Text(
-            value,
+            tr(value),
             textAlign: TextAlign.end,
             style: TextStyle(
               color: valueColor,

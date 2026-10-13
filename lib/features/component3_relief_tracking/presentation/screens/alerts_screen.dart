@@ -7,6 +7,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/inter_camp_alert_model.dart';
 import '../../data/services/firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class AlertsScreen extends StatefulWidget {
   const AlertsScreen({super.key});
 
@@ -17,7 +18,6 @@ class AlertsScreen extends StatefulWidget {
 class _AlertsScreenState extends State<AlertsScreen> {
   final ShelterReliefService _service = ShelterReliefService.instance;
   final FirestoreService _fs = FirestoreService.instance;
-  int _selectedFilter = 0;
 
   @override
   void initState() {
@@ -76,8 +76,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Dispatch Supplies',
+                      Text(
+                        tr('Dispatch Supplies'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -88,24 +88,24 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       TextFormField(
                         controller: driverNameCtrl,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          labelText: 'Driver Name',
+                        decoration: InputDecoration(
+                          labelText: tr('Driver Name'),
                           labelStyle: TextStyle(color: ShelterTheme.textMuted),
                         ),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) => v!.isEmpty ? tr('Required') : null,
                       ),
                       TextFormField(
                         controller: driverContactCtrl,
                         style: const TextStyle(color: Colors.white),
                         keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Driver Contact',
+                        decoration: InputDecoration(
+                          labelText: tr('Driver Contact'),
                           labelStyle: TextStyle(color: ShelterTheme.textMuted),
                         ),
                         validator: (v) {
-                          if (v!.isEmpty) return 'Required';
+                          if (v!.isEmpty) return tr('Required');
                           if (!RegExp(r'^\d+$').hasMatch(v)) {
-                            return 'Invalid phone format';
+                            return tr('Invalid phone format');
                           }
                           return null;
                         },
@@ -116,15 +116,15 @@ class _AlertsScreenState extends State<AlertsScreen> {
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText:
-                              'Dispatched Quantity (${alertData['requiredItems'] ?? ''})',
+                              tr('Dispatched Quantity ({p0})', {'p0': (alertData['requiredItems'] ?? '').toString()}),
                           labelStyle: const TextStyle(
                             color: ShelterTheme.textMuted,
                           ),
                         ),
                         validator: (v) {
-                          if (v!.isEmpty) return 'Required';
+                          if (v!.isEmpty) return tr('Required');
                           if (int.tryParse(v) == null || int.parse(v) <= 0) {
-                            return 'Must be a positive number';
+                            return tr('Must be a positive number');
                           }
                           return null;
                         },
@@ -132,11 +132,11 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       TextFormField(
                         controller: vehicleTypeCtrl,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          labelText: 'Vehicle Type',
+                        decoration: InputDecoration(
+                          labelText: tr('Vehicle Type'),
                           labelStyle: TextStyle(color: ShelterTheme.textMuted),
                         ),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) => v!.isEmpty ? tr('Required') : null,
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
@@ -178,7 +178,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Dispatch failed: $e'),
+                                        content: Text(tr('Dispatch failed: {p0}', {'p0': (e).toString()})),
                                         backgroundColor:
                                             ShelterTheme.statusCriticalRed,
                                       ),
@@ -200,7 +200,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                                   ),
                                 ),
                               )
-                            : const Text('CONFIRM DISPATCH'),
+                            : Text(tr('CONFIRM DISPATCH')),
                       ),
                     ],
                   ),
@@ -230,15 +230,15 @@ class _AlertsScreenState extends State<AlertsScreen> {
       appBar: AppBar(
         backgroundColor: ShelterTheme.backgroundDeepNavy,
         elevation: 0,
-        title: const Text(
-          'Inter-Camp Alerts',
+        title: Text(
+          tr('Inter-Camp Alerts'),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         // Button to add a new supply request (saved to Firestore)
         actions: [
           IconButton(
             icon: const Icon(Icons.add_alert_outlined, color: Colors.white),
-            tooltip: 'New Supply Request',
+            tooltip: tr('New Supply Request'),
             onPressed: () => _showNewRequestDialog(),
           ),
         ],
@@ -257,16 +257,16 @@ class _AlertsScreenState extends State<AlertsScreen> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error: ${snapshot.error}',
+                tr('Error: {p0}', {'p0': (snapshot.error).toString()}),
                 style: const TextStyle(color: ShelterTheme.statusCriticalRed),
               ),
             );
           }
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'No alerts yet.',
+                tr('No alerts yet.'),
                 style: TextStyle(color: ShelterTheme.textMuted),
               ),
             );
@@ -285,7 +285,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
               if (type == AlertType.request.name &&
                   status == AlertStatus.pending.name) {
                 return _buildAlertCard(
-                  title: 'Urgent Supply Request',
+                  title: tr('Urgent Supply Request'),
                   time: timeStr,
                   desc:
                       '${data['requestingCampName']} requires ${data['requiredItems']}.',
@@ -294,7 +294,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   actions: [
                     ElevatedButton(
                       onPressed: () => _showDispatchForm(data, docId),
-                      style: ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                         backgroundColor: ShelterTheme.statusSafeGreen,
                       ),
                       child: const Text('සැපයුම් එවන්නම් (Accept)'),
@@ -318,7 +318,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 );
               } else if (type == AlertType.dispatch.name) {
                 return _buildAlertCard(
-                  title: 'Supply Dispatched',
+                  title: tr('Supply Dispatched'),
                   time: timeStr,
                   desc: 'Supplies dispatched to ${data['requestingCampName']}.',
                   color: ShelterTheme.primaryActionOrange,
@@ -327,8 +327,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     ElevatedButton.icon(
                       onPressed: _openGoogleMaps,
                       icon: const Icon(Icons.map),
-                      label: const Text('Open in Google Maps'),
-                      style: ElevatedButton.styleFrom(
+                      label: Text(tr('Open in Google Maps')),
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
                         backgroundColor: ShelterTheme.primaryActionOrange,
                       ),
                     ),
@@ -337,7 +337,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
               }
 
               return _buildAlertCard(
-                title: 'Alert Update',
+                title: tr('Alert Update'),
                 time: timeStr,
                 desc: 'Status: $status — ${data['requiredItems'] ?? ''}',
                 color: ShelterTheme.textMuted,
@@ -365,8 +365,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
           builder: (ctx, setDialogState) {
             return AlertDialog(
               backgroundColor: ShelterTheme.surfaceDarkNavy,
-              title: const Text(
-                'New Supply Request',
+              title: Text(
+                tr('New Supply Request'),
                 style: TextStyle(color: Colors.white),
               ),
               content: Form(
@@ -377,21 +377,21 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     TextFormField(
                       controller: campNameCtrl,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Your Camp Name',
+                      decoration: InputDecoration(
+                        labelText: tr('Your Camp Name'),
                         labelStyle: TextStyle(color: ShelterTheme.textMuted),
                       ),
-                      validator: (v) => v!.trim().isEmpty ? 'Required' : null,
+                      validator: (v) => v!.trim().isEmpty ? tr('Required') : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: itemsCtrl,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Required Items',
+                      decoration: InputDecoration(
+                        labelText: tr('Required Items'),
                         labelStyle: TextStyle(color: ShelterTheme.textMuted),
                       ),
-                      validator: (v) => v!.trim().isEmpty ? 'Required' : null,
+                      validator: (v) => v!.trim().isEmpty ? tr('Required') : null,
                     ),
                   ],
                 ),
@@ -399,12 +399,16 @@ class _AlertsScreenState extends State<AlertsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text(
-                    'Cancel',
+                  child: Text(
+                    tr('Cancel'),
                     style: TextStyle(color: ShelterTheme.textMuted),
                   ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    backgroundColor: ShelterTheme.statusCriticalRed,
+                  ),
                   onPressed: isSaving
                       ? null
                       : () async {
@@ -425,7 +429,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Failed: $e'),
+                                  content: Text(tr('Failed: {p0}', {'p0': (e).toString()})),
                                   backgroundColor:
                                       ShelterTheme.statusCriticalRed,
                                 ),
@@ -433,9 +437,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             }
                           }
                         },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ShelterTheme.statusCriticalRed,
-                  ),
                   child: isSaving
                       ? const SizedBox(
                           height: 16,
@@ -447,7 +448,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             ),
                           ),
                         )
-                      : const Text('BROADCAST REQUEST'),
+                      : Text(tr('BROADCAST REQUEST')),
                 ),
               ],
             );
@@ -482,25 +483,25 @@ class _AlertsScreenState extends State<AlertsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  title,
+                  tr(title),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              Text(
-                time,
+              Flexible(child: Text(
+                tr(time),
                 style: const TextStyle(
                   color: ShelterTheme.textMuted,
                   fontSize: 10,
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            desc,
+            tr(desc),
             style: const TextStyle(color: ShelterTheme.textMuted, fontSize: 14),
           ),
           if (actions.isNotEmpty) ...[

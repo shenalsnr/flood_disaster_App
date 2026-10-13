@@ -1,17 +1,23 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/warning_alert.dart';
+import '../../../../core/services/notification_service.dart';
 
 import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
 import 'citizen_drawer.dart';
+import 'citizen_settings_screen.dart';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
+import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ---------------------------------------------------------------------------
 // Citizen Dashboard Screen — Component 1: Early Warning & Evacuation
 // ---------------------------------------------------------------------------
@@ -32,15 +38,78 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
+  bool? _pushNotificationsEnabled = true;
+  final Set<String> _notifiedWarningIds = {};
+
   @override
   void initState() {
     super.initState();
+    NotificationService.instance.registerChannels();
+    _loadNotificationSetting();
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  Future<void> _loadNotificationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _pushNotificationsEnabled =
+            prefs.getBool('c1_push_notifications') ?? true;
+      });
+    }
+  }
+
+  void _onWarningsReceived(List<WarningAlert> alerts) {
+    if (!(_pushNotificationsEnabled ?? true)) return;
+
+    for (final alert in alerts) {
+      if (!_notifiedWarningIds.contains(alert.id)) {
+        _notifiedWarningIds.add(alert.id);
+        NotificationService.instance.showDisasterWarningNotification(
+          id: alert.id.hashCode & 0x7FFFFFFF,
+          title: '🚨 ${alert.severity.toUpperCase()} ALERT: ${alert.hazardType}',
+          body:
+              '${alert.locationZone.isNotEmpty ? "${alert.locationZone} — " : ""}${alert.description}',
+          severity: alert.severity,
+        );
+      }
+    }
+  }
+
+  void _showNotificationCenter(
+      BuildContext context, List<WarningAlert>? alerts, String district) {
+    final alertList = alerts ?? <WarningAlert>[];
+    final bool isPushActive = _pushNotificationsEnabled ?? true;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _NotificationCenterSheet(
+        alerts: alertList,
+        district: district,
+        pushNotificationsEnabled: isPushActive,
+        onManageSettings: () async {
+          Navigator.pop(ctx);
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CitizenSettingsScreen()),
+          );
+          _loadNotificationSetting();
+        },
+        onViewRoute: () {
+          Navigator.pop(ctx);
+          _push(const SafeRoutingMapScreen());
+        },
+      ),
     );
   }
 
@@ -69,36 +138,67 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             ? (userSnap.data!.data() as Map<String, dynamic>)
             : <String, dynamic>{};
 
-        final district = userData['district'] as String? ?? 'Colombo';
-        final city = userData['city'] as String? ?? 'Colombo';
-        final citizenName =
-            userData['name'] as String? ??
-            userData['fullName'] as String? ??
-            'Citizen User';
+        final String currentCitizenDistrict = (userData['district'] as String?)?.trim().isNotEmpty == true
+            ? (userData['district'] as String).trim()
+            : ((ResponderController().currentUser?.district.trim().isNotEmpty ?? false)
+                ? ResponderController().currentUser!.district.trim()
+                : 'Colombo');
+        final String currentCitizenCity = (userData['city'] as String?)?.trim().isNotEmpty == true
+            ? (userData['city'] as String).trim()
+            : ((ResponderController().currentUser?.city.trim().isNotEmpty ?? false)
+                ? ResponderController().currentUser!.city.trim()
+                : 'Colombo');
+        String? firestoreName = userData['name'] as String? ?? userData['fullName'] as String?;
+        if (firestoreName == 'Citizen User' || firestoreName == null || firestoreName.isEmpty) {
+          firestoreName = null;
+        }
+        final citizenName = firestoreName ?? ResponderController().currentUser?.fullName ?? 'Citizen User';
         final citizenZone =
             userData['floodZone'] as String? ??
             userData['district'] as String? ??
             userData['zone'] as String? ??
             userData['alertZone'] as String? ??
+            ResponderController().currentUser?.floodZone ??
             'Colombo Low-Lying Area';
+        final photoUrl = userData['photoUrl'] as String?;
+
+        print("CITIZEN LOC: $currentCitizenDistrict, $currentCitizenCity");
 
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('warnings')
-              .where('district', isEqualTo: district)
-              .where('city', isEqualTo: city)
+              .where('district', isEqualTo: currentCitizenDistrict)
+              .where('city', isEqualTo: currentCitizenCity)
               .snapshots(),
-          builder: (context, warningsSnap) {
+          builder: (context, snapshot) {
             WarningAlert? topAlert;
-            List<WarningAlert> allAlerts = [];
+            List<WarningAlert> matchingAlerts = [];
 
-            if (warningsSnap.hasData && warningsSnap.data!.docs.isNotEmpty) {
-              allAlerts = warningsSnap.data!.docs
-                  .map((d) => WarningAlert.fromDoc(d))
-                  .toList();
+            if (snapshot.hasData && snapshot.data != null) {
+              // Strict Safety Net: iterate through docs and manually verify district & city
+              for (final doc in snapshot.data!.docs) {
+                try {
+                  final bool isDistrictMatch = doc['district'].toString().toLowerCase() ==
+                      currentCitizenDistrict.toLowerCase();
+                  final bool isCityMatch = doc['city'].toString().toLowerCase() ==
+                      currentCitizenCity.toLowerCase();
 
-              // Only run reduce if list is not empty, which we know it isn't
-              topAlert = allAlerts.reduce(
+                  if (isDistrictMatch && isCityMatch) {
+                    matchingAlerts.add(WarningAlert.fromDoc(doc));
+                  }
+                } catch (e) {
+                  debugPrint('Warning doc safety net validation error: $e');
+                }
+              }
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _onWarningsReceived(matchingAlerts);
+              });
+            }
+
+            if (matchingAlerts.isNotEmpty) {
+              // Only run reduce if matching list is not empty
+              topAlert = matchingAlerts.reduce(
                 (a, b) =>
                     (_severityRank[b.severity] ?? 0) >
                         (_severityRank[a.severity] ?? 0)
@@ -111,52 +211,130 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             final isPulse = topAlert != null;
 
             return Scaffold(
-              backgroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF0B1220),
               drawer: const CitizenDrawer(),
               extendBodyBehindAppBar: true,
               appBar: AppBar(
                 leading: Builder(
                   builder: (ctx) => IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     icon: const Icon(Icons.menu_rounded, color: Colors.white),
-                    tooltip: 'Open Menu',
+                    tooltip: tr('Open Menu'),
                     onPressed: () => Scaffold.of(ctx).openDrawer(),
                   ),
                 ),
+                titleSpacing: 0,
                 iconTheme: const IconThemeData(color: Colors.white),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: Row(
-                  children: [
-                    const Icon(
-                      Icons.shield_rounded,
-                      color: Color(0xFF00E676),
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: 'We',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          TextSpan(
-                            text: 'Safe',
-                            style: TextStyle(color: Color(0xFF00E676)),
-                          ),
-                        ],
+                title: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.shield_rounded,
+                        color: Color(0xFF34D399),
+                        size: 22,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: tr('We'),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            TextSpan(
+                              text: tr('Safe'),
+                              style: const TextStyle(color: Color(0xFF34D399)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 actions: [
+                  Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        padding: const EdgeInsets.all(6),
+                        icon: const Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        tooltip: 'Disaster Warnings',
+                        onPressed: () =>
+                            _showNotificationCenter(context, matchingAlerts, currentCitizenDistrict),
+                      ),
+                      if (matchingAlerts.isNotEmpty)
+                        Positioned(
+                          top: 2,
+                          right: 2,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFF1744),
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 15,
+                              minHeight: 15,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${matchingAlerts.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(6),
+                    icon: const Icon(
+                      Icons.settings_outlined,
+                      color: Colors.white,
+                      size: 21,
+                    ),
+                    tooltip: 'Settings & Preferences',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CitizenSettingsScreen(),
+                        ),
+                      );
+                      _loadNotificationSetting();
+                    },
+                  ),
+                  const ThemeToggleButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: EdgeInsets.all(6),
+                  ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.only(left: 4, right: 8),
                     child: Center(child: _AlertLevelBadge(level: alertLevel)),
                   ),
                 ],
@@ -168,7 +346,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                   gradient: RadialGradient(
                     center: Alignment(-0.8, -0.6),
                     radius: 1.5,
-                    colors: [Color(0xFF112240), Color(0xFF070B14)],
+                    colors: [Color(0xFF112240), Color(0xFF0B1220)],
                   ),
                 ),
                 child: SafeArea(
@@ -190,7 +368,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                           decoration: BoxDecoration(
                             color: const Color(0xFF0F172A),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFF1E293B)),
+                            border: Border.all(color: const Color(0xFF1C2740)),
                           ),
                           child: isLoading
                               ? const Center(
@@ -203,7 +381,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Color(0xFF00E676),
+                                        color: Color(0xFF34D399),
                                       ),
                                     ),
                                   ),
@@ -214,19 +392,34 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                       width: 40,
                                       height: 40,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF00E676)
+                                        color: const Color(0xFF34D399)
                                             .withValues(alpha: 0.15),
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: const Color(0xFF00E676)
+                                          color: const Color(0xFF34D399)
                                               .withValues(alpha: 0.4),
                                         ),
                                       ),
-                                      child: const Icon(
-                                        Icons.person_rounded,
-                                        color: Color(0xFF00E676),
-                                        size: 22,
-                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: photoUrl != null && photoUrl.isNotEmpty
+                                          ? (photoUrl.startsWith('http')
+                                              ? Unfiltered(child: Image.network(
+                                                  photoUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF34D399), size: 22),
+                                                ))
+                                              : Unfiltered(child: Image.memory(
+                                                  base64Decode(photoUrl),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.person_rounded, color: Color(0xFF34D399), size: 22),
+                                                )))
+                                          : const Icon(
+                                              Icons.person_rounded,
+                                              color: Color(0xFF34D399),
+                                              size: 22,
+                                            ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
@@ -235,7 +428,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            citizenName,
+                                            tr(citizenName),
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
@@ -244,7 +437,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            'Sector: $citizenZone',
+                                            tr('Sector: {p0}', {'p0': (citizenZone).toString()}),
                                             style: const TextStyle(
                                               color: Color(0xFF38BDF8),
                                               fontSize: 11,
@@ -254,25 +447,25 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                         ],
                                       ),
                                     ),
-                                    Container(
+                                    Flexible(child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 6,
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF00E676)
+                                        color: const Color(0xFF34D399)
                                             .withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'ACTIVE',
+                                      child: Text(
+                                        tr('ACTIVE'),
                                         style: TextStyle(
-                                          color: Color(0xFF00E676),
+                                          color: Color(0xFF34D399),
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ),
+                                    )),
                                   ],
                                 ),
                         ),
@@ -290,14 +483,15 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                   'Issued: ${DateFormat('dd MMM, HH:mm').format(topAlert.issuedTimestamp)}',
                               waterLevel: topAlert.waterLevelMeters,
                               rainfall: topAlert.rainfallMm,
+                              windSpeed: topAlert.windSpeedKmh,
                               severity: topAlert.severity,
                             ),
                           )
                         else
-                          _AllClearCard(district: district),
+                          _AllClearCard(district: currentCitizenDistrict),
 
                         // ── Multiple active warnings list ────────────────────
-                        if (allAlerts.length > 1) ...[
+                        if (matchingAlerts.length > 1) ...[
                           const SizedBox(height: 20),
                           Row(
                             children: [
@@ -305,23 +499,23 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 width: 4,
                                 height: 18,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFF6D00),
+                                  color: const Color(0xFF38BDF8),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Text(
-                                '${allAlerts.length} Active Warnings',
+                              Flexible(child: Text(
+                                tr('{p0} Active Warnings', {'p0': (matchingAlerts.length).toString()}),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                 ),
-                              ),
+                              )),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          ...allAlerts
+                          ...matchingAlerts
                               .skip(1)
                               .map((a) => _MiniAlertTile(alert: a)),
                         ],
@@ -335,26 +529,26 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                               width: 4,
                               height: 22,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00E676),
+                                color: const Color(0xFF34D399),
                                 borderRadius: BorderRadius.circular(2),
                                 boxShadow: const [
                                   BoxShadow(
-                                    color: Color(0x6600E676),
+                                    color: Color(0x6634D399),
                                     blurRadius: 8,
                                   ),
                                 ],
                               ),
                             ),
                             const SizedBox(width: 10),
-                            const Text(
-                              'Emergency Actions',
+                            Flexible(child: Text(
+                              tr('Emergency Actions'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
                               ),
-                            ),
+                            )),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -363,9 +557,9 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                         _PremiumActionCard(
                           onTap: () => _push(const SafeRoutingMapScreen()),
                           icon: Icons.alt_route_rounded,
-                          title: 'Safe Route',
-                          subtitle: 'Fastest path to high ground',
-                          color: const Color(0xFFFFD740),
+                          title: tr('Safe Route'),
+                          subtitle: tr('Fastest path to high ground'),
+                          color: const Color(0xFFFBBF24),
                           isPrimary: true,
                         ),
 
@@ -379,8 +573,8 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 onTap: () =>
                                     _push(const EvacuationChecklistScreen()),
                                 icon: Icons.checklist_rounded,
-                                label: 'Go-Bag\nChecklist',
-                                color: const Color(0xFF00E676),
+                                label: tr('Go Bag\nChecklist'),
+                                color: const Color(0xFF34D399),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -389,8 +583,8 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                                 onTap: () =>
                                     _push(const EmergencyContactsScreen()),
                                 icon: Icons.contact_phone_rounded,
-                                label: 'Emergency\nContacts',
-                                color: const Color(0xFF40C4FF),
+                                label: tr('Emergency\nContacts'),
+                                color: const Color(0xFF38BDF8),
                               ),
                             ),
                           ],
@@ -402,9 +596,9 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                         _PremiumActionCard(
                           onTap: () => _push(const SafeArrivalCheckInScreen()),
                           icon: Icons.verified_user_rounded,
-                          title: 'Safe Arrival Check-In',
-                          subtitle: 'Mark yourself and family as safe',
-                          color: const Color(0xFFFF6D00),
+                          title: tr('Safe Arrival Check-In'),
+                          subtitle: tr('Mark yourself and family as safe'),
+                          color: const Color(0xFF38BDF8),
                           isPrimary: false,
                         ),
 
@@ -491,7 +685,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B), // Very dark slate/blue
+            color: const Color(0xFF131C2E), // Very dark slate/blue
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: widget.isPrimary
@@ -529,7 +723,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.title,
+                      tr(widget.title),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -540,7 +734,7 @@ class _PremiumActionCardState extends State<_PremiumActionCard>
                     if (widget.subtitle != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        widget.subtitle!,
+                        tr(widget.subtitle!),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 13,
@@ -620,7 +814,7 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.05),
@@ -651,7 +845,7 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
               ),
               const SizedBox(height: 16),
               Text(
-                widget.label,
+                tr(widget.label),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
@@ -669,12 +863,13 @@ class _PremiumGridCardState extends State<_PremiumGridCard>
   }
 }
 
-class _PremiumCriticalAlertCard extends StatelessWidget {
+class _PremiumCriticalAlertCard extends StatefulWidget {
   final String title;
   final String body;
   final String time;
   final double waterLevel;
   final double rainfall;
+  final double windSpeed;
   final String severity;
 
   const _PremiumCriticalAlertCard({
@@ -683,133 +878,251 @@ class _PremiumCriticalAlertCard extends StatelessWidget {
     required this.time,
     required this.waterLevel,
     required this.rainfall,
+    required this.windSpeed,
     required this.severity,
   });
 
+  @override
+  State<_PremiumCriticalAlertCard> createState() => _PremiumCriticalAlertCardState();
+}
+
+class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> with SingleTickerProviderStateMixin {
+  late AnimationController _bgController;
+
   static const _gradients = {
-    'Watch': [Color(0xFF7B5800), Color(0xFF4A3500)],
-    'Warning': [Color(0xFFBF3600), Color(0xFF7A2000)],
-    'Critical': [Color(0xFFD32F2F), Color(0xFF9B0000)],
+    'Watch': [Color(0xFFFBBF24), Color(0xFFFF8F00)],
+    'Warning': [Color(0xFF38BDF8), Color(0xFFE65100)],
+    'Critical': [Color(0xFFF87171), Color(0xFFD50000)], // More vibrant reds
   };
 
   @override
+  void initState() {
+    super.initState();
+    _bgController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _bgController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final gradColors =
-        _gradients[severity] ??
-        [const Color(0xFFD32F2F), const Color(0xFF9B0000)];
+    final gradColors = _gradients[widget.severity] ?? [const Color(0xFFF87171), const Color(0xFFD50000)];
+    final isCritical = widget.severity == 'Critical';
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [gradColors[0], gradColors[1].withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
-          width: 1.5,
-        ),
-        boxShadow: const [
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x66B71C1C),
-            blurRadius: 24,
-            offset: Offset(0, 10),
+            color: gradColors[1].withValues(alpha: 0.6),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          children: [
+            // Bottom layer: Vibrant Gradient
+            Positioned.fill(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'EMERGENCY ALERT',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2,
+                  gradient: LinearGradient(
+                    colors: [gradColors[0], gradColors[1]],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
               ),
-              _BlinkingDot(),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              height: 1.2,
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            body,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: 14,
-              height: 1.5,
-              fontWeight: FontWeight.w500,
+            
+            // Middle layer: Animated Rain & Water
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _bgController,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: _WeatherBackgroundPainter(
+                      _bgController.value,
+                      isCritical,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Live metrics row
-          Row(
-            children: [
-              _MetricPill(
-                icon: Icons.water_rounded,
-                label: '${waterLevel.toStringAsFixed(2)} m',
-                hint: 'Water Level',
+            
+            // Top layer: Content
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          tr('EMERGENCY ALERT'),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ),
+                      _BlinkingDot(),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    tr(widget.title),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1.2,
+                    ),
+                    softWrap: true,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    tr(widget.body),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 15,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    softWrap: true,
+                  ),
+                  const SizedBox(height: 20),
+                  // Live metrics row — use Wrap so pills wrap on small screens
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _MetricPill(
+                        icon: Icons.water_rounded,
+                        label: '${widget.waterLevel.toStringAsFixed(2)} m',
+                        hint: tr('Water Level'),
+                      ),
+                      _MetricPill(
+                        icon: Icons.grain_rounded,
+                        label: tr('{p0} mm', {'p0': (widget.rainfall.toStringAsFixed(1)).toString()}),
+                        hint: tr('Rainfall'),
+                      ),
+                      _MetricPill(
+                        icon: Icons.air_rounded,
+                        label: tr('{p0} kph', {'p0': (widget.windSpeed.toStringAsFixed(1)).toString()}),
+                        hint: tr('Wind Speed'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time_rounded, color: Colors.white.withValues(alpha: 0.7), size: 16),
+                      const SizedBox(width: 6),
+                      Flexible(child: Text(
+                        tr(widget.time),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              _MetricPill(
-                icon: Icons.grain_rounded,
-                label: '${rainfall.toStringAsFixed(1)} mm',
-                hint: 'Rainfall',
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(
-                Icons.access_time_rounded,
-                color: Colors.white.withValues(alpha: 0.6),
-                size: 16,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                time,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+class _WeatherBackgroundPainter extends CustomPainter {
+  final double animationValue;
+  final bool isCritical;
+
+  _WeatherBackgroundPainter(this.animationValue, this.isCritical);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 1. Draw Rain
+    final paintRain = Paint()
+      ..color = Colors.white.withValues(alpha: 0.2)
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    final int dropCount = isCritical ? 40 : 20;
+    for (int i = 0; i < dropCount; i++) {
+      final double x = (i * 27.0) % size.width;
+      final double y = ((i * 53.0) + (animationValue * size.height * 2)) % size.height;
+      final double length = 10.0 + (i % 15);
+      canvas.drawLine(Offset(x, y), Offset(x - 2, y + length), paintRain); // slightly angled rain
+    }
+
+    // 2. Draw Back Water Wave (Slower)
+    final paintWaterBack = Paint()
+      ..color = const Color(0xFF000000).withValues(alpha: 0.15)
+      ..style = PaintingStyle.fill;
+      
+    final pathBack = Path();
+    final double baseHeightBack = size.height * 0.75;
+    pathBack.moveTo(0, size.height);
+    pathBack.lineTo(0, baseHeightBack);
+
+    for (double i = 0; i <= size.width; i++) {
+      final waveOffset = math.cos((i / 40) - (animationValue * math.pi * 2)) * 6;
+      pathBack.lineTo(i, baseHeightBack + waveOffset);
+    }
+    pathBack.lineTo(size.width, size.height);
+    pathBack.close();
+    canvas.drawPath(pathBack, paintWaterBack);
+
+    // 3. Draw Front Water Wave (Faster)
+    final paintWaterFront = Paint()
+      ..color = const Color(0xFF000000).withValues(alpha: 0.25)
+      ..style = PaintingStyle.fill;
+
+    final pathFront = Path();
+    final double baseHeightFront = size.height * 0.78;
+    pathFront.moveTo(0, size.height);
+    pathFront.lineTo(0, baseHeightFront);
+
+    for (double i = 0; i <= size.width; i++) {
+      final waveOffset = math.sin((i / 30) + (animationValue * math.pi * 4)) * 8;
+      pathFront.lineTo(i, baseHeightFront + waveOffset);
+    }
+    pathFront.lineTo(size.width, size.height);
+    pathFront.close();
+    canvas.drawPath(pathFront, paintWaterFront);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeatherBackgroundPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue;
   }
 }
 
@@ -826,7 +1139,7 @@ class _MetricPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(10),
@@ -837,11 +1150,13 @@ class _MetricPill extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white70, size: 14),
           const SizedBox(width: 6),
-          Column(
+          Flexible(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                hint,
+                tr(hint),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 9,
@@ -849,7 +1164,9 @@ class _MetricPill extends StatelessWidget {
                 ),
               ),
               Text(
-                label,
+                tr(label),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -857,7 +1174,7 @@ class _MetricPill extends StatelessWidget {
                 ),
               ),
             ],
-          ),
+          )),
         ],
       ),
     );
@@ -881,12 +1198,12 @@ class _AllClearCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFF00E676).withValues(alpha: 0.3),
+          color: const Color(0xFF34D399).withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00E676).withValues(alpha: 0.08),
+            color: const Color(0xFF34D399).withValues(alpha: 0.08),
             blurRadius: 20,
           ),
         ],
@@ -897,12 +1214,12 @@ class _AllClearCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+              color: const Color(0xFF34D399).withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.shield_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 28,
             ),
           ),
@@ -911,17 +1228,17 @@ class _AllClearCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'All Clear',
+                Text(
+                  tr('All Clear'),
                   style: TextStyle(
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'No active warnings in $district.',
+                  tr('No active warnings in {p0}.', {'p0': (district).toString()}),
                   style: const TextStyle(
                     color: Colors.white60,
                     fontSize: 13,
@@ -942,14 +1259,14 @@ class _MiniAlertTile extends StatelessWidget {
   const _MiniAlertTile({required this.alert});
 
   static const _colors = {
-    'Watch': Color(0xFFFFC107),
-    'Warning': Color(0xFFFF6D00),
-    'Critical': Color(0xFFFF1744),
+    'Watch': Color(0xFFFBBF24),
+    'Warning': Color(0xFF38BDF8),
+    'Critical': Color(0xFFF87171),
   };
 
   @override
   Widget build(BuildContext context) {
-    final color = _colors[alert.severity] ?? const Color(0xFFFFC107);
+    final color = _colors[alert.severity] ?? const Color(0xFFFBBF24);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -981,29 +1298,32 @@ class _MiniAlertTile extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${alert.waterLevelMeters.toStringAsFixed(2)} m  •  ${alert.rainfallMm.toStringAsFixed(1)} mm',
+                  tr('{p0} m  •  {p1} mm  •  {p2} kph', {'p0': (alert.waterLevelMeters.toStringAsFixed(2)).toString(), 'p1': (alert.rainfallMm.toStringAsFixed(1)).toString(), 'p2': (alert.windSpeedKmh.toStringAsFixed(1)).toString()}),
                   style: const TextStyle(color: Colors.white54, fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              alert.severity,
+              tr(alert.severity),
               style: TextStyle(
                 color: color,
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
               ),
             ),
-          ),
+          )),
         ],
       ),
     );
@@ -1060,30 +1380,30 @@ class _AlertLevelBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSafe = level == 'SAFE';
     final bgColor = isSafe
-        ? const Color(0xFF00E676).withValues(alpha: 0.15)
-        : const Color(0xFFB71C1C).withValues(alpha: 0.8);
+        ? const Color(0xFF34D399).withValues(alpha: 0.15)
+        : const Color(0xFFB71C1C).withValues(alpha: 0.85);
     final borderColor = isSafe
-        ? const Color(0xFF00E676).withValues(alpha: 0.4)
+        ? const Color(0xFF34D399).withValues(alpha: 0.4)
         : Colors.redAccent.shade100.withValues(alpha: 0.5);
     final shadowColor = isSafe
-        ? const Color(0x3300E676)
+        ? const Color(0x3334D399)
         : const Color(0x4DB71C1C);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor, width: 1.5),
-        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 8)],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 6)],
       ),
       child: Text(
-        level,
+        tr(level),
         style: TextStyle(
-          color: isSafe ? const Color(0xFF00E676) : Colors.white,
+          color: isSafe ? const Color(0xFF34D399) : Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w900,
-          letterSpacing: 1.5,
+          letterSpacing: 0.8,
         ),
       ),
     );
@@ -1113,34 +1433,34 @@ class _PremiumStatusFooter extends StatelessWidget {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'SYSTEM STATUS',
+              Flexible(child: Text(
+                tr('SYSTEM STATUS'),
                 style: TextStyle(
                   color: Colors.white54,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 2,
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 16),
           _buildStatusRow(
             Icons.cell_tower,
             'Network: Online',
-            const Color(0xFF00E676),
+            const Color(0xFF34D399),
           ),
           const SizedBox(height: 14),
           _buildStatusRow(
             Icons.offline_pin_rounded,
             'Map cached (10km)',
-            const Color(0xFF40C4FF),
+            const Color(0xFF38BDF8),
           ),
           const SizedBox(height: 14),
           _buildStatusRow(
             Icons.battery_4_bar_rounded,
             'Battery-save ON',
-            const Color(0xFFFFD740),
+            const Color(0xFFFBBF24),
           ),
         ],
       ),
@@ -1159,14 +1479,14 @@ class _PremiumStatusFooter extends StatelessWidget {
           child: Icon(icon, color: color, size: 16),
         ),
         const SizedBox(width: 14),
-        Text(
-          label,
+        Flexible(child: Text(
+          tr(label),
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
-        ),
+        )),
         const Spacer(),
         Container(
           width: 8,
@@ -1180,6 +1500,415 @@ class _PremiumStatusFooter extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Notification Center Bottom Sheet Modal
+// ---------------------------------------------------------------------------
+class _NotificationCenterSheet extends StatelessWidget {
+  final List<WarningAlert>? alerts;
+  final String district;
+  final bool? pushNotificationsEnabled;
+  final VoidCallback onManageSettings;
+  final VoidCallback onViewRoute;
+
+  const _NotificationCenterSheet({
+    this.alerts,
+    this.district = 'Galle',
+    this.pushNotificationsEnabled,
+    required this.onManageSettings,
+    required this.onViewRoute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final alertList = alerts ?? <WarningAlert>[];
+    final bool isPushActive = pushNotificationsEnabled ?? true;
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.82,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(
+          top: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          left: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          right: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Grab handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+
+            // Sheet Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.notifications_active_rounded,
+                      color: Color(0xFF00E676),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Disaster Alerts & Warnings',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          alertList.isEmpty
+                              ? 'All clear in your registered area ($district)'
+                              : '${alertList.length} active emergency alert${alertList.length > 1 ? "s" : ""}',
+                          style: TextStyle(
+                            color: alertList.isEmpty
+                                ? const Color(0xFF00E676)
+                                : const Color(0xFFFF9F0A),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+
+            // Settings status banner
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B).withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isPushActive
+                        ? Icons.check_circle_rounded
+                        : Icons.notifications_off_rounded,
+                    color: isPushActive
+                        ? const Color(0xFF00E676)
+                        : const Color(0xFFFF9F0A),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      isPushActive
+                          ? 'Status bar & push alerts active for $district'
+                          : 'Push notifications are currently muted',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: onManageSettings,
+                    child: const Text(
+                      'SETTINGS',
+                      style: TextStyle(
+                        color: Color(0xFF00E676),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+
+            const SizedBox(height: 6),
+
+            // Alerts Content List
+            if (alertList.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 14, 32, 28),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00E676)
+                              .withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.shield_rounded,
+                          color: Color(0xFF00E676),
+                          size: 48,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Zone Status: All Clear ($district)',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'No active flood or disaster warnings in $district. Broadcast warnings will automatically pop into your phone notification bar.',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  itemCount: alertList.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (ctx, i) {
+                    final a = alertList[i];
+                        final isCrit =
+                            a.severity.toLowerCase() == 'critical';
+                        final isWarn =
+                            a.severity.toLowerCase() == 'warning';
+                        final color = isCrit
+                            ? const Color(0xFFFF1744)
+                            : isWarn
+                                ? const Color(0xFFFF9F0A)
+                                : const Color(0xFF40C4FF);
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF131B2B),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.6),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: color, width: 1),
+                                    ),
+                                    child: Text(
+                                      a.severity.toUpperCase(),
+                                      style: TextStyle(
+                                        color: color,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      a.hazardType,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('HH:mm').format(a.issuedTimestamp),
+                                    style: const TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (a.locationZone.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_rounded,
+                                        color: Color(0xFF00E676),
+                                        size: 15,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        child: Text(
+                                          'Zone: ${a.locationZone}',
+                                          style: const TextStyle(
+                                            color: Color(0xFF00E676),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              Text(
+                                a.description,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                  height: 1.4,
+                                ),
+                                softWrap: true,
+                              ),
+                              const SizedBox(height: 12),
+                              // Live metrics chips
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: [
+                                  if (a.waterLevelMeters > 0)
+                                    _metricChip(
+                                      Icons.water_rounded,
+                                      '${a.waterLevelMeters.toStringAsFixed(1)}m Water Level',
+                                      color,
+                                    ),
+                                  if (a.rainfallMm > 0)
+                                    _metricChip(
+                                      Icons.cloud_rounded,
+                                      '${a.rainfallMm.toStringAsFixed(0)}mm Rain',
+                                      const Color(0xFF40C4FF),
+                                    ),
+                                  if (a.windSpeedKmh > 0)
+                                    _metricChip(
+                                      Icons.air_rounded,
+                                      '${a.windSpeedKmh.toStringAsFixed(0)} km/h Wind',
+                                      Colors.white70,
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: color,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                  onPressed: onViewRoute,
+                                  icon: const Icon(
+                                    Icons.navigation_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'EVACUATION ROUTE',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 11.5,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _metricChip(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

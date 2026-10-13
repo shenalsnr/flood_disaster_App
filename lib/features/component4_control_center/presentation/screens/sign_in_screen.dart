@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '../widgets/c4_ui.dart';
 
 import '../../data/models/responder_models.dart';
 import 'responder_login_screen.dart';
 import 'responder_register_screen.dart';
-import '../../../component1_evacuation/presentation/screens/citizen_dashboard_screen.dart';
-import '../../../component2_reporting/presentation/screens/quick_hazard_screen.dart';
-import '../../../component3_relief_tracking/presentation/screens/camp_dashboard_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -27,18 +26,13 @@ class _SignInScreenState extends State<SignInScreen> {
         );
         break;
       case UserRole.citizen:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
-        );
-        break;
       case UserRole.volunteer:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QuickHazardScreen()),
-        );
-        break;
       case UserRole.campLeader:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CampDashboardScreen()),
+        // Everyone signs in; the dashboard is chosen from the account's role.
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ResponderLoginScreen(initialRole: _selectedRole),
+          ),
         );
         break;
     }
@@ -47,9 +41,11 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ResponsiveBody(
+          maxWidth: 520,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,9 +60,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: const Color(0xFF2B3A55)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -75,15 +71,15 @@ class _SignInScreenState extends State<SignInScreen> {
                         width: 8,
                         height: 8,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF00E676),
+                          color: Color(0xFF34D399),
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'NATIONAL DISASTER MANAGEMENT PLATFORM',
+                      Text(
+                        tr('NATIONAL DISASTER MANAGEMENT PLATFORM'),
                         style: TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
@@ -104,15 +100,15 @@ class _SignInScreenState extends State<SignInScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const RadialGradient(
-                      colors: [Color(0xFF1E3A8A), Color(0xFF0F172A)],
+                      colors: [Color(0xFF1E3A8A), Color(0xFF131C2E)],
                     ),
                     border: Border.all(
-                      color: const Color(0xFFFF6D00).withValues(alpha: 0.6),
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.6),
                       width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.25),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
@@ -122,7 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Icon(
                       Icons.shield_outlined,
                       size: 44,
-                      color: Color(0xFFFF6D00),
+                      color: Color(0xFF38BDF8),
                     ),
                   ),
                 ),
@@ -130,8 +126,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               const SizedBox(height: 16),
 
-              const Text(
-                'FloodGuard',
+              Text(
+                tr('FloodGuard'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -143,11 +139,11 @@ class _SignInScreenState extends State<SignInScreen> {
 
               const SizedBox(height: 6),
 
-              const Text(
-                'Stay safe with one-tap alerts and verified routes.',
+              Text(
+                tr('Stay safe with one-tap alerts and verified routes.'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -162,20 +158,20 @@ class _SignInScreenState extends State<SignInScreen> {
                     width: 4,
                     height: 18,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF6D00),
+                      color: const Color(0xFF38BDF8),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'SELECT SYSTEM ROLE TO ENTER',
+                  Flexible(child: Text(
+                    tr('SELECT SYSTEM ROLE TO ENTER'),
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.1,
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -184,10 +180,10 @@ class _SignInScreenState extends State<SignInScreen> {
               // Role Option Cards
               _buildRoleCard(
                 role: UserRole.responder,
-                title: 'Emergency Dispatcher / Responder',
-                subtitle: 'Component 4 • Triage incident queue, dispatch units & live tracking',
+                title: tr('Emergency Dispatcher / Responder'),
+                subtitle: tr('Component 4 • Triage incident queue, dispatch units & live tracking'),
                 icon: Icons.cell_tower,
-                color: const Color(0xFFFF6D00),
+                color: const Color(0xFF38BDF8),
                 isHighlight: true,
               ),
 
@@ -195,18 +191,18 @@ class _SignInScreenState extends State<SignInScreen> {
 
               _buildRoleCard(
                 role: UserRole.citizen,
-                title: 'Affected Citizen',
-                subtitle: 'Component 1 • Evacuation route, weather alerts & battery save mode',
+                title: tr('Affected Citizen'),
+                subtitle: tr('Component 1 • Evacuation route, weather alerts & battery save mode'),
                 icon: Icons.person_pin_circle_outlined,
-                color: const Color(0xFF00E676),
+                color: const Color(0xFF34D399),
               ),
 
               const SizedBox(height: 10),
 
               _buildRoleCard(
                 role: UserRole.volunteer,
-                title: 'Community Volunteer Reporter',
-                subtitle: 'Component 2 • Icon-driven hazard reporting with auto-tagged GPS',
+                title: tr('Community Volunteer Reporter'),
+                subtitle: tr('Component 2 • Icon-driven hazard reporting with auto-tagged GPS'),
                 icon: Icons.add_location_alt_outlined,
                 color: const Color(0xFF38BDF8),
               ),
@@ -215,8 +211,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               _buildRoleCard(
                 role: UserRole.campLeader,
-                title: 'Relief Camp Triage Leader',
-                subtitle: 'Component 3 • Manage shelter beds, supplies & food logistics',
+                title: tr('Relief Camp Triage Leader'),
+                subtitle: tr('Component 3 • Manage shelter beds, supplies & food logistics'),
                 icon: Icons.night_shelter_outlined,
                 color: const Color(0xFFA855F7),
               ),
@@ -226,29 +222,29 @@ class _SignInScreenState extends State<SignInScreen> {
               // Primary Action Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF38BDF8),
+                  foregroundColor: const Color(0xFF06121F),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 6,
-                  shadowColor: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                  shadowColor: const Color(0xFF38BDF8).withValues(alpha: 0.4),
                 ),
                 onPressed: _proceedToLogin,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    Flexible(child: Text(
                       _selectedRole == UserRole.responder
-                          ? 'ENTER RESPONDER PORTAL'
-                          : 'LAUNCH ${_selectedRole.displayName.toUpperCase()}',
+                          ? tr('ENTER RESPONDER PORTAL')
+                          : tr('LAUNCH {p0}', {'p0': (_selectedRole.displayName.toUpperCase()).toString()}),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
                       ),
-                    ),
+                    )),
                     const SizedBox(width: 8),
                     const Icon(Icons.arrow_forward_rounded, size: 20),
                   ],
@@ -261,7 +257,7 @@ class _SignInScreenState extends State<SignInScreen> {
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white70,
-                  side: const BorderSide(color: Color(0xFF334155)),
+                  side: const BorderSide(color: Color(0xFF2B3A55)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -274,8 +270,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   );
                 },
-                child: const Text(
-                  'CREATE NEW RESPONDER ACCOUNT',
+                child: Text(
+                  tr('CREATE NEW RESPONDER ACCOUNT'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -293,34 +289,34 @@ class _SignInScreenState extends State<SignInScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF1E293B)),
+                  border: Border.all(color: const Color(0xFF1C2740)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.phone_in_talk,
-                      color: Colors.redAccent,
+                      color: Color(0xFFF87171),
                       size: 16,
                     ),
                     SizedBox(width: 8),
-                    Text(
-                      'Emergency Hotlines: 117 (DMC) • 119 (Police) • 110 (Fire)',
+                    Flexible(child: Text(
+                      tr('Emergency Hotlines: 117 (DMC) • 119 (Police) • 110 (Fire)'),
                       style: TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: Color(0xFFB6C2D6),
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),
               const SizedBox(height: 12),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
@@ -345,10 +341,10 @@ class _SignInScreenState extends State<SignInScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1E293B) : const Color(0xFF0F172A),
+          color: isSelected ? const Color(0xFF1C2740) : const Color(0xFF131C2E),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? color : const Color(0xFF1E293B),
+            color: isSelected ? color : const Color(0xFF1C2740),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -381,7 +377,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          title,
+                          tr(title),
                           style: TextStyle(
                             color: isSelected ? Colors.white : Colors.white70,
                             fontWeight: FontWeight.w800,
@@ -398,14 +394,14 @@ class _SignInScreenState extends State<SignInScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFF6D00)
+                            color: const Color(0xFF38BDF8)
                                 .withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'PART 4',
+                          child: Text(
+                            tr('PART 4'),
                             style: TextStyle(
-                              color: Color(0xFFFF6D00),
+                              color: Color(0xFF38BDF8),
                               fontSize: 9,
                               fontWeight: FontWeight.w900,
                             ),
@@ -416,11 +412,11 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    subtitle,
+                    tr(subtitle),
                     style: TextStyle(
                       color: isSelected
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                          ? const Color(0xFFB6C2D6)
+                          : const Color(0xFF8A98B0),
                       fontSize: 11,
                       height: 1.3,
                     ),

@@ -1,10 +1,13 @@
+import 'package:flood_disaster/core/services/offline_sync.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/warning_alert.dart';
+import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ---------------------------------------------------------------------------
 // C1AdminMetricsScreen — Admin CRUD: Live Warning Data Entry
 // ---------------------------------------------------------------------------
@@ -29,6 +32,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
   final _formKey = GlobalKey<FormState>();
   final _waterController = TextEditingController();
   final _rainfallController = TextEditingController();
+  final _windController = TextEditingController();
   final _descController = TextEditingController();
   final _cityController = TextEditingController();
 
@@ -99,9 +103,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   // ── Severity styling ───────────────────────────────────────────────────────
   static const _severityColors = {
-    'Watch': Color(0xFFFFC107),
-    'Warning': Color(0xFFFF6D00),
-    'Critical': Color(0xFFFF1744),
+    'Watch': Color(0xFFFBBF24),
+    'Warning': Color(0xFF38BDF8),
+    'Critical': Color(0xFFF87171),
   };
 
   static const _severityIcons = {
@@ -128,6 +132,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     _pulseCtrl.dispose();
     _waterController.dispose();
     _rainfallController.dispose();
+    _windController.dispose();
     _descController.dispose();
     _cityController.dispose();
     super.dispose();
@@ -147,6 +152,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       hazardType: _selectedHazard,
       waterLevelMeters: double.parse(_waterController.text),
       rainfallMm: double.parse(_rainfallController.text),
+      windSpeedKmh: double.parse(_windController.text),
       severity: _selectedSeverity,
       description: _descController.text.trim(),
       issuedTimestamp: DateTime.now(),
@@ -155,19 +161,19 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     try {
       if (_editingId != null) {
         // UPDATE existing document
-        await _warningsCol.doc(_editingId).update(alert.toMap());
-        _showSnack('✅ Warning updated successfully.', const Color(0xFF00E676));
+        await _warningsCol.doc(_editingId).update(alert.toMap()).queued();
+        _showSnack(tr('✅ Warning updated successfully.'), const Color(0xFF34D399));
       } else {
         // CREATE new document
-        await _warningsCol.add(alert.toMap());
+        await _warningsCol.add(alert.toMap()).queued();
         _showSnack(
-          '📡 Warning broadcast to all citizens!',
-          const Color(0xFF00E676),
+          tr('📡 Warning broadcast to all citizens!'),
+          const Color(0xFF34D399),
         );
       }
       _resetForm();
     } catch (e) {
-      _showSnack('❌ Error: $e', const Color(0xFFFF1744));
+      _showSnack(tr('❌ Error: {p0}', {'p0': (e).toString()}), const Color(0xFFF87171));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -178,10 +184,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     if (!confirmed) return;
     try {
       await _warningsCol.doc(docId).delete();
-      _showSnack('✅ Warning resolved and removed.', const Color(0xFF00E676));
+      _showSnack(tr('✅ Warning resolved and removed.'), const Color(0xFF34D399));
       if (_editingId == docId) _resetForm();
     } catch (e) {
-      _showSnack('❌ Error: $e', const Color(0xFFFF1744));
+      _showSnack(tr('❌ Error: {p0}', {'p0': (e).toString()}), const Color(0xFFF87171));
     }
   }
 
@@ -202,6 +208,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           : 'Watch';
       _waterController.text = alert.waterLevelMeters.toStringAsFixed(2);
       _rainfallController.text = alert.rainfallMm.toStringAsFixed(1);
+      _windController.text = alert.windSpeedKmh.toStringAsFixed(1);
       _descController.text = alert.description;
       _cityController.text = alert.city;
     });
@@ -223,6 +230,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     });
     _waterController.clear();
     _rainfallController.clear();
+    _windController.clear();
     _descController.clear();
     _cityController.clear();
     _formKey.currentState?.reset();
@@ -235,7 +243,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          msg,
+          tr(msg),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -257,36 +265,36 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text(
-              'Resolve Warning?',
+            title: Text(
+              tr('Resolve Warning?'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            content: const Text(
-              'This will permanently remove the alert and clear it from all citizen dashboards.',
+            content: Text(
+              tr('This will permanently remove the alert and clear it from all citizen dashboards.'),
               style: TextStyle(color: Colors.white70),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text(
-                  'Cancel',
+                child: Text(
+                  tr('Cancel'),
                   style: TextStyle(color: Colors.white54),
                 ),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00E676),
+                style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
+                  backgroundColor: const Color(0xFF34D399),
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text(
-                  'Resolve',
+                child: Text(
+                  tr('Resolve'),
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
@@ -301,9 +309,11 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: _buildAppBar(),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,17 +321,17 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             _buildSectionHeader(
               icon: Icons.broadcast_on_personal_rounded,
               label: _editingId == null
-                  ? 'Broadcast New Warning'
-                  : 'Edit Warning',
-              color: const Color(0xFF00E676),
+                  ? tr('Broadcast New Warning')
+                  : tr('Edit Warning'),
+              color: const Color(0xFF34D399),
             ),
             const SizedBox(height: 14),
             _buildForm(),
             const SizedBox(height: 32),
             _buildSectionHeader(
               icon: Icons.crisis_alert_rounded,
-              label: 'Active Warnings',
-              color: const Color(0xFFFF1744),
+              label: tr('Active Warnings'),
+              color: const Color(0xFFF87171),
               trailing: _buildLiveBadge(),
             ),
             const SizedBox(height: 14),
@@ -329,14 +339,16 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           ],
         ),
       ),
+      ),
     );
   }
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+      actions: const [ThemeToggleButton()],
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
@@ -345,23 +357,23 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         ),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: Row(
+      title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, 
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF1744).withValues(alpha: 0.15),
+              color: const Color(0xFFF87171).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.admin_panel_settings_rounded,
-              color: Color(0xFFFF1744),
+              color: Color(0xFFF87171),
               size: 20,
             ),
           ),
           const SizedBox(width: 10),
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -369,18 +381,18 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               ),
               children: [
                 TextSpan(
-                  text: 'Admin ',
+                  text: tr('Admin '),
                   style: TextStyle(color: Colors.white),
                 ),
                 TextSpan(
-                  text: 'Metrics',
-                  style: TextStyle(color: Color(0xFF00E676)),
+                  text: tr('Metrics'),
+                  style: TextStyle(color: Color(0xFF34D399)),
                 ),
               ],
             ),
           ),
         ],
-      ),
+      )),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(height: 1, color: Colors.white10),
@@ -398,15 +410,15 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 8),
-        Text(
-          label,
+        Flexible(child: Text(
+          tr(label),
           style: TextStyle(
             color: color,
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
           ),
-        ),
+        )),
         if (trailing != null) ...[const Spacer(), trailing],
       ],
     );
@@ -418,10 +430,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF1744).withValues(alpha: 0.15),
+          color: const Color(0xFFF87171).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFFF1744).withValues(alpha: 0.4),
+            color: const Color(0xFFF87171).withValues(alpha: 0.4),
           ),
         ),
         child: Row(
@@ -431,15 +443,15 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFFFF1744),
+                color: Color(0xFFF87171),
                 shape: BoxShape.circle,
               ),
             ),
             const SizedBox(width: 5),
-            const Text(
-              'LIVE',
+            Text(
+              tr('LIVE'),
               style: TextStyle(
-                color: Color(0xFFFF1744),
+                color: Color(0xFFF87171),
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
@@ -461,15 +473,15 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _editingId != null
-              ? const Color(0xFFFFC107).withValues(alpha: 0.4)
+              ? const Color(0xFFFBBF24).withValues(alpha: 0.4)
               : Colors.white10,
         ),
         boxShadow: [
           BoxShadow(
             color:
                 (_editingId != null
-                        ? const Color(0xFFFFC107)
-                        : const Color(0xFF00E676))
+                        ? const Color(0xFFFBBF24)
+                        : const Color(0xFF34D399))
                     .withValues(alpha: 0.06),
             blurRadius: 20,
             spreadRadius: 2,
@@ -490,25 +502,25 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFC107).withValues(alpha: 0.1),
+                  color: const Color(0xFFFBBF24).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFFFFC107).withValues(alpha: 0.3),
+                    color: const Color(0xFFFBBF24).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.edit_rounded,
-                      color: Color(0xFFFFC107),
+                      color: Color(0xFFFBBF24),
                       size: 16,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Editing warning — changes will propagate instantly.',
+                        tr('Editing warning — changes will propagate instantly.'),
                         style: TextStyle(
-                          color: const Color(0xFFFFC107).withValues(alpha: 0.9),
+                          color: const Color(0xFFFBBF24).withValues(alpha: 0.9),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -518,7 +530,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       onTap: _resetForm,
                       child: const Icon(
                         Icons.close_rounded,
-                        color: Color(0xFFFFC107),
+                        color: Color(0xFFFBBF24),
                         size: 16,
                       ),
                     ),
@@ -532,7 +544,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               children: [
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Target District',
+                    label: tr('Target District'),
                     icon: Icons.map_rounded,
                     value: _selectedDistrict,
                     items: _districts,
@@ -543,9 +555,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 Expanded(
                   child: _buildTextField(
                     controller: _cityController,
-                    label: 'City (Target)',
+                    label: tr('City (Target)'),
                     icon: Icons.location_city_rounded,
-                    hint: 'e.g. Ambalangoda',
+                    hint: tr('e.g. Ambalangoda'),
                   ),
                 ),
               ],
@@ -557,7 +569,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               children: [
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Location Zone',
+                    label: tr('Location Zone'),
                     icon: Icons.location_on_rounded,
                     value: _selectedZone,
                     items: _zones,
@@ -567,7 +579,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Hazard Type',
+                    label: tr('Hazard Type'),
                     icon: Icons.flood_rounded,
                     value: _selectedHazard,
                     items: _hazards,
@@ -578,24 +590,33 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             ),
             const SizedBox(height: 14),
 
-            // Row 2: Water level + Rainfall inputs
+            // Row 3: Water level + Rainfall + Wind inputs
             Row(
               children: [
                 Expanded(
                   child: _buildNumericField(
                     controller: _waterController,
-                    label: 'Water Level (m)',
+                    label: tr('Water (m)'),
                     icon: Icons.water_rounded,
-                    hint: 'e.g. 3.8',
+                    hint: '3.8',
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _buildNumericField(
                     controller: _rainfallController,
-                    label: 'Rainfall (mm)',
+                    label: tr('Rain (mm)'),
                     icon: Icons.grain_rounded,
-                    hint: 'e.g. 120.5',
+                    hint: '120.5',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildNumericField(
+                    controller: _windController,
+                    label: tr('Wind (km/h)'),
+                    icon: Icons.air_rounded,
+                    hint: '65.0',
                   ),
                 ),
               ],
@@ -618,11 +639,11 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               maxLines: 3,
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: _inputDecoration(
-                hint: 'Describe the situation and evacuation instructions...',
+                hint: tr('Describe the situation and evacuation instructions...'),
                 icon: Icons.description_rounded,
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? tr('Required') : null,
             ),
             const SizedBox(height: 20),
 
@@ -634,8 +655,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 onPressed: _isSaving ? null : _broadcastWarning,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _editingId != null
-                      ? const Color(0xFFFFC107)
-                      : const Color(0xFFFF1744),
+                      ? const Color(0xFFFBBF24)
+                      : const Color(0xFFF87171),
                   foregroundColor: Colors.black,
                   disabledBackgroundColor: Colors.white12,
                   shape: RoundedRectangleBorder(
@@ -660,10 +681,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       ),
                 label: Text(
                   _isSaving
-                      ? 'Saving...'
+                      ? tr('Saving...')
                       : _editingId != null
-                      ? 'Save Changes'
-                      : 'Broadcast Warning',
+                      ? tr('Save Changes')
+                      : tr('Broadcast Warning'),
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -690,14 +711,23 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       children: [
         _buildLabel(label),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<String>(isExpanded: true, 
           initialValue: value,
+          selectedItemBuilder: (ctx) => items
+              .map((z) => Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(tr(z),
+                      maxLines: 1, overflow: TextOverflow.ellipsis)))
+              .toList(),
           dropdownColor: const Color(0xFF112240),
           style: const TextStyle(color: Colors.white, fontSize: 13),
           iconEnabledColor: Colors.white38,
           decoration: _inputDecoration(icon: icon),
           items: items
-              .map((z) => DropdownMenuItem(value: z, child: Text(z)))
+              .map((z) => DropdownMenuItem(
+                  value: z,
+                  child: Text(tr(z),
+                      maxLines: 1, overflow: TextOverflow.ellipsis)))
               .toList(),
           onChanged: onChanged,
         ),
@@ -725,8 +755,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: _inputDecoration(hint: hint, icon: icon),
           validator: (v) {
-            if (v == null || v.isEmpty) return 'Required';
-            if (double.tryParse(v) == null) return 'Invalid number';
+            if (v == null || v.isEmpty) return tr('Required');
+            if (double.tryParse(v) == null) return tr('Invalid number');
             return null;
           },
         ),
@@ -750,7 +780,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: _inputDecoration(hint: hint, icon: icon),
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Required';
+            if (v == null || v.trim().isEmpty) return tr('Required');
             return null;
           },
         ),
@@ -768,7 +798,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           onTap: () => setState(() => _selectedSeverity = severity),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             decoration: BoxDecoration(
               color: isSelected
                   ? color.withValues(alpha: 0.2)
@@ -788,7 +818,10 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  severity,
+                  tr(severity),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: isSelected ? color : Colors.white38,
                     fontSize: 11,
@@ -806,7 +839,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   Widget _buildLabel(String text) {
     return Text(
-      text,
+      tr(text),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: const TextStyle(
         color: Colors.white60,
         fontSize: 12,
@@ -818,17 +853,20 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   InputDecoration _inputDecoration({String? hint, IconData? icon}) {
     return InputDecoration(
+      isDense: true,
+      prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      hintMaxLines: 1,
       hintText: hint,
       hintStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.25),
         fontSize: 13,
       ),
       prefixIcon: icon != null
-          ? Icon(icon, color: Colors.white30, size: 18)
+          ? Icon(icon, color: Colors.white30, size: 16)
           : null,
       filled: true,
       fillColor: Colors.white.withValues(alpha: 0.05),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: Colors.white12),
@@ -839,17 +877,17 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF00E676), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF34D399), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF1744)),
+        borderSide: const BorderSide(color: Color(0xFFF87171)),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF1744), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFFF87171), width: 1.5),
       ),
-      errorStyle: const TextStyle(color: Color(0xFFFF1744), fontSize: 11),
+      errorStyle: const TextStyle(color: Color(0xFFF87171), fontSize: 11),
     );
   }
 
@@ -865,7 +903,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(color: Color(0xFF00E676)),
+              child: CircularProgressIndicator(color: Color(0xFF34D399)),
             ),
           );
         }
@@ -873,8 +911,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         if (snapshot.hasError) {
           return _buildEmptyState(
             icon: Icons.error_outline_rounded,
-            message: 'Error loading warnings.\n${snapshot.error}',
-            color: const Color(0xFFFF1744),
+            message: tr('Error loading warnings.\n{p0}', {'p0': (snapshot.error).toString()}),
+            color: const Color(0xFFF87171),
           );
         }
 
@@ -883,8 +921,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
         if (docs.isEmpty) {
           return _buildEmptyState(
             icon: Icons.shield_rounded,
-            message: 'No active warnings.\nAll zones are currently safe.',
-            color: const Color(0xFF00E676),
+            message: tr('No active warnings.\nAll zones are currently safe.'),
+            color: const Color(0xFF34D399),
           );
         }
 
@@ -904,7 +942,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
 
   Widget _buildAlertCard(WarningAlert alert) {
     final severityColor =
-        _severityColors[alert.severity] ?? const Color(0xFFFFC107);
+        _severityColors[alert.severity] ?? const Color(0xFFFBBF24);
     final severityIcon =
         _severityIcons[alert.severity] ?? Icons.warning_rounded;
     final isBeingEdited = _editingId == alert.id;
@@ -914,12 +952,12 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
         color: isBeingEdited
-            ? const Color(0xFFFFC107).withValues(alpha: 0.07)
+            ? const Color(0xFFFBBF24).withValues(alpha: 0.07)
             : const Color(0xFF0D1B2A),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isBeingEdited
-              ? const Color(0xFFFFC107).withValues(alpha: 0.5)
+              ? const Color(0xFFFBBF24).withValues(alpha: 0.5)
               : severityColor.withValues(alpha: 0.25),
           width: isBeingEdited ? 1.5 : 1,
         ),
@@ -960,6 +998,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                           Expanded(
                             child: Text(
                               '${alert.district} — ${alert.locationZone}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -972,7 +1012,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        alert.hazardType,
+                        tr(alert.hazardType),
                         style: const TextStyle(
                           color: Colors.white60,
                           fontSize: 12,
@@ -981,7 +1021,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Issued: $timeStr',
+                        tr('Issued: {p0}', {'p0': (timeStr).toString()}),
                         style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 11,
@@ -1003,35 +1043,49 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 bottom: Radius.circular(14),
               ),
             ),
-            child: Row(
+child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildMetricChip(
-                  icon: Icons.water_rounded,
-                  label: 'Water',
-                  value: '${alert.waterLevelMeters.toStringAsFixed(2)} m',
-                  color: const Color(0xFF42A5F5),
+                Expanded(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _buildMetricChip(
+                        icon: Icons.water_rounded,
+                        label: tr('Water'),
+                        value: 'm',
+                        color: const Color(0xFF42A5F5),
+                      ),
+                      _buildMetricChip(
+                        icon: Icons.grain_rounded,
+                        label: tr('Rain'),
+                        value: 'mm',
+                        color: const Color(0xFF26C6DA),
+                      ),
+                      _buildMetricChip(
+                        icon: Icons.air_rounded,
+                        label: tr('Wind'),
+                        value: 'kph',
+                        color: const Color(0xFFB39DDB),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 10),
-                _buildMetricChip(
-                  icon: Icons.grain_rounded,
-                  label: 'Rainfall',
-                  value: '${alert.rainfallMm.toStringAsFixed(1)} mm',
-                  color: const Color(0xFF26C6DA),
-                ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 // Edit button
                 _buildCardIconBtn(
                   icon: Icons.edit_rounded,
-                  color: const Color(0xFFFFC107),
-                  tooltip: 'Edit',
+                  color: const Color(0xFFFBBF24),
+                  tooltip: tr('Edit'),
                   onTap: () => _populateFormForEdit(alert),
                 ),
                 const SizedBox(width: 6),
                 // Resolve button
                 _buildCardIconBtn(
                   icon: Icons.check_circle_outline_rounded,
-                  color: const Color(0xFF00E676),
-                  tooltip: 'Resolve',
+                  color: const Color(0xFF34D399),
+                  tooltip: tr('Resolve'),
                   onTap: () => _resolveWarning(alert.id),
                 ),
               ],
@@ -1084,7 +1138,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
+                tr(label),
                 style: TextStyle(
                   color: color.withValues(alpha: 0.7),
                   fontSize: 9,
@@ -1092,7 +1146,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 ),
               ),
               Text(
-                value,
+                tr(value),
                 style: TextStyle(
                   color: color,
                   fontSize: 12,
@@ -1148,7 +1202,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
           Icon(icon, color: color.withValues(alpha: 0.5), size: 40),
           const SizedBox(height: 12),
           Text(
-            message,
+            tr(message),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),
