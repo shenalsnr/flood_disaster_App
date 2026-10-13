@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/relief_item_model.dart';
 import '../controllers/relief_tracking_controller.dart';
 import 'leader_avatar.dart';
+import 'camp_hero_banner.dart';
 
 import '../../../../core/localization/app_strings.dart';
 class CampCapacityCard extends StatelessWidget {
@@ -103,6 +104,10 @@ class CampCapacityCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 18),
+
+        // Decorative banner above the capacity card
+        const CampHeroBanner(),
+        const SizedBox(height: 14),
 
         // Shelter Capacity Overview Card (Matching Image 1 Iframe)
         Container(
