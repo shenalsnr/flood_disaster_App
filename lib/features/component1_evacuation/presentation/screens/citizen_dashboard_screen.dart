@@ -54,6 +54,26 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
     super.dispose();
   }
 
+  // ── Alert targeting ────────────────────────────────────────────────────────
+  static String _norm(String v) => v
+      .toLowerCase()
+      .replaceAll('district', '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+
+  static bool _isAll(String v) {
+    final n = _norm(v);
+    return n.isEmpty || n == 'all';
+  }
+
+  /// A warning reaches a citizen when its district is "All" or equals the
+  /// citizen's district, AND its city is "All" or equals the citizen's city.
+  static bool _alertMatches(WarningAlert w, String district, String city) {
+    final districtOk = _isAll(w.district) || _norm(w.district) == _norm(district);
+    if (!districtOk) return false;
+    return _isAll(w.city) || _norm(w.city) == _norm(city);
+  }
+
   void _push(Widget screen) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
@@ -73,8 +93,17 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             ? (userSnap.data!.data() as Map<String, dynamic>)
             : <String, dynamic>{};
 
-        final district = userData['district'] as String? ?? 'Colombo';
-        final city = userData['city'] as String? ?? 'Colombo';
+        // Blank profile values fall back to the logged-in account, then Colombo.
+        String pickText(Object? fromDoc, String? fromAccount) {
+          final d = (fromDoc as String?)?.trim() ?? '';
+          if (d.isNotEmpty) return d;
+          final a = fromAccount?.trim() ?? '';
+          return a.isNotEmpty ? a : 'Colombo';
+        }
+        final district = pickText(
+            userData['district'], ResponderController().currentUser?.district);
+        final city = pickText(
+            userData['city'], ResponderController().currentUser?.city);
         String? firestoreName = userData['name'] as String? ?? userData['fullName'] as String?;
         if (firestoreName == 'Citizen User' || firestoreName == null || firestoreName.isEmpty) {
           firestoreName = null;
@@ -90,22 +119,21 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
         final photoUrl = userData['photoUrl'] as String?;
 
         return StreamBuilder<QuerySnapshot>(
+          // All warnings are read and matched below, so spelling / letter-case
+          // differences in district or city never hide an alert.
           stream: FirebaseFirestore.instance
               .collection('warnings')
-              .where('district', whereIn: [district, 'All'])
               .snapshots(),
           builder: (context, warningsSnap) {
             WarningAlert? topAlert;
             List<WarningAlert> allAlerts = [];
 
             if (warningsSnap.hasData) {
-              // City is matched here so broadcasts sent to city 'All' also arrive.
               allAlerts = warningsSnap.data!.docs
                   .map((d) => WarningAlert.fromDoc(d))
-                  .where((w) =>
-                      w.city.toLowerCase() == 'all' ||
-                      w.city.toLowerCase() == city.toLowerCase())
-                  .toList();
+                  .where((w) => _alertMatches(w, district, city))
+                  .toList()
+                ..sort((a, b) => b.issuedTimestamp.compareTo(a.issuedTimestamp));
             }
 
             if (allAlerts.isNotEmpty) {
