@@ -12,6 +12,7 @@ import 'package:flood_disaster/features/component2_reporting/data/models/offline
 import 'package:flood_disaster/features/component2_reporting/presentation/screens/report_submission_status_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Review Your Report Screen.
 /// Exactly matches the user's Figma/Mobile specification:
 /// - Dark tactical theme with status bar indicators
@@ -75,10 +76,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
 
   Color _getHazardColor(String hazard) {
     final lower = hazard.toLowerCase();
-    if (lower.contains('flood')) return const Color(0xFF40C4FF);
-    if (lower.contains('landslide')) return const Color(0xFFFFB300);
-    if (lower.contains('tree')) return const Color(0xFF22C55E);
-    return const Color(0xFFFF5252);
+    if (lower.contains('flood')) return const Color(0xFF38BDF8);
+    if (lower.contains('landslide')) return const Color(0xFFFBBF24);
+    if (lower.contains('tree')) return const Color(0xFF34D399);
+    return const Color(0xFFF87171);
   }
 
   String _getDisplayHazardName(String hazard) {
@@ -263,8 +264,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
             ),
           ),
           titleSpacing: 10,
-          title: const Text(
-            'Review Your Report',
+          title: Text(
+            tr('Review Your Report'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 21,
@@ -288,20 +289,20 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131B2B),
+                        color: const Color(0xFF131C2E),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: const Color(0xFF1E293B),
+                          color: const Color(0xFF1C2740),
                           width: 1.2,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'HAZARD',
+                          Text(
+                            tr('HAZARD'),
                             style: TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
@@ -341,20 +342,20 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF131B2B),
+                        color: const Color(0xFF131C2E),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: const Color(0xFF1E293B),
+                          color: const Color(0xFF1C2740),
                           width: 1.2,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'SEVERITY',
+                          Text(
+                            tr('SEVERITY'),
                             style: TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
@@ -370,7 +371,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                               color: const Color(0xFF2E1218),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: const Color(0xFFFF3B3B).withValues(alpha: 0.3),
+                                color: const Color(0xFFF87171).withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -378,7 +379,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                               child: Text(
                                 _getDisplaySeverityName(widget.severity),
                                 style: const TextStyle(
-                                  color: Color(0xFFFF3B3B),
+                                  color: Color(0xFFF87171),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.5,
@@ -399,10 +400,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     width: 1.2,
                   ),
                 ),
@@ -448,7 +449,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                                       height: 20,
                                       child: const Icon(
                                         Icons.location_on_rounded,
-                                        color: Color(0xFFFF9F0A),
+                                        color: Color(0xFFFB923C),
                                         size: 20,
                                       ),
                                     ),
@@ -467,10 +468,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'LOCATION & GPS',
+                          Text(
+                            tr('LOCATION & GPS'),
                             style: TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
@@ -478,7 +479,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _displayLocation,
+                            tr(_displayLocation),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14.5,
@@ -487,9 +488,9 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            'GPS: ${widget.coordinates.latitude.toStringAsFixed(4)}° N, ${widget.coordinates.longitude.toStringAsFixed(4)}° E',
+                            tr('GPS: {p0}° N, {p1}° E', {'p0': (widget.coordinates.latitude.toStringAsFixed(4)).toString(), 'p1': (widget.coordinates.longitude.toStringAsFixed(4)).toString()}),
                             style: const TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -507,10 +508,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     width: 1.2,
                   ),
                 ),
@@ -530,7 +531,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: const Center(
                         child: Icon(
                           Icons.access_time_rounded,
-                          color: Color(0xFF94A3B8),
+                          color: Color(0xFFB6C2D6),
                           size: 22,
                         ),
                       ),
@@ -540,10 +541,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'RECORDED AT',
+                          Text(
+                            tr('RECORDED AT'),
                             style: TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
@@ -551,7 +552,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Today, $timeStr (Local Time)',
+                            tr('Today, {p0} (Local Time)', {'p0': (timeStr).toString()}),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14.5,
@@ -571,10 +572,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: const Color(0xFF1E293B),
+                    color: const Color(0xFF1C2740),
                     width: 1.2,
                   ),
                 ),
@@ -597,7 +598,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                                 child: const Center(
                                   child: Icon(
                                     Icons.image_outlined,
-                                    color: Color(0xFF00E676),
+                                    color: Color(0xFF34D399),
                                     size: 26,
                                   ),
                                 ),
@@ -611,10 +612,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'ATTACHED MEDIA',
+                          Text(
+                            tr('ATTACHED MEDIA'),
                             style: TextStyle(
-                              color: Color(0xFF8B9BB4),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
@@ -622,9 +623,9 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            fileName,
+                            tr(fileName),
                             style: const TextStyle(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                             ),
@@ -645,10 +646,10 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                 height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF22C55E), // Solid Vivid Green
+                    backgroundColor: const Color(0xFF34D399), // Solid Vivid Green
                     foregroundColor: Colors.white,
                     elevation: 4,
-                    shadowColor: const Color(0xFF22C55E).withValues(alpha: 0.4),
+                    shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -663,8 +664,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          'SUBMIT REPORT',
+                      : Text(
+                          tr('SUBMIT REPORT'),
                           style: TextStyle(
                             fontSize: 16.5,
                             fontWeight: FontWeight.w900,
@@ -682,7 +683,7 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                 height: 50,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF40C4FF),
+                    foregroundColor: const Color(0xFF38BDF8),
                     side: const BorderSide(
                         color: Color(0xFF1E3A5F), width: 1.2),
                     shape: RoundedRectangleBorder(
@@ -690,8 +691,8 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                     ),
                   ),
                   icon: const Icon(Icons.storage_rounded, size: 18),
-                  label: const Text(
-                    'SAVE AS LOCAL DRAFT (SQLITE)',
+                  label: Text(
+                    tr('SAVE AS LOCAL DRAFT (SQLITE)'),
                     style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w800,
@@ -709,16 +710,16 @@ class _ReviewReportScreenState extends State<ReviewReportScreen> {
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFFF9F0A),
+                    foregroundColor: const Color(0xFFFB923C),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 10,
                     ),
                   ),
-                  child: const Text(
-                    'Edit Details',
+                  child: Text(
+                    tr('Edit Details'),
                     style: TextStyle(
-                      color: Color(0xFFFF9F0A),
+                      color: Color(0xFFFB923C),
                       fontSize: 15.5,
                       fontWeight: FontWeight.w700,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/relief_request_model.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class ReliefRequestCard extends StatelessWidget {
   final ReliefRequestModel request;
 
@@ -16,7 +17,7 @@ class ReliefRequestCard extends StatelessWidget {
 
     switch (request.urgency) {
       case RequestUrgency.immediate:
-        urgencyColor = const Color(0xFFFF5252);
+        urgencyColor = const Color(0xFFF87171);
         urgencyLabel = 'IMMEDIATE';
         break;
       case RequestUrgency.high:
@@ -24,7 +25,7 @@ class ReliefRequestCard extends StatelessWidget {
         urgencyLabel = 'HIGH PRIORITY';
         break;
       case RequestUrgency.routine:
-        urgencyColor = const Color(0xFF69F0AE);
+        urgencyColor = const Color(0xFF6EE7B7);
         urgencyLabel = 'ROUTINE';
         break;
     }
@@ -68,7 +69,7 @@ class ReliefRequestCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  request.itemTitle,
+                  tr(request.itemTitle),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -76,28 +77,28 @@ class ReliefRequestCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
+              Flexible(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: urgencyColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  urgencyLabel,
+                  tr(urgencyLabel),
                   style: TextStyle(
                     color: urgencyColor,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: 6),
 
           // Requested qty & Requester
           Text(
-            'Quantity: ${request.quantityRequested} • Requested by: ${request.requestedBy} at ${request.timestamp}',
+            tr('Quantity: {p0} • Requested by: {p1} at {p2}', {'p0': (request.quantityRequested).toString(), 'p1': (request.requestedBy).toString(), 'p2': (request.timestamp).toString()}),
             style: const TextStyle(color: Colors.white60, fontSize: 12),
           ),
           const SizedBox(height: 12),
@@ -113,22 +114,22 @@ class ReliefRequestCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
+                Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                   children: [
                     Icon(statusIcon, color: statusColor, size: 18),
                     const SizedBox(width: 8),
-                    Text(
-                      statusLabel,
+                    Flexible(child: Text(
+                      tr(statusLabel),
                       style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
-                    ),
+                    )),
                   ],
-                ),
+                )),
                 Flexible(child: Text(
-                  'ETA: ${request.eta}',
+                  tr('ETA: {p0}', {'p0': (request.eta).toString()}),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

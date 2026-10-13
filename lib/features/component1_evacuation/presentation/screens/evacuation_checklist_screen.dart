@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:ui';
 import '../../services/citizen_firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // Model — mapped from Firestore DocumentSnapshot
 class ChecklistItem {
   final String id;
@@ -64,7 +65,7 @@ class _EvacuationChecklistScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -73,7 +74,7 @@ class _EvacuationChecklistScreenState
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              color: const Color(0xFF070B14).withValues(alpha: 0.7),
+              color: const Color(0xFF0B1220).withValues(alpha: 0.7),
             ),
           ),
         ),
@@ -81,8 +82,8 @@ class _EvacuationChecklistScreenState
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Go Bag Checklist',
+        title: Text(
+          tr('Go Bag Checklist'),
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -99,7 +100,7 @@ class _EvacuationChecklistScreenState
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: SafeArea(
@@ -107,14 +108,14 @@ class _EvacuationChecklistScreenState
             stream: _firestoreService.getChecklistItems(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Center(
-                  child: Text('Error loading checklist',
+                return Center(
+                  child: Text(tr('Error loading checklist'),
                       style: TextStyle(color: Colors.red)),
                 );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF00E676)),
+                  child: CircularProgressIndicator(color: Color(0xFF34D399)),
                 );
               }
 
@@ -146,10 +147,10 @@ class _EvacuationChecklistScreenState
                   // ── Checklist ────────────────────────────────────────────────────
                   Expanded(
                     child: items.isEmpty
-                        ? const _EmptyState(
+                        ? _EmptyState(
                             icon: Icons.backpack_rounded,
                             message:
-                                'Your Go Bag is empty.\nAdd essential items above.',
+                                tr('Your Go Bag is empty.\nAdd essential items above.'),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
@@ -200,18 +201,18 @@ class _PremiumProgressHeader extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B2B),
+        color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isComplete
-              ? const Color(0xFF00E676).withValues(alpha: 0.3)
+              ? const Color(0xFF34D399).withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.05),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: isComplete
-                ? const Color(0xFF00E676).withValues(alpha: 0.1)
+                ? const Color(0xFF34D399).withValues(alpha: 0.1)
                 : Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
@@ -229,9 +230,9 @@ class _PremiumProgressHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isComplete ? 'Ready for Evacuation' : 'Packing Progress',
+                      isComplete ? tr('Ready for Evacuation') : tr('Packing Progress'),
                       style: TextStyle(
-                        color: isComplete ? const Color(0xFF00E676) : Colors.white,
+                        color: isComplete ? const Color(0xFF34D399) : Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                       ),
@@ -239,7 +240,7 @@ class _PremiumProgressHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$packedCount of $total items packed',
+                      tr('{p0} of {p1} items packed', {'p0': (packedCount).toString(), 'p1': (total).toString()}),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 13,
@@ -257,16 +258,16 @@ class _PremiumProgressHeader extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isComplete
-                        ? const Color(0xFF00E676).withValues(alpha: 0.15)
-                        : const Color(0xFF40C4FF).withValues(alpha: 0.15),
+                        ? const Color(0xFF34D399).withValues(alpha: 0.15)
+                        : const Color(0xFF38BDF8).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '$pct%',
+                    '%',
                     style: TextStyle(
                       color: isComplete
-                          ? const Color(0xFF00E676)
-                          : const Color(0xFF40C4FF),
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF38BDF8),
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
                     ),
@@ -281,9 +282,9 @@ class _PremiumProgressHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 10,
-              backgroundColor: const Color(0xFF070B14),
+              backgroundColor: const Color(0xFF0B1220),
               valueColor: AlwaysStoppedAnimation<Color>(
-                isComplete ? const Color(0xFF00E676) : const Color(0xFF40C4FF),
+                isComplete ? const Color(0xFF34D399) : const Color(0xFF38BDF8),
               ),
             ),
           ),
@@ -308,7 +309,7 @@ class _PremiumAddItemField extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2B),
+                color: const Color(0xFF131C2E),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                 boxShadow: [
@@ -325,7 +326,7 @@ class _PremiumAddItemField extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
-                  hintText: 'Add new item (e.g. Flashlight)...',
+                  hintText: tr('Add new item (e.g. Flashlight)...'),
                   hintStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.3),
                     fontSize: 15,
@@ -346,14 +347,14 @@ class _PremiumAddItemField extends StatelessWidget {
               height: 54,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF00E676), Color(0xFF00C853)],
+                  colors: [Color(0xFF34D399), Color(0xFF34D399)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -392,12 +393,12 @@ class _PremiumChecklistItemTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: item.isPacked
-            ? const Color(0xFF00E676).withValues(alpha: 0.05)
-            : const Color(0xFF131B2B),
+            ? const Color(0xFF34D399).withValues(alpha: 0.05)
+            : const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: item.isPacked
-              ? const Color(0xFF00E676).withValues(alpha: 0.2)
+              ? const Color(0xFF34D399).withValues(alpha: 0.2)
               : Colors.white.withValues(alpha: 0.05),
           width: 1.5,
         ),
@@ -427,19 +428,19 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                   height: 28,
                   decoration: BoxDecoration(
                     color: item.isPacked
-                        ? const Color(0xFF00E676)
+                        ? const Color(0xFF34D399)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: item.isPacked
-                          ? const Color(0xFF00E676)
+                          ? const Color(0xFF34D399)
                           : Colors.white.withValues(alpha: 0.3),
                       width: 2,
                     ),
                     boxShadow: item.isPacked
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                              color: const Color(0xFF34D399).withValues(alpha: 0.4),
                               blurRadius: 8,
                             ),
                           ]
@@ -468,7 +469,7 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                       decorationColor: Colors.white.withValues(alpha: 0.4),
                       decorationThickness: 2,
                     ),
-                    child: Text(item.name),
+                    child: Text(tr(item.name)),
                   ),
                 ),
                 
@@ -477,17 +478,17 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF5252).withValues(alpha: 0.1),
+                    color: const Color(0xFFF87171).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: IconButton(
                     padding: EdgeInsets.zero,
                     icon: const Icon(
                       Icons.delete_outline_rounded,
-                      color: Color(0xFFFF5252),
+                      color: Color(0xFFF87171),
                       size: 20,
                     ),
-                    tooltip: 'Delete Item',
+                    tooltip: tr('Delete Item'),
                     onPressed: () {
                       // Haptic feedback or confirmation dialog can be added here
                       onDelete();
@@ -525,7 +526,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            message,
+            tr(message),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),

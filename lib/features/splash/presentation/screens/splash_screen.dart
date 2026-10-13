@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/language_controller.dart';
+import '../../../../core/localization/language_picker_screen.dart';
 import '../../../../core/responsive/screen_fit.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../component4_control_center/data/services/session_service.dart';
@@ -9,6 +11,7 @@ import '../../../component4_control_center/presentation/screens/startup_gate.dar
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Animated launch screen for WeSafe.
 ///
 /// Sequence: radar-style alert pulses ripple out → logo scales in with an
@@ -68,8 +71,23 @@ class _SplashScreenState extends State<SplashScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, _, _) =>
-            signedIn != null ? const StartupGate() : const OnboardingScreen(),
+        pageBuilder: (_, _, _) {
+          if (signedIn != null) return const StartupGate();
+          // First launch: pick a language before the onboarding pages.
+          if (!LanguageController.instance.hasChosen) {
+            return LanguagePickerScreen(
+              onContinue: () => Navigator.of(context).pushReplacement(
+                PageRouteBuilder<void>(
+                  transitionDuration: const Duration(milliseconds: 400),
+                  pageBuilder: (_, _, _) => const OnboardingScreen(),
+                  transitionsBuilder: (_, animation, _, child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
+              ),
+            );
+          }
+          return const OnboardingScreen();
+        },
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
@@ -84,10 +102,10 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   String _statusFor(double p) {
-    if (p < 0.35) return 'Starting safety services…';
-    if (p < 0.70) return 'Loading early-warning alerts…';
-    if (p < 0.98) return 'Preparing offline maps…';
-    return 'Ready';
+    if (p < 0.35) return tr('Starting safety services…');
+    if (p < 0.70) return tr('Loading early-warning alerts…');
+    if (p < 0.98) return tr('Preparing offline maps…');
+    return tr('Ready');
   }
 
   @override
@@ -186,7 +204,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: ScaleTransition(
               scale: _logoScale,
               child: Semantics(
-                label: 'WeSafe logo',
+                label: tr('WeSafe logo'),
                 image: true,
                 child: Unfiltered(child: Image.asset(
                   'assets/images/wesafe_logo.png',
@@ -212,15 +230,15 @@ class _SplashScreenState extends State<SplashScreen>
           begin: const Offset(0, 0.35),
           end: Offset.zero,
         ).animate(_titleAnim),
-        child: const Text.rich(
+        child: Text.rich(
           TextSpan(
             children: [
               TextSpan(
-                text: 'We',
+                text: tr('We'),
                 style: TextStyle(color: AppColors.textPrimary),
               ),
               TextSpan(
-                text: 'Safe',
+                text: tr('Safe'),
                 style: TextStyle(color: AppColors.primary),
               ),
             ],
@@ -246,8 +264,8 @@ class _SplashScreenState extends State<SplashScreen>
         ).animate(_taglineAnim),
         child: Column(
           children: [
-            const Text(
-              'Your Community, Your Safety.',
+            Text(
+              tr('Your Community, Your Safety.'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -339,10 +357,10 @@ class _SplashScreenState extends State<SplashScreen>
   Widget _buildFooter() {
     return FadeTransition(
       opacity: _footerAnim,
-      child: const Column(
+      child: Column(
         children: [
           Text(
-            'FLOOD & DISASTER EARLY WARNING',
+            tr('FLOOD & DISASTER EARLY WARNING'),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -352,7 +370,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
           SizedBox(height: 4),
           Text(
-            'Community Reporting & Relief',
+            tr('Community Reporting & Relief'),
             style: TextStyle(
               fontSize: 11,
               letterSpacing: 1.0,

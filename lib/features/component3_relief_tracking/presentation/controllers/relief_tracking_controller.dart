@@ -559,10 +559,10 @@ class ReliefTrackingController extends ChangeNotifier {
       final sev = (m['severity'] ?? '').toString().toLowerCase();
       final ts = m['_ts'] as DateTime;
       final color = sev.contains('critical')
-          ? const Color(0xFFFF1744)
+          ? const Color(0xFFF87171)
           : sev.contains('high')
-              ? const Color(0xFFFF6D00)
-              : const Color(0xFFFF9F0A);
+              ? const Color(0xFF38BDF8)
+              : const Color(0xFFFB923C);
       return <String, dynamic>{
         'id': 'inc_${m['_id']}',
         'type': 'incident',
@@ -650,10 +650,10 @@ class ReliefTrackingController extends ChangeNotifier {
       final place = (m['areaName'] ?? m['locationZone'] ?? '').toString().trim();
       final desc = (m['description'] ?? '').toString().trim();
       final color = sev.toLowerCase() == 'critical'
-          ? const Color(0xFFFF1744)
+          ? const Color(0xFFF87171)
           : sev.toLowerCase() == 'watch'
-              ? const Color(0xFF40C4FF)
-              : const Color(0xFFFF9F0A);
+              ? const Color(0xFF38BDF8)
+              : const Color(0xFFFB923C);
       return <String, dynamic>{
         'id': 'warn_${m['_id']}',
         'type': 'broadcast',

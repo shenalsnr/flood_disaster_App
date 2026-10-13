@@ -4,6 +4,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/shelter_model.dart';
 import 'dart:math';
 
+import '../../../../core/localization/app_strings.dart';
 /// Screen to manage shelters (CRUD operations)
 class ManageSheltersScreen extends StatefulWidget {
   const ManageSheltersScreen({super.key});
@@ -40,26 +41,26 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ShelterTheme.surfaceDarkNavy,
-        title: Text(existingShelter == null ? 'Add Shelter' : 'Edit Shelter', style: const TextStyle(color: ShelterTheme.textHighContrastWhite)),
+        title: Text(existingShelter == null ? tr('Add Shelter') : tr('Edit Shelter'), style: const TextStyle(color: ShelterTheme.textHighContrastWhite)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Shelter Name'),
+                decoration: InputDecoration(labelText: tr('Shelter Name')),
                 style: const TextStyle(color: ShelterTheme.textHighContrastWhite),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: locCtrl,
-                decoration: const InputDecoration(labelText: 'Location'),
+                decoration: InputDecoration(labelText: tr('Location')),
                 style: const TextStyle(color: ShelterTheme.textHighContrastWhite),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: bedsCtrl,
-                decoration: const InputDecoration(labelText: 'Total Beds'),
+                decoration: InputDecoration(labelText: tr('Total Beds')),
                 keyboardType: TextInputType.number,
                 style: const TextStyle(color: ShelterTheme.textHighContrastWhite),
               ),
@@ -69,7 +70,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: ShelterTheme.textMuted)),
+            child: Text(tr('Cancel'), style: TextStyle(color: ShelterTheme.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
@@ -94,7 +95,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
               }
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(tr('Save')),
           ),
         ],
       ),
@@ -106,12 +107,12 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ShelterTheme.surfaceDarkNavy,
-        title: const Text('Delete Shelter?', style: TextStyle(color: ShelterTheme.textHighContrastWhite)),
-        content: Text('Are you sure you want to delete ${shelter.name}?', style: const TextStyle(color: ShelterTheme.textMuted)),
+        title: Text(tr('Delete Shelter?'), style: TextStyle(color: ShelterTheme.textHighContrastWhite)),
+        content: Text(tr('Are you sure you want to delete {p0}?', {'p0': (shelter.name).toString()}), style: const TextStyle(color: ShelterTheme.textMuted)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: ShelterTheme.textMuted)),
+            child: Text(tr('Cancel'), style: TextStyle(color: ShelterTheme.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: ShelterTheme.statusCriticalRed),
@@ -119,7 +120,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
               _service.deleteShelter(shelter.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
+            child: Text(tr('Delete')),
           ),
         ],
       ),
@@ -132,7 +133,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Shelters'),
+        title: Text(tr('Manage Shelters')),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -151,8 +152,8 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
             ),
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              title: Text(shelter.name, style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontWeight: FontWeight.bold)),
-              subtitle: Text('${shelter.location} • ${shelter.occupiedBeds}/${shelter.totalBeds} Beds', style: const TextStyle(color: ShelterTheme.textMuted)),
+              title: Text(tr(shelter.name), style: const TextStyle(color: ShelterTheme.textHighContrastWhite, fontWeight: FontWeight.bold)),
+              subtitle: Text(tr('{p0} • {p1}/{p2} Beds', {'p0': (shelter.location).toString(), 'p1': (shelter.occupiedBeds).toString(), 'p2': (shelter.totalBeds).toString()}), style: const TextStyle(color: ShelterTheme.textMuted)),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -168,7 +169,7 @@ class _ManageSheltersScreenState extends State<ManageSheltersScreen> {
               ),
               onTap: () {
                 _service.switchActiveShelter(shelter.id);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${shelter.name} selected as active.')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('{p0} selected as active.', {'p0': (shelter.name).toString()}))));
               },
             ),
           );

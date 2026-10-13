@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/translation_service.dart';
 import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
 import 'broadcast_dialog.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Zone broadcasts issued from the control center.
 /// Read (live list) / Create (new broadcast) / Update (edit) / Delete (withdraw).
 class BroadcastHistoryScreen extends StatelessWidget {
@@ -13,11 +15,11 @@ class BroadcastHistoryScreen extends StatelessWidget {
   Color _color(String sev) {
     switch (sev) {
       case 'Critical':
-        return const Color(0xFFFF5252);
+        return const Color(0xFFF87171);
       case 'Warning':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFBBF24);
       default:
-        return const Color(0xFF40C4FF);
+        return const Color(0xFF38BDF8);
     }
   }
 
@@ -30,8 +32,8 @@ class BroadcastHistoryScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: const Text('Edit broadcast',
+          backgroundColor: const Color(0xFF1C2740),
+          title: Text(tr('Edit broadcast'),
               style: TextStyle(color: Colors.white, fontSize: 16)),
           content: SingleChildScrollView(
             child: Column(
@@ -41,14 +43,14 @@ class BroadcastHistoryScreen extends StatelessWidget {
                 TextField(
                   controller: zone,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(labelText: 'Zone'),
+                  decoration: InputDecoration(labelText: tr('Zone')),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   children: ['Watch', 'Warning', 'Critical']
                       .map((s) => ChoiceChip(
-                            label: Text(s),
+                            label: Text(tr(s)),
                             selected: sev == s,
                             onSelected: (_) => setS(() => sev = s),
                           ))
@@ -59,7 +61,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                   controller: desc,
                   maxLines: 4,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(labelText: 'Message'),
+                  decoration: InputDecoration(labelText: tr('Message')),
                 ),
               ],
             ),
@@ -67,11 +69,11 @@ class BroadcastHistoryScreen extends StatelessWidget {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('CANCEL')),
+                child: Text(tr('CANCEL'))),
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('SAVE')),
+                child: Text(tr('SAVE'))),
           ],
         ),
       ),
@@ -86,7 +88,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Update failed: $e')));
+            .showSnackBar(SnackBar(content: Text(tr('Update failed: {p0}', {'p0': (e).toString()}))));
       }
     }
   }
@@ -95,20 +97,20 @@ class BroadcastHistoryScreen extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF1C2740),
         title:
-            const Text('Withdraw warning?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-            'Citizens will no longer see this warning on their dashboard.',
+            Text(tr('Withdraw warning?'), style: TextStyle(color: Colors.white)),
+        content: Text(
+            tr('Citizens will no longer see this warning on their dashboard.'),
             style: TextStyle(color: Color(0xFFCBD5E1))),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('CANCEL')),
+              child: Text(tr('CANCEL'))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: Color(0xFFDC2626)),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('WITHDRAW'),
+            child: Text(tr('WITHDRAW')),
           ),
         ],
       ),
@@ -119,7 +121,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+            .showSnackBar(SnackBar(content: Text(tr('Delete failed: {p0}', {'p0': (e).toString()}))));
       }
     }
   }
@@ -127,19 +129,19 @@ class BroadcastHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF070B14),
+        backgroundColor: const Color(0xFF0B1220),
         foregroundColor: Colors.white,
-        title: const Text('Broadcast History',
+        title: Text(tr('Broadcast History'),
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Color(0xFFDC2626),
         foregroundColor: Colors.white,
         onPressed: () => showBroadcastDialog(context),
         icon: const Icon(Icons.cell_tower),
-        label: const Text('NEW BROADCAST'),
+        label: Text(tr('NEW BROADCAST')),
       ),
       body: ResponsiveBody(
         maxWidth: 760,
@@ -148,7 +150,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
         builder: (context, snap) {
           if (snap.hasError) {
             return Center(
-                child: Text('Error: ${snap.error}',
+                child: Text(tr('Error: {p0}', {'p0': (snap.error).toString()}),
                     style: const TextStyle(color: Colors.orange)));
           }
           if (!snap.hasData) {
@@ -163,8 +165,8 @@ class BroadcastHistoryScreen extends StatelessWidget {
               return db.compareTo(da);
             });
           if (docs.isEmpty) {
-            return const Center(
-              child: Text('No broadcasts sent yet.',
+            return Center(
+              child: Text(tr('No broadcasts sent yet.'),
                   style: TextStyle(color: Colors.white54)),
             );
           }
@@ -186,7 +188,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                 child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF1C2740),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: color.withValues(alpha: 0.5)),
                 ),
@@ -195,7 +197,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Container(
+                        Flexible(child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -207,7 +209,7 @@ class BroadcastHistoryScreen extends StatelessWidget {
                                   color: color,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold)),
-                        ),
+                        )),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(d['locationZone'] as String? ?? '-',
@@ -216,29 +218,28 @@ class BroadcastHistoryScreen extends StatelessWidget {
                                   fontWeight: FontWeight.bold)),
                         ),
                         IconButton(
-                          tooltip: 'Edit',
+                          tooltip: tr('Edit'),
                           icon: const Icon(Icons.edit_outlined,
-                              color: Color(0xFF40C4FF), size: 20),
+                              color: Color(0xFF38BDF8), size: 20),
                           onPressed: () => _edit(context, doc.id, d),
                         ),
                         IconButton(
-                          tooltip: 'Withdraw',
+                          tooltip: tr('Withdraw'),
                           icon: const Icon(Icons.delete_outline,
-                              color: Colors.redAccent, size: 20),
+                              color: Color(0xFFF87171), size: 20),
                           onPressed: () => _withdraw(context, doc.id),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text(d['description'] as String? ?? '',
+                    Text(TranslationService.pickLocalized(d, 'description'),
                         style: const TextStyle(
                             color: Color(0xFFCBD5E1), fontSize: 12)),
                     const SizedBox(height: 8),
                     Text(
-                      '${d['district'] ?? 'All'} / ${d['city'] ?? 'All'} • '
-                      '${d['radiusKm'] ?? '-'} km • $when',
+                      tr('{p0} / {p1} • {p2} km • {p3}', {'p0': (d['district'] ?? 'All').toString(), 'p1': (d['city'] ?? 'All').toString(), 'p2': (d['radiusKm'] ?? '-').toString(), 'p3': (when).toString()}),
                       style: const TextStyle(
-                          color: Color(0xFF64748B), fontSize: 11),
+                          color: Color(0xFF8A98B0), fontSize: 11),
                     ),
                   ],
                 ),

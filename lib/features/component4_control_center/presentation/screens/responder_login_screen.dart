@@ -9,6 +9,8 @@ import '../controllers/responder_controller.dart';
 import '../../data/services/session_service.dart';
 import 'role_router.dart';
 import 'responder_register_screen.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/language_button.dart';
 
 class ResponderLoginScreen extends StatefulWidget {
   final UserRole initialRole;
@@ -53,9 +55,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your email address to log in.'),
-          backgroundColor: Colors.redAccent,
+        SnackBar(
+          content: Text(tr('login_enter_email')),
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
       return;
@@ -63,9 +65,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your password.'),
-          backgroundColor: Colors.redAccent,
+        SnackBar(
+          content: Text(tr('login_enter_password')),
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
       return;
@@ -91,17 +93,17 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_rounded, color: Color(0xFF00E676)),
+              const Icon(Icons.check_circle_rounded, color: Color(0xFF34D399)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Welcome, ${user.fullName}! Connected to Firebase.',
+                  tr('login_welcome', {'name': user.fullName}),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -126,12 +128,12 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.error_outline, color: Colors.redAccent),
+              const Icon(Icons.error_outline, color: Color(0xFFF87171)),
               const SizedBox(width: 10),
-              Expanded(child: Text(errorMsg)),
+              Expanded(child: Text(tr(errorMsg))),
             ],
           ),
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF1C2740),
           duration: const Duration(seconds: 4),
         ),
       );
@@ -143,11 +145,11 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
     final targetEmail = _emailController.text.trim();
     if (targetEmail.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Please enter your email address first to receive the OTP code.',
+            tr('otp_need_email'),
           ),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
       return;
@@ -164,17 +166,17 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.mark_email_read, color: Color(0xFF00E676)),
+            const Icon(Icons.mark_email_read, color: Color(0xFF34D399)),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'OTP Code sent to $targetEmail: $randomOtp (Valid for 5 mins)',
+                tr('otp_sent_snack', {'email': targetEmail, 'otp': randomOtp}),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF1C2740),
         duration: const Duration(seconds: 5),
       ),
     );
@@ -182,7 +184,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -203,7 +205,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
+                    color: const Color(0xFF2B3A55),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -215,25 +217,25 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
                       ),
                     ),
                     child: const Icon(
                       Icons.lock_reset_rounded,
-                      color: Color(0xFFFF6D00),
+                      color: Color(0xFF38BDF8),
                       size: 22,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Reset PIN / Password',
+                          tr('reset_title'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -241,9 +243,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                           ),
                         ),
                         Text(
-                          'OTP Verification via Email',
+                          tr('otp_via_email'),
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: Color(0xFFB6C2D6),
                             fontSize: 12,
                           ),
                         ),
@@ -256,21 +258,21 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF1E293B)),
+                  border: Border.all(color: const Color(0xFF1C2740)),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.email_outlined,
-                      color: Color(0xFFFF6D00),
+                      color: Color(0xFF38BDF8),
                       size: 18,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'OTP sent to: $targetEmail\nTest Code: $randomOtp',
+                        tr('otp_sent_to', {'email': targetEmail, 'otp': randomOtp}),
                         style: const TextStyle(
                           color: Color(0xFFCBD5E1),
                           fontSize: 12,
@@ -282,10 +284,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'ENTER 6-DIGIT OTP CODE',
+              Text(
+                tr('enter_otp'),
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
@@ -305,7 +307,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 decoration: InputDecoration(
                   counterText: '',
                   filled: true,
-                  fillColor: const Color(0xFF131B2B),
+                  fillColor: const Color(0xFF131C2E),
                   hintText: '••••••',
                   hintStyle: const TextStyle(
                     color: Color(0xFF475569),
@@ -313,7 +315,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   ),
                   prefixIcon: const Icon(
                     Icons.pin,
-                    color: Color(0xFFFF6D00),
+                    color: Color(0xFF38BDF8),
                     size: 20,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
@@ -322,26 +324,26 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                    borderSide: const BorderSide(color: Color(0xFF1C2740)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                    borderSide: const BorderSide(color: Color(0xFF1C2740)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(
-                      color: Color(0xFFFF6D00),
+                      color: Color(0xFF38BDF8),
                       width: 1.5,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
-                'NEW PIN / PASSWORD',
+              Text(
+                tr('new_pin'),
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: Color(0xFFB6C2D6),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
@@ -354,15 +356,15 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: const Color(0xFF131B2B),
-                  hintText: 'Enter new secure PIN or password',
+                  fillColor: const Color(0xFF131C2E),
+                  hintText: tr('new_pin_hint'),
                   hintStyle: const TextStyle(
                     color: Color(0xFF475569),
                     fontSize: 13,
                   ),
                   prefixIcon: const Icon(
                     Icons.lock_outline,
-                    color: Color(0xFFFF6D00),
+                    color: Color(0xFF38BDF8),
                     size: 20,
                   ),
                   suffixIcon: IconButton(
@@ -370,7 +372,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       obscureNewPin
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: const Color(0xFF94A3B8),
+                      color: const Color(0xFFB6C2D6),
                       size: 20,
                     ),
                     onPressed: () {
@@ -385,16 +387,16 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                    borderSide: const BorderSide(color: Color(0xFF1C2740)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF1E293B)),
+                    borderSide: const BorderSide(color: Color(0xFF1C2740)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(
-                      color: Color(0xFFFF6D00),
+                      color: Color(0xFF38BDF8),
                       width: 1.5,
                     ),
                   ),
@@ -416,11 +418,11 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
                   if (enteredOtp != randomOtp) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'Invalid OTP code. Please enter the code sent to your email.',
+                          tr('otp_invalid'),
                         ),
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: Color(0xFFDC2626),
                       ),
                     );
                     return;
@@ -428,11 +430,11 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
 
                   if (newPin.length < 4) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'Please enter a valid PIN or password (min 4 characters).',
+                          tr('pin_invalid'),
                         ),
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: Color(0xFFDC2626),
                       ),
                     );
                     return;
@@ -451,25 +453,25 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   Navigator.of(ctx).pop();
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Row(
                         children: [
-                          Icon(Icons.check_circle, color: Color(0xFF00E676)),
+                          Icon(Icons.check_circle, color: Color(0xFF34D399)),
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'PIN successfully updated in Firebase! You can now log in.',
+                              tr('pin_updated'),
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
                       ),
-                      backgroundColor: Color(0xFF1E293B),
+                      backgroundColor: Color(0xFF1C2740),
                     ),
                   );
                 },
-                child: const Text(
-                  'VERIFY OTP & UPDATE PIN',
+                child: Text(
+                  tr('verify_update'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -487,7 +489,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       body: SafeArea(
         child: ResponsiveBody(
           maxWidth: 520,
@@ -511,7 +513,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         color: const Color(0xFF151E32),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFF1E293B),
+                          color: const Color(0xFF1C2740),
                           width: 1,
                         ),
                       ),
@@ -524,7 +526,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   ),
                   if (Navigator.of(context).canPop()) const SizedBox(width: 14),
                   Flexible(child: Text(
-                    'Secure Portal Login',
+                    tr('portal_title'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -532,6 +534,8 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       letterSpacing: 0.3,
                     ),
                   )),
+                  const SizedBox(width: 10),
+                  LanguageButton(),
                 ],
               ),
 
@@ -541,9 +545,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131B2B),
+                  color: const Color(0xFF131C2E),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF1E293B), width: 1),
+                  border: Border.all(color: const Color(0xFF1C2740), width: 1),
                 ),
                 child: Row(
                   children: [
@@ -561,18 +565,18 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                       child: const Center(
                         child: Icon(
                           Icons.security,
-                          color: Color(0xFFFF6D00),
+                          color: Color(0xFF38BDF8),
                           size: 26,
                         ),
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Disaster Response System',
+                            tr('disaster_system'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -581,9 +585,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                           ),
                           SizedBox(height: 3),
                           Text(
-                            'Municipal Dispatch Authorization v4.2',
+                            tr('municipal'),
                             style: TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: Color(0xFFB6C2D6),
                               fontSize: 12,
                             ),
                           ),
@@ -597,13 +601,13 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               const SizedBox(height: 20),
 
               // Field 1: EMAIL
-              _buildFieldLabel('OFFICIAL WORK EMAIL'),
+              _buildFieldLabel(tr('work_email')),
               TextField(
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 keyboardType: TextInputType.emailAddress,
                 decoration: _buildInputDecoration(
-                  hint: 'Enter your email',
+                  hint: tr('enter_email'),
                   icon: Icons.email,
                 ),
               ),
@@ -611,20 +615,20 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               const SizedBox(height: 18),
 
               // Field 2: PASSWORD
-              _buildFieldLabel('PASSWORD'),
+              _buildFieldLabel(tr('password')),
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: _buildInputDecoration(
-                  hint: 'Enter your password',
+                  hint: tr('enter_password'),
                   icon: Icons.lock,
                   suffix: IconButton(
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: const Color(0xFF94A3B8),
+                      color: const Color(0xFFB6C2D6),
                       size: 20,
                     ),
                     onPressed: () {
@@ -640,7 +644,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Flexible(child: Row(mainAxisSize: MainAxisSize.min, 
                     children: [
                       SizedBox(
                         width: 22,
@@ -658,26 +662,26 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        'Remember credentials',
+                      Flexible(child: Text(
+                        tr('remember'),
                         style: TextStyle(
                           color: Color(0xFFCBD5E1),
                           fontSize: 13,
                         ),
-                      ),
+                      )),
                     ],
-                  ),
-                  GestureDetector(
+                  )),
+                  Flexible(child: GestureDetector(
                     onTap: _openResetPinDialog,
-                    child: const Text(
-                      'Reset PIN?',
+                    child: Text(
+                      tr('reset_pin_q'),
                       style: TextStyle(
-                        color: Color(0xFFFF6D00),
+                        color: Color(0xFF38BDF8),
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -689,7 +693,7 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF6D00).withValues(alpha: 0.35),
+                      color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
                       blurRadius: 18,
                       offset: const Offset(0, 6),
                     ),
@@ -715,11 +719,11 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Flexible(child: Text(
-                              'AUTHENTICATE & LOGIN',
+                              tr('login_btn'),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
@@ -744,10 +748,10 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(child: Text(
-                    'New officer? ',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                    tr('new_officer'),
+                    style: TextStyle(color: Color(0xFFB6C2D6), fontSize: 13),
                   )),
-                  GestureDetector(
+                  Flexible(child: GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
@@ -755,15 +759,15 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'Registration',
+                    child: Text(
+                      tr('registration'),
                       style: TextStyle(
-                        color: Color(0xFFFF6D00),
+                        color: Color(0xFF38BDF8),
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
 
@@ -779,9 +783,9 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
-        label,
+        tr(label),
         style: const TextStyle(
-          color: Color(0xFF94A3B8),
+          color: Color(0xFFB6C2D6),
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -797,23 +801,23 @@ class _ResponderLoginScreenState extends State<ResponderLoginScreen> {
   }) {
     return InputDecoration(
       filled: true,
-      fillColor: const Color(0xFF131B2B),
+      fillColor: const Color(0xFF131C2E),
       hintText: hint,
       hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 13),
-      prefixIcon: Icon(icon, color: const Color(0xFFFF6D00), size: 20),
+      prefixIcon: Icon(icon, color: const Color(0xFF38BDF8), size: 20),
       suffixIcon: suffix,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1E293B)),
+        borderSide: const BorderSide(color: Color(0xFF1C2740)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1E293B)),
+        borderSide: const BorderSide(color: Color(0xFF1C2740)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
       ),
     );
   }

@@ -13,6 +13,7 @@ import '../controllers/responder_controller.dart';
 import '../widgets/c4_ui.dart';
 import 'responder_login_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// "My Profile" for control-center staff (dispatcher / admin / camp leader).
 /// Same look as the citizen profile. All data comes from, and is saved to,
 /// the Firestore `users/{email}` document.
@@ -24,7 +25,7 @@ class ResponderProfileScreen extends StatefulWidget {
 }
 
 class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
-  static const Color _green = Color(0xFF00E676);
+  static const Color _green = Color(0xFF34D399);
 
   final ResponderController _controller = ResponderController();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -61,7 +62,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
 
   bool _needsDbProfile() {
     if (_docExists) return false;
-    _snack('This built-in account has no database profile, so it cannot be edited.',
+    _snack(tr('This built-in account has no database profile, so it cannot be edited.'),
         error: true);
     return true;
   }
@@ -86,7 +87,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           .queued();
       _controller.updateCurrentUserPhoto(b64);
     } catch (e) {
-      _snack('Failed to update photo: $e', error: true);
+      _snack(tr('Failed to update photo: {p0}', {'p0': (e).toString()}), error: true);
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);
     }
@@ -100,9 +101,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           .set({'photoUrl': FieldValue.delete()}, SetOptions(merge: true))
           .queued();
       _controller.updateCurrentUserPhoto('');
-      _snack('Photo removed');
+      _snack(tr('Photo removed'));
     } catch (e) {
-      _snack('Failed to remove photo: $e', error: true);
+      _snack(tr('Failed to remove photo: {p0}', {'p0': (e).toString()}), error: true);
     }
   }
 
@@ -110,7 +111,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
     if (_needsDbProfile()) return;
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFF1C2740),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -120,7 +121,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_rounded, color: Colors.white),
-              title: const Text('Take Photo',
+              title: Text(tr('Take Photo'),
                   style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(ctx);
@@ -130,7 +131,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             ListTile(
               leading:
                   const Icon(Icons.photo_library_rounded, color: Colors.white),
-              title: const Text('Choose from Gallery',
+              title: Text(tr('Choose from Gallery'),
                   style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(ctx);
@@ -140,9 +141,9 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             if (hasPhoto)
               ListTile(
                 leading: const Icon(Icons.delete_outline_rounded,
-                    color: Colors.redAccent),
-                title: const Text('Remove Photo',
-                    style: TextStyle(color: Colors.redAccent)),
+                    color: Color(0xFFF87171)),
+                title: Text(tr('Remove Photo'),
+                    style: TextStyle(color: Color(0xFFF87171))),
                 onTap: () {
                   Navigator.pop(ctx);
                   _removePhoto(email);
@@ -157,8 +158,8 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
   void _snack(String msg, {bool error = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: error ? Colors.redAccent : const Color(0xFF1E293B),
+      content: Text(tr(msg)),
+      backgroundColor: error ? Color(0xFFDC2626) : const Color(0xFF1C2740),
     ));
   }
 
@@ -191,7 +192,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A).withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF2B3A55)),
                 ),
                 child: SingleChildScrollView(
                   child: Form(
@@ -200,7 +201,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Edit Profile',
+                        Text(tr('Edit Profile'),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -228,7 +229,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                           children: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancel',
+                              child: Text(tr('Cancel'),
                                   style: TextStyle(color: Colors.white70)),
                             ),
                             ElevatedButton(
@@ -270,12 +271,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                                       floodZone: zone.text.trim(),
                                     ));
                                   }
-                                  _snack('Profile updated');
+                                  _snack(tr('Profile updated'));
                                 } catch (e) {
-                                  _snack('Could not save: $e', error: true);
+                                  _snack(tr('Could not save: {p0}', {'p0': (e).toString()}), error: true);
                                 }
                               },
-                              child: const Text('Save Changes',
+                              child: Text(tr('Save Changes'),
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                             ),
@@ -300,14 +301,14 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       keyboardType: keyboard,
       style: const TextStyle(color: Colors.white, fontSize: 16),
       validator: required
-          ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
+          ? (v) => (v == null || v.trim().isEmpty) ? tr('Required') : null
           : null,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white54),
         prefixIcon: Icon(icon, color: _green.withValues(alpha: 0.7)),
         filled: true,
-        fillColor: const Color(0xFF1E293B).withValues(alpha: 0.5),
+        fillColor: const Color(0xFF1C2740).withValues(alpha: 0.5),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.transparent),
@@ -332,7 +333,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('My Profile',
+        title: Text(tr('My Profile'),
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -343,12 +344,12 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: email == null || email.isEmpty
-            ? const Center(
-                child: Text('Not logged in.',
+            ? Center(
+                child: Text(tr('Not logged in.'),
                     style: TextStyle(color: Colors.white)))
             : SafeArea(
                 child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -428,7 +429,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                        colors: [Color(0xFF34D399), Color(0xFF00BFA5)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -446,7 +447,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       child: Container(
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFF070B14),
+                          color: Color(0xFF0B1220),
                         ),
                         clipBehavior: Clip.hardEdge,
                         child: SizedBox.expand(child: avatarChild),
@@ -470,7 +471,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFF1C2740),
                         shape: BoxShape.circle,
                         border: Border.all(color: _green, width: 2),
                       ),
@@ -483,7 +484,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              name,
+              tr(name),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
@@ -519,7 +520,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B).withValues(alpha: 0.4),
+                    color: const Color(0xFF1C2740).withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                         color: Colors.white.withValues(alpha: 0.1)),
@@ -528,37 +529,37 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                     children: [
                       _ProfileRow(
                           icon: Icons.badge_outlined,
-                          label: 'Full Name',
+                          label: tr('Full Name'),
                           value: name),
                       divider(),
                       _ProfileRow(
                           icon: Icons.email_outlined,
-                          label: 'Email Address',
+                          label: tr('Email Address'),
                           value: _show(d['email'] ?? email)),
                       divider(),
                       _ProfileRow(
                           icon: Icons.phone_outlined,
-                          label: 'Phone Number',
+                          label: tr('Phone Number'),
                           value: _show(d['phoneNumber'])),
                       divider(),
                       _ProfileRow(
                           icon: Icons.credit_card_outlined,
-                          label: 'NIC Number',
+                          label: tr('NIC Number'),
                           value: _show(d['nic'])),
                       divider(),
                       _ProfileRow(
                           icon: Icons.location_city_outlined,
-                          label: 'City',
+                          label: tr('City'),
                           value: _show(d['city'])),
                       divider(),
                       _ProfileRow(
                           icon: Icons.map_outlined,
-                          label: 'District',
+                          label: tr('District'),
                           value: _show(d['district'])),
                       divider(),
                       _ProfileRow(
                           icon: Icons.location_on_outlined,
-                          label: 'Sector / Zone',
+                          label: tr('Sector / Zone'),
                           value: _show(d['floodZone'])),
                     ],
                   ),
@@ -579,13 +580,13 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.edit_rounded, size: 22),
                     SizedBox(width: 10),
                     Flexible(
-                      child: Text('EDIT PROFILE',
+                      child: Text(tr('EDIT PROFILE'),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               fontSize: 16,
@@ -617,7 +618,7 @@ class _ResponderProfileScreenState extends State<ResponderProfileScreen> {
                       borderRadius: BorderRadius.circular(16)),
                 ),
                 icon: const Icon(Icons.logout, size: 18),
-                label: const Text('SIGN OUT',
+                label: Text(tr('SIGN OUT'),
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -656,10 +657,10 @@ class _ProfileRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF00E676).withValues(alpha: 0.1),
+            color: const Color(0xFF34D399).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF00E676), size: 24),
+          child: Icon(icon, color: const Color(0xFF34D399), size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -677,7 +678,7 @@ class _ProfileRow extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                value,
+                tr(value),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,

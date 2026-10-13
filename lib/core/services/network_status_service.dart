@@ -94,8 +94,8 @@ class _OnlineStatusBadgeState extends State<OnlineStatusBadge>
       valueListenable: NetworkStatusService.instance.isOnline,
       builder: (context, isOnline, _) {
         final color = isOnline
-            ? const Color(0xFF00E676) // Vivid Green
-            : const Color(0xFFFF5252); // Alert Red
+            ? const Color(0xFF34D399) // Vivid Green
+            : const Color(0xFFF87171); // Alert Red
 
         final text = isOnline ? 'ONLINE' : 'OFFLINE';
 

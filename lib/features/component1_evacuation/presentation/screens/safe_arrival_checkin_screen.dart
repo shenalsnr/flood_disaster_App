@@ -13,6 +13,7 @@ import '../../services/citizen_firestore_service.dart';
 import '../../services/safe_zone_service.dart';
 import 'citizen_dashboard_screen.dart';
 
+import '../../../../core/localization/app_strings.dart';
 enum _CheckInStatus { idle, loading, confirmed }
 
 class SafeArrivalCheckInScreen extends StatefulWidget {
@@ -319,7 +320,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF0B1220),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -328,7 +329,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              color: const Color(0xFF070B14).withValues(alpha: 0.7),
+              color: const Color(0xFF0B1220).withValues(alpha: 0.7),
             ),
           ),
         ),
@@ -339,8 +340,8 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Safe Arrival Check-In',
+        title: Text(
+          tr('Safe Arrival Check-In'),
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -357,7 +358,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
           gradient: RadialGradient(
             center: Alignment(-0.8, -0.6),
             radius: 1.5,
-            colors: [Color(0xFF112240), Color(0xFF070B14)],
+            colors: [Color(0xFF112240), Color(0xFF0B1220)],
           ),
         ),
         child: SafeArea(
@@ -403,7 +404,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
                           color: Colors.white.withValues(alpha: 0.05),
                         ),
                       ),
-                      child: Row(
+child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -414,7 +415,7 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Battery-save mode active',
+                            tr('Battery-save mode active'),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.4),
                               fontSize: 12,
@@ -506,8 +507,8 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         // ── Instruction text ─────────────────────────────────────────────
-        const Text(
-          'Have you reached safety?',
+        Text(
+          tr('Have you reached safety?'),
           style: TextStyle(
             color: Colors.white,
             fontSize: 26,
@@ -518,7 +519,7 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Tap the button below to confirm your arrival\nand instantly notify emergency contacts.',
+          tr('Tap the button below to confirm your arrival\nand instantly notify emergency contacts.'),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.6),
             fontSize: 15,
@@ -601,17 +602,17 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                 _PremiumRippleRing(
                   listenable: rippleController,
                   delay: 0.0,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                 ),
                 _PremiumRippleRing(
                   listenable: rippleController,
                   delay: 0.33,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                 ),
                 _PremiumRippleRing(
                   listenable: rippleController,
                   delay: 0.66,
-                  color: const Color(0xFF00E676),
+                  color: const Color(0xFF34D399),
                 ),
               ],
 
@@ -629,14 +630,8 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: isLoading
-                              ? [
-                                  const Color(0xFF1A3A1A),
-                                  const Color(0xFF0D1D0D)
-                                ]
-                              : [
-                                  const Color(0xFF00E676),
-                                  const Color(0xFF00B259)
-                                ],
+                              ? [const Color(0xFF1A3A1A), const Color(0xFF0D1D0D)]
+                              : [const Color(0xFF34D399), const Color(0xFF00B259)],
                         ),
                         border: Border.all(
                           color: Colors.white
@@ -653,8 +648,7 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                               ]
                             : [
                                 BoxShadow(
-                                  color: const Color(0xFF00E676)
-                                      .withValues(alpha: 0.5),
+                                  color: const Color(0xFF34D399).withValues(alpha: 0.5),
                                   blurRadius: 40,
                                   spreadRadius: 10,
                                 ),
@@ -688,8 +682,8 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  'MARK\nAS SAFE',
+                                Text(
+                                  tr('MARK\nAS SAFE'),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.black87,
@@ -712,7 +706,7 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
         if (isLoading) ...[
           const SizedBox(height: 36),
           Text(
-            'Broadcasting status...',
+            tr('Broadcasting status...'),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),
               fontSize: 15,
@@ -752,7 +746,7 @@ class _PremiumSuccessState extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF131B2B),
+            color: const Color(0xFF131C2E),
             borderRadius: BorderRadius.circular(32),
             border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             boxShadow: [
@@ -772,14 +766,14 @@ class _PremiumSuccessState extends StatelessWidget {
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.5),
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.2),
                       blurRadius: 30,
                       spreadRadius: 10,
                     ),
@@ -788,7 +782,7 @@ class _PremiumSuccessState extends StatelessWidget {
                 child: const Center(
                   child: Icon(
                     Icons.check_rounded,
-                    color: Color(0xFF00E676),
+                    color: Color(0xFF34D399),
                     size: 64,
                   ),
                 ),
@@ -796,8 +790,8 @@ class _PremiumSuccessState extends StatelessWidget {
               const SizedBox(height: 32),
 
               // ── Success message ─────────────────────────────────────────
-              const Text(
-                'Safely Checked-In',
+              Text(
+                tr('Safely Checked-In'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 26,
@@ -814,7 +808,7 @@ class _PremiumSuccessState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Recorded at $checkInTime',
+                  tr('Recorded at {p0}', {'p0': (checkInTime).toString()}),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 14,
@@ -824,7 +818,7 @@ class _PremiumSuccessState extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Your emergency contacts have been notified with your last known location.',
+                tr('Your emergency contacts have been notified with your last known location.'),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
@@ -839,10 +833,10 @@ class _PremiumSuccessState extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.08),
+                  color: const Color(0xFF34D399).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -850,12 +844,12 @@ class _PremiumSuccessState extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                        color: const Color(0xFF34D399).withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.location_on_rounded,
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         size: 20,
                       ),
                     ),
@@ -864,10 +858,10 @@ class _PremiumSuccessState extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Current Safe Zone',
+                          Text(
+                            tr('Current Safe Zone'),
                             style: TextStyle(
-                              color: Color(0xFF00E676),
+                              color: Color(0xFF34D399),
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
@@ -916,8 +910,8 @@ class _PremiumSuccessState extends StatelessWidget {
                   color: Colors.black,
                   size: 20,
                 ),
-                label: const Text(
-                  'Return to Dashboard',
+                label: Text(
+                  tr('Return to Dashboard'),
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -925,7 +919,7 @@ class _PremiumSuccessState extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00E676),
+                  backgroundColor: const Color(0xFF34D399),
                   minimumSize: const Size(double.infinity, 56),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -943,7 +937,7 @@ class _PremiumSuccessState extends StatelessWidget {
                   size: 18,
                 ),
                 label: Text(
-                  'Update check-in status',
+                  tr('Update check-in status'),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 14,

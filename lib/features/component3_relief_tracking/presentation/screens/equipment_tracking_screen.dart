@@ -6,6 +6,7 @@ import '../../domain/services/shelter_relief_service.dart';
 import '../../data/models/equipment_model.dart';
 import '../../data/services/firestore_service.dart';
 
+import '../../../../core/localization/app_strings.dart';
 class EquipmentTrackingScreen extends StatefulWidget {
   const EquipmentTrackingScreen({super.key});
 
@@ -39,23 +40,23 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: ShelterTheme.surfaceDarkNavy,
-              title: const Text(
-                'Add Equipment',
+              title: Text(
+                tr('Add Equipment'),
                 style: TextStyle(color: Colors.white),
               ),
               content: TextField(
                 controller: nameCtrl,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Equipment Name',
+                decoration: InputDecoration(
+                  labelText: tr('Equipment Name'),
                   labelStyle: TextStyle(color: ShelterTheme.textMuted),
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
+                  child: Text(
+                    tr('Cancel'),
                     style: TextStyle(color: ShelterTheme.textMuted),
                   ),
                 ),
@@ -100,7 +101,7 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Failed to save: $e'),
+                                  content: Text(tr('Failed to save: {p0}', {'p0': (e).toString()})),
                                   backgroundColor:
                                       ShelterTheme.statusCriticalRed,
                                 ),
@@ -119,7 +120,7 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                             ),
                           ),
                         )
-                      : const Text('Add'),
+                      : Text(tr('Add')),
                 ),
               ],
             );
@@ -133,7 +134,7 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Equipment Tracking'),
+        title: Text(tr('Equipment Tracking')),
         backgroundColor: ShelterTheme.backgroundDeepNavy,
         actions: [
           IconButton(
@@ -157,16 +158,16 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error: ${snapshot.error}',
+                tr('Error: {p0}', {'p0': (snapshot.error).toString()}),
                 style: const TextStyle(color: ShelterTheme.statusCriticalRed),
               ),
             );
           }
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'No equipment found.',
+                tr('No equipment found.'),
                 style: TextStyle(color: ShelterTheme.textMuted),
               ),
             );
@@ -199,14 +200,14 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                 ),
                 child: ExpansionTile(
                   title: Text(
-                    data['name'] ?? 'Unknown',
+                    data['name'] ?? tr('Unknown'),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   subtitle: Text(
-                    'Status: ${statusName.toUpperCase()}',
+                    tr('Status: {p0}', {'p0': (statusName.toUpperCase()).toString()}),
                     style: TextStyle(color: statusColor),
                   ),
                   leading: Icon(Icons.handyman, color: statusColor),
@@ -231,8 +232,8 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                           onPressed: () => _fs.updateEquipment(docId, {
                             'status': EquipmentStatus.assigned.name,
                           }),
-                          child: const Text(
-                            'Assign',
+                          child: Text(
+                            tr('Assign'),
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
@@ -240,8 +241,8 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                           onPressed: () => _fs.updateEquipment(docId, {
                             'status': EquipmentStatus.underMaintenance.name,
                           }),
-                          child: const Text(
-                            'Maintenance',
+                          child: Text(
+                            tr('Maintenance'),
                             style: TextStyle(
                               color: ShelterTheme.statusWarningYellow,
                             ),
@@ -251,8 +252,8 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
                           onPressed: () => _fs.updateEquipment(docId, {
                             'status': EquipmentStatus.decommissioned.name,
                           }),
-                          child: const Text(
-                            'Decommission',
+                          child: Text(
+                            tr('Decommission'),
                             style: TextStyle(
                               color: ShelterTheme.statusCriticalRed,
                             ),
@@ -274,9 +275,9 @@ class _EquipmentTrackingScreenState extends State<EquipmentTrackingScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(child: Text(label, style: const TextStyle(color: ShelterTheme.textMuted))),
+        Flexible(child: Text(tr(label), style: const TextStyle(color: ShelterTheme.textMuted))),
         Flexible(child: Text(
-          value,
+          tr(value),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

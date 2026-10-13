@@ -89,7 +89,7 @@ class _OfflineBannerState extends State<OfflineBanner> {
             bottom: 0,
             child: IgnorePointer(
               child: Material(
-                color: const Color(0xFFFF6D00),
+                color: const Color(0xFF38BDF8),
                 child: SafeArea(
                   top: false,
                   child: Padding(

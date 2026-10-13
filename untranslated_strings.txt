@@ -1,0 +1,29 @@
++94 7X XXX XXXX
+BROADCAST NOW
+BROADCAST ZONE ALERT
+Broadcast Targeted Evacuation Alert
+Convoy #1
+Culvert Blocked / Water 3ft
+Dr. Rohan Silva
+ENC-98%
+Emergency Dispatch Station
+Fallen Electric Pole
+FloodGuard
+GPS: {p0}° N, {p1}° E
+HDG: 042° NE • GPS: {p0}°N, {p1}°E
+INCOMING CITIZEN HAZARDS
+KP
+Live Multi-Agency Coordinate Feed
+Main St
+PART 4
+RELIEF TEAM LEAD | RM
+RS
+Select zone radius to dispatch early warning sirens and push notifications to all citizen devices.
+Sudden Mudslide
+Verified by GN
+WS SYNC: OK
+We
+WeSafe logo
+WeSafe v1.0.0
+WeSafe — Flood Relief & Early Warning System
+name@example.com

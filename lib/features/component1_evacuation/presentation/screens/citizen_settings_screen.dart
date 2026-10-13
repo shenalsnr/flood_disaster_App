@@ -13,6 +13,7 @@ import '../../../component4_control_center/presentation/controllers/responder_co
 // High-performance, ultra-reliable, state-of-the-art UI matching WeSafe dark theme.
 // ---------------------------------------------------------------------------
 
+import '../../../../core/localization/app_strings.dart';
 class CitizenSettingsScreen extends StatefulWidget {
   const CitizenSettingsScreen({super.key});
 
@@ -83,14 +84,14 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
   void _clearCache() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.check_circle_rounded, color: Colors.black, size: 20),
-            SizedBox(width: 10),
+            const Icon(Icons.check_circle_rounded, color: Colors.black, size: 20),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Offline emergency map tiles cleared successfully.',
-                style: TextStyle(
+                tr('Offline emergency map tiles cleared successfully.'),
+                style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
@@ -99,7 +100,7 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF00E676),
+        backgroundColor: const Color(0xFF34D399),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 3),
@@ -165,17 +166,16 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Settings & Preferences',
-          style: TextStyle(
+        title: Text(
+          tr('Settings & Preferences'),
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w900,
             fontSize: 20,
             letterSpacing: 0.3,
           ),
         ),
-        centerTitle: true,
-        actions: const [
+        centerTitle: true,        actions: const [
           Padding(
             padding: EdgeInsets.only(right: 12),
             child: ThemeToggleButton(),
@@ -503,15 +503,15 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: const Color(0xFF00E676).withValues(alpha: 0.15),
+              color: const Color(0xFF34D399).withValues(alpha: 0.15),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF00E676).withValues(alpha: 0.4),
+                color: const Color(0xFF34D399).withValues(alpha: 0.4),
               ),
             ),
             child: const Icon(
               Icons.shield_rounded,
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               size: 26,
             ),
           ),
@@ -522,10 +522,10 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
               children: [
                 Row(
                   children: [
-                    const Flexible(
+                    Flexible(
                       child: Text(
-                        'Early Warning System Active',
-                        style: TextStyle(
+                        tr('Early Warning System Active'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
@@ -537,7 +537,7 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
                       width: 8,
                       height: 8,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF00E676),
+                        color: Color(0xFF34D399),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -566,12 +566,12 @@ class _CitizenSettingsScreenState extends State<CitizenSettingsScreen> {
       padding: const EdgeInsets.only(left: 4),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF00E676), size: 15),
+          Icon(icon, color: const Color(0xFF34D399), size: 15),
           const SizedBox(width: 8),
           Text(
-            title,
+            tr(title),
             style: const TextStyle(
-              color: Color(0xFF00E676),
+              color: Color(0xFF34D399),
               fontSize: 12,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.0,

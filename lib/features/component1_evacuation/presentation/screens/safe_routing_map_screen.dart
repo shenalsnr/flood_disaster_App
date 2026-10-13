@@ -12,6 +12,7 @@ import '../../services/safe_zone_service.dart';
 import 'battery_saving_nav_screen.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 // ---------------------------------------------------------------------------
 // SafeRoutingMapScreen — Component 1: Early Warning & Evacuation
 // ---------------------------------------------------------------------------
@@ -146,9 +147,12 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
         return;
       }
       _setIssue(_LocIssue.none); // closes the alert if it is showing
-      final pos = await Geolocator.getCurrentPosition()
-          .timeout(const Duration(seconds: 20));
-      _onPosition(pos);
+      // 1) Instant: the phone's last known position (no waiting for GPS).
+      try {
+        final last = await Geolocator.getLastKnownPosition();
+        if (last != null) _onPosition(last);
+      } catch (_) {}
+      // 2) Live updates start right away - the first fix refreshes the screen.
       await _positionSub?.cancel();
       _positionSub = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
@@ -156,6 +160,14 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           distanceFilter: 25,
         ),
       ).listen(_onPosition, onError: (Object _) {});
+      // 3) Quick network/medium fix in parallel (much faster than waiting for
+      //    a perfect GPS lock).
+      Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 8),
+        ),
+      ).then(_onPosition).catchError((Object _) {});
     } catch (_) {
       // No GPS fix yet: the demo location stays until one arrives.
     } finally {
@@ -185,19 +197,16 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     final String button;
     switch (issue) {
       case _LocIssue.serviceOff:
-        text = 'Turn on your phone\'s location so we can find the nearest '
-            'safe zone to you.';
-        button = 'TURN ON LOCATION';
+        text = tr('Turn on your phone\'s location so we can find the nearest safe zone to you.');
+        button = tr('TURN ON LOCATION');
         break;
       case _LocIssue.denied:
-        text = 'Allow this app to use your location so we can find the '
-            'nearest safe zone to you.';
-        button = 'ALLOW LOCATION';
+        text = tr('Allow this app to use your location so we can find the nearest safe zone to you.');
+        button = tr('ALLOW LOCATION');
         break;
       case _LocIssue.deniedForever:
-        text = 'Location permission is blocked. Open the app settings and '
-            'allow Location so we can find the nearest safe zone to you.';
-        button = 'OPEN SETTINGS';
+        text = tr('Location permission is blocked. Open the app settings and allow Location so we can find the nearest safe zone to you.');
+        button = tr('OPEN SETTINGS');
         break;
       case _LocIssue.none:
         _dialogOpen = false;
@@ -212,31 +221,31 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: Colors.white12),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.location_off_outlined, color: Color(0xFFFF9F0A)),
+            Icon(Icons.location_off_outlined, color: Color(0xFFFB923C)),
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Location is off',
+                tr('Location is off'),
                 style: TextStyle(color: Colors.white, fontSize: 17),
               ),
             ),
           ],
         ),
-        content: Text(text, style: const TextStyle(color: Colors.white70)),
+        content: Text(tr(text), style: const TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'later'),
-            child: const Text('Not now'),
+            child: Text(tr('Not now')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), 
-              backgroundColor: const Color(0xFF00E676),
+              backgroundColor: const Color(0xFF34D399),
               foregroundColor: Colors.black,
             ),
             onPressed: () => Navigator.pop(ctx, 'go'),
-            child: Text(button,
+            child: Text(tr(button),
                 style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
@@ -294,9 +303,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     String? notice;
     if (_targetId != null && next?.id != _targetId) {
       if (previous == null) {
-        notice = 'The previous safe zone is no longer available.';
+        notice = tr('The previous safe zone is no longer available.');
       } else if (!previous.isOpen) {
-        notice = '${previous.name} is now ${previous.stateLabel.toLowerCase()}.';
+        notice = tr('{p0} is now {p1}.', {'p0': (previous.name).toString(), 'p1': (previous.stateLabel.toLowerCase()).toString()});
       }
       if (notice != null) {
         notice = next == null
@@ -312,8 +321,8 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(
-          content: Text(notice),
-          backgroundColor: const Color(0xFFFF9F0A),
+          content: Text(tr(notice)),
+          backgroundColor: const Color(0xFFFB923C),
           duration: const Duration(seconds: 8),
           showCloseIcon: true,
         ));
@@ -375,12 +384,19 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     const q = 'overview=full&geometries=geojson';
 
     // Walking route first, driving route (road shape) as a backup.
-    var routes = await _getJson(
+    // Both are requested at the same time, so a slow walking server no
+    // longer delays the route.
+    final walkF = _getJson(
         'https://routing.openstreetmap.de/routed-foot/route/v1/foot/$coords?$q');
-    var walking = true;
-    routes ??= await _getJson(
+    final driveF = _getJson(
         'https://router.project-osrm.org/route/v1/driving/$coords?$q');
-    if (routes == null) walking = false;
+    var walking = true;
+    var routes = await walkF.timeout(const Duration(seconds: 3),
+        onTimeout: () => null);
+    if (routes == null) {
+      routes = await driveF;
+      walking = false;
+    }
 
     _routeLoading = false;
     if (!mounted) return;
@@ -522,10 +538,10 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     for (final z in _zones) {
       if (!z.hasLocation || z.id == target?.id) continue;
       final color = z.state == SafeZoneState.open
-          ? const Color(0xFF00E676).withValues(alpha: 0.6)
+          ? const Color(0xFF34D399).withValues(alpha: 0.6)
           : z.state == SafeZoneState.full
-              ? const Color(0xFFFF9F0A)
-              : const Color(0xFFFF5252);
+              ? const Color(0xFFFB923C)
+              : const Color(0xFFF87171);
       markers.add(Marker(
         point: z.point,
         width: 44,
@@ -574,11 +590,11 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Column(
+        title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Column(mainAxisSize: MainAxisSize.min, 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Safe Evacuation Route',
+              tr('Safe Evacuation Route'),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -586,11 +602,11 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
               ),
             ),
             Text(
-              'OpenStreetMap — Live shelter status',
+              tr('OpenStreetMap — Live shelter status'),
               style: TextStyle(color: Colors.white54, fontSize: 11),
             ),
           ],
-        ),
+        )),
       ),
       body: Stack(
         children: [
@@ -624,9 +640,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                       points: hasRoad
                           ? [_userLocation, ..._routePoints, target.point]
                           : [_userLocation, target.point],
-                      color: const Color(0xFF00E676),
+                      color: const Color(0xFF34D399),
                       strokeWidth: 5.0,
-                      borderColor: const Color(0xFF00E676),
+                      borderColor: const Color(0xFF34D399),
                       borderStrokeWidth: 1.5,
                     ),
                   ],
@@ -697,14 +713,14 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFF9F0A)),
+                    border: Border.all(color: const Color(0xFFFB923C)),
                   ),
                   child: Text(
                     _locIssue == _LocIssue.none
-                        ? 'Finding your location...'
-                        : 'Location is off - tap to turn on (demo location shown)',
+                        ? tr('Finding your location...')
+                        : tr('Location is off - tap to turn on (demo location shown)'),
                     style:
-                        const TextStyle(color: Color(0xFFFF9F0A), fontSize: 11),
+                        const TextStyle(color: Color(0xFFFB923C), fontSize: 11),
                   ),
                 ),
               ),
@@ -723,12 +739,12 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                   shape: BoxShape.circle,
                   color: Colors.black.withValues(alpha: 0.6),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.2),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.2),
                       blurRadius: 12,
                       spreadRadius: 2,
                     ),
@@ -736,7 +752,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                 ),
                 child: const Icon(
                   Icons.battery_saver_rounded,
-                  color: Color(0xFF00E676),
+                  color: Color(0xFF34D399),
                   size: 28,
                 ),
               ),
@@ -932,11 +948,11 @@ class _SafeZoneMarker extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF00E676),
+            color: const Color(0xFF34D399),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
-            'SAFE ZONE',
+          child: Text(
+            tr('SAFE ZONE'),
             style: TextStyle(
               color: Colors.black,
               fontSize: 9,
@@ -945,7 +961,7 @@ class _SafeZoneMarker extends StatelessWidget {
             ),
           ),
         ),
-        const Icon(Icons.location_pin, color: Color(0xFF00E676), size: 32),
+        const Icon(Icons.location_pin, color: Color(0xFF34D399), size: 32),
       ],
     );
   }
@@ -961,23 +977,23 @@ class _MapLegend extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white12),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.navigation_rounded, color: Color(0xFF40C4FF), size: 14),
+          Icon(Icons.navigation_rounded, color: Color(0xFF38BDF8), size: 14),
           SizedBox(width: 4),
-          Text('You', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(tr('You'), style: TextStyle(color: Colors.white70, fontSize: 12)),
           SizedBox(width: 12),
-          Icon(Icons.location_pin, color: Color(0xFF00E676), size: 14),
+          Icon(Icons.location_pin, color: Color(0xFF34D399), size: 14),
           SizedBox(width: 4),
           Text(
-            'Safe Zone',
+            tr('Safe Zone'),
             style: TextStyle(color: Colors.white70, fontSize: 12),
           ),
           SizedBox(width: 12),
-          Icon(Icons.remove, color: Color(0xFF00E676), size: 14),
+          Icon(Icons.remove, color: Color(0xFF34D399), size: 14),
           SizedBox(width: 4),
-          Text('Route', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(tr('Route'), style: TextStyle(color: Colors.white70, fontSize: 12)),
         ],
       ),
     );
@@ -1015,17 +1031,17 @@ class _BottomActionCard extends StatelessWidget {
     final String title;
     final String subtitle;
     if (loading) {
-      title = 'Looking for safe zones...';
-      subtitle = 'Nearest Safe Zone';
+      title = tr('Looking for safe zones...');
+      subtitle = tr('Nearest Safe Zone');
     } else if (errorText != null) {
-      title = 'Could not load safe zones';
-      subtitle = 'Check your internet connection';
+      title = tr('Could not load safe zones');
+      subtitle = tr('Check your internet connection');
     } else if (!hasTarget) {
-      title = 'No open safe zone right now';
-      subtitle = 'All shelters are full, closed or not set up yet';
+      title = tr('No open safe zone right now');
+      subtitle = tr('All shelters are full, closed or not set up yet');
     } else {
       title = safeZoneName ?? '';
-      subtitle = 'Nearest Safe Zone';
+      subtitle = tr('Nearest Safe Zone');
     }
 
     return Container(
@@ -1063,16 +1079,16 @@ class _BottomActionCard extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: (hasTarget
-                          ? const Color(0xFF00E676)
-                          : const Color(0xFFFF9F0A))
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFFFB923C))
                       .withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   hasTarget ? Icons.shield_rounded : Icons.warning_amber_rounded,
                   color: hasTarget
-                      ? const Color(0xFF00E676)
-                      : const Color(0xFFFF9F0A),
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFFFB923C),
                   size: 24,
                 ),
               ),
@@ -1082,12 +1098,12 @@ class _BottomActionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      subtitle,
+                      tr(subtitle),
                       style:
                           const TextStyle(color: Colors.white38, fontSize: 12),
                     ),
                     Text(
-                      title,
+                      tr(title),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -1111,15 +1127,15 @@ class _BottomActionCard extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        '~$walkMinutes min',
+                        tr('~{p0} min', {'p0': (walkMinutes).toString()}),
                         style: const TextStyle(
-                          color: Color(0xFFFFD740),
+                          color: Color(0xFFFBBF24),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
-                        'walk',
+                      Text(
+                        tr('walk'),
                         style: TextStyle(color: Colors.white38, fontSize: 10),
                       ),
                     ],
@@ -1140,9 +1156,9 @@ class _BottomActionCard extends StatelessWidget {
                   sub: 'distance',
                 ),
                 const SizedBox(width: 12),
-                const _RouteStat(
+                _RouteStat(
                   icon: Icons.check_circle_outline,
-                  label: 'Open',
+                  label: tr('Open'),
                   sub: 'shelter status',
                 ),
                 const SizedBox(width: 12),
@@ -1162,18 +1178,18 @@ class _BottomActionCard extends StatelessWidget {
               height: 52,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFFF9F0A)),
+                  side: const BorderSide(color: Color(0xFFFB923C)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 onPressed: onCallDmc,
                 icon: const Icon(Icons.phone_in_talk_outlined,
-                    color: Color(0xFFFF9F0A)),
-                label: const Text(
-                  'CALL DMC HOTLINE 117',
+                    color: Color(0xFFFB923C)),
+                label: Text(
+                  tr('CALL DMC HOTLINE 117'),
                   style: TextStyle(
-                    color: Color(0xFFFF9F0A),
+                    color: Color(0xFFFB923C),
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
                   ),
@@ -1192,7 +1208,7 @@ class _BottomActionCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 key: const Key('start_navigating_btn'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00E676),
+                  backgroundColor: const Color(0xFF34D399),
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -1201,8 +1217,8 @@ class _BottomActionCard extends StatelessWidget {
                 ),
                 onPressed: onStartNavigation,
                 icon: const Icon(Icons.directions_walk_rounded, size: 28),
-                label: const Text(
-                  'START NAVIGATING',
+                label: Text(
+                  tr('START NAVIGATING'),
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
@@ -1244,7 +1260,7 @@ class _RouteStat extends StatelessWidget {
             Icon(icon, color: Colors.white54, size: 16),
             const SizedBox(height: 4),
             Text(
-              label,
+              tr(label),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -1252,7 +1268,7 @@ class _RouteStat extends StatelessWidget {
               ),
             ),
             Text(
-              sub,
+              tr(sub),
               style: const TextStyle(color: Colors.white38, fontSize: 10),
             ),
           ],

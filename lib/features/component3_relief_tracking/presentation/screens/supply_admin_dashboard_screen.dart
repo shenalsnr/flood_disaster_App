@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/services/firestore_service.dart';
 import '../../../../core/theme/appearance.dart';
 
+import '../../../../core/localization/app_strings.dart';
 /// Supply Admin Dashboard (opened from Settings).
 ///
 /// The admin sees every supply request, assigns a truck by filling in the
@@ -17,13 +18,13 @@ class SupplyAdminDashboardScreen extends StatefulWidget {
 }
 
 class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen> {
-  static const Color _bg = Color(0xFF131B2B);
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
-  static const Color _green = Color(0xFF00E676);
-  static const Color _orange = Color(0xFFFF9F0A);
+  static const Color _bg = Color(0xFF131C2E);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
+  static const Color _green = Color(0xFF34D399);
+  static const Color _orange = Color(0xFFFB923C);
   static const Color _blue = Color(0xFF448AFF);
 
   Stream<QuerySnapshot<Map<String, dynamic>>>? _stream;
@@ -66,24 +67,23 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: _border),
         ),
-        title: const Text(
-          'Truck has arrived?',
+        title: Text(
+          tr('Truck has arrived?'),
           style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'Confirm that the truck with ${data['itemName'] ?? 'the supplies'} reached '
-          '${data['campName'] ?? 'the camp'}. The camp leader will then be able to confirm the restock.',
+          tr('Confirm that the truck with {p0} reached {p1}. The camp leader will then be able to confirm the restock.', {'p0': (data['itemName'] ?? 'the supplies').toString(), 'p1': (data['campName'] ?? 'the camp').toString()}),
           style: const TextStyle(color: _muted, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Not yet', style: TextStyle(color: _muted)),
+            child: Text(tr('Not yet'), style: TextStyle(color: _muted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: _green, foregroundColor: Colors.black),
-            child: const Text('YES, ARRIVED'),
+            child: Text(tr('YES, ARRIVED')),
           ),
         ],
       ),
@@ -100,14 +100,14 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
     try {
       await FirestoreService.instance.saveDmcDispatchRequest(docId, data);
       messenger.showSnackBar(SnackBar(
-        content: Text(okMessage),
+        content: Text(tr(okMessage)),
         backgroundColor: _green,
         showCloseIcon: true,
       ));
     } catch (e) {
       messenger.showSnackBar(SnackBar(
-        content: Text('Could not save: $e'),
-        backgroundColor: const Color(0xFFFF1744),
+        content: Text(tr('Could not save: {p0}', {'p0': (e).toString()})),
+        backgroundColor: const Color(0xFFDC2626),
         showCloseIcon: true,
       ));
     }
@@ -124,8 +124,8 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
         backgroundColor: const Color(0xFF0D1424),
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Supply Admin Dashboard',
+        title: Text(
+          tr('Supply Admin Dashboard'),
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
         actions: const [ThemeToggleButton()],
@@ -154,7 +154,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
 
         final pending = byStatus(['pending']);
         final onTheWay = byStatus(['dispatched']);
-        final done = byStatus(['arrived', 'resolved']).take(5).toList();
+        final done = byStatus(['arrived', 'resolved']);
 
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -182,7 +182,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
                     ),
                     onPressed: () => _assignTruck(d.id, d.data()),
                     icon: const Icon(Icons.local_shipping_outlined, size: 16),
-                    label: const Text('ASSIGN TRUCK',
+                    label: Text(tr('ASSIGN TRUCK'),
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                 )),
@@ -201,33 +201,101 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
                     ),
                     onPressed: () => _confirmArrival(d.id, d.data()),
                     icon: const Icon(Icons.check_circle_outline, size: 16),
-                    label: const Text('TRUCK ARRIVED',
+                    label: Text(tr('TRUCK ARRIVED'),
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                 )),
             const SizedBox(height: 14),
 
-            _section('RECENTLY COMPLETED', null),
-            if (done.isEmpty) _empty('Nothing completed yet.'),
-            ...done.map((d) => _requestCard(d.data(), showDriver: true)),
+            _completedButton(done.length, done.map((d) => d.data()).toList()),
           ],
         );
       },
     );
   }
 
+  /// Button that opens the completed requests on their own page.
+  Widget _completedButton(int count, List<Map<String, dynamic>> items) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => _openCompleted(items),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.history_rounded, color: _green),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(tr('Recently completed'),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text(
+                          count == 0
+                              ? tr('Nothing completed yet')
+                              : tr('{p0} completed request{p1}', {'p0': (count).toString(), 'p1': (count == 1 ? '' : 's').toString()}),
+                          style: const TextStyle(color: _muted, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: _muted),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  void _openCompleted(List<Map<String, dynamic>> items) {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (routeCtx) => Scaffold(
+        backgroundColor: _bg,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF0D1424),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          title: Text(
+            tr('Recently Completed'),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          ),
+          actions: const [ThemeToggleButton()],
+        ),
+        body: SafeArea(
+          child: items.isEmpty
+              ? _note('Nothing completed yet.')
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: items.length,
+                  itemBuilder: (_, i) =>
+                      _requestCard(items[i], showDriver: true),
+                ),
+        ),
+      ),
+    ));
+  }
+
   Widget _note(String text) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(text,
+          child: Text(tr(text),
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF7E8B9B), fontSize: 12)),
+              style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 12)),
         ),
       );
 
   Widget _empty(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 12)),
+        child: Text(tr(text), style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 12)),
       );
 
   Widget _section(String title, String? help) => Padding(
@@ -236,16 +304,16 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              tr(title),
               style: const TextStyle(
-                color: Color(0xFF7E8B9B),
+                color: Color(0xFF8A98B0),
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
               ),
             ),
             if (help != null)
-              Text(help, style: const TextStyle(color: Color(0xFF5E6D82), fontSize: 11)),
+              Text(tr(help), style: const TextStyle(color: Color(0xFF8A98B0), fontSize: 11)),
           ],
         ),
       );
@@ -260,12 +328,12 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           ),
           child: Column(
             children: [
-              Text(value,
+              Text(tr(value),
                   style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.bold)),
               const SizedBox(height: 2),
-              Text(label,
+              Text(tr(label),
                   style: const TextStyle(
-                      color: Color(0xFF63738A), fontSize: 9, fontWeight: FontWeight.bold)),
+                      color: Color(0xFF8A98B0), fontSize: 9, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -289,7 +357,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
 
     Color urgencyColor = _green;
     if (urgency == 'urgent') urgencyColor = _orange;
-    if (urgency == 'critical' || (isAuto && urgency.isEmpty)) urgencyColor = const Color(0xFFFF1744);
+    if (urgency == 'critical' || (isAuto && urgency.isEmpty)) urgencyColor = const Color(0xFFF87171);
 
     final statusColor = status == 'pending'
         ? _orange
@@ -318,7 +386,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           Row(
             children: [
               Expanded(
-                child: Text(item,
+                child: Text(tr(item),
                     style: const TextStyle(
                         color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
               ),
@@ -326,13 +394,13 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
             ],
           ),
           const SizedBox(height: 4),
-          Text(camp, style: const TextStyle(color: _muted, fontSize: 12)),
+          Text(tr(camp), style: const TextStyle(color: _muted, fontSize: 12)),
           if (needText.isNotEmpty) ...[
             const SizedBox(height: 6),
             Row(
               children: [
                 Flexible(
-                  child: Text(needText,
+                  child: Text(tr(needText),
                       style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
                 if (urgency.isNotEmpty) ...[
@@ -344,7 +412,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           ],
           if (note.isNotEmpty) ...[
             const SizedBox(height: 6),
-            Text('Note: $note', style: const TextStyle(color: _muted, fontSize: 11)),
+            Text(tr('Note: {p0}', {'p0': (note).toString()}), style: const TextStyle(color: _muted, fontSize: 11)),
           ],
           if (showDriver && (data['driverName'] ?? '').toString().isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -377,7 +445,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Text(text,
+        child: Text(tr(text),
             style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
       );
 }
@@ -394,11 +462,11 @@ class _DriverFormDialog extends StatefulWidget {
 }
 
 class _DriverFormDialogState extends State<_DriverFormDialog> {
-  static const Color _card = Color(0xFF131B2B);
-  static const Color _field = Color(0xFF131B2B);
-  static const Color _border = Color(0xFF1E293B);
-  static const Color _muted = Color(0xFF8E9BAE);
-  static const Color _accent = Color(0xFFFF5252);
+  static const Color _card = Color(0xFF131C2E);
+  static const Color _field = Color(0xFF131C2E);
+  static const Color _border = Color(0xFF1C2740);
+  static const Color _muted = Color(0xFFB6C2D6);
+  static const Color _accent = Color(0xFFF87171);
 
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
@@ -452,9 +520,9 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                       child: const Icon(Icons.local_shipping_outlined, color: _accent),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Assign Truck',
+                        tr('Assign Truck'),
                         style: TextStyle(
                             color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -463,8 +531,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Enter the driver who will deliver ${widget.itemName}. '
-                  'The camp leader will see these details and can call the driver.',
+                  tr('Enter the driver who will deliver {p0}. The camp leader will see these details and can call the driver.', {'p0': (widget.itemName).toString()}),
                   style: const TextStyle(color: _muted, fontSize: 12),
                 ),
                 const SizedBox(height: 18),
@@ -475,7 +542,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                   textCapitalization: TextCapitalization.words,
                   decoration: _decoration('e.g. Kamal Perera'),
                   validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Enter the driver\'s name' : null,
+                      v == null || v.trim().isEmpty ? tr('Enter the driver\'s name') : null,
                 ),
                 const SizedBox(height: 14),
                 _label('Driver contact number', help: 'The camp leader will call this number'),
@@ -486,7 +553,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                   decoration: _decoration('e.g. 077 123 4567'),
                   validator: (v) {
                     final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
-                    return digits.length < 9 ? 'Enter a valid phone number' : null;
+                    return digits.length < 9 ? tr('Enter a valid phone number') : null;
                   },
                 ),
                 const SizedBox(height: 14),
@@ -503,7 +570,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: _muted)),
+                      child: Text(tr('Cancel'), style: TextStyle(color: _muted)),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
@@ -515,7 +582,7 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
                       ),
                       onPressed: _confirm,
                       icon: const Icon(Icons.check, size: 16),
-                      label: const Text('CONFIRM',
+                      label: Text(tr('CONFIRM'),
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                   ],
@@ -533,18 +600,18 @@ class _DriverFormDialogState extends State<_DriverFormDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(text,
+            Text(tr(text),
                 style: const TextStyle(
                     color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
             if (help != null)
-              Text(help, style: const TextStyle(color: _muted, fontSize: 11)),
+              Text(tr(help), style: const TextStyle(color: _muted, fontSize: 11)),
           ],
         ),
       );
 
   InputDecoration _decoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF5E6D82), fontSize: 13),
+        hintStyle: const TextStyle(color: Color(0xFF8A98B0), fontSize: 13),
         filled: true,
         fillColor: _field,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
