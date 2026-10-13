@@ -31,12 +31,33 @@ class CitizenFirestoreService {
     return _db.collection('users').doc(currentUserId).snapshots();
   }
 
-  /// Update: "Mark as Safe" function that updates the evacuationStatus field
-  Future<void> markAsSafe() async {
-    await _db.collection('users').doc(currentUserId).update({
+  /// Update: "Mark as Safe" function that updates the evacuationStatus field and safe zone location
+  Future<void> markAsSafe({
+    String? safeZoneName,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final Map<String, dynamic> data = {
       'evacuationStatus': 'Safe',
+      'checkInTimestamp': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
-    }).queued();
+    };
+    if (safeZoneName != null) data['currentSafeZone'] = safeZoneName;
+    if (latitude != null) data['safeLatitude'] = latitude;
+    if (longitude != null) data['safeLongitude'] = longitude;
+
+    await _db.collection('users').doc(currentUserId).set(
+      data,
+      SetOptions(merge: true),
+    ).queued();
+  }
+
+  /// Reset: Reset check-in status back to Pending when updating status
+  Future<void> resetCheckInStatus() async {
+    await _db.collection('users').doc(currentUserId).set({
+      'evacuationStatus': 'Pending',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true)).queued();
   }
 
   /// Delete: Delete the user's profile document
@@ -79,6 +100,16 @@ class CitizenFirestoreService {
         .collection('checklist')
         .doc(docId)
         .update({'isPacked': !currentStatus});
+  }
+
+  /// Update: Edit the item's name
+  Future<void> updateChecklistItem(String docId, String newName) async {
+    await _db
+        .collection('users')
+        .doc(currentUserId)
+        .collection('checklist')
+        .doc(docId)
+        .update({'itemName': newName});
   }
 
   /// Delete: Remove the item's document

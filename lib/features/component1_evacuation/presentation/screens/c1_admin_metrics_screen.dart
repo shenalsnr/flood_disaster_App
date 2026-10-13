@@ -1043,7 +1043,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                 bottom: Radius.circular(14),
               ),
             ),
-            child: Row(
+child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
@@ -1051,24 +1051,24 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                _buildMetricChip(
-                  icon: Icons.water_rounded,
-                  label: tr('Water'),
-                  value: '${alert.waterLevelMeters.toStringAsFixed(2)}m',
-                  color: const Color(0xFF42A5F5),
-                ),
-                _buildMetricChip(
-                  icon: Icons.grain_rounded,
-                  label: tr('Rain'),
-                  value: '${alert.rainfallMm.toStringAsFixed(1)}mm',
-                  color: const Color(0xFF26C6DA),
-                ),
-                _buildMetricChip(
-                  icon: Icons.air_rounded,
-                  label: tr('Wind'),
-                  value: '${alert.windSpeedKmh.toStringAsFixed(1)}kph',
-                  color: const Color(0xFFB39DDB),
-                ),
+                      _buildMetricChip(
+                        icon: Icons.water_rounded,
+                        label: tr('Water'),
+                        value: 'm',
+                        color: const Color(0xFF42A5F5),
+                      ),
+                      _buildMetricChip(
+                        icon: Icons.grain_rounded,
+                        label: tr('Rain'),
+                        value: 'mm',
+                        color: const Color(0xFF26C6DA),
+                      ),
+                      _buildMetricChip(
+                        icon: Icons.air_rounded,
+                        label: tr('Wind'),
+                        value: 'kph',
+                        color: const Color(0xFFB39DDB),
+                      ),
                     ],
                   ),
                 ),
