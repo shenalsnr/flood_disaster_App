@@ -1,8 +1,16 @@
-import 'package:flutter/material.dart';
-import '../../../../core/responsive/screen_fit.dart';
+import 'dart:async';
 import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../core/responsive/screen_fit.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../services/citizen_firestore_service.dart';
+import '../../services/safe_zone_service.dart';
 import 'citizen_dashboard_screen.dart';
 
 import '../../../../core/localization/app_strings.dart';
@@ -18,10 +26,65 @@ class SafeArrivalCheckInScreen extends StatefulWidget {
 
 class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
     with TickerProviderStateMixin {
-  // --- Local state (replace with Firestore write later) ---
   _CheckInStatus _status = _CheckInStatus.idle;
   String? _checkInTime;
+  String? _currentSafeZoneName;
+  String? _currentSafeZoneDistance;
+  LatLng? _userLocation;
+  List<SafeZone> _safeZones = const [];
+  StreamSubscription<List<SafeZone>>? _safeZonesSub;
+  StreamSubscription<DocumentSnapshot>? _profileSub;
+  bool _isLoadingLocation = false;
   final CitizenFirestoreService _firestoreService = CitizenFirestoreService();
+
+  // Sri Lanka emergency relief centers fallback if Firestore has no camps yet
+  static const List<SafeZone> _fallbackSafeZones = [
+    SafeZone(
+      id: 'camp_kolonnawa',
+      name: 'Kolonnawa Central Relief Shelter',
+      lat: 6.9298,
+      lng: 79.8860,
+      capacity: 500,
+      occupied: 120,
+      closed: false,
+    ),
+    SafeZone(
+      id: 'camp_kelani',
+      name: 'Kelani Ganga Safe Evacuation Center',
+      lat: 6.9553,
+      lng: 79.9142,
+      capacity: 600,
+      occupied: 245,
+      closed: false,
+    ),
+    SafeZone(
+      id: 'camp_ratnapura',
+      name: 'Ratnapura District Disaster Shelter',
+      lat: 6.6828,
+      lng: 80.3992,
+      capacity: 450,
+      occupied: 180,
+      closed: false,
+    ),
+    SafeZone(
+      id: 'camp_kaduwela',
+      name: 'Kaduwela Community Safe Haven',
+      lat: 6.9344,
+      lng: 79.9839,
+      capacity: 400,
+      occupied: 90,
+      closed: false,
+    ),
+    SafeZone(
+      id: 'camp_galle',
+      name: 'Galle Municipal Evacuation Camp',
+      lat: 6.0535,
+      lng: 80.2210,
+      capacity: 350,
+      occupied: 85,
+      closed: false,
+    ),
+  ];
 
   // Animations
   late AnimationController _rippleController;
@@ -47,13 +110,148 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
     _successOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _successController, curve: Curves.easeIn),
     );
+
+    _listenToProfile();
+    _initLocationAndSafeZones();
   }
 
   @override
   void dispose() {
+    _safeZonesSub?.cancel();
+    _profileSub?.cancel();
     _rippleController.dispose();
     _successController.dispose();
     super.dispose();
+  }
+
+  void _listenToProfile() {
+    _profileSub = _firestoreService.getCitizenProfile().listen((doc) {
+      if (!mounted || !doc.exists) return;
+      final data = doc.data() as Map<String, dynamic>?;
+      if (data == null) return;
+
+      final evacStatus = data['evacuationStatus'] as String?;
+      final savedZone = data['currentSafeZone'] as String?;
+      final timestamp = data['checkInTimestamp'] as Timestamp?;
+
+      if (evacStatus == 'Safe') {
+        String formatted = _checkInTime ?? '';
+        if (formatted.isEmpty && timestamp != null) {
+          formatted = '${DateFormat('HH:mm').format(timestamp.toDate())} LKT';
+        } else if (formatted.isEmpty) {
+          final now = TimeOfDay.now();
+          formatted =
+              '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} LKT';
+        }
+
+        setState(() {
+          _status = _CheckInStatus.confirmed;
+          _checkInTime = formatted;
+          if (savedZone != null && savedZone.isNotEmpty) {
+            _currentSafeZoneName = savedZone;
+          }
+        });
+        _rippleController.stop();
+        _successController.value = 1.0;
+      }
+    });
+  }
+
+  Future<void> _initLocationAndSafeZones() async {
+    setState(() => _isLoadingLocation = true);
+
+    // 1. Listen to real Firestore Safe Zones
+    _safeZonesSub = SafeZoneService.instance.watch().listen((zones) {
+      if (!mounted) return;
+      setState(() {
+        _safeZones = zones;
+      });
+      _computeClosestSafeZone();
+    }, onError: (e) {
+      debugPrint('SafeZoneService watch error: $e');
+    });
+
+    // 2. Obtain GPS location
+    try {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (enabled) {
+        LocationPermission perm = await Geolocator.checkPermission();
+        if (perm == LocationPermission.denied) {
+          perm = await Geolocator.requestPermission();
+        }
+        if (perm == LocationPermission.whileInUse ||
+            perm == LocationPermission.always) {
+          Position? pos;
+          try {
+            pos = await Geolocator.getCurrentPosition(
+              locationSettings: const LocationSettings(
+                accuracy: LocationAccuracy.medium,
+                timeLimit: Duration(seconds: 4),
+              ),
+            );
+          } catch (_) {
+            pos = await Geolocator.getLastKnownPosition();
+          }
+          if (pos != null && mounted) {
+            _userLocation = LatLng(pos.latitude, pos.longitude);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getting GPS location: $e');
+    }
+
+    // Fallback based on citizen's sector or default Sri Lanka coordinates
+    if (_userLocation == null) {
+      final user = ResponderController().currentUser;
+      final district = (user?.district ?? '').toLowerCase();
+      if (district.contains('ratnapura')) {
+        _userLocation = const LatLng(6.6828, 80.3992);
+      } else if (district.contains('galle')) {
+        _userLocation = const LatLng(6.0535, 80.2210);
+      } else if (district.contains('kalutara')) {
+        _userLocation = const LatLng(6.5854, 79.9607);
+      } else if (district.contains('gampaha')) {
+        _userLocation = const LatLng(7.0840, 80.0098);
+      } else {
+        _userLocation = const LatLng(6.9271, 79.8612); // Colombo
+      }
+    }
+
+    if (mounted) {
+      setState(() => _isLoadingLocation = false);
+      _computeClosestSafeZone();
+    }
+  }
+
+  void _computeClosestSafeZone() {
+    final candidateList =
+        _safeZones.isNotEmpty ? _safeZones : _fallbackSafeZones;
+    final withLocation = candidateList.where((z) => z.hasLocation).toList();
+    if (withLocation.isEmpty) return;
+
+    final loc = _userLocation ?? const LatLng(6.9271, 79.8612);
+
+    final openList = withLocation.where((z) => z.isOpen).toList();
+    final searchList = openList.isNotEmpty ? openList : withLocation;
+
+    searchList.sort((a, b) {
+      final da = SafeZoneService.distanceKm(loc, a.point);
+      final db = SafeZoneService.distanceKm(loc, b.point);
+      return da.compareTo(db);
+    });
+
+    final closest = searchList.first;
+    final dist = SafeZoneService.distanceKm(loc, closest.point);
+
+    if (_status != _CheckInStatus.confirmed || _currentSafeZoneName == null) {
+      setState(() {
+        _currentSafeZoneName = closest.name;
+        _currentSafeZoneDistance = dist < 1.0
+            ? '${(dist * 1000).round()} m away'
+            : '${dist.toStringAsFixed(1)} km away';
+      });
+    }
   }
 
   // --- Check-In Action (Firestore write) ---
@@ -62,35 +260,61 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
 
     setState(() => _status = _CheckInStatus.loading);
 
-    try {
-      // Mark as safe
-      await _firestoreService.markAsSafe();
-    } catch (e) {
-      // Handle error gracefully in real app
-      setState(() => _status = _CheckInStatus.idle);
-      return;
-    }
-
+    final selectedZone = _currentSafeZoneName ?? 'Designated Relief Camp';
     final now = TimeOfDay.now();
     final formattedTime =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} LKT';
 
-    setState(() {
-      _status = _CheckInStatus.confirmed;
-      _checkInTime = formattedTime;
-    });
+    try {
+      // Mark as safe with real closest safe zone name and coordinates
+      await _firestoreService.markAsSafe(
+        safeZoneName: selectedZone,
+        latitude: _userLocation?.latitude,
+        longitude: _userLocation?.longitude,
+      );
 
-    _rippleController.stop();
-    _successController.forward();
+      // Trigger notification confirmation
+      NotificationService.instance.showDisasterWarningNotification(
+        id: 88801,
+        title: '✅ Check-In Confirmed',
+        body:
+            'You are safely checked in at $selectedZone. Emergency contacts notified.',
+        severity: 'Safe',
+      );
+    } catch (e) {
+      debugPrint('Error marking as safe: $e');
+      if (mounted) {
+        setState(() => _status = _CheckInStatus.idle);
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _status = _CheckInStatus.confirmed;
+        _checkInTime = formattedTime;
+        _currentSafeZoneName = selectedZone;
+      });
+
+      _rippleController.stop();
+      _successController.forward();
+    }
   }
 
-  void _resetCheckIn() {
+  Future<void> _resetCheckIn() async {
     setState(() {
       _status = _CheckInStatus.idle;
       _checkInTime = null;
     });
     _successController.reset();
     _rippleController.repeat();
+    _computeClosestSafeZone();
+
+    try {
+      await _firestoreService.resetCheckInStatus();
+    } catch (e) {
+      debugPrint('Error resetting check-in: $e');
+    }
   }
 
   @override
@@ -142,61 +366,68 @@ class _SafeArrivalCheckInScreenState extends State<SafeArrivalCheckInScreen>
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ScrollFill(
               child: Column(
-              children: [
-                const Spacer(flex: 2),
+                children: [
+                  const Spacer(flex: 2),
 
-                // ── Status Area ────────────────────────────────────────────
-                _status == _CheckInStatus.confirmed
-                    ? _PremiumSuccessState(
-                        checkInTime: _checkInTime!,
-                        scaleAnimation: _successScale,
-                        opacityAnimation: _successOpacity,
-                        onReset: _resetCheckIn,
-                      )
-                    : _PremiumIdleOrLoadingState(
-                        status: _status,
-                        rippleController: _rippleController,
-                        onMarkAsSafe: _markAsSafe,
-                      ),
+                  // ── Status Area ────────────────────────────────────────────
+                  _status == _CheckInStatus.confirmed
+                      ? _PremiumSuccessState(
+                          checkInTime: _checkInTime ?? 'Recently',
+                          safeZoneName:
+                              _currentSafeZoneName ?? 'Designated Relief Camp',
+                          safeZoneDistance: _currentSafeZoneDistance,
+                          scaleAnimation: _successScale,
+                          opacityAnimation: _successOpacity,
+                          onReset: _resetCheckIn,
+                        )
+                      : _PremiumIdleOrLoadingState(
+                          status: _status,
+                          rippleController: _rippleController,
+                          closestZoneName: _currentSafeZoneName,
+                          closestZoneDistance: _currentSafeZoneDistance,
+                          isLoadingLocation: _isLoadingLocation,
+                          onMarkAsSafe: _markAsSafe,
+                        ),
 
-                const Spacer(flex: 3),
+                  const Spacer(flex: 3),
 
-                // ── Battery-save note ──────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
+                  // ── Battery-save note ──────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.05),
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.battery_saver_outlined,
-                          color: Colors.white.withValues(alpha: 0.4),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          tr('Battery-save mode active'),
-                          style: TextStyle(
+child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.battery_saver_outlined,
                             color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            size: 16,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            tr('Battery-save mode active'),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             ),
           ),
         ),
@@ -254,11 +485,17 @@ class _PremiumRippleRing extends AnimatedWidget {
 class _PremiumIdleOrLoadingState extends StatelessWidget {
   final _CheckInStatus status;
   final AnimationController rippleController;
+  final String? closestZoneName;
+  final String? closestZoneDistance;
+  final bool isLoadingLocation;
   final VoidCallback onMarkAsSafe;
 
   const _PremiumIdleOrLoadingState({
     required this.status,
     required this.rippleController,
+    this.closestZoneName,
+    this.closestZoneDistance,
+    this.isLoadingLocation = false,
     required this.onMarkAsSafe,
   });
 
@@ -291,7 +528,68 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 40),
+
+        // ── Nearest Detected Safe Zone Preview ────────────────────────────
+        if (closestZoneName != null) ...[
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00E676).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFF00E676).withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.near_me_rounded,
+                  color: Color(0xFF00E676),
+                  size: 15,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    'Nearest Safe Shelter: $closestZoneName${closestZoneDistance != null ? " ($closestZoneDistance)" : ""}',
+                    style: const TextStyle(
+                      color: Color(0xFF00E676),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else if (isLoadingLocation) ...[
+          const SizedBox(height: 18),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Color(0xFF00E676),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Locating nearest safe shelter...',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+
+        const SizedBox(height: 32),
 
         // ── Mark as Safe Button with Ripple ──────────────────────────────
         SizedBox(
@@ -336,7 +634,8 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
                               : [const Color(0xFF34D399), const Color(0xFF00B259)],
                         ),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: isLoading ? 0.05 : 0.2),
+                          color: Colors.white
+                              .withValues(alpha: isLoading ? 0.05 : 0.2),
                           width: 2,
                         ),
                         boxShadow: isLoading
@@ -422,12 +721,16 @@ class _PremiumIdleOrLoadingState extends StatelessWidget {
 
 class _PremiumSuccessState extends StatelessWidget {
   final String checkInTime;
+  final String safeZoneName;
+  final String? safeZoneDistance;
   final Animation<double> scaleAnimation;
   final Animation<double> opacityAnimation;
   final VoidCallback onReset;
 
   const _PremiumSuccessState({
     required this.checkInTime,
+    required this.safeZoneName,
+    this.safeZoneDistance,
     required this.scaleAnimation,
     required this.opacityAnimation,
     required this.onReset,
@@ -498,7 +801,8 @@ class _PremiumSuccessState extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
@@ -525,7 +829,7 @@ class _PremiumSuccessState extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // ── Status card ─────────────────────────────────────────────
+              // ── Status card with dynamic safe zone location ─────────────
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -563,15 +867,28 @@ class _PremiumSuccessState extends StatelessWidget {
                               letterSpacing: 0.5,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            tr('Rathnapura Central College'),
-                            style: TextStyle(
+                            safeZoneName,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                          if (safeZoneDistance != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              safeZoneDistance!,
+                              style: const TextStyle(
+                                color: Color(0xFF38BDF8),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -584,7 +901,8 @@ class _PremiumSuccessState extends StatelessWidget {
               // ── Action Buttons ──────────────────────────────────────────
               ElevatedButton.icon(
                 onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const CitizenDashboardScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const CitizenDashboardScreen()),
                   (route) => false,
                 ),
                 icon: const Icon(

@@ -17,11 +17,11 @@ class ChecklistItem {
   });
 
   factory ChecklistItem.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ChecklistItem(
       id: doc.id,
-      name: data['itemName'] ?? '',
-      isPacked: data['isPacked'] ?? false,
+      name: data['itemName'] as String? ?? '',
+      isPacked: data['isPacked'] as bool? ?? false,
     );
   }
 }
@@ -50,8 +50,19 @@ class _EvacuationChecklistScreenState
   void _addItem() async {
     final text = _addController.text.trim();
     if (text.isEmpty) return;
-    await _firestoreService.addChecklistItem(text);
-    _addController.clear();
+    try {
+      await _firestoreService.addChecklistItem(text);
+      _addController.clear();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('Failed to add item')),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
   }
 
   void _togglePacked(ChecklistItem item) {
@@ -60,6 +71,182 @@ class _EvacuationChecklistScreenState
 
   void _deleteItem(String id) {
     _firestoreService.deleteChecklistItem(id);
+  }
+
+  Future<void> _editItem(String id, String newName) async {
+    try {
+      await _firestoreService.updateChecklistItem(id, newName);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('Failed to update item')),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showEditDialog(ChecklistItem item) async {
+    final controller = TextEditingController(text: item.name);
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: const Color(0xFF131C2E),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.edit_rounded,
+                        color: Color(0xFF38BDF8),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        tr('Edit Item'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 20),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: controller,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: tr('Item Name'),
+                    labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                    hintText: tr('e.g. Flashlight, First Aid Kit'),
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                    filled: true,
+                    fillColor: const Color(0xFF0B1220),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Color(0xFF34D399), width: 1.5),
+                    ),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return tr('Item name cannot be empty');
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (_) async {
+                    if (formKey.currentState?.validate() ?? false) {
+                      final newName = controller.text.trim();
+                      Navigator.of(ctx).pop();
+                      await _editItem(item.id, newName);
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          tr('Cancel'),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF34D399),
+                          foregroundColor: const Color(0xFF0B1220),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () async {
+                          if (formKey.currentState?.validate() ?? false) {
+                            final newName = controller.text.trim();
+                            Navigator.of(ctx).pop();
+                            await _editItem(item.id, newName);
+                          }
+                        },
+                        child: Text(
+                          tr('Save Changes'),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -82,13 +269,16 @@ class _EvacuationChecklistScreenState
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          tr('Go Bag Checklist'),
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 20,
-            letterSpacing: 0.5,
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            tr('Go Bag Checklist'),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         centerTitle: true,
@@ -109,11 +299,15 @@ class _EvacuationChecklistScreenState
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(
-                  child: Text(tr('Error loading checklist'),
-                      style: TextStyle(color: Colors.red)),
+                  child: Text(
+                    tr('Error loading checklist'),
+                    style: const TextStyle(color: Color(0xFFEF4444)),
+                  ),
                 );
               }
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  !snapshot.hasData ||
+                  snapshot.data == null) {
                 return const Center(
                   child: CircularProgressIndicator(color: Color(0xFF34D399)),
                 );
@@ -162,6 +356,7 @@ class _EvacuationChecklistScreenState
                                 key: ValueKey(item.id),
                                 item: item,
                                 onToggle: () => _togglePacked(item),
+                                onEdit: () => _showEditDialog(item),
                                 onDelete: () => _deleteItem(item.id),
                               );
                             },
@@ -225,47 +420,57 @@ class _PremiumProgressHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isComplete ? tr('Ready for Evacuation') : tr('Packing Progress'),
-                    style: TextStyle(
-                      color: isComplete ? const Color(0xFF34D399) : Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isComplete ? tr('Ready for Evacuation') : tr('Packing Progress'),
+                      style: TextStyle(
+                        color: isComplete ? const Color(0xFF34D399) : Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    tr('{p0} of {p1} items packed', {'p0': (packedCount).toString(), 'p1': (total).toString()}),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: 4),
+                    Text(
+                      tr('{p0} of {p1} items packed', {'p0': (packedCount).toString(), 'p1': (total).toString()}),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              )),
-              Flexible(child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isComplete
-                      ? const Color(0xFF34D399).withValues(alpha: 0.15)
-                      : const Color(0xFF38BDF8).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  ],
                 ),
-                child: Text(
-                  '$pct%',
-                  style: TextStyle(
+              ),
+              const SizedBox(width: 8),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
                     color: isComplete
-                        ? const Color(0xFF34D399)
-                        : const Color(0xFF38BDF8),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
+                        ? const Color(0xFF34D399).withValues(alpha: 0.15)
+                        : const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$pct%',
+                    style: TextStyle(
+                      color: isComplete
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF38BDF8),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
-              )),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -368,12 +573,14 @@ class _PremiumAddItemField extends StatelessWidget {
 class _PremiumChecklistItemTile extends StatelessWidget {
   final ChecklistItem item;
   final VoidCallback onToggle;
+  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _PremiumChecklistItemTile({
     super.key,
     required this.item,
     required this.onToggle,
+    required this.onEdit,
     required this.onDelete,
   });
 
@@ -465,6 +672,27 @@ class _PremiumChecklistItemTile extends StatelessWidget {
                   ),
                 ),
                 
+                // Edit Button
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      color: Color(0xFF38BDF8),
+                      size: 20,
+                    ),
+                    tooltip: tr('Edit Item'),
+                    onPressed: onEdit,
+                  ),
+                ),
+                const SizedBox(width: 8),
+
                 // Delete Button
                 Container(
                   width: 40,
@@ -505,29 +733,33 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.03),
-              shape: BoxShape.circle,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.03),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 64, color: Colors.white.withValues(alpha: 0.2)),
             ),
-            child: Icon(icon, size: 64, color: Colors.white.withValues(alpha: 0.2)),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            tr(message),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
-              fontSize: 16,
-              height: 1.5,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 24),
+            Text(
+              tr(message),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 16,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

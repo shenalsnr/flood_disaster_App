@@ -67,6 +67,7 @@ class _WeSafeAppState extends State<WeSafeApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: NotificationService.navigatorKey,
       scaffoldMessengerKey: NotificationService.messengerKey,
       debugShowCheckedModeBanner: false,
       title: 'WeSafe — Flood Relief & Early Warning',

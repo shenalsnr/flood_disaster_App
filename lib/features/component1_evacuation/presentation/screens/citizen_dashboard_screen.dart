@@ -1,17 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/warning_alert.dart';
+import '../../../../core/services/notification_service.dart';
 
 import 'evacuation_checklist_screen.dart';
 import 'emergency_contacts_screen.dart';
 import 'safe_routing_map_screen.dart';
 import 'safe_arrival_checkin_screen.dart';
 import 'citizen_drawer.dart';
+import 'citizen_settings_screen.dart';
 import '../../../component4_control_center/presentation/controllers/responder_controller.dart';
 import '../../../../core/theme/appearance.dart';
 
@@ -36,15 +38,78 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
+  bool? _pushNotificationsEnabled = true;
+  final Set<String> _notifiedWarningIds = {};
+
   @override
   void initState() {
     super.initState();
+    NotificationService.instance.registerChannels();
+    _loadNotificationSetting();
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  Future<void> _loadNotificationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _pushNotificationsEnabled =
+            prefs.getBool('c1_push_notifications') ?? true;
+      });
+    }
+  }
+
+  void _onWarningsReceived(List<WarningAlert> alerts) {
+    if (!(_pushNotificationsEnabled ?? true)) return;
+
+    for (final alert in alerts) {
+      if (!_notifiedWarningIds.contains(alert.id)) {
+        _notifiedWarningIds.add(alert.id);
+        NotificationService.instance.showDisasterWarningNotification(
+          id: alert.id.hashCode & 0x7FFFFFFF,
+          title: '🚨 ${alert.severity.toUpperCase()} ALERT: ${alert.hazardType}',
+          body:
+              '${alert.locationZone.isNotEmpty ? "${alert.locationZone} — " : ""}${alert.description}',
+          severity: alert.severity,
+        );
+      }
+    }
+  }
+
+  void _showNotificationCenter(
+      BuildContext context, List<WarningAlert>? alerts, String district) {
+    final alertList = alerts ?? <WarningAlert>[];
+    final bool isPushActive = _pushNotificationsEnabled ?? true;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _NotificationCenterSheet(
+        alerts: alertList,
+        district: district,
+        pushNotificationsEnabled: isPushActive,
+        onManageSettings: () async {
+          Navigator.pop(ctx);
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CitizenSettingsScreen()),
+          );
+          _loadNotificationSetting();
+        },
+        onViewRoute: () {
+          Navigator.pop(ctx);
+          _push(const SafeRoutingMapScreen());
+        },
+      ),
     );
   }
 
@@ -73,8 +138,16 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             ? (userSnap.data!.data() as Map<String, dynamic>)
             : <String, dynamic>{};
 
-        final district = userData['district'] as String? ?? 'Colombo';
-        final city = userData['city'] as String? ?? 'Colombo';
+        final String currentCitizenDistrict = (userData['district'] as String?)?.trim().isNotEmpty == true
+            ? (userData['district'] as String).trim()
+            : ((ResponderController().currentUser?.district.trim().isNotEmpty ?? false)
+                ? ResponderController().currentUser!.district.trim()
+                : 'Colombo');
+        final String currentCitizenCity = (userData['city'] as String?)?.trim().isNotEmpty == true
+            ? (userData['city'] as String).trim()
+            : ((ResponderController().currentUser?.city.trim().isNotEmpty ?? false)
+                ? ResponderController().currentUser!.city.trim()
+                : 'Colombo');
         String? firestoreName = userData['name'] as String? ?? userData['fullName'] as String?;
         if (firestoreName == 'Citizen User' || firestoreName == null || firestoreName.isEmpty) {
           firestoreName = null;
@@ -89,29 +162,43 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
             'Colombo Low-Lying Area';
         final photoUrl = userData['photoUrl'] as String?;
 
+        print("CITIZEN LOC: $currentCitizenDistrict, $currentCitizenCity");
+
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('warnings')
-              .where('district', whereIn: [district, 'All'])
+              .where('district', isEqualTo: currentCitizenDistrict)
+              .where('city', isEqualTo: currentCitizenCity)
               .snapshots(),
-          builder: (context, warningsSnap) {
+          builder: (context, snapshot) {
             WarningAlert? topAlert;
-            List<WarningAlert> allAlerts = [];
+            List<WarningAlert> matchingAlerts = [];
 
-            if (warningsSnap.hasData) {
-              // City is matched here so broadcasts sent to city 'All' also arrive.
-              allAlerts = warningsSnap.data!.docs
-                  .map((d) => WarningAlert.fromDoc(d))
-                  .where((w) =>
-                      w.city.toLowerCase() == 'all' ||
-                      w.city.toLowerCase() == city.toLowerCase())
-                  .toList();
+            if (snapshot.hasData && snapshot.data != null) {
+              // Strict Safety Net: iterate through docs and manually verify district & city
+              for (final doc in snapshot.data!.docs) {
+                try {
+                  final bool isDistrictMatch = doc['district'].toString().toLowerCase() ==
+                      currentCitizenDistrict.toLowerCase();
+                  final bool isCityMatch = doc['city'].toString().toLowerCase() ==
+                      currentCitizenCity.toLowerCase();
+
+                  if (isDistrictMatch && isCityMatch) {
+                    matchingAlerts.add(WarningAlert.fromDoc(doc));
+                  }
+                } catch (e) {
+                  debugPrint('Warning doc safety net validation error: $e');
+                }
+              }
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _onWarningsReceived(matchingAlerts);
+              });
             }
 
-            if (allAlerts.isNotEmpty) {
-
-              // Only run reduce if list is not empty, which we know it isn't
-              topAlert = allAlerts.reduce(
+            if (matchingAlerts.isNotEmpty) {
+              // Only run reduce if matching list is not empty
+              topAlert = matchingAlerts.reduce(
                 (a, b) =>
                     (_severityRank[b.severity] ?? 0) >
                         (_severityRank[a.severity] ?? 0)
@@ -130,47 +217,124 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
               appBar: AppBar(
                 leading: Builder(
                   builder: (ctx) => IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     icon: const Icon(Icons.menu_rounded, color: Colors.white),
                     tooltip: tr('Open Menu'),
                     onPressed: () => Scaffold.of(ctx).openDrawer(),
                   ),
                 ),
+                titleSpacing: 0,
                 iconTheme: const IconThemeData(color: Colors.white),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, 
-                  children: [
-                    const Icon(
-                      Icons.shield_rounded,
-                      color: Color(0xFF34D399),
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: tr('We'),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          TextSpan(
-                            text: tr('Safe'),
-                            style: TextStyle(color: Color(0xFF34D399)),
-                          ),
-                        ],
+                title: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.shield_rounded,
+                        color: Color(0xFF34D399),
+                        size: 22,
                       ),
-                    ),
-                  ],
-                )),
+                      const SizedBox(width: 6),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: tr('We'),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            TextSpan(
+                              text: tr('Safe'),
+                              style: const TextStyle(color: Color(0xFF34D399)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 actions: [
-                  const ThemeToggleButton(),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        padding: const EdgeInsets.all(6),
+                        icon: const Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        tooltip: 'Disaster Warnings',
+                        onPressed: () =>
+                            _showNotificationCenter(context, matchingAlerts, currentCitizenDistrict),
+                      ),
+                      if (matchingAlerts.isNotEmpty)
+                        Positioned(
+                          top: 2,
+                          right: 2,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFF1744),
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 15,
+                              minHeight: 15,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${matchingAlerts.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(6),
+                    icon: const Icon(
+                      Icons.settings_outlined,
+                      color: Colors.white,
+                      size: 21,
+                    ),
+                    tooltip: 'Settings & Preferences',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CitizenSettingsScreen(),
+                        ),
+                      );
+                      _loadNotificationSetting();
+                    },
+                  ),
+                  const ThemeToggleButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: EdgeInsets.all(6),
+                  ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 4, right: 12),
+                    padding: const EdgeInsets.only(left: 4, right: 8),
                     child: Center(child: _AlertLevelBadge(level: alertLevel)),
                   ),
                 ],
@@ -324,10 +488,10 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                             ),
                           )
                         else
-                          _AllClearCard(district: district),
+                          _AllClearCard(district: currentCitizenDistrict),
 
                         // ── Multiple active warnings list ────────────────────
-                        if (allAlerts.length > 1) ...[
+                        if (matchingAlerts.length > 1) ...[
                           const SizedBox(height: 20),
                           Row(
                             children: [
@@ -341,7 +505,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                               ),
                               const SizedBox(width: 10),
                               Flexible(child: Text(
-                                tr('{p0} Active Warnings', {'p0': (allAlerts.length).toString()}),
+                                tr('{p0} Active Warnings', {'p0': (matchingAlerts.length).toString()}),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
@@ -351,7 +515,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen>
                             ],
                           ),
                           const SizedBox(height: 10),
-                          ...allAlerts
+                          ...matchingAlerts
                               .skip(1)
                               .map((a) => _MiniAlertTile(alert: a)),
                         ],
@@ -836,6 +1000,7 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                       fontWeight: FontWeight.w900,
                       height: 1.2,
                     ),
+                    softWrap: true,
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -846,28 +1011,29 @@ class _PremiumCriticalAlertCardState extends State<_PremiumCriticalAlertCard> wi
                       height: 1.5,
                       fontWeight: FontWeight.w500,
                     ),
+                    softWrap: true,
                   ),
                   const SizedBox(height: 20),
-                  // Live metrics row
-                  Row(
+                  // Live metrics row — use Wrap so pills wrap on small screens
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
                     children: [
-                      Expanded(child: _MetricPill(
+                      _MetricPill(
                         icon: Icons.water_rounded,
                         label: '${widget.waterLevel.toStringAsFixed(2)} m',
                         hint: tr('Water Level'),
-                      )),
-                      const SizedBox(width: 6),
-                      Expanded(child: _MetricPill(
+                      ),
+                      _MetricPill(
                         icon: Icons.grain_rounded,
                         label: tr('{p0} mm', {'p0': (widget.rainfall.toStringAsFixed(1)).toString()}),
                         hint: tr('Rainfall'),
-                      )),
-                      const SizedBox(width: 6),
-                      Expanded(child: _MetricPill(
+                      ),
+                      _MetricPill(
                         icon: Icons.air_rounded,
                         label: tr('{p0} kph', {'p0': (widget.windSpeed.toStringAsFixed(1)).toString()}),
                         hint: tr('Wind Speed'),
-                      )),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -1132,10 +1298,13 @@ class _MiniAlertTile extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   tr('{p0} m  •  {p1} mm  •  {p2} kph', {'p0': (alert.waterLevelMeters.toStringAsFixed(2)).toString(), 'p1': (alert.rainfallMm.toStringAsFixed(1)).toString(), 'p2': (alert.windSpeedKmh.toStringAsFixed(1)).toString()}),
                   style: const TextStyle(color: Colors.white54, fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -1212,7 +1381,7 @@ class _AlertLevelBadge extends StatelessWidget {
     final isSafe = level == 'SAFE';
     final bgColor = isSafe
         ? const Color(0xFF34D399).withValues(alpha: 0.15)
-        : const Color(0xFFB71C1C).withValues(alpha: 0.8);
+        : const Color(0xFFB71C1C).withValues(alpha: 0.85);
     final borderColor = isSafe
         ? const Color(0xFF34D399).withValues(alpha: 0.4)
         : Colors.redAccent.shade100.withValues(alpha: 0.5);
@@ -1221,12 +1390,12 @@ class _AlertLevelBadge extends StatelessWidget {
         : const Color(0x4DB71C1C);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor, width: 1.5),
-        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 8)],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 6)],
       ),
       child: Text(
         tr(level),
@@ -1234,7 +1403,7 @@ class _AlertLevelBadge extends StatelessWidget {
           color: isSafe ? const Color(0xFF34D399) : Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w900,
-          letterSpacing: 1.5,
+          letterSpacing: 0.8,
         ),
       ),
     );
@@ -1331,6 +1500,415 @@ class _PremiumStatusFooter extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Notification Center Bottom Sheet Modal
+// ---------------------------------------------------------------------------
+class _NotificationCenterSheet extends StatelessWidget {
+  final List<WarningAlert>? alerts;
+  final String district;
+  final bool? pushNotificationsEnabled;
+  final VoidCallback onManageSettings;
+  final VoidCallback onViewRoute;
+
+  const _NotificationCenterSheet({
+    this.alerts,
+    this.district = 'Galle',
+    this.pushNotificationsEnabled,
+    required this.onManageSettings,
+    required this.onViewRoute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final alertList = alerts ?? <WarningAlert>[];
+    final bool isPushActive = pushNotificationsEnabled ?? true;
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.82,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(
+          top: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          left: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          right: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Grab handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+
+            // Sheet Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.notifications_active_rounded,
+                      color: Color(0xFF00E676),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Disaster Alerts & Warnings',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          alertList.isEmpty
+                              ? 'All clear in your registered area ($district)'
+                              : '${alertList.length} active emergency alert${alertList.length > 1 ? "s" : ""}',
+                          style: TextStyle(
+                            color: alertList.isEmpty
+                                ? const Color(0xFF00E676)
+                                : const Color(0xFFFF9F0A),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+
+            // Settings status banner
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B).withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isPushActive
+                        ? Icons.check_circle_rounded
+                        : Icons.notifications_off_rounded,
+                    color: isPushActive
+                        ? const Color(0xFF00E676)
+                        : const Color(0xFFFF9F0A),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      isPushActive
+                          ? 'Status bar & push alerts active for $district'
+                          : 'Push notifications are currently muted',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: onManageSettings,
+                    child: const Text(
+                      'SETTINGS',
+                      style: TextStyle(
+                        color: Color(0xFF00E676),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+
+            const SizedBox(height: 6),
+
+            // Alerts Content List
+            if (alertList.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 14, 32, 28),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00E676)
+                              .withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.shield_rounded,
+                          color: Color(0xFF00E676),
+                          size: 48,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Zone Status: All Clear ($district)',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'No active flood or disaster warnings in $district. Broadcast warnings will automatically pop into your phone notification bar.',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  itemCount: alertList.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (ctx, i) {
+                    final a = alertList[i];
+                        final isCrit =
+                            a.severity.toLowerCase() == 'critical';
+                        final isWarn =
+                            a.severity.toLowerCase() == 'warning';
+                        final color = isCrit
+                            ? const Color(0xFFFF1744)
+                            : isWarn
+                                ? const Color(0xFFFF9F0A)
+                                : const Color(0xFF40C4FF);
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF131B2B),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.6),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: color, width: 1),
+                                    ),
+                                    child: Text(
+                                      a.severity.toUpperCase(),
+                                      style: TextStyle(
+                                        color: color,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      a.hazardType,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('HH:mm').format(a.issuedTimestamp),
+                                    style: const TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (a.locationZone.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_rounded,
+                                        color: Color(0xFF00E676),
+                                        size: 15,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        child: Text(
+                                          'Zone: ${a.locationZone}',
+                                          style: const TextStyle(
+                                            color: Color(0xFF00E676),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              Text(
+                                a.description,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                  height: 1.4,
+                                ),
+                                softWrap: true,
+                              ),
+                              const SizedBox(height: 12),
+                              // Live metrics chips
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: [
+                                  if (a.waterLevelMeters > 0)
+                                    _metricChip(
+                                      Icons.water_rounded,
+                                      '${a.waterLevelMeters.toStringAsFixed(1)}m Water Level',
+                                      color,
+                                    ),
+                                  if (a.rainfallMm > 0)
+                                    _metricChip(
+                                      Icons.cloud_rounded,
+                                      '${a.rainfallMm.toStringAsFixed(0)}mm Rain',
+                                      const Color(0xFF40C4FF),
+                                    ),
+                                  if (a.windSpeedKmh > 0)
+                                    _metricChip(
+                                      Icons.air_rounded,
+                                      '${a.windSpeedKmh.toStringAsFixed(0)} km/h Wind',
+                                      Colors.white70,
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: color,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                  onPressed: onViewRoute,
+                                  icon: const Icon(
+                                    Icons.navigation_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'EVACUATION ROUTE',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 11.5,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _metricChip(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

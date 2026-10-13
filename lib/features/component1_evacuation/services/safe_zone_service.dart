@@ -61,6 +61,9 @@ class SafeZoneService {
   SafeZoneService._();
   static final SafeZoneService instance = SafeZoneService._();
 
+  static List<SafeZone>? _cachedZones;
+  List<SafeZone>? get cachedZones => _cachedZones;
+
   CollectionReference<Map<String, dynamic>> get _camps =>
       FirebaseFirestore.instance.collection('camps');
   CollectionReference<Map<String, dynamic>> get _status =>
@@ -79,11 +82,20 @@ class SafeZoneService {
     void emit() {
       final c = camps;
       if (c == null || ctrl.isClosed) return;
-      ctrl.add(_merge(c, status));
+      final merged = _merge(c, status);
+      _cachedZones = merged;
+      ctrl.add(merged);
     }
 
     ctrl = StreamController<List<SafeZone>>(
       onListen: () {
+        if (_cachedZones != null && _cachedZones!.isNotEmpty) {
+          scheduleMicrotask(() {
+            if (!ctrl.isClosed && _cachedZones != null) {
+              ctrl.add(_cachedZones!);
+            }
+          });
+        }
         a = _camps.snapshots().listen((s) {
           camps = s;
           emit();
