@@ -311,7 +311,9 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF0B1220),
       appBar: _buildAppBar(),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,6 +338,7 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
             _buildWarningsList(),
           ],
         ),
+      ),
       ),
     );
   }
@@ -995,6 +998,8 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
                           Expanded(
                             child: Text(
                               '${alert.district} — ${alert.locationZone}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -1039,28 +1044,35 @@ class _C1AdminMetricsScreenState extends State<C1AdminMetricsScreen>
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Expanded(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
                 _buildMetricChip(
                   icon: Icons.water_rounded,
                   label: tr('Water'),
                   value: '${alert.waterLevelMeters.toStringAsFixed(2)}m',
                   color: const Color(0xFF42A5F5),
                 ),
-                const SizedBox(width: 6),
                 _buildMetricChip(
                   icon: Icons.grain_rounded,
                   label: tr('Rain'),
                   value: '${alert.rainfallMm.toStringAsFixed(1)}mm',
                   color: const Color(0xFF26C6DA),
                 ),
-                const SizedBox(width: 6),
                 _buildMetricChip(
                   icon: Icons.air_rounded,
                   label: tr('Wind'),
                   value: '${alert.windSpeedKmh.toStringAsFixed(1)}kph',
                   color: const Color(0xFFB39DDB),
                 ),
-                const Spacer(),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
                 // Edit button
                 _buildCardIconBtn(
                   icon: Icons.edit_rounded,

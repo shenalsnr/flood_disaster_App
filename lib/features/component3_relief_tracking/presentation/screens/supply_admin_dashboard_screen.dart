@@ -207,7 +207,7 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
                 )),
             const SizedBox(height: 14),
 
-            _completedButton(done.length),
+            _completedButton(done.length, done.map((d) => d.data()).toList()),
           ],
         );
       },
@@ -215,11 +215,11 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
   }
 
   /// Button that opens the completed requests on their own page.
-  Widget _completedButton(int count) => Material(
+  Widget _completedButton(int count, List<Map<String, dynamic>> items) => Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: _openCompleted,
+          onTap: () => _openCompleted(items),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -256,9 +256,9 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
         ),
       );
 
-  void _openCompleted() {
+  void _openCompleted(List<Map<String, dynamic>> items) {
     Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => Scaffold(
+      builder: (routeCtx) => Scaffold(
         backgroundColor: _bg,
         appBar: AppBar(
           backgroundColor: const Color(0xFF0D1424),
@@ -266,37 +266,18 @@ class _SupplyAdminDashboardScreenState extends State<SupplyAdminDashboardScreen>
           elevation: 0,
           title: Text(
             tr('Recently Completed'),
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
           actions: const [ThemeToggleButton()],
         ),
         body: SafeArea(
-          child: _stream == null
-              ? _note('Unavailable right now.')
-              : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return _note('Could not load requests.\n${snapshot.error}');
-                    }
-                    if (!snapshot.hasData) {
-                      return const Center(
-                          child: CircularProgressIndicator(color: _accent));
-                    }
-                    final done = snapshot.data!.docs
-                        .where((d) => ['arrived', 'resolved']
-                            .contains(d.data()['status']))
-                        .toList();
-                    if (done.isEmpty) {
-                      return _note('Nothing completed yet.');
-                    }
-                    return ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: done
-                          .map((d) => _requestCard(d.data(), showDriver: true))
-                          .toList(),
-                    );
-                  },
+          child: items.isEmpty
+              ? _note('Nothing completed yet.')
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: items.length,
+                  itemBuilder: (_, i) =>
+                      _requestCard(items[i], showDriver: true),
                 ),
         ),
       ),

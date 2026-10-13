@@ -1000,7 +1000,7 @@ class _AddStaffDialogState extends State<_AddStaffDialog> {
                   children: [
                     TextButton(
                       onPressed:
-                          _saving ? null : () => Navigator.pop(context, false),
+                          _saving ? null : () => Navigator.pop(context),
                       child:
                           Text(tr('Cancel'), style: TextStyle(color: _muted)),
                     ),
