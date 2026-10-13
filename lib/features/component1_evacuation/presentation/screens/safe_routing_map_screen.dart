@@ -30,6 +30,20 @@ import '../../../../core/localization/app_strings.dart';
 
 enum _LocIssue { none, serviceOff, denied, deniedForever }
 
+class _CachedRoute {
+  final List<LatLng> points;
+  final double km;
+  final double minutes;
+  final DateTime timestamp;
+
+  const _CachedRoute({
+    required this.points,
+    required this.km,
+    required this.minutes,
+    required this.timestamp,
+  });
+}
+
 class SafeRoutingMapScreen extends StatefulWidget {
   const SafeRoutingMapScreen({super.key});
 
@@ -40,9 +54,14 @@ class SafeRoutingMapScreen extends StatefulWidget {
 class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   static const LatLng _demoLocation = LatLng(6.6828, 80.3992); // Ratnapura town
+  static LatLng? _lastKnownUserLocation;
+  static final Map<String, _CachedRoute> _routeCache = {};
+  static final HttpClient _routeHttpClient = HttpClient()
+    ..connectionTimeout = const Duration(seconds: 4)
+    ..idleTimeout = const Duration(seconds: 30);
 
-  LatLng _userLocation = _demoLocation;
-  bool _usingDemoLocation = true;
+  LatLng _userLocation = _lastKnownUserLocation ?? _demoLocation;
+  bool _usingDemoLocation = _lastKnownUserLocation == null;
 
   List<SafeZone> _zones = const [];
   bool _loaded = false;
@@ -70,6 +89,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   bool _dismissedAlert = false;
 
   final MapController _mapController = MapController();
+  AnimationController? _animController;
   bool _mapReady = false;
   bool _isNavigating = false;
   bool _fittedOnce = false;
@@ -77,6 +97,12 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   @override
   void initState() {
     super.initState();
+    final cachedZones = SafeZoneService.instance.cachedZones;
+    if (cachedZones != null && cachedZones.isNotEmpty) {
+      _zones = cachedZones;
+      _loaded = true;
+      _recompute();
+    }
     _zonesSub = SafeZoneService.instance.watch().listen((zones) {
       if (!mounted) return;
       _zones = zones;
@@ -120,6 +146,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     _serviceSub?.cancel();
     _zonesSub?.cancel();
     _positionSub?.cancel();
+    _animController?.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -276,6 +303,7 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   void _onPosition(Position p) {
     if (!mounted) return;
     _userLocation = LatLng(p.latitude, p.longitude);
+    _lastKnownUserLocation = _userLocation;
     _usingDemoLocation = false;
     _recompute();
   }
@@ -334,6 +362,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
   }
 
   // ── Road route (like Google Maps) ──────────────────────────────────────────
+  static String _cacheKey(LatLng from, String targetId) =>
+      '${(from.latitude * 1000).round()}_${(from.longitude * 1000).round()}_$targetId';
+
   void _maybeFetchRoute(SafeZone? target) {
     if (target == null) {
       if (_routePoints.isNotEmpty) {
@@ -354,15 +385,34 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     if (_routeLoading || (sameTarget && movedM < 60 && _routePoints.isNotEmpty)) {
       return;
     }
+
+    // Check fast in-memory cache first (0ms instantaneous render)
+    final key = _cacheKey(_userLocation, target.id);
+    final cached = _routeCache[key];
+    if (cached != null &&
+        DateTime.now().difference(cached.timestamp) <
+            const Duration(minutes: 10)) {
+      setState(() {
+        _routePoints = cached.points;
+        _routeKm = cached.km;
+        _routeMinutes = cached.minutes;
+        _routeTargetId = target.id;
+        _routeFrom = _userLocation;
+      });
+      if (!_isNavigating && _mapReady) {
+        _fitRoute(target);
+      }
+      return;
+    }
+
     _fetchRoute(target);
   }
 
   Future<List<dynamic>?> _getJson(String url) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
-      final req = await client.getUrl(Uri.parse(url));
+      final req = await _routeHttpClient.getUrl(Uri.parse(url));
       req.headers.set('User-Agent', 'dev.lasha.flood_disaster');
-      final res = await req.close().timeout(const Duration(seconds: 12));
+      final res = await req.close().timeout(const Duration(seconds: 4));
       if (res.statusCode != 200) return null;
       final body = await res.transform(utf8.decoder).join();
       final json = jsonDecode(body) as Map<String, dynamic>;
@@ -370,8 +420,6 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
       return json['routes'] as List<dynamic>;
     } catch (_) {
       return null;
-    } finally {
-      client.close(force: true);
     }
   }
 
@@ -384,17 +432,17 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     const q = 'overview=full&geometries=geojson';
 
     // Walking route first, driving route (road shape) as a backup.
-    // Both are requested at the same time, so a slow walking server no
-    // longer delays the route.
+    // Both are requested concurrently so a slow walking server doesn't freeze the route.
     final walkF = _getJson(
         'https://routing.openstreetmap.de/routed-foot/route/v1/foot/$coords?$q');
     final driveF = _getJson(
         'https://router.project-osrm.org/route/v1/driving/$coords?$q');
     var walking = true;
-    var routes = await walkF.timeout(const Duration(seconds: 3),
+    var routes = await walkF.timeout(const Duration(milliseconds: 1200),
         onTimeout: () => null);
     if (routes == null) {
-      routes = await driveF;
+      routes = await driveF.timeout(const Duration(milliseconds: 2500),
+          onTimeout: () => null);
       walking = false;
     }
 
@@ -424,6 +472,15 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     final minutes = walking
         ? (r['duration'] as num).toDouble() / 60
         : km / 4.5 * 60;
+
+    // Save in route memory cache
+    final key = _cacheKey(from, target.id);
+    _routeCache[key] = _CachedRoute(
+      points: pts,
+      km: km,
+      minutes: minutes,
+      timestamp: DateTime.now(),
+    );
 
     setState(() {
       _routePoints = pts;
@@ -469,6 +526,8 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     double destZoom, {
     double destRotation = 0.0,
   }) {
+    _animController?.dispose();
+
     final latTween = Tween<double>(
       begin: _mapController.camera.center.latitude,
       end: destLocation.latitude,
@@ -487,12 +546,13 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     );
 
     final controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
+    _animController = controller;
     final Animation<double> animation = CurvedAnimation(
       parent: controller,
-      curve: Curves.fastOutSlowIn,
+      curve: Curves.easeOutCubic,
     );
 
     controller.addListener(() {
@@ -508,6 +568,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
     animation.addStatusListener((status) {
       if (status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed) {
+        if (_animController == controller) {
+          _animController = null;
+        }
         controller.dispose();
       }
     });
@@ -629,6 +692,10 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'dev.lasha.flood_disaster',
+                tileDisplay: const TileDisplay.instantaneous(),
+                panBuffer: 1,
+                keepBuffer: 3,
+                evictErrorTileStrategy: EvictErrorTileStrategy.dispose,
               ),
 
               // Route to the nearest open shelter along real roads
@@ -657,7 +724,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                     point: _userLocation,
                     width: 80,
                     height: 80,
-                    child: _UserLocationMarker(),
+                    child: const RepaintBoundary(
+                      child: _UserLocationMarker(),
+                    ),
                   ),
 
                   // Nearest open safe zone
@@ -667,7 +736,9 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
                       width: 80,
                       height: 80,
                       alignment: Alignment.topCenter,
-                      child: const _SafeZoneMarker(),
+                      child: const RepaintBoundary(
+                        child: _SafeZoneMarker(),
+                      ),
                     ),
                 ],
               ),
@@ -820,6 +891,8 @@ class _SafeRoutingMapScreenState extends State<SafeRoutingMapScreen>
 // ---------------------------------------------------------------------------
 
 class _UserLocationMarker extends StatefulWidget {
+  const _UserLocationMarker();
+
   @override
   State<_UserLocationMarker> createState() => _UserLocationMarkerState();
 }
