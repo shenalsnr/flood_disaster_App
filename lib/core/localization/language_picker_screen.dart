@@ -3,14 +3,15 @@ import 'package:flutter/services.dart';
 
 import 'app_strings.dart';
 import 'language_controller.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 /// Shown the very first time the app is opened (before onboarding).
 /// Tapping a language switches the whole screen immediately; "Continue"
 /// moves on to the onboarding pages.
 class LanguagePickerScreen extends StatelessWidget {
-  const LanguagePickerScreen({super.key, required this.onContinue});
+  const LanguagePickerScreen({super.key, this.onContinue});
 
-  final VoidCallback onContinue;
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +106,20 @@ class LanguagePickerScreen extends StatelessWidget {
                         // Make sure a choice is saved even if the user keeps
                         // the default (English).
                         controller.set(controller.lang);
-                        onContinue();
+                        if (onContinue != null) {
+                          onContinue!();
+                        } else {
+                          Navigator.of(context).pushReplacement(
+                            PageRouteBuilder<void>(
+                              transitionDuration:
+                                  const Duration(milliseconds: 400),
+                              pageBuilder: (_, _, _) => const OnboardingScreen(),
+                              transitionsBuilder: (_, animation, _, child) =>
+                                  FadeTransition(
+                                      opacity: animation, child: child),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF38BDF8),
